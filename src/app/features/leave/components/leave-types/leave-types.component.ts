@@ -31,6 +31,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-leave-types',
   standalone: true,
@@ -45,7 +46,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatMenuModule,
-    MatDialogModule
+    MatDialogModule,
+    PageHeaderComponent,
   ],
   templateUrl: './leave-types.component.html',
   styleUrls: ['./leave-types.component.scss']
@@ -96,8 +98,9 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   addLeaveType(): void {
     const dialogRef = this.dialog.open(AddLeaveTypeDialogTemplate, {
       width: '600px',
-      maxWidth: '90vw',
-      disableClose: true
+      maxWidth: '95vw',
+      disableClose: true,
+      panelClass: 'attendance-dialog-panel',
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -122,8 +125,9 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   editLeaveType(type: LeaveType): void {
     const dialogRef = this.dialog.open(EditLeaveTypeDialogTemplate, {
       width: '600px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
       disableClose: true,
+      panelClass: 'attendance-dialog-panel',
       data: { leaveType: type }
     });
 

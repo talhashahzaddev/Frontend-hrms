@@ -14,6 +14,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { LeaveCalendarEvent } from '../../../../core/models/leave.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 interface CalendarDay {
   date: Date;
   dayNumber: number;
@@ -35,17 +36,16 @@ interface CalendarDay {
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    PageHeaderComponent,
   ],
   template: `
-    <div class="leave-calendar-container">
-      
-      <!-- Header -->
-      <div class="calendar-header">
-        <h1 class="page-title">
-          <mat-icon>calendar_month</mat-icon>
-          Leave Calendar
-        </h1>
+    <div class="ts-page-layout">
+
+      <app-page-header matIcon="calendar_month" title="Leave Calendar" subtitle="View team leave events by month">
+      </app-page-header>
+
+      <div class="filters-section calendar-nav">
         <div class="calendar-controls">
           <button mat-icon-button (click)="previousMonth()" [disabled]="isLoading">
             <mat-icon>chevron_left</mat-icon>

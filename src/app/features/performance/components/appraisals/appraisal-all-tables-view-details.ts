@@ -11,202 +11,209 @@ import { MatChipsModule } from '@angular/material/chips';
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatChipsModule],
   template: `
     <div class="dialog-container">
-
       <div class="dialog-header">
         <div class="header-left">
-          <div class="header-avatar">
+          <div class="header-icon">
             <mat-icon>assignment</mat-icon>
           </div>
-          <div class="header-info">
-            <h2 class="header-name">{{ data?.employeeName || data?.managerName || 'Details' }}</h2>
-            <div class="header-meta">
-              <span class="dept-id" *ngIf="data?.goalName">{{ data?.goalName }}</span>
+          <div>
+            <h2 class="header-title">{{ data?.employeeName || data?.managerName || 'Details' }}</h2>
+            <p class="header-subtitle">{{ data?.goalName || 'Performance Review Details' }}</p>
+          </div>
+        </div>
+        <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <mat-dialog-content class="dialog-body">
+        <!-- Status & Cycle Header Info -->
+        <div class="assign-section">
+          <div class="assign-section-body" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <mat-icon style="color:#64748b; font-size:18px; width:18px; height:18px;">calendar_today</mat-icon>
+              <span style="font-size:14px; color:#334155; font-weight:500;">{{ data?.cycleName || '—' }}</span>
+            </div>
+            <div>
+              <mat-chip [class]="getStatusChipClass(data?.status)">
+                {{ data?.status ? (data.status | titlecase) : '—' }}
+              </mat-chip>
             </div>
           </div>
         </div>
-        <div class="header-actions">
-          <button mat-icon-button aria-label="close" (click)="close()"><mat-icon>close</mat-icon></button>
-        </div>
-      </div>
 
-      <div class="info-strip">
-        <div class="strip-item">
-          <mat-icon>calendar_today</mat-icon>
-          <span>{{ data?.cycleName || '—' }}</span>
-        </div>
-        <div class="strip-divider"></div>
-        <div class="strip-item">
-          <span class="status-pill" [class.pill-active]="(data?.status || '').toLowerCase() === 'completed'" [class.pill-inactive]="(data?.status || '').toLowerCase() !== 'completed'">
-            <span class="pill-dot"></span>
-            {{ data?.status ? (data.status | titlecase) : '—' }}
-          </span>
-        </div>
-      </div>
-
-      <mat-dialog-content>
         <!-- Manager Review View -->
-        <div *ngIf="isManagerReview()" class="info-block">
-          <div class="block-header"><div class="block-icon"></div><span>Manager Review - Overview</span></div>
-          <div class="block-grid">
-            <div class="cell" *ngIf="data?.kraName">
-              <span class="cell-label">KRA</span>
-              <span class="cell-value"><mat-chip [class]="getKraChipClass(data?.kraName)">{{ data?.kraName }}</mat-chip></span>
-            </div>
-            <div class="cell" *ngIf="data?.goalName">
-              <span class="cell-label">Goal</span>
-              <span class="cell-value">{{ data?.goalName }}</span>
-            </div>
-            <div class="cell">
-              <span class="cell-label">Manager</span>
-              <span class="cell-value">{{ data?.managerName || '—' }}</span>
-            </div>
-            <div class="cell">
-              <span class="cell-label">Submitted</span>
-              <span class="cell-value">{{ (data?.submittedAt || data?.createdAt) ? ((data.submittedAt || data.createdAt) | date:'medium') : '—' }}</span>
-            </div>
-            <div class="cell cell-wide">
-              <span class="cell-label">Rating</span>
-              <span class="cell-value">
-                <span class="star-row compact">
-                  <mat-icon *ngFor="let s of [1,2,3,4,5]" [ngClass]="getStarClass(s, data?.rating)">star</mat-icon>
-                  <span class="numeric-rating">{{ getRatingDisplay(data?.rating ?? getRatingValue()) }}</span>
-                </span>
-              </span>
-            </div>
+        <div class="assign-section" *ngIf="isManagerReview()">
+          <div class="assign-section-header">
+            <mat-icon>person_search</mat-icon>
+            <span>Manager Review Overview</span>
           </div>
+          <div class="assign-section-body">
+            <div class="assign-dates-grid">
+              <div class="assign-field-group" *ngIf="data?.kraName">
+                <label class="field-label">KRA</label>
+                <div class="readonly-value"><mat-chip [class]="getKraChipClass(data?.kraName)">{{ data?.kraName }}</mat-chip></div>
+              </div>
+              <div class="assign-field-group" *ngIf="data?.goalName">
+                <label class="field-label">Goal</label>
+                <div class="readonly-value">{{ data?.goalName }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Manager</label>
+                <div class="readonly-value">{{ data?.managerName || '—' }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Submitted</label>
+                <div class="readonly-value">{{ (data?.submittedAt || data?.createdAt) ? ((data.submittedAt || data.createdAt) | date:'medium') : '—' }}</div>
+              </div>
+            </div>
 
-          <div *ngIf="data?.feedback || data?.comments" class="block-grid">
-            <div class="cell cell-wide">
-              <span class="cell-label">Feedback</span>
-              <span class="cell-value mono">{{ data?.feedback || data?.comments || '—' }}</span>
+            <div class="assign-field-group" style="margin-top:12px;">
+              <label class="field-label">Rating</label>
+              <div class="readonly-value" style="display:flex; align-items:center; gap:12px;">
+                <div class="star-row">
+                  <mat-icon *ngFor="let s of [1,2,3,4,5]" [ngClass]="getStarClass(s, data?.rating)">star</mat-icon>
+                </div>
+                <span style="font-weight:600; color:#334155;">{{ getRatingDisplay(data?.rating ?? getRatingValue()) }} / 5.0</span>
+              </div>
+            </div>
+
+            <div class="assign-field-group" style="margin-top:12px;" *ngIf="data?.feedback || data?.comments">
+              <label class="field-label">Feedback</label>
+              <div class="readonly-value" style="min-height:60px;">{{ data?.feedback || data?.comments || '—' }}</div>
             </div>
           </div>
         </div>
 
         <!-- Self Assessment View -->
-        <div *ngIf="isSelfAssessment()" class="info-block">
-          <div class="block-header"><div class="block-icon"></div><span>Self Assessment - Overview</span></div>
-          <div class="block-grid">
-            <div class="cell" *ngIf="data?.kraName">
-              <span class="cell-label">KRA</span>
-              <span class="cell-value"><mat-chip [class]="getKraChipClass(data?.kraName)">{{ data?.kraName }}</mat-chip></span>
-            </div>
-            <div class="cell" *ngIf="data?.goalName">
-              <span class="cell-label">Goal</span>
-              <span class="cell-value">{{ data?.goalName }}</span>
-            </div>
-            <div class="cell">
-              <span class="cell-label">Employee</span>
-              <span class="cell-value">{{ data?.employeeName || '—' }}</span>
-            </div>
-            <div class="cell">
-              <span class="cell-label">Submitted</span>
-              <span class="cell-value">{{ (data?.submittedAt || data?.createdAt) ? ((data.submittedAt || data.createdAt) | date:'medium') : '—' }}</span>
-            </div>
-            <div class="cell cell-wide">
-              <span class="cell-label">Self Rating</span>
-              <span class="cell-value">
-                <span class="star-row compact">
-                  <mat-icon *ngFor="let s of [1,2,3,4,5]" [ngClass]="getStarClass(s, data?.selfRating)">star</mat-icon>
-                  <span class="numeric-rating">{{ getRatingDisplay(data?.selfRating ?? getRatingValue()) }}</span>
-                </span>
-              </span>
-            </div>
+        <div class="assign-section" *ngIf="isSelfAssessment()">
+          <div class="assign-section-header">
+            <mat-icon>self_improvement</mat-icon>
+            <span>Self Assessment Overview</span>
           </div>
+          <div class="assign-section-body">
+            <div class="assign-dates-grid">
+              <div class="assign-field-group" *ngIf="data?.kraName">
+                <label class="field-label">KRA</label>
+                <div class="readonly-value"><mat-chip [class]="getKraChipClass(data?.kraName)">{{ data?.kraName }}</mat-chip></div>
+              </div>
+              <div class="assign-field-group" *ngIf="data?.goalName">
+                <label class="field-label">Goal</label>
+                <div class="readonly-value">{{ data?.goalName }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Employee</label>
+                <div class="readonly-value">{{ data?.employeeName || '—' }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Submitted</label>
+                <div class="readonly-value">{{ (data?.submittedAt || data?.createdAt) ? ((data.submittedAt || data.createdAt) | date:'medium') : '—' }}</div>
+              </div>
+            </div>
 
-          <div *ngIf="data?.selfComment" class="block-grid">
-            <div class="cell cell-wide">
-              <span class="cell-label">Comment</span>
-              <span class="cell-value mono">{{ data?.selfComment || '—' }}</span>
+            <div class="assign-field-group" style="margin-top:12px;">
+              <label class="field-label">Self Rating</label>
+              <div class="readonly-value" style="display:flex; align-items:center; gap:12px;">
+                <div class="star-row">
+                  <mat-icon *ngFor="let s of [1,2,3,4,5]" [ngClass]="getStarClass(s, data?.selfRating)">star</mat-icon>
+                </div>
+                <span style="font-weight:600; color:#334155;">{{ getRatingDisplay(data?.selfRating ?? getRatingValue()) }} / 5.0</span>
+              </div>
+            </div>
+
+            <div class="assign-field-group" style="margin-top:12px;" *ngIf="data?.selfComment">
+              <label class="field-label">Comment</label>
+              <div class="readonly-value" style="min-height:60px;">{{ data?.selfComment || '—' }}</div>
             </div>
           </div>
         </div>
 
         <!-- HR Review View -->
-        <div *ngIf="isHrReview()" class="info-block">
-          <div class="block-header"><div class="block-icon"></div><span>HR Review - Overview</span></div>
-          <div class="block-grid">
-            <div class="cell" *ngIf="data?.kraName">
-              <span class="cell-label">KRA</span>
-              <span class="cell-value"><mat-chip [class]="getKraChipClass(data?.kraName)">{{ data?.kraName }}</mat-chip></span>
-            </div>
-            <div class="cell" *ngIf="data?.goalName">
-              <span class="cell-label">Goal</span>
-              <span class="cell-value">{{ data?.goalName }}</span>
-            </div>
-            <div class="cell">
-              <span class="cell-label">Employee</span>
-              <span class="cell-value">{{ data?.employeeName || '—' }}</span>
-            </div>
-            <div class="cell">
-              <span class="cell-label">Submitted</span>
-              <span class="cell-value">{{ (data?.submittedAt || data?.createdAt) ? ((data.submittedAt || data.createdAt) | date:'medium') : '—' }}</span>
-            </div>
-            <div class="cell cell-wide">
-              <span class="cell-label">Final Rating</span>
-              <span class="cell-value">
-                <span class="star-row compact">
-                  <mat-icon *ngFor="let s of [1,2,3,4,5]" [ngClass]="getStarClass(s, data?.finalRating)">star</mat-icon>
-                  <span class="numeric-rating">{{ getRatingDisplay(data?.finalRating ?? getRatingValue()) }}</span>
-                </span>
-              </span>
-            </div>
+        <div class="assign-section" *ngIf="isHrReview()">
+          <div class="assign-section-header">
+            <mat-icon>fact_check</mat-icon>
+            <span>HR Review Overview</span>
           </div>
+          <div class="assign-section-body">
+            <div class="assign-dates-grid">
+              <div class="assign-field-group" *ngIf="data?.kraName">
+                <label class="field-label">KRA</label>
+                <div class="readonly-value"><mat-chip [class]="getKraChipClass(data?.kraName)">{{ data?.kraName }}</mat-chip></div>
+              </div>
+              <div class="assign-field-group" *ngIf="data?.goalName">
+                <label class="field-label">Goal</label>
+                <div class="readonly-value">{{ data?.goalName }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Employee</label>
+                <div class="readonly-value">{{ data?.employeeName || '—' }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Submitted</label>
+                <div class="readonly-value">{{ (data?.submittedAt || data?.createdAt) ? ((data.submittedAt || data.createdAt) | date:'medium') : '—' }}</div>
+              </div>
+            </div>
 
-          <div *ngIf="data?.hrComments || data?.feedback" class="block-grid">
-            <div class="cell cell-wide">
-              <span class="cell-label">HR Comments</span>
-              <span class="cell-value mono">{{ data?.hrComments || data?.feedback || '—' }}</span>
+            <div class="assign-field-group" style="margin-top:12px;">
+              <label class="field-label">Final Rating</label>
+              <div class="readonly-value" style="display:flex; align-items:center; gap:12px;">
+                <div class="star-row">
+                  <mat-icon *ngFor="let s of [1,2,3,4,5]" [ngClass]="getStarClass(s, data?.finalRating)">star</mat-icon>
+                </div>
+                <span style="font-weight:600; color:#334155;">{{ getRatingDisplay(data?.finalRating ?? getRatingValue()) }} / 5.0</span>
+              </div>
+            </div>
+
+            <div class="assign-field-group" style="margin-top:12px;" *ngIf="data?.hrComments || data?.feedback">
+              <label class="field-label">HR Comments / Feedback</label>
+              <div class="readonly-value" style="min-height:60px;">{{ data?.hrComments || data?.feedback || '—' }}</div>
             </div>
           </div>
         </div>
+
       </mat-dialog-content>
 
       <div class="dialog-footer">
-        <button mat-stroked-button mat-dialog-close class="btn-close" (click)="close()"><mat-icon>close</mat-icon>Close</button>
+        <button mat-stroked-button class="btn-cancel" mat-dialog-close (click)="close()">
+          <mat-icon>close</mat-icon> Close
+        </button>
       </div>
-
     </div>
   `,
   styles: [
     `
-    .dialog-container { width:520px; max-width: calc(100vw - 48px); max-height:80vh; background: #f7f8fa; border-radius: 10px; overflow: hidden; display:flex; flex-direction:column; font-family: 'DM Sans', 'Segoe UI', sans-serif; box-shadow: 0 6px 18px rgba(16,24,40,0.08); }
-    .dialog-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#fff; border-bottom:1px solid #ebebeb }
-    .header-left { display:flex; align-items:center; gap:12px }
-    .header-avatar { width:44px; height:44px; border-radius:50%; background:#f0eeff; display:flex; align-items:center; justify-content:center; border:1px solid #e6e6e9 }
-    .header-avatar mat-icon { font-size:20px; background:linear-gradient(135deg,#8b5cf6 0%,#6366f1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent }
-    .header-name { margin:0; font-size:15px; font-weight:700; color:#111827 }
-    .header-meta .dept-id { font-size:12px; color:#6b7280 }
-    .info-strip { display:flex; align-items:center; gap:12px; padding:8px 14px; background:#fff; border-bottom:1px solid #ebebeb }
-    .strip-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#374151 }
-    .strip-divider { width:1px; height:14px; background:#e5e7eb }
-    .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600 }
-    .pill-dot { width:8px; height:8px; border-radius:50% }
-    .pill-active .pill-dot { background:#22c55e }
-    .pill-inactive .pill-dot { background:#9ca3af }
-    mat-dialog-content { padding:10px 10px; max-height:60vh; overflow-y:auto }
-    .info-block { background:#fff; border-radius:8px; border:1px solid #ebebeb; margin-bottom:8px }
-    .block-header { display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid #f5f5f5; font-weight:700 }
-    .block-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:0 }
-    .cell { padding:8px 10px; border-bottom:1px solid #f5f5f5; font-size:13px }
-    .cell:nth-child(odd) { border-right:1px solid #f5f5f5 }
-    .cell-wide { grid-column:1 / -1 }
-    .cell-label { display:block; font-size:11px; color:#9ca3af; font-weight:700; text-transform:uppercase }
-    .cell-value { font-size:13px; color:#111827; margin-top:6px }
-    .mono { font-family: 'Fira Code', monospace; background:#fafafa; padding:8px; border-radius:6px }
-    .star-row.compact mat-icon { font-size:18px; vertical-align:middle; margin-right:4px }
-    .star-row.compact .active-star { color:#f59e0b }
-    .star-row.compact .inactive-star { color:#e5e7eb }
-    .numeric-rating { margin-left:8px; color:#374151; font-weight:600 }
-    .dialog-footer { display:flex; justify-content:flex-end; padding:10px 12px; background:#fff; border-top:1px solid #ebebeb }
-    .btn-close { height:34px; padding:0 12px; border-radius:8px }
-
-    @media (max-width:600px) {
-      .dialog-container { width: calc(100vw - 24px); max-width: calc(100vw - 24px); }
-      .block-grid { grid-template-columns: repeat(1,1fr) }
-      .header-avatar { width:36px; height:36px }
-      .header-name { font-size:13px }
+    @use '../../styles/performance-shared';
+    
+    .readonly-value {
+      font-size: 14px;
+      color: #1e293b;
+      font-weight: 500;
+      padding: 10px 14px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
     }
+
+    .star-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .star-row mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .active-star { color: #f59e0b; }
+    .inactive-star { color: #e5e7eb; }
+
+    .status-completed { background-color: #10b981 !important; color: white !important; }
+    .status-submitted { background-color: #3b82f6 !important; color: white !important; }
+    .status-under-review { background-color: #f59e0b !important; color: white !important; }
+    .status-draft { background-color: #64748b !important; color: white !important; }
+    .status-rejected { background-color: #ef4444 !important; color: white !important; }
     `
   ]
 })

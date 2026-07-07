@@ -18,11 +18,13 @@ import { AuthService } from '@core/services/auth.service';
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-billing-history',
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     MatCardModule,
     MatButtonModule,

@@ -1,0 +1,1280 @@
+﻿// ═══════════════════════════════════════════════
+//  ASSETS COMPONENT STYLES
+//  Matches asset-types aesthetic exactly
+// ═══════════════════════════════════════════════
+
+.assets-container {
+  padding: 12px 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: #f5f6fa;
+  min-height: 100vh;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+
+  // ─── Page Header ──────────────────────────────────────────────
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+
+    .header-content {
+      .page-title {
+        margin: 0 0 4px;
+        font-size: 26px;
+        font-weight: 700;
+        color: #111827;
+        letter-spacing: -0.4px;
+      }
+      .page-subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 400;
+      }
+    }
+
+    .header-actions {
+      .add-button {
+        height: 42px;
+        padding: 0 20px !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+        color: white !important;
+        letter-spacing: 0.1px;
+        transition: filter 0.2s ease, box-shadow 0.2s ease !important;
+        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3) !important;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 6px;
+        }
+
+        &:hover {
+          filter: brightness(0.88) !important;
+          box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45) !important;
+        }
+      }
+    }
+  }
+
+  // ─── Filters Card ─────────────────────────────────────────────
+  .filters-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    margin-bottom: 16px;
+    overflow: hidden;
+
+    .filters-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f1f5;
+
+      .filters-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+    }
+
+    .filters-body {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+
+      .filter-field {
+        flex: 1;
+        min-width: 180px;
+        margin-bottom: -22px;
+
+        &.search-field { flex: 1.4; }
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-shrink: 0;
+
+        .clear-btn {
+          height: 40px;
+          padding: 0 14px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          color: #6b7280 !important;
+          border-color: #d1d5db !important;
+
+          mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+          &:hover { background: #f9fafb !important; }
+        }
+
+        .apply-btn {
+          height: 40px;
+          padding: 0 16px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+          color: white !important;
+          box-shadow: 0 2px 6px rgba(99,102,241,0.25) !important;
+
+          mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+          &:hover { filter: brightness(0.88) !important; }
+        }
+      }
+
+      // Form field internal styling
+      ::ng-deep mat-form-field {
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper { background: #f8f9fc; border-radius: 8px !important; }
+          .mat-mdc-form-field-flex { padding: 0 12px; }
+          .mat-mdc-form-field-infix { padding: 10px 0 !important; min-height: unset; }
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing { border-color: #e5e7eb !important; }
+          input, .mat-mdc-select-value { font-size: 13px; color: #374151; }
+          mat-icon[matprefix] { color: #9ca3af; font-size: 18px; width: 18px; height: 18px; margin-right: 6px; }
+
+          &.mat-focused {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing { border-color: #6366f1 !important; border-width: 1.5px !important; }
+          }
+        }
+      }
+    }
+  }
+
+  // ─── Toolbar Row ──────────────────────────────────────────────
+  .toolbar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9eaf0;
+
+    .table-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.2px;
+    }
+
+    .total-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+  }
+
+  // ─── Table Card ───────────────────────────────────────────────
+  .table-card {
+    background: white;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: hidden;
+
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .asset-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+
+      thead tr {
+        background: #fafafa;
+        height: 44px;
+      }
+
+      th {
+        padding: 0 16px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        border-bottom: 1px solid #f0f1f5;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      tbody tr {
+        height: 64px;
+        transition: background 0.12s ease;
+
+        &:hover { background: #fafbff; }
+        &:last-child td { border-bottom: none; }
+      }
+
+      td {
+        padding: 0 16px;
+        border-bottom: 1px solid #f5f6fa;
+        font-size: 13.5px;
+        color: #374151;
+        vertical-align: middle;
+      }
+
+      .asset-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      .type-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        background: #f3f4f6;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4b5563;
+      }
+
+      .code-cell {
+        font-family: 'Courier New', monospace;
+        font-size: 12.5px;
+        color: #6b7280;
+        background: #f9fafb;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+
+      .date-cell {
+        font-size: 13px;
+        color: #6b7280;
+        white-space: nowrap;
+      }
+
+      .assigned-cell {
+        font-size: 13px;
+        color: #374151;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+      }
+
+      .action-menu-btn {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 6px !important;
+        color: #374151 !important;
+
+        mat-icon { font-size: 20px; }
+      }
+    }
+
+    // Empty state
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+
+      .empty-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+
+        mat-icon { font-size: 36px; width: 36px; height: 36px; color: #d1d5db; }
+      }
+
+      h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #111827; }
+      p { margin: 0 0 24px; font-size: 14px; color: #9ca3af; }
+
+      .add-button {
+        height: 40px;
+        padding: 0 20px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+        color: white !important;
+        transition: filter 0.2s ease !important;
+        &:hover { filter: brightness(0.88) !important; }
+        mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; }
+      }
+    }
+
+    // ─── Pagination ───────────────────────────────────────────────
+    ::ng-deep mat-paginator {
+      background: #fafafa;
+      border-top: 1px solid #e5e7eb;
+
+      .mat-mdc-paginator-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 16px;
+        padding: 8px 20px;
+        min-height: 52px;
+      }
+
+      .mat-mdc-paginator-page-size {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .mat-mdc-paginator-range-label {
+        white-space: nowrap;
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .mat-mdc-paginator-navigation {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+      }
+    }
+  }
+
+  // ─── Shared Action Menu ───────────────────────────────────────
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+    border: 1px solid #f0f1f5 !important;
+    min-width: 160px !important;
+
+    .mat-mdc-menu-content {
+      padding: 6px !important;
+
+      .mat-mdc-menu-item {
+        border-radius: 6px !important;
+        margin: 1px 0 !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        font-size: 13.5px !important;
+        color: #374151;
+
+        &:hover { background: #f5f6fa !important; }
+
+        mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #6b7280; }
+
+        &.danger-action {
+          color: #dc2626 !important;
+          mat-icon { color: #dc2626 !important; }
+          &:hover { background: #fff5f5 !important; }
+        }
+      }
+
+      mat-divider { margin: 4px 0 !important; border-color: #f0f1f5 !important; }
+    }
+  }
+
+  // ─── Responsive ───────────────────────────────────────────────
+  @media (max-width: 768px) {
+    padding: 12px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+
+      .header-actions .add-button { width: 100%; justify-content: center; }
+    }
+
+    .filters-card .filters-body {
+      flex-direction: column;
+      .filter-field { min-width: 100%; }
+      .filter-actions { width: 100%; }
+    }
+
+    .toolbar-row { border-radius: 12px 12px 0 0; }
+
+    .table-card {
+      ::ng-deep mat-paginator {
+        .mat-mdc-paginator-container {
+          flex-wrap: nowrap;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 6px;
+          padding: 2px 6px;
+          min-height: 36px;
+        }
+
+        .mat-mdc-paginator-page-size {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin: 0;
+          font-size: 11px;
+          white-space: nowrap;
+        }
+
+        .mat-mdc-paginator-page-size-label { font-size: 11px; }
+
+        .mat-mdc-select-trigger {
+          height: 22px;
+          font-size: 11px;
+          padding: 0 4px;
+        }
+
+        .mat-mdc-paginator-range-label {
+          font-size: 11px;
+          white-space: nowrap;
+          margin: 0;
+        }
+
+        .mat-mdc-paginator-navigation {
+          display: flex;
+          align-items: center;
+          gap: 0;
+        }
+
+        button {
+          width: 22px !important;
+          height: 22px !important;
+          min-width: 22px !important;
+          padding: 0 !important;
+
+          mat-icon { font-size: 14px; }
+        }
+      }
+    }
+  }
+}
+
+
+// ═══════════════════════════════════════════════
+//  STATUS BADGES (global, used in table + dialogs)
+// ═══════════════════════════════════════════════
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+
+  &.status-available   { background: #d1fae5; color: #065f46; }
+  &.status-assigned    { background: #dbeafe; color: #1e40af; }
+  &.status-maintenance { background: #fef3c7; color: #92400e; }
+  &.status-retired     { background: #fee2e2; color: #991b1b; }
+  &.status-unknown, &.status- { background: #f3f4f6; color: #6b7280; }
+}
+
+
+// ═══════════════════════════════════════════════
+//  UNIFIED DIALOG SYSTEM  (.cad-*)
+// ═══════════════════════════════════════════════
+
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.16) !important;
+}
+
+// ── Dialog Shell ──────────────────────────────
+// ═══════════════════════════════════════════════
+//  CAD DIALOG — pixel-accurate match to reference
+// ═══════════════════════════════════════════════
+
+// ── Dialog Shell ──────────────────────────────
+.cad-dialog {
+  display: flex;
+  flex-direction: column;
+  background: #f0f1f6;
+  border-radius: 18px;
+  overflow: hidden;
+  min-width: 480px;
+  max-width: 680px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+// ── Header ────────────────────────────────────
+// White background, no coloured gradient
+.cad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;       // close btn stays top-right
+  padding: 20px 22px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8e9ee;
+  flex-shrink: 0;
+
+  // Icon badge tint per variant
+  &--assign  .cad-header-icon { background: #ede9fe; mat-icon { color: #6d28d9; } }
+  &--view    .cad-header-icon { background: #d1fae5; mat-icon { color: #059669; } }
+  &--history .cad-header-icon { background: #fef3c7; mat-icon { color: #d97706; } }
+  &--return  .cad-header-icon { background: #fce7f3; mat-icon { color: #db2777; } }
+
+  .cad-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  // Rounded square badge
+  .cad-header-icon {
+    width: 44px;
+    height: 44px;
+    background: #ede9fe;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 21px;
+      width: 21px;
+      height: 21px;
+      color: #6d28d9;
+    }
+  }
+
+  .cad-title {
+    margin: 0 0 2px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
+  }
+
+  .cad-subtitle {
+    margin: 0;
+    font-size: 12.5px;
+    color: #9ca3af;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  // Close — top-right, small rounded square, grey icon
+  .cad-close {
+    color: #9ca3af !important;
+    background: #f3f4f6 !important;
+    border-radius: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    transition: background 0.15s ease, transform 0.2s ease !important;
+    flex-shrink: 0;
+    margin-top: 2px;
+
+    &:hover {
+      background: #e5e7eb !important;
+      color: #374151 !important;
+      transform: rotate(90deg);
+    }
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+}
+
+// ── Content Area ──────────────────────────────
+// Grey bg — asset info sits directly here, no card
+.cad-content {
+  padding: 20px 22px 14px !important;
+  flex: 1;
+  overflow-y: auto;
+  background: #f0f1f6;
+  max-height: 65vh;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+}
+
+// ── Asset Info Blocks ─────────────────────────
+// Sit directly on grey bg — professional hierarchy:
+//   ASSET name is prominent
+//   CODE + TYPE sit below in a pill-style row
+
+// Wrapper for all asset meta info
+.cad-asset-meta {
+  padding: 4px 0 0;
+}
+
+// Primary name block — full width
+.cad-info-block {
+  margin-bottom: 0;
+
+  .cad-info-label {
+    margin: 0 0 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a0a8b8;
+    line-height: 1;
+  }
+
+  .cad-info-value {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+  }
+}
+
+// CODE + TYPE row — displayed side by side, each in its own mini-block
+.cad-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 12px;
+
+  // Each code/type block
+  .cad-info-block {
+    padding-right: 20px;
+    margin-right: 20px;
+    border-right: 1px solid #dde0e8;
+
+    &:last-child {
+      border-right: none;
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    .cad-info-value {
+      font-size: 13.5px;    // slightly smaller than name — clear hierarchy
+      font-weight: 700;
+      color: #374151;
+    }
+  }
+}
+
+// Thin separator between info area and white section card
+.cad-divider {
+  height: 1px;
+  background: #e2e4ea;
+  margin: 16px 0 18px;
+}
+
+// ── Section Card ──────────────────────────────
+// White rounded card — used for "ASSIGNMENT DETAILS"
+.cad-section {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e8e9ee;
+  padding: 16px 18px 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+// Section header row: icon + uppercase text
+.cad-section-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: #6b7280;
+  margin-bottom: 14px;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    color: #7c3aed;
+  }
+}
+
+// ── Form Layout ───────────────────────────────
+.cad-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cad-grid   { display: grid; gap: 12px; }
+.cad-grid-1 { grid-template-columns: 1fr; }
+.cad-grid-2 { grid-template-columns: 1fr 1fr; }
+.cad-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 560px) {
+  .cad-grid-2,
+  .cad-grid-3 { grid-template-columns: 1fr; }
+  .cad-dialog { min-width: unset; }
+}
+
+// ── Form Fields ───────────────────────────────
+.cad-field {
+  width: 100%;
+  margin-bottom: -18px;
+
+  &.cad-field-full { grid-column: 1 / -1; }
+}
+
+::ng-deep .cad-form,
+::ng-deep .cad-content {
+  mat-form-field.mat-form-field-appearance-outline {
+
+    .mat-mdc-text-field-wrapper {
+      background: #ffffff;
+      border-radius: 8px !important;
+    }
+
+    // Clean flex row — label and input sit naturally, no prefix icon conflicts
+    .mat-mdc-form-field-flex {
+      padding: 0 14px;
+      align-items: center !important;
+    }
+
+    // No prefix icons — infix takes full width cleanly
+    .mat-mdc-form-field-infix {
+      padding: 12px 0 !important;
+      min-height: unset;
+    }
+
+    // Floating label — natural size and colour, no positional overrides
+    .mat-mdc-floating-label {
+      font-size: 13.5px;
+      color: #a8adb8;
+      font-weight: 400;
+    }
+
+    // Suffix icons only (calendar, dropdown arrow) — sit on the right
+    .mat-mdc-form-field-icon-suffix {
+      display: flex;
+      align-items: center;
+      padding: 0 2px 0 4px;
+      color: #c4c8d4;
+    }
+
+    // Hide any stray prefix icon if accidentally left in template
+    .mat-mdc-form-field-icon-prefix {
+      display: none !important;
+    }
+
+    // Default: light grey border
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #e2e4ea !important;
+      transition: border-color 0.15s ease;
+    }
+
+    &:hover {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing { border-color: #c4b5fd !important; }
+    }
+
+    &.mat-focused {
+      .mat-mdc-text-field-wrapper {
+        box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing { border-color: #7c3aed !important; }
+
+      .mat-mdc-floating-label { color: #7c3aed !important; }
+    }
+
+    input,
+    .mat-mdc-select-value-text {
+      font-size: 13.5px;
+      color: #111827;
+      font-weight: 500;
+    }
+
+    // Calendar toggle — suffix, right side only
+    .mat-datepicker-toggle {
+      color: #b8bcc8;
+      display: flex;
+      align-items: center;
+
+      .mat-mdc-icon-button {
+        width: 28px;
+        height: 28px;
+        padding: 2px;
+
+        .mat-icon { font-size: 17px; width: 17px; height: 17px; }
+      }
+    }
+
+    // Select dropdown arrow
+    .mat-mdc-select-arrow-wrapper {
+      display: flex;
+      align-items: center;
+      padding-right: 2px;
+    }
+    .mat-mdc-select-arrow { color: #b8bcc8; }
+
+    .mat-mdc-form-field-error { font-size: 11px; }
+  }
+}
+
+// ── Actions Footer ────────────────────────────
+// White strip — Cancel (plain text) + Submit (purple)
+.cad-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 22px 18px;
+  background: #ffffff;
+  border-top: 1px solid #e8e9ee;
+  flex-shrink: 0;
+}
+
+// Cancel — text only, no visible border (matches screenshot)
+.cad-btn-cancel {
+  border: none !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  padding: 0 16px !important;
+  height: 38px !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+
+  &:hover {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+  }
+}
+
+// Submit — solid purple, left icon
+.cad-btn-submit {
+  border-radius: 8px !important;
+  background: #7c3aed !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  padding: 0 20px !important;
+  height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.22) !important;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover:not([disabled]) {
+    background: #6d28d9 !important;
+    box-shadow: 0 4px 14px rgba(109, 40, 217, 0.32) !important;
+    transform: translateY(-1px);
+  }
+
+  &:active:not([disabled]) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(109, 40, 217, 0.2) !important;
+  }
+
+  // Disabled — greyed out (matches screenshot state)
+  &[disabled] {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+  }
+}
+// ═══════════════════════════════════════════════
+//  VIEW DIALOG SECTIONS
+// ═══════════════════════════════════════════════
+.view-section {
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.view-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: #6b7280;
+  margin-bottom: 14px;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #8b5cf6; }
+}
+
+.view-grid { display: flex; flex-direction: column; gap: 0; }
+
+.view-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f6fa;
+  align-items: center;
+
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+  &:first-child { padding-top: 0; }
+}
+
+.view-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.view-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.view-notes {
+  margin: 0;
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+
+// ═══════════════════════════════════════════════
+//  EMPLOYEE DROPDOWN STYLES
+//  Custom state-driven dropdown (matching Assign Shift)
+// ═══════════════════════════════════════════════
+
+// Field label styling
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  
+  .required {
+    color: #ef4444;
+  }
+}
+
+// Dropdown container with focus/error states
+.employee-dropdown-container {
+  position: relative;
+  background: white;
+  border: 1px solid #e2e4ea;
+  border-radius: 8px;
+  transition: border-color 0.15s ease;
+  
+  &.is-open {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08), 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  &.has-error {
+    border-color: #ef4444;
+    &.is-open {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08), 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+// Input box wrapper
+.employee-input-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+// Search input field
+.employee-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: #111827;
+  font-weight: 500;
+  outline: none;
+  padding: 12px 0;
+  
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+// Dropdown panel (positioned below input)
+.employee-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e4ea;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+// Employee list container
+.employee-list-container {
+  display: flex;
+  flex-direction: column;
+}
+
+// Individual employee item
+.employee-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.1s ease;
+  user-select: none;
+  
+  &:hover {
+    background: #f5f6fa;
+  }
+  
+  &.is-selected {
+    background: #f3f4f6;
+    .employee-checkbox { accent-color: #7c3aed; }
+  }
+}
+
+// Checkbox styling
+.employee-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+// Employee info section
+.employee-info {
+  flex: 1;
+  min-width: 0;
+}
+
+// Employee name
+.employee-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+// Employee email
+.employee-email {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+// No results message
+.employee-no-results {
+  padding: 20px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+// Error message
+.employee-error {
+  display: block;
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.view-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.view-notes {
+  margin: 0;
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+
+// ═══════════════════════════════════════════════
+//  HISTORY DIALOG
+// ═══════════════════════════════════════════════
+.history-asset-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+
+  .history-asset-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+  }
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  background: white;
+  border: 1px solid #e9eaf0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.15s ease;
+
+  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+}
+
+.history-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f1f5;
+
+  .history-employee {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .history-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon { font-size: 17px; width: 17px; height: 17px; color: white; }
+  }
+
+  .history-status-tag {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f3f4f6;
+    color: #6b7280;
+
+    &.active { background: #d1fae5; color: #065f46; }
+  }
+}
+
+.history-item-details {
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.history-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  .history-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+  }
+
+  .history-detail-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+}
+
+.history-log-ts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 10px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f1f5;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #9ca3af; }
+}
+
+.history-log-msg {
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 48px 24px;
+
+  .empty-icon {
+    width: 60px;
+    height: 60px;
+    background: #f3f4f6;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+
+    mat-icon { font-size: 30px; width: 30px; height: 30px; color: #d1d5db; }
+  }
+
+  p { margin: 0; font-size: 14px; color: #9ca3af; }
+}

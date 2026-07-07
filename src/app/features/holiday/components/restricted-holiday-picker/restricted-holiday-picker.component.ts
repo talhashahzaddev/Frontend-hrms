@@ -15,6 +15,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-restricted-holiday-picker',
   standalone: true,
@@ -28,7 +29,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    PageHeaderComponent,
   ],
   templateUrl: './restricted-holiday-picker.component.html',
   styleUrls: ['./restricted-holiday-picker.component.scss']

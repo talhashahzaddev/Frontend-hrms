@@ -1,103 +1,95 @@
-<div class="checkout-page">
-  <div class="checkout-container">
-    <!-- Back Button -->
-    <button class="back-btn" (click)="goBack()">
-      <mat-icon>arrow_back</mat-icon>
-      Back to Plans
+<div class="ts-page-layout">
+  <app-page-header matIcon="shopping_cart" title="Checkout" subtitle="Complete your subscription payment">
+    <button actions class="btn-back" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Back to Plans
     </button>
+  </app-page-header>
 
-    <div class="checkout-grid">
-      <!-- Order Summary -->
-      <mat-card class="order-summary">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>receipt</mat-icon>
-            Order Summary
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="summary-details">
-            <div class="summary-row">
-              <span class="label">Plan</span>
-              <span class="value plan-name">{{ planName }}</span>
-            </div>
-            <div class="summary-row">
-              <span class="label">Billing Cycle</span>
-              <span class="value">
-                <span class="billing-badge" [class.annual]="billingCycle === 'annual'">
-                  {{ billingCycle === 'annual' ? 'Annual' : 'Monthly' }}
-                </span>
+  <div class="checkout-grid">
+    <!-- Order Summary -->
+    <div class="ts-card order-summary">
+      <div class="ts-card-header" style="padding: 20px 24px 12px; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
+        <mat-icon>receipt</mat-icon>
+        Order Summary
+      </div>
+      <div class="ts-card-content" style="padding: 0 24px 24px;">
+        <div class="summary-details">
+          <div class="summary-row">
+            <span class="label">Plan</span>
+            <span class="value plan-name">{{ planName }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Billing Cycle</span>
+            <span class="value">
+              <span class="billing-badge" [class.annual]="billingCycle === 'annual'">
+                {{ billingCycle === 'annual' ? 'Annual' : 'Monthly' }}
               </span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="summary-row subtotal">
-              <span class="label">Subtotal</span>
-              <span class="value">{{ formattedAmount }}</span>
-            </div>
-            <div class="summary-row">
-              <span class="label">Tax</span>
-              <span class="value">$0.00</span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="summary-row total">
-              <span class="label">Total</span>
-              <span class="value">{{ formattedAmount }} <small>{{ billingLabel }}</small></span>
-            </div>
+            </span>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <mat-divider></mat-divider>
+          <div class="summary-row subtotal">
+            <span class="label">Subtotal</span>
+            <span class="value">{{ formattedAmount }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Tax</span>
+            <span class="value">$0.00</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="summary-row total">
+            <span class="label">Total</span>
+            <span class="value">{{ formattedAmount }} <small>{{ billingLabel }}</small></span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <!-- Payment Gateway Selection -->
-      <mat-card class="gateway-selection">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>payment</mat-icon>
-            Select Payment Method
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="gateway-list">
-            @for (gateway of gateways; track gateway.id) {
-              @if (gateway.enabled) {
-                <div class="gateway-option"
-                     [class.selected]="selectedGateway === gateway.id"
-                     (click)="selectedGateway = gateway.id">
-                  <div class="gateway-radio">
-                    <mat-icon class="radio-icon">
-                      {{ selectedGateway === gateway.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
-                    </mat-icon>
-                  </div>
-                  <div class="gateway-icon">
-                    <mat-icon>{{ gateway.icon }}</mat-icon>
-                  </div>
-                  <div class="gateway-info">
-                    <h4>{{ gateway.name }}</h4>
-                    <p>{{ gateway.description }}</p>
-                  </div>
+    <!-- Payment Gateway Selection -->
+    <div class="ts-card gateway-selection">
+      <div class="ts-card-header" style="padding: 20px 24px 12px; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 600; color: #1e293b;">
+        <mat-icon>payment</mat-icon>
+        Select Payment Method
+      </div>
+      <div class="ts-card-content" style="padding: 0 24px 24px;">
+        <div class="gateway-list">
+          @for (gateway of gateways; track gateway.id) {
+            @if (gateway.enabled) {
+              <div class="gateway-option"
+                   [class.selected]="selectedGateway === gateway.id"
+                   (click)="selectedGateway = gateway.id">
+                <div class="gateway-radio">
+                  <mat-icon class="radio-icon">
+                    {{ selectedGateway === gateway.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                  </mat-icon>
                 </div>
-              }
+                <div class="gateway-icon">
+                  <mat-icon>{{ gateway.icon }}</mat-icon>
+                </div>
+                <div class="gateway-info">
+                  <h4>{{ gateway.name }}</h4>
+                  <p>{{ gateway.description }}</p>
+                </div>
+              </div>
             }
-          </div>
+          }
+        </div>
 
-          <button mat-raised-button
-                  color="primary"
-                  class="pay-btn"
-                  [disabled]="isProcessing"
-                  (click)="processPayment()">
-            @if (isProcessing) {
-              <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
-              Processing...
-            } @else {
-              <span class="btn-label"><mat-icon>lock</mat-icon> Pay {{ formattedAmount }} Securely</span>
-            }
-          </button>
+        <button class="btn-primary pay-btn"
+                [disabled]="isProcessing"
+                (click)="processPayment()">
+          @if (isProcessing) {
+            <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+            Processing...
+          } @else {
+            <span class="btn-label" style="display:flex; align-items:center; gap:8px;"><mat-icon>lock</mat-icon> Pay {{ formattedAmount }} Securely</span>
+          }
+        </button>
 
-          <div class="security-notice">
-            <mat-icon>verified_user</mat-icon>
-            <span>Your payment information is encrypted and secure</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        <div class="security-notice">
+          <mat-icon>verified_user</mat-icon>
+          <span>Your payment information is encrypted and secure</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

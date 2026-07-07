@@ -1,19 +1,10 @@
-<div class="leave-types-container">
-    <div class="page-header">
-        <div class="header-content">
-            <h1 class="page-title">
-                <mat-icon>category</mat-icon>
-                Leave Types Management
-            </h1>
-            <p class="page-subtitle">Manage organization leave types and policies</p>
-        </div>
-        <div class="header-actions">
-            <button mat-raised-button class="add-button" (click)="addLeaveType()" *ngIf="hasPermission('leave_type_add_leave_type')">
-                <mat-icon>add</mat-icon>
-                Add Leave Type
-            </button>
-        </div>
-    </div>
+<div class="ts-page-layout">
+    <app-page-header matIcon="category" title="Leave Types Management" subtitle="Manage organization leave types and policies">
+        <button actions mat-raised-button class="btn-primary add-button" (click)="addLeaveType()" *ngIf="hasPermission('leave_type_add_leave_type')">
+            <mat-icon>add</mat-icon>
+            Add Leave Type
+        </button>
+    </app-page-header>
 
     <div class="types-grid" *ngIf="!isLoading">
         <mat-card *ngFor="let type of leaveTypes; let i = index" class="stat-card stat-card-dynamic-color"
@@ -37,20 +28,14 @@
                                 <mat-icon>edit</mat-icon>
                                 Edit
                             </button>
-                            <!-- <button mat-menu-item (click)="deleteLeaveType(type)" class="delete-action">
-                                <mat-icon>delete</mat-icon>
-                                Delete
-                            </button> -->
                         </mat-menu>
                     </div>
                 </div>
 
-                <!-- Type Description -->
                 <div class="type-description-clean" *ngIf="type.description">
                     <p>{{ type.description }}</p>
                 </div>
 
-                <!-- Type Flags (Clean Style) -->
                 <div class="type-flags-clean">
                     <div class="flag-item" *ngIf="type.isPaid">
                         <mat-icon [style.color]="type.color || '#2196F3'">attach_money</mat-icon>
@@ -62,7 +47,6 @@
                         Half Paid
                     </div>
 
-                    <!-- Carry Forward Info -->
                     <div class="flag-item" *ngIf="type.carryForwardAllowed && type.maxCarryForwardDays">
                         <mat-icon [style.color]="type.color || '#2196F3'">event_repeat</mat-icon>
                         Carry Forward ({{ type.maxCarryForwardDays }} days)
@@ -83,7 +67,7 @@
         </div>
         <h3>No Leave Types Configured</h3>
         <p>Get started by creating your first leave type</p>
-        <button mat-raised-button *ngIf="hasPermission('leave_type_add_leave_type')" color="primary" class="add-button" (click)="addLeaveType()">
+        <button mat-raised-button *ngIf="hasPermission('leave_type_add_leave_type')" class="btn-primary add-button" (click)="addLeaveType()">
             <mat-icon>add</mat-icon>
             Add Leave Type
         </button>

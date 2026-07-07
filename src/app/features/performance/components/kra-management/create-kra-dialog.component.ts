@@ -8,7 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { CreateKRARequest, UpdateKRARequest, KRA } from '../../../../core/models/performance.models';
 import { PerformanceService } from '../../services/performance.service';
@@ -35,417 +35,101 @@ export interface CreateKRADialogData {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatCheckboxModule
+    MatSlideToggleModule
   ],
   template: `
-    <div class="kra-dialog-wrapper">
-
-      <!-- Header -->
-      <div class="kra-dialog-header">
-        <h2 class="kra-dialog-title">
-          {{ data.isEditMode ? 'Edit KRA' : 'Add New KRA' }}
-        </h2>
-        <button class="kra-close-btn" mat-dialog-close type="button" aria-label="Close">
-          <span class="kra-close-icon">&#x2715;</span>
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <div class="header-left">
+          <div class="header-icon">
+            <mat-icon>{{ data.isEditMode ? 'edit' : 'add_box' }}</mat-icon>
+          </div>
+          <div>
+            <h2 class="header-title">{{ data.isEditMode ? 'Edit KRA' : 'Add New KRA' }}</h2>
+            <p class="header-subtitle">{{ data.isEditMode ? 'Update Key Result Area details' : 'Define a new Key Result Area' }}</p>
+          </div>
+        </div>
+        <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
+          <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <!-- Form -->
-      <form [formGroup]="kraForm" (ngSubmit)="onSubmit()" class="kra-dialog-form">
+      <mat-dialog-content class="dialog-body">
+        <form [formGroup]="kraForm" (ngSubmit)="onSubmit()">
+          
+          <div class="assign-section">
+            <div class="assign-section-header">
+              <mat-icon>info</mat-icon>
+              <span>KRA Details</span>
+            </div>
+            <div class="assign-section-body">
+              
+              <div class="assign-field-group">
+                <label class="field-label">KRA Title <span class="required">*</span></label>
+                <mat-form-field appearance="outline" class="mat-field">
+                  <input matInput formControlName="title" placeholder="e.g. Talent Retention Strategy">
+                  <mat-error *ngIf="kraForm.get('title')?.hasError('required')">Title is required</mat-error>
+                </mat-form-field>
+              </div>
 
-        <!-- KRA Title -->
-        <div class="kra-field-group">
-          <label class="kra-label">KRA Title</label>
-          <input
-            class="kra-input"
-            [class.kra-input--error]="kraForm.get('title')?.invalid && kraForm.get('title')?.touched"
-            formControlName="title"
-            type="text"
-            placeholder="e.g. Talent Retention Strategy"
-            autocomplete="off"
-          />
-          <span class="kra-error" *ngIf="kraForm.get('title')?.hasError('required') && kraForm.get('title')?.touched">
-            Title is required
-          </span>
-        </div>
+              <div class="assign-field-group">
+                <label class="field-label">Appraisal Cycle <span class="required">*</span></label>
+                <mat-form-field appearance="outline" class="mat-field">
+                  <mat-select formControlName="cycleId" placeholder="Select a cycle">
+                    <mat-option *ngFor="let cycle of cycles" [value]="cycle.cycleId">
+                      {{ cycle.cycleName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="kraForm.get('cycleId')?.hasError('required')">Cycle is required</mat-error>
+                </mat-form-field>
+              </div>
 
-        <!-- Appraisal Cycle -->
-        <div class="kra-field-group">
-          <label class="kra-label">Appraisal Cycle</label>
-          <div class="kra-select-wrapper">
-            <select
-              class="kra-select"
-              [class.kra-input--error]="kraForm.get('cycleId')?.invalid && kraForm.get('cycleId')?.touched"
-              formControlName="cycleId"
-            >
-              <option value="" disabled selected>Select a cycle</option>
-              <option *ngFor="let cycle of cycles" [value]="cycle.cycleId">
-                {{ cycle.cycleName }}
-              </option>
-            </select>
-            <span class="kra-select-chevron">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </span>
+              <div class="assign-field-group">
+                <label class="field-label">Description</label>
+                <mat-form-field appearance="outline" class="mat-field">
+                  <textarea matInput formControlName="kraDescription" rows="3" placeholder="Brief overview of the goal objectives..."></textarea>
+                </mat-form-field>
+              </div>
+            </div>
           </div>
-          <span class="kra-error" *ngIf="kraForm.get('cycleId')?.hasError('required') && kraForm.get('cycleId')?.touched">
-            Cycle is required
-          </span>
-        </div>
 
-        <!-- Description -->
-        <div class="kra-field-group">
-          <label class="kra-label">Description</label>
-          <textarea
-            class="kra-textarea"
-            formControlName="kraDescription"
-            rows="3"
-            placeholder="Brief overview of the goal objectives..."
-          ></textarea>
-        </div>
-
-        <!-- Active Status Toggle -->
-        <div class="kra-toggle-row">
-          <div class="kra-toggle-info">
-            <span class="kra-toggle-title">Active Status</span>
-            <span class="kra-toggle-subtitle">Enable this KRA for the current appraisal cycle</span>
+          <div class="assign-section">
+            <div class="assign-section-header">
+              <mat-icon>settings</mat-icon>
+              <span>Configuration</span>
+            </div>
+            <div class="assign-section-body">
+              <div class="pm-toggle-list">
+                <div class="pm-toggle-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                  <div class="pm-toggle-info" style="display:flex; align-items:center; gap:12px;">
+                    <mat-icon style="color:#94a3b8;">power_settings_new</mat-icon>
+                    <div>
+                      <p style="margin:0 0 2px; font-size:14px; font-weight:600; color:#334155;">Active Status</p>
+                      <p style="margin:0; font-size:12px; color:#64748b;">Enable this KRA for the current appraisal cycle</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="isActive"></mat-slide-toggle>
+                </div>
+              </div>
+            </div>
           </div>
-          <label class="kra-toggle-switch">
-            <input
-              type="checkbox"
-              formControlName="isActive"
-              class="kra-toggle-input"
-            />
-            <span class="kra-toggle-track">
-              <span class="kra-toggle-thumb"></span>
-            </span>
-          </label>
-        </div>
 
-        <!-- Actions -->
-        <div class="kra-dialog-actions">
-          <button
-            type="button"
-            class="kra-btn kra-btn--cancel"
-            mat-dialog-close
-            [disabled]="isSubmitting"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="kra-btn kra-btn--submit"
-            [disabled]="kraForm.invalid || isSubmitting"
-          >
-            <span *ngIf="isSubmitting" class="kra-spinner"></span>
-            <span *ngIf="!isSubmitting">
-              {{ data.isEditMode ? 'Update KRA' : 'Save KRA' }}
-            </span>
-            <span *ngIf="isSubmitting">Saving...</span>
-          </button>
-        </div>
+        </form>
+      </mat-dialog-content>
 
-      </form>
+      <div class="dialog-footer">
+        <button mat-stroked-button class="btn-cancel" mat-dialog-close [disabled]="isSubmitting">Cancel</button>
+        <button mat-flat-button class="btn-submit" (click)="onSubmit()" [disabled]="kraForm.invalid || isSubmitting">
+          <mat-icon *ngIf="!isSubmitting">{{ data.isEditMode ? 'save' : 'add_circle' }}</mat-icon>
+          <mat-spinner diameter="16" *ngIf="isSubmitting" style="margin-right:8px;"></mat-spinner>
+          <span *ngIf="!isSubmitting">{{ data.isEditMode ? 'Update KRA' : 'Create KRA' }}</span>
+          <span *ngIf="isSubmitting">Saving...</span>
+        </button>
+      </div>
     </div>
   `,
   styles: [`
-    /* ─── Host & Overlay Reset ─────────────────────────────── */
-    :host {
-      display: contents;
-    }
-
-    /* ─── Dialog Wrapper ───────────────────────────────────── */
-    .kra-dialog-wrapper {
-      background: #ffffff;
-      border-radius: 16px;
-      width: 100%;      max-width: 480px;      overflow: hidden;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.14), 0 4px 16px rgba(0, 0, 0, 0.06);
-    }
-
-    /* ─── Header ───────────────────────────────────────────── */
-    .kra-dialog-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 28px 32px 12px 32px;
-    }
-
-    .kra-dialog-title {
-      font-size: 1.375rem;
-      font-weight: 700;
-      color: #0f172a;
-      letter-spacing: -0.02em;
-      margin: 0;
-      line-height: 1.2;
-    }
-
-    .kra-close-btn {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #94a3b8;
-      transition: background 0.15s ease, color 0.15s ease;
-      line-height: 1;
-    }
-
-    .kra-close-btn:hover {
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .kra-close-icon {
-      font-size: 1rem;
-      font-style: normal;
-    }
-
-    /* ─── Form ─────────────────────────────────────────────── */
-    .kra-dialog-form {
-      padding: 8px 32px 32px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* ─── Field Group ──────────────────────────────────────── */
-    .kra-field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    /* ─── Label ────────────────────────────────────────────── */
-    .kra-label {
-      font-size: 0.6875rem;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    /* ─── Input ────────────────────────────────────────────── */
-    .kra-input,
-    .kra-textarea,
-    .kra-select {
-      width: 100%;
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 0.875rem;
-      color: #0f172a;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-      box-sizing: border-box;
-    }
-
-    .kra-input::placeholder,
-    .kra-textarea::placeholder {
-      color: #94a3b8;
-    }
-
-    .kra-input:focus,
-    .kra-textarea:focus,
-    .kra-select:focus {
-      border-color: #6764f2;
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(103, 100, 242, 0.12);
-    }
-
-    .kra-input--error {
-      border-color: #ef4444 !important;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10) !important;
-    }
-
-    /* ─── Textarea ─────────────────────────────────────────── */
-    .kra-textarea {
-      resize: none;
-      line-height: 1.55;
-    }
-
-    /* ─── Select ───────────────────────────────────────────── */
-    .kra-select-wrapper {
-      position: relative;
-    }
-
-    .kra-select {
-      appearance: none;
-      -webkit-appearance: none;
-      padding-right: 40px;
-      cursor: pointer;
-    }
-
-    .kra-select-chevron {
-      position: absolute;
-      right: 13px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-    }
-
-    /* ─── Error ────────────────────────────────────────────── */
-    .kra-error {
-      font-size: 0.75rem;
-      color: #ef4444;
-      font-weight: 500;
-    }
-
-    /* ─── Toggle Row ───────────────────────────────────────── */
-    .kra-toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 12px 14px;
-      gap: 12px;
-    }
-
-    .kra-toggle-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .kra-toggle-title {
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .kra-toggle-subtitle {
-      font-size: 0.75rem;
-      color: #64748b;
-      line-height: 1.4;
-    }
-
-    /* ─── Toggle Switch ────────────────────────────────────── */
-    .kra-toggle-switch {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .kra-toggle-input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .kra-toggle-track {
-      width: 44px;
-      height: 24px;
-      background: #e2e8f0;
-      border-radius: 9999px;
-      position: relative;
-      transition: background 0.22s ease;
-      display: block;
-    }
-
-    .kra-toggle-thumb {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 20px;
-      height: 20px;
-      background: #ffffff;
-      border-radius: 9999px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-      transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .kra-toggle-input:checked + .kra-toggle-track {
-      background: #6764f2;
-    }
-
-    .kra-toggle-input:checked + .kra-toggle-track .kra-toggle-thumb {
-      transform: translateX(20px);
-    }
-
-    /* ─── Actions ──────────────────────────────────────────── */
-    .kra-dialog-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-top: 4px;
-    }
-
-    .kra-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 0.875rem;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 11px 20px;
-      transition: all 0.18s ease;
-      letter-spacing: 0.01em;
-    }
-
-    .kra-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
-    .kra-btn--cancel {
-      flex: 1;
-      background: transparent;
-      color: #475569;
-    }
-
-    .kra-btn--cancel:hover:not(:disabled) {
-      background: #f1f5f9;
-      color: #1e293b;
-    }
-
-    .kra-btn--submit {
-      flex: 2;
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-      color: #ffffff;
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.28);
-    }
-
-    .kra-btn--submit:hover:not(:disabled) {
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.38);
-      transform: translateY(-1px);
-    }
-
-    .kra-btn--submit:active:not(:disabled) {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.22);
-    }
-
-    /* ─── Spinner ──────────────────────────────────────────── */
-    .kra-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.35);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: kra-spin 0.7s linear infinite;
-    }
-
-    @keyframes kra-spin {
-      to { transform: rotate(360deg); }
-    }
+    @use '../../styles/performance-shared';
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

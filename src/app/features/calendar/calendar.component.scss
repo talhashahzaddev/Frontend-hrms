@@ -1,225 +1,24 @@
-// Variables for cleaner architecture
+// Styles for calendar components
+@use '../performance/styles/performance-shared' as pm;
+
 :host {
-    --primary-color: #667eea;
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    --text-color: #1f2937;
-    --text-muted: #6b7280;
-    --border-color: #e5e7eb;
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-
+    --primary-color: #2563eb;
+    --text-color: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    
     // Status Colors
-    --status-present: #16a34a;
-    --status-absent: #dc2626;
-    --status-late: #f59e0b;
-    --status-pending: #6b7280;
+    --status-present: #22c55e;
+    --status-absent: #ef4444;
+    --status-late: #f97316;
+    --status-pending: #64748b;
 }
 
-.calendar-container {
-    padding: 24px;
-    max-width: 1600px;
-    margin: 0 auto;
-    background: var(--bg-gradient);
-    min-height: 100vh;
-}
-
-// ==========================================
-// Header Section
-// ==========================================
-.calendar-header {
-    margin-bottom: 24px;
-    padding: 20px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-
-    .header-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 16px;
-        margin-bottom: 20px;
-    }
-
-    .page-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 24px;
-        font-weight: 800;
-        color: var(--text-color);
-        margin: 0;
-        letter-spacing: -0.5px;
-
-        mat-icon {
-            color: var(--primary-color);
-            font-size: 32px;
-            width: 32px;
-            height: 32px;
-        }
-    }
-
-    .calendar-controls {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: #f3f4f6;
-        padding: 6px;
-        border-radius: 12px;
-
-        .month-year {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-color);
-            margin: 0;
-            min-width: 160px;
-            text-align: center;
-        }
-
-        button {
-            border-radius: 8px;
-
-            &[mat-icon-button] {
-                width: 36px;
-                height: 36px;
-                background: white;
-                color: var(--text-color);
-
-                &:hover {
-                    color: var(--primary-color);
-                    background: #eff6ff;
-                }
-            }
-
-            &[mat-stroked-button] {
-                background: white;
-                color: var(--primary-color);
-                border: 1px solid transparent;
-                font-weight: 600;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-                &:hover {
-                    border-color: var(--primary-color);
-                }
-            }
-        }
-    }
-
-    .header-bottom {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 20px;
-        border-top: 1px solid var(--border-color);
-        gap: 20px;
-    }
-
-    .calendar-legend {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 24px;
-        flex: 1;
-    }
-
-    .legend-section {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-
-        .legend-section-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-right: 4px;
-        }
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-
-        .legend-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-
-            &.present {
-                color: var(--status-present);
-            }
-
-            &.absent {
-                color: var(--status-absent);
-            }
-
-            &.late {
-                color: var(--status-late);
-            }
-        }
-
-        .legend-badge-example {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border-left: 3px solid;
-            background: #f8fafc;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-            &.approved {
-                border-color: var(--status-present);
-                background: #f0fdf4;
-                color: #15803d;
-            }
-
-            &.pending {
-                border-color: var(--status-pending);
-                background: #f9fafb;
-                color: #4b5563;
-            }
-
-            &.rejected {
-                border-color: var(--status-absent);
-                background: #fef2f2;
-                color: #b91c1c;
-            }
-        }
-
-        .legend-badge.holiday {
-            background: #fdf2f8;
-            color: #be185d;
-            border: 1px solid #fbcfe8;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .legend-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-    }
-
-    .filter-field {
-        width: 180px;
-
-        // Material Override for cleaner look
-        ::ng-deep .mat-mdc-text-field-wrapper {
-            background: white !important;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-    }
+// Override material form field for filter
+::ng-deep .mat-mdc-text-field-wrapper {
+    background: white !important;
+    border-radius: 8px;
 }
 
 // ==========================================

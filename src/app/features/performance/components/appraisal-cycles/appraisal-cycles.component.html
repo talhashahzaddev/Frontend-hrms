@@ -1,154 +1,136 @@
-<div class="appraisal-cycles-container">
+<div class="ts-page-layout">
 
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-text">
-      <h2 class="page-title">Appraisal Cycles</h2>
-      <p class="page-subtitle">Manage and track performance review windows for your organization iii.</p>
-    </div>
-    <div class="header-actions" >
-      <button *ngIf="hasPermission('APPRAISAL_CYCLE_BUTTON')" class="btn-create" (click)="openCreateDialog()">
-        <span class="material-icons btn-icon">add</span>
-        Create Cycle
-      </button>
-    </div>
-  </div>
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+  <app-page-header matIcon="event_repeat" title="Appraisal Cycles" subtitle="Manage and track performance review windows for your organization">
+    <button *ngIf="hasPermission('APPRAISAL_CYCLE_BUTTON')" actions class="btn-submit" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon> Create Cycle
+    </button>
+  </app-page-header>
 
-  <!-- Filters Section -->
-  <section class="filters-card">
-    <form [formGroup]="filterForm" class="filters-form">
+  <!-- ═══ FILTERS ════════════════════════════════════════════════════════ -->
+  <div class="filters-section">
+    <form [formGroup]="filterForm" class="filters-row">
 
       <!-- Search -->
-      <div class="filter-search">
-        <span class="search-icon material-icons">search</span>
-        <input
-          class="filter-input"
-          formControlName="search"
-          placeholder="Search by cycle name..."
-          type="text"
-        />
+      <div class="ts-search-wrapper">
+        <mat-icon class="ts-search-icon">search</mat-icon>
+        <input class="ts-search-input" formControlName="search"
+               placeholder="Search by cycle name..." type="text" />
       </div>
 
-      <!-- Date Range -->
-      <div class="filter-dates">
-        <div class="filter-date-wrap">
-          <label class="filter-label">Start Date</label>
-          <input class="filter-date-input" formControlName="startDate" type="date" />
-        </div>
-        <div class="filter-date-wrap">
-          <label class="filter-label">End Date</label>
-          <input class="filter-date-input" formControlName="endDate" type="date" />
-        </div>
+      <!-- Start Date -->
+      <div class="filter-date-wrap">
+        <mat-icon class="filter-select-icon">calendar_today</mat-icon>
+        <input class="filter-date-input" formControlName="startDate" type="date" placeholder="Start Date" />
       </div>
 
-      <!-- Actions -->
-      <div class="filter-actions">
-        <button class="btn-apply" type="button" (click)="applyFilters()">
-          Apply Filters
-        </button>
-        <button class="btn-reset" type="button" (click)="clearFilters()">
-          Reset
-        </button>
+      <!-- End Date -->
+      <div class="filter-date-wrap">
+        <mat-icon class="filter-select-icon">event</mat-icon>
+        <input class="filter-date-input" formControlName="endDate" type="date" placeholder="End Date" />
       </div>
+
+      <!-- Apply -->
+      <button class="btn-submit" type="button" (click)="applyFilters()">
+        <mat-icon>filter_list</mat-icon> Apply
+      </button>
+
+      <!-- Reset -->
+      <button class="filter-clear-btn" type="button" (click)="clearFilters()">
+        <mat-icon>clear</mat-icon> Reset
+      </button>
 
     </form>
-  </section>
+  </div>
 
-  <!-- Table Card -->
-  <div class="table-card">
+  <!-- ═══ TABLE CARD ══════════════════════════════════════════════════════ -->
+  <div class="ts-card" *ngIf="hasPermission('APPRAISAL_CYCLE_TABLE')">
 
-    <!-- Loading State -->
-    <div class="loading-overlay" *ngIf="isLoading">
-      <div class="spinner"></div>
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="pm-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading appraisal cycles...</p>
     </div>
 
     <!-- Table -->
-    <div class="table-wrapper" *ngIf="!isLoading && hasPermission('APPRAISAL_CYCLE_TABLE')">
-      <table class="cycles-table" mat-table [dataSource]="appraisalCycles">
+    <div *ngIf="!isLoading" class="pm-table-wrap">
+      <table mat-table [dataSource]="appraisalCycles" class="ref-table" style="width:100%;">
 
-        <!-- Cycle Name Column -->
+        <!-- Cycle Name -->
         <ng-container matColumnDef="cycleName">
-          <th mat-header-cell *matHeaderCellDef class="col-header">Appraisal Cycle Name</th>
-          <td mat-cell *matCellDef="let cycle" class="col-cell">
-            <span class="cycle-name" [class.cycle-name--active]="cycle.status?.toLowerCase() === 'active'">
-              {{ cycle.cycleName }}
-            </span>
+          <th mat-header-cell *matHeaderCellDef>Appraisal Cycle Name</th>
+          <td mat-cell *matCellDef="let cycle">
+            <div class="pm-cell-title">{{ cycle.cycleName }}</div>
           </td>
         </ng-container>
 
-        <!-- Start Date Column -->
+        <!-- Start Date -->
         <ng-container matColumnDef="dates">
-          <th mat-header-cell *matHeaderCellDef class="col-header">Start Date</th>
-          <td mat-cell *matCellDef="let cycle" class="col-cell col-date">
+          <th mat-header-cell *matHeaderCellDef>Start Date</th>
+          <td mat-cell *matCellDef="let cycle" class="date-cell">
             {{ cycle.startDate | localizedDate:'MMM dd, yyyy' }}
           </td>
         </ng-container>
 
-        <!-- End Date Column -->
+        <!-- End Date -->
         <ng-container matColumnDef="endDate">
-          <th mat-header-cell *matHeaderCellDef class="col-header">End Date</th>
-          <td mat-cell *matCellDef="let cycle" class="col-cell col-date">
+          <th mat-header-cell *matHeaderCellDef>End Date</th>
+          <td mat-cell *matCellDef="let cycle" class="date-cell">
             {{ cycle.endDate | localizedDate:'MMM dd, yyyy' }}
           </td>
         </ng-container>
 
-        <!-- Status Column -->
+        <!-- Status -->
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef class="col-header">Status</th>
-          <td mat-cell *matCellDef="let cycle" class="col-cell">
-            <span class="status-badge" [ngClass]="'status-badge--' + cycle.status?.toLowerCase()">
-              <span class="status-dot" *ngIf="cycle.status?.toLowerCase() === 'active'"></span>
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let cycle">
+            <span class="pm-cycle-badge"
+                  [class]="'pm-cycle-badge status-badge--' + (cycle.status?.toLowerCase() || 'inactive')">
               {{ cycle.status | titlecase }}
             </span>
           </td>
         </ng-container>
 
-        <!-- Actions Column -->
+        <!-- Actions -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="col-header col-header--right">Actions</th>
-          <td mat-cell *matCellDef="let cycle" class="col-cell col-cell--right">
-            <button *ngIf="hasPermission('APPRAISAL_CYCLE_EDIT_BUTTON') || hasPermission('APPRAISAL_CYCLE_DELETE_BUTTON')" class="btn-menu" [matMenuTriggerFor]="cycleMenu">
-              <span class="material-icons">more_vert</span>
+          <th mat-header-cell *matHeaderCellDef style="text-align:right;">Actions</th>
+          <td mat-cell *matCellDef="let cycle" style="text-align:right;">
+            <button *ngIf="hasPermission('APPRAISAL_CYCLE_EDIT_BUTTON') || hasPermission('APPRAISAL_CYCLE_DELETE_BUTTON')"
+                    mat-icon-button [matMenuTriggerFor]="cycleMenu" class="action-menu-btn">
+              <mat-icon>more_vert</mat-icon>
             </button>
-            <mat-menu #cycleMenu="matMenu" class="cycle-action-menu">
+            <mat-menu #cycleMenu="matMenu">
               <button mat-menu-item *ngIf="hasPermission('APPRAISAL_CYCLE_EDIT_BUTTON')" (click)="openEditDialog(cycle)">
-                <span class="material-icons menu-icon">edit</span>
-                Edit
+                <mat-icon>edit</mat-icon><span>Edit</span>
               </button>
-              <button mat-menu-item *ngIf="hasPermission('APPRAISAL_CYCLE_DELETE_BUTTON')" class="menu-item--danger" (click)="deleteCycle(cycle)" >
-                <span class="material-icons menu-icon">delete</span>
-                Delete
+              <mat-divider></mat-divider>
+              <button mat-menu-item *ngIf="hasPermission('APPRAISAL_CYCLE_DELETE_BUTTON')" (click)="deleteCycle(cycle)" class="danger-action">
+                <mat-icon>delete</mat-icon><span>Delete</span>
               </button>
             </mat-menu>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-row"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-            class="table-row"
-            [class.table-row--active]="row.status?.toLowerCase() === 'active'"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
         <!-- No Data Row -->
-        <tr class="table-row--empty" *matNoDataRow>
+        <tr class="mat-row" *matNoDataRow>
           <td [attr.colspan]="displayedColumns.length">
-            <div class="empty-state">
-              <span class="material-icons empty-icon">inbox</span>
-              <p class="empty-text">No appraisal cycles found</p>
+            <div class="pm-empty-state">
+              <div class="pm-empty-icon"><mat-icon>inbox</mat-icon></div>
+              <h3>No Appraisal Cycles Found</h3>
+              <p>No cycles match your current filters.</p>
             </div>
           </td>
         </tr>
-
       </table>
     </div>
 
     <!-- Pagination Footer -->
-    <div class="table-footer" *ngIf="!isLoading">
-      <p class="pagination-info">
-        Showing
-        <strong>{{ appraisalCycles.length }}</strong>
-        of
-        <strong>{{ totalItems }}</strong>
-        cycles
+    <div *ngIf="!isLoading" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-top:1px solid #e2e8f0;">
+      <p style="font-size:0.8125rem;color:#64748b;margin:0;">
+        Showing <strong>{{ appraisalCycles.length }}</strong> of <strong>{{ totalItems }}</strong> cycles
       </p>
       <mat-paginator
         [length]="totalItems"
@@ -156,9 +138,10 @@
         [pageIndex]="pageIndex"
         [pageSizeOptions]="[10, 25, 50]"
         (page)="onPageChange($event)"
-        class="custom-paginator">
+        showFirstLastButtons>
       </mat-paginator>
     </div>
 
   </div>
+
 </div>

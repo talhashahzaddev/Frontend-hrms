@@ -19,6 +19,7 @@ import { LoadingService } from '@core/services/loading.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CreateAssetTypeDialogComponent } from './create-asset-type-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
@@ -39,7 +40,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatChipsModule,
     MatDialogModule,
     MatDividerModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    PageHeaderComponent
   ],
   templateUrl: './asset-types.component.html',
   styleUrls: ['./asset-types.component.scss']
@@ -79,7 +81,7 @@ export class AssetTypesComponent implements OnInit {
     private loading: LoadingService,
     private authService: AuthService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   hasPermission(actionKey: string): boolean {
     return this.authService.hasMenuPermission('Assets Management', 'Type of Assets', actionKey);

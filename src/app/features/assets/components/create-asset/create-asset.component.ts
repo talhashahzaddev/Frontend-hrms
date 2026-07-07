@@ -29,6 +29,7 @@ import { EmployeeSearchRequest } from '../../../../core/models/employee.models';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
@@ -54,7 +55,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatDividerModule,
     MatChipsModule,
     MatPaginatorModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    PageHeaderComponent
   ],
   templateUrl: './create-asset.component.html',
   styleUrls: ['./create-asset.component.scss']
@@ -325,7 +327,7 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
   openCreateDialog(): void {
     this.isEditMode = false;
     this.form.reset();
-    this.dialogRef = this.dialog.open(this.assetDialogTemplate, { width: '500px' });
+    this.dialogRef = this.dialog.open(this.assetDialogTemplate, { width: '600px', panelClass: 'attendance-dialog-panel' });
   }
 
   editAsset(asset: any): void {
@@ -351,20 +353,21 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
     console.log('Full asset - typeId:', fullAsset?.typeId);
     
     // Map asset properties to form field names (handle property name mismatches)
-    // assetTypeId in Asset maps to typeId in form
-    const formData = {
-      name: fullAsset.name || '',
-      assetTag: fullAsset.assetTag || fullAsset.code || '', // Handle both assetTag and code from backend
-      code: fullAsset.code || '',
-      typeId: fullAsset.assetTypeId || fullAsset.typeId || '',
-      purchaseDate: fullAsset.purchaseDate ? new Date(fullAsset.purchaseDate) : null,
-      status: fullAsset.status || '',
-      notes: fullAsset.notes || ''
-    };
     
+    // Map backend type/status strings/IDs to form values
+    const formData = {
+      code: asset.code,
+      name: asset.name,
+      assetTag: asset.assetTag,
+      typeId: asset.typeId,
+      status: asset.status,
+      purchaseDate: asset.purchaseDate ? new Date(asset.purchaseDate) : null,
+      notes: asset.notes
+    };
+
     console.log('✅ Patching form with mapped data:', formData);
     this.form.patchValue(formData);
-    this.dialogRef = this.dialog.open(this.assetDialogTemplate, { width: '500px' });
+    this.dialogRef = this.dialog.open(this.assetDialogTemplate, { width: '600px', panelClass: 'attendance-dialog-panel' });
   }
 
 deleteAsset(asset: Asset): void {
@@ -521,7 +524,7 @@ deleteAsset(asset: Asset): void {
       takeUntil(this.destroy$)
     );
     
-    this.assignDialogRef = this.dialog.open(this.assignDialogTemplate, { width: '500px' });
+    this.assignDialogRef = this.dialog.open(this.assignDialogTemplate, { width: '500px', panelClass: 'attendance-dialog-panel' });
   }
 
   private filterEmployeesBySearchTerm(searchTerm: string | null | any): any[] {
@@ -611,22 +614,22 @@ deleteAsset(asset: Asset): void {
     if (asset.id) {
       this.assetsService.getAssignmentHistory(asset.id).subscribe(history => {
         this.selectedAsset.assignmentHistory = history || [];
-        this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px' });
+        this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px', panelClass: 'attendance-dialog-panel' });
       }, err => {
         console.error('Failed to load history', err);
         this.selectedAsset.assignmentHistory = [];
-        this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px' });
+        this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px', panelClass: 'attendance-dialog-panel' });
       });
     } else {
       this.selectedAsset.assignmentHistory = [];
-      this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px' });
+      this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px', panelClass: 'attendance-dialog-panel' });
     }
   }
 
   openViewDialog(asset: any): void {
     if (!asset) return;
     this.selectedAsset = asset;
-    this.viewDialogRef = this.dialog.open(this.viewDialogTemplate, { width: '600px' });
+    this.viewDialogRef = this.dialog.open(this.viewDialogTemplate, { width: '600px', panelClass: 'attendance-dialog-panel' });
   }
 
   openReturnDialog(asset: any): void {
@@ -641,13 +644,13 @@ deleteAsset(asset: Asset): void {
         const active = (history || []).find((h: any) => !h.returnedAt && (h.status === 'Active' || h.status === 'Assigned' || h.status === 'Overdue'))
                     || (history || [])[0];
         this.selectedAssignment = active || null;
-        this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px' });
+        this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px', panelClass: 'attendance-dialog-panel' });
       }, err => {
         console.error('Failed to load assignment history for return', err);
-        this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px' });
+        this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px', panelClass: 'attendance-dialog-panel' });
       });
     } else {
-      this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px' });
+      this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px', panelClass: 'attendance-dialog-panel' });
     }
   }
 
@@ -825,3 +828,4 @@ deleteAsset(asset: Asset): void {
   }
   
 }
+

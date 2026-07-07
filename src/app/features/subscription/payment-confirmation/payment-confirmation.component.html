@@ -1,8 +1,8 @@
-<div class="confirmation-page">
-  <div class="confirmation-container">
+<div class="ts-page-layout" style="display:flex; align-items:center; justify-content:center; min-height:calc(100vh - 100px);">
+  <div class="confirmation-container" style="max-width: 520px; width: 100%;">
     @if (isSuccess) {
       <!-- Success State -->
-      <mat-card class="confirmation-card success">
+      <div class="ts-card confirmation-card success">
         <div class="status-icon success-icon">
           <mat-icon>check_circle</mat-icon>
         </div>
@@ -37,19 +37,19 @@
         </div>
 
         <div class="action-buttons">
-          <button mat-raised-button color="primary" (click)="goToDashboard()">
-            <mat-icon>dashboard</mat-icon>
+          <button class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:8px;" (click)="goToDashboard()">
+            <mat-icon style="font-size:18px; width:18px; height:18px;">dashboard</mat-icon>
             Go to Dashboard
           </button>
-          <button mat-stroked-button (click)="goToBillingHistory()">
-            <mat-icon>receipt_long</mat-icon>
+          <button class="btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:8px;" (click)="goToBillingHistory()">
+            <mat-icon style="font-size:18px; width:18px; height:18px;">receipt_long</mat-icon>
             View Billing History
           </button>
         </div>
-      </mat-card>
+      </div>
     } @else {
       <!-- Failed State -->
-      <mat-card class="confirmation-card failed">
+      <div class="ts-card confirmation-card failed">
         <div class="status-icon failed-icon">
           <mat-icon>error</mat-icon>
         </div>
@@ -74,16 +74,16 @@
         }
 
         <div class="action-buttons">
-          <button mat-raised-button color="primary" (click)="retryPayment()">
-            <mat-icon>refresh</mat-icon>
+          <button class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:8px;" (click)="retryPayment()">
+            <mat-icon style="font-size:18px; width:18px; height:18px;">refresh</mat-icon>
             Try Again
           </button>
-          <button mat-stroked-button (click)="goToDashboard()">
-            <mat-icon>dashboard</mat-icon>
+          <button class="btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:8px;" (click)="goToDashboard()">
+            <mat-icon style="font-size:18px; width:18px; height:18px;">dashboard</mat-icon>
             Go to Dashboard
           </button>
         </div>
-      </mat-card>
+      </div>
     }
   </div>
 </div>

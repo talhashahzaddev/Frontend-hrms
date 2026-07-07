@@ -1,14 +1,13 @@
-<div class="details-dialog-container">
+<div class="dialog-container">
 
-  <!-- ══ HEADER ══ -->
   <div class="dialog-header">
     <div class="header-left">
-      <div class="header-icon-box">
+      <div class="header-icon">
         <mat-icon>event_note</mat-icon>
       </div>
-      <div class="header-titles">
-        <h2 class="dialog-title">Request Details</h2>
-        <p class="dialog-subtitle">Full details of this leave request</p>
+      <div class="header-info">
+        <h2 class="header-title">Request Details</h2>
+        <p class="header-subtitle">Full details of this leave request</p>
       </div>
     </div>
   </div>
@@ -33,7 +32,7 @@
     <!-- ── Section 1: Employee (hidden for self-view) ── -->
     <div class="section-card" *ngIf="!data.isSelfView">
       <div class="section-card-title">
-        <div class="section-icon-box section-purple">
+        <div class="section-icon-box">
           <mat-icon>person</mat-icon>
         </div>
         <div>
@@ -54,7 +53,7 @@
     <!-- ── Section 2: Leave Details ── -->
     <div class="section-card">
       <div class="section-card-title">
-        <div class="section-icon-box section-purple">
+        <div class="section-icon-box">
           <mat-icon>info</mat-icon>
         </div>
         <div>

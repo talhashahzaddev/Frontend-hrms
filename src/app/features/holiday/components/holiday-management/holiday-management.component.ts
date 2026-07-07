@@ -26,6 +26,8 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { MatCardModule } from '@angular/material/card';
 interface TimelineMonth {
   key: string;
   label: string;
@@ -58,9 +60,11 @@ interface TimelineMonth {
     MatSnackBarModule,
     MatChipsModule,
     MatAutocompleteModule,
+    MatCardModule,
+    PageHeaderComponent,
   ],
   templateUrl: './holiday-management.component.html',
-  styleUrl: './holiday-management.component.scss'
+  styleUrls: ['./holiday-management.component.scss', './holiday-form-dialog.scss']
 })
 export class HolidayManagementComponent implements OnInit {
   @ViewChild('holidayFormDialog') holidayFormDialog!: TemplateRef<any>;
@@ -317,7 +321,11 @@ export class HolidayManagementComponent implements OnInit {
       applicableTo: 'all',
       applicableValue: ''
     });
-    this.dialog.open(this.holidayFormDialog, { width: '500px' });
+    this.dialog.open(this.holidayFormDialog, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
+    });
   }
 
   openEditHolidayDialog(holiday: CompanyHoliday): void {
@@ -335,7 +343,11 @@ export class HolidayManagementComponent implements OnInit {
       applicableTo: holiday.applicableTo,
       applicableValue: holiday.applicableValue || '',
     });
-    this.dialog.open(this.holidayFormDialog, { width: '500px' });
+    this.dialog.open(this.holidayFormDialog, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
+    });
   }
 
   saveHoliday(): void {
@@ -430,7 +442,9 @@ export class HolidayManagementComponent implements OnInit {
 
     const dialogRef = this.dialog.open(HolidayCatalogPickerComponent, {
       width: '800px',
+      maxWidth: '95vw',
       maxHeight: '85vh',
+      panelClass: 'attendance-dialog-panel',
       data: { year: this.selectedYear }
     });
 

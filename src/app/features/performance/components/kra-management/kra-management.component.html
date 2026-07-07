@@ -1,438 +1,380 @@
-<div class="kra-management-container">
+<div class="ts-page-layout">
 
   <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
-  <div class="page-header">
-    <div class="header-left">
-      <div class="header-icon">
-        <mat-icon>business</mat-icon>
-      </div>
-      <div>
-        <h1 class="page-title">Performance Management</h1>
-        <p class="page-subtitle">Manage KRAs and goals for organizational performance tracking</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button *ngIf="selectedTab === 0 && hasPermission('CREATE_KRA_BUTTON')" (click)="openCreateDialog()" class="btn-primary">
-        <mat-icon>add</mat-icon> New KRA
-      </button>
-      <button *ngIf="selectedTab === 1 && hasPermission('CREATE_GOAL_BUTTON')" (click)="openCreateGoalDialog()" class="btn-primary">
-        <mat-icon>add</mat-icon> Add Goal
-      </button>
-    </div>
-  </div>
+  <app-page-header matIcon="business" title="Performance Management" subtitle="Manage KRAs and goals for organizational performance tracking">
+    <button *ngIf="selectedTab === 0 && hasPermission('CREATE_KRA_BUTTON')" actions (click)="openCreateDialog()" class="btn-submit">
+      <mat-icon>add</mat-icon> New KRA
+    </button>
+    <button *ngIf="selectedTab === 1 && hasPermission('CREATE_GOAL_BUTTON')" actions (click)="openCreateGoalDialog()" class="btn-submit">
+      <mat-icon>add</mat-icon> Add Goal
+    </button>
+  </app-page-header>
 
   <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
-  <div class="page-tabs">
-    <button *ngIf="hasPermission('KRA_MANAGEMENT_SECTION')" class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+  <div class="perf-tabs">
+    <button *ngIf="hasPermission('KRA_MANAGEMENT_SECTION')" class="perf-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
       <mat-icon>category</mat-icon>
       <span>KRA Management</span>
-      <span class="tab-badge" *ngIf="filteredKRAs.length > 0">{{ filteredKRAs.length }}</span>
+      <span class="perf-tab-badge" *ngIf="filteredKRAs.length > 0">{{ filteredKRAs.length }}</span>
     </button>
-    <button *ngIf="hasPermission('GOAL_MANAGEMENT_SECTION')" class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+    <button *ngIf="hasPermission('GOAL_MANAGEMENT_SECTION')" class="perf-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
       <mat-icon>flag</mat-icon>
       <span>Goals</span>
-      <span class="tab-badge" *ngIf="goals.length > 0">{{ goals.length }}</span>
+      <span class="perf-tab-badge" *ngIf="goals.length > 0">{{ goals.length }}</span>
     </button>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 1 — KRA MANAGEMENT                                             -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <div [ngSwitch]="selectedTab" class="tab-content-wrapper">
-    <div *ngSwitchCase="0" class="tab-content">
+  <!-- ═══ TAB CONTENT WRAPPER ═══════════════════════════════════════════ -->
+  <div [ngSwitch]="selectedTab">
 
-    <!-- KRA Table Section -->
-    <div *ngIf="hasPermission('KRA_TABLE')" class="section-card" [formGroup]="filterForm">
+    <!-- ─── TAB 0 — KRA MANAGEMENT ──────────────────────────────────── -->
+    <div *ngSwitchCase="0">
 
-    <!-- Search & Filter Bar -->
-    <div class="filter-bar">
-      <div class="filter-left filters-wrapper">
-        <div class="search-wrap">
-          <span class="search-icon material-icon">search</span>
-          <input class="search-input"
-                 formControlName="search"
-                 placeholder="Search..." />
+      <!-- KRA Filters -->
+      <div *ngIf="hasPermission('KRA_TABLE')" [formGroup]="filterForm">
+        <div class="filters-section">
+          <div class="filters-row">
+            <!-- Search -->
+            <div class="ts-search-wrapper">
+              <mat-icon class="ts-search-icon">search</mat-icon>
+              <input class="ts-search-input" formControlName="search" placeholder="Search KRAs..." />
+            </div>
+
+            <!-- Status filter -->
+            <div class="filter-select-wrap">
+              <mat-icon class="filter-select-icon">tune</mat-icon>
+              <select class="filter-select" formControlName="status">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+            <!-- Apply -->
+            <button class="btn-submit" (click)="applyFilters()">
+              <mat-icon>filter_list</mat-icon> Apply
+            </button>
+
+            <!-- Clear -->
+            <button class="filter-clear-btn" (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
+              <mat-icon>clear</mat-icon> Clear
+            </button>
+          </div>
         </div>
 
-        <div class="select-wrap">
-          <select class="filter-select" formControlName="status">
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <span class="select-arrow material-icon">expand_more</span>
-        </div>
+        <!-- KRA Table Card -->
+        <div class="ts-card">
+          <!-- Loading -->
+          <div *ngIf="isLoading" class="pm-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading KRAs...</p>
+          </div>
 
-        <button class="btn-icon" (click)="applyFilters()" title="Apply Filters">
-          <span class="material-icon">filter_list</span>
-        </button>
-      </div>
+          <!-- Table -->
+          <div *ngIf="!isLoading" class="pm-table-wrap">
+            <table class="pm-table">
+              <thead>
+                <tr>
+                  <th>KRA Title &amp; Description</th>
+                  <th>Appraisal Cycle</th>
+                  <th>No. of Goals</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let kra of krasDataSource.data">
+                  <td>
+                    <div class="pm-cell-title">{{ kra.title }}</div>
+                    <div class="pm-cell-sub" *ngIf="kra.kraDescription">{{ kra.kraDescription }}</div>
+                  </td>
+                  <td><span class="pm-kra-badge">{{ kra.cycleName }}</span></td>
+                  <td>
+                    <span style="font-size:0.8125rem;font-weight:600;color:#0f172a;">{{ getGoalCountForKRA(kra.kraId) }} Goals</span>
+                  </td>
+                  <td>
+                    <div class="pm-progress">
+                      <span class="pm-progress-label">{{ kra.kraRate }}%</span>
+                      <div class="pm-progress-track">
+                        <div class="pm-progress-fill" [style.width.%]="kra.kraRate"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="pm-status-badge" [class.status-active]="kra.isActive" [class.status-inactive]="!kra.isActive">
+                      {{ kra.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <button mat-icon-button [matMenuTriggerFor]="kraMenu" class="action-menu-btn">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #kraMenu="matMenu">
+                      <button mat-menu-item *ngIf="hasPermission('KRA_VIEW')" (click)="viewKRADetails(kra)">
+                        <mat-icon>visibility</mat-icon><span>View Details</span>
+                      </button>
+                      <button mat-menu-item *ngIf="hasPermission('KRA_EDIT_BUTTON')" (click)="openEditDialog(kra)">
+                        <mat-icon>edit</mat-icon><span>Edit</span>
+                      </button>
+                      <button mat-menu-item *ngIf="hasPermission('KRA_ACTIVATE_DEACTIVATE_BUTTON')" (click)="toggleKRAStatus(kra)">
+                        <mat-icon>{{ kra.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                        <span>{{ kra.isActive ? 'Deactivate' : 'Activate' }}</span>
+                      </button>
+                      <mat-divider></mat-divider>
+                      <button mat-menu-item *ngIf="hasPermission('KRA_DELETE_BUTTON')" (click)="deleteKRA(kra)" class="danger-action">
+                        <mat-icon>delete</mat-icon><span>Delete</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-      <div class="filter-right">
-        <button class="btn-icon"
-                (click)="clearFilters()"
-                [disabled]="!hasFiltersApplied()"
-                title="Clear Filters">
-          <span class="material-icon">clear</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- KRA Table -->
-    <div class="table-wrap" *ngIf="!isLoading">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>KRA Title &amp; Description</th>
-            <th>Appraisal Cycle</th>
-            <th>No. of Goals</th>
-            <th>Progress</th>
-            <th>Status</th>
-            <th class="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let kra of krasDataSource.data" class="table-row">
-            <td>
-              <div class="cell-title">{{ kra.title }}</div>
-              <div class="cell-sub" *ngIf="kra.kraDescription">{{ kra.kraDescription }}</div>
-            </td>
-            <td>
-              <span class="cycle-text">{{ kra.cycleName }}</span>
-            </td>
-            <td>
-              <span class="goals-count">{{ getGoalCountForKRA(kra.kraId) }} Goals</span>
-            </td>
-            <td>
-              <div class="progress-wrap">
-                <span class="progress-label">{{ kra.kraRate }}%</span>
-                <div class="progress-bar">
-                  <div class="progress-fill" [style.width.%]="kra.kraRate"></div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span [class]="'status-badge ' + (kra.isActive ? 'status-active' : 'status-inactive')">
-                {{ kra.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="text-right">
-              <button mat-icon-button [matMenuTriggerFor]="kraMenu" class="action-btn">
-                <span style="font-weight: normal; font-size: 20px;">⋮</span>
+            <!-- Empty state -->
+            <div *ngIf="filteredKRAs.length === 0" class="pm-empty-state">
+              <div class="pm-empty-icon"><mat-icon>inbox</mat-icon></div>
+              <h3>No KRAs Found</h3>
+              <p>No KRAs match your current filters.</p>
+              <button *ngIf="hasPermission('CREATE_KRA_BUTTON')" class="btn-submit" (click)="openCreateDialog()">
+                <mat-icon>add</mat-icon> Create Your First KRA
               </button>
-              <mat-menu #kraMenu="matMenu">
-                <button mat-menu-item *ngIf="hasPermission('KRA_VIEW')" (click)="viewKRADetails(kra)">
-                  <mat-icon>visibility</mat-icon>
-                  <span>View Details</span>
-                </button>
+            </div>
+          </div>
 
-                <button mat-menu-item *ngIf="hasPermission('KRA_EDIT_BUTTON')" (click)="openEditDialog(kra)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
-                </button>
-
-                <button mat-menu-item *ngIf="hasPermission('KRA_ACTIVATE_DEACTIVATE_BUTTON')" (click)="toggleKRAStatus(kra)">
-                  <mat-icon>{{ kra.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-                  <span>{{ kra.isActive ? 'Deactivate' : 'Activate' }}</span>
-                </button>
-
-                <mat-divider></mat-divider>
-
-                <button mat-menu-item *ngIf="hasPermission('KRA_DELETE_BUTTON')" (click)="deleteKRA(kra)">
-                  <mat-icon>delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              </mat-menu>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Empty State -->
-        <div *ngIf="filteredKRAs.length === 0" class="empty-state">
-        <span class="material-icon empty-icon">inbox</span>
-        <h3>No KRAs Found</h3>
-        <p>No KRAs match your current filters.</p>
-        <button *ngIf="hasPermission('CREATE_KRA_BUTTON')" class="btn-primary" (click)="openCreateDialog()">
-          <span class="material-icon">add</span>
-          Create Your First KRA
-        </button>
+          <!-- Pagination -->
+          <div *ngIf="!isLoading && filteredKRAs.length > 0">
+            <mat-paginator #kraPaginator
+              [length]="totalItems"
+              [pageSize]="pageSize"
+              [pageIndex]="pageIndex"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="onPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Loading -->
-    <div class="loading-state" *ngIf="isLoading">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading KRAs...</p>
-    </div>
+    <!-- ─── TAB 1 — GOALS MANAGEMENT ──────────────────────────────────── -->
+    <div *ngSwitchCase="1">
 
-    <!-- Pagination -->
-    <div class="paginator-wrap" *ngIf="!isLoading && filteredKRAs.length > 0">
-      <mat-paginator #kraPaginator
-        [length]="totalItems"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        [pageSizeOptions]="[5, 10, 25, 50]"
-        (page)="onPageChange($event)"
-        showFirstLastButtons>
-      </mat-paginator>
-    </div>
-  </div>
-    </div>
+      <!-- All Goals Section -->
+      <div *ngIf="hasPermission('HR_GOAL_TABLE')">
+        <div class="filters-section">
+          <div class="filters-row">
+            <div class="ts-search-wrapper">
+              <mat-icon class="ts-search-icon">search</mat-icon>
+              <input class="ts-search-input"
+                     [(ngModel)]="goalsSearchTerm"
+                     (ngModelChange)="filterGoals()"
+                     placeholder="Search Goals..." />
+            </div>
+          </div>
+        </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 2 — GOALS MANAGEMENT                                           -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <div *ngSwitchCase="1" class="tab-content">
+        <div class="ts-card">
+          <div class="pm-sub-section">
+            <h3>
+              All Goals
+              <span class="pm-count-badge">{{ goals.length }}</span>
+            </h3>
+          </div>
 
-    <!-- Goals Management Section -->
-    <div class="section-card" *ngIf="hasPermission('HR_GOAL_TABLE')">
+          <div *ngIf="isLoadingGoals" class="pm-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading Goals...</p>
+          </div>
 
-      <div class="section-header">
-        <h3>All Goals <span class="count-badge">{{ goals.length }}</span></h3>
-      </div>
+          <div *ngIf="!isLoadingGoals" class="pm-table-wrap">
+            <table class="pm-table">
+              <thead>
+                <tr>
+                  <th>Goal Title</th>
+                  <th>KRA</th>
+                  <th>Assigned To</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let goal of goalsDataSource.data">
+                  <td><div class="pm-cell-title">{{ goal.title }}</div></td>
+                  <td><span class="pm-kra-badge">{{ goal.kraName || 'N/A' }}</span></td>
+                  <td>
+                    <span class="name-primary">{{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}</span>
+                  </td>
+                  <td class="date-cell">{{ goal.startDate | localizedDate:'MMM dd, yyyy' }}</td>
+                  <td class="date-cell">{{ goal.endDate | localizedDate:'MMM dd, yyyy' }}</td>
+                  <td>
+                    <span class="pm-progress-badge" [class]="'pm-progress-badge progress-' + goal.progress.toLowerCase()">
+                      {{ goal.progress | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="pm-status-badge" [class.status-active]="goal.isActive" [class.status-inactive]="!goal.isActive">
+                      {{ goal.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <button mat-icon-button [matMenuTriggerFor]="goalMenu" class="action-menu-btn">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #goalMenu="matMenu">
+                      <button mat-menu-item (click)="viewGoalDetails(goal)">
+                        <mat-icon>visibility</mat-icon><span>View Details</span>
+                      </button>
+                      <button mat-menu-item *ngIf="hasPermission('ASSIGN_GOAL_BUTTON')" (click)="openAssignGoalDialog(goal)">
+                        <mat-icon>person_add</mat-icon><span>Assign Goal</span>
+                      </button>
+                      <button mat-menu-item *ngIf="hasPermission('EDIT_GOAL_BUTTON')" (click)="openEditGoalDialog(goal)">
+                        <mat-icon>edit</mat-icon><span>Edit</span>
+                      </button>
+                      <button mat-menu-item (click)="toggleGoalStatus(goal)">
+                        <mat-icon>{{ goal.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                        <span>{{ goal.isActive ? 'Deactivate' : 'Activate' }}</span>
+                      </button>
+                      <mat-divider></mat-divider>
+                      <button mat-menu-item *ngIf="hasPermission('DELETE_GOAL_BUTTON')" (click)="deleteGoal(goal)" class="danger-action">
+                        <mat-icon>delete</mat-icon><span>Delete</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-      <div class="filter-bar">
-        <div class="filter-left">
-          <div class="search-wrap">
-            <span class="search-icon material-icon">search</span>
-            <input class="search-input"
-                   [(ngModel)]="goalsSearchTerm"
-                   (ngModelChange)="filterGoals()"
-                   placeholder="Search Goals..." />
+            <div *ngIf="goals.length === 0" class="pm-empty-state">
+              <div class="pm-empty-icon"><mat-icon>flag</mat-icon></div>
+              <h3>No Goals Found</h3>
+              <p>Create your first goal to get started.</p>
+              <button *ngIf="hasPermission('CREATE_GOAL_BUTTON')" class="btn-submit" (click)="openCreateGoalDialog()">
+                <mat-icon>add</mat-icon> Create Your First Goal
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoadingGoals && goals.length > 0">
+            <mat-paginator #goalsPaginator
+              [length]="totalGoals"
+              [pageSize]="goalPageSize"
+              [pageIndex]="goalPageIndex"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="onGoalPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
           </div>
         </div>
       </div>
 
-      <div class="table-wrap" *ngIf="!isLoadingGoals">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Goal Title</th>
-              <th>KRA</th>
-              <th>Assigned To</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let goal of goalsDataSource.data" class="table-row">
-              <td>
-                <div class="cell-title">{{ goal.title }}</div>
-              </td>
-              <td>
-                <span class="kra-link-badge">
-                  {{ goal.kraName || 'N/A' }}
-                </span>
-              </td>
-              <td>
-                <span class="assigned-to-text">
-                  {{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}
-                </span>
-              </td>
-              <td class="date-cell">{{ goal.startDate | localizedDate:'MMM dd, yyyy' }}</td>
-              <td class="date-cell">{{ goal.endDate | localizedDate:'MMM dd, yyyy' }}</td>
-              <td>
-                <span [class]="'progress-badge progress-' + goal.progress.toLowerCase()">
-                  {{ goal.progress | titlecase }}
-                </span>
-              </td>
-              <td>
-                <span [class]="'status-badge ' + (goal.isActive ? 'status-active' : 'status-inactive')">
-                  {{ goal.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="text-right">
-                <button mat-icon-button [matMenuTriggerFor]="goalMenu" class="action-btn">
-                  <span style="font-weight: normal; font-size: 20px;">⋮</span>
-                </button>
+      <!-- Employee Goals Section -->
+      <div *ngIf="hasPermission('EMPLOYEE_GOAL_TABLE')" style="margin-top:1.25rem;">
+        <div class="ts-card">
+          <div class="pm-sub-section">
+            <h3>
+              Employee Goals
+              <span class="pm-count-badge">{{ employeeGoals.length }}</span>
+            </h3>
+          </div>
 
-                <mat-menu #goalMenu="matMenu">
-                  <button mat-menu-item (click)="viewGoalDetails(goal)">
-                    <mat-icon>visibility</mat-icon>
-                    <span>View Details</span>
-                  </button>
+          <div class="filters-row" style="margin-bottom:1rem;">
+            <div class="ts-search-wrapper">
+              <mat-icon class="ts-search-icon">search</mat-icon>
+              <input class="ts-search-input"
+                     [(ngModel)]="employeeGoalsSearchTerm"
+                     (ngModelChange)="filterEmployeeGoals()"
+                     placeholder="Search Employee Goals..." />
+            </div>
+          </div>
 
-                    <button mat-menu-item *ngIf="hasPermission('ASSIGN_GOAL_BUTTON')" (click)="openAssignGoalDialog(goal)">
-                      <mat-icon>person_add</mat-icon>
-                      <span>Assign Goal</span>
+          <div *ngIf="isLoadingEmployeeGoals" class="pm-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading Employee Goals...</p>
+          </div>
+
+          <div *ngIf="!isLoadingEmployeeGoals" class="pm-table-wrap">
+            <table class="pm-table">
+              <thead>
+                <tr>
+                  <th>Goal Title</th>
+                  <th>KRA</th>
+                  <th>Assigned To</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let goal of employeeGoalsDataSource.data">
+                  <td><div class="pm-cell-title">{{ goal.title }}</div></td>
+                  <td><span class="pm-kra-badge">{{ goal.kraName || 'N/A' }}</span></td>
+                  <td>
+                    <span class="name-primary">{{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}</span>
+                  </td>
+                  <td class="date-cell">{{ goal.startDate | localizedDate:'MMM dd, yyyy' }}</td>
+                  <td class="date-cell">{{ goal.endDate | localizedDate:'MMM dd, yyyy' }}</td>
+                  <td>
+                    <span class="pm-progress-badge" [class]="'pm-progress-badge progress-' + goal.progress.toLowerCase()">
+                      {{ goal.progress | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="pm-status-badge" [class.status-active]="goal.isActive" [class.status-inactive]="!goal.isActive">
+                      {{ goal.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <button mat-icon-button [matMenuTriggerFor]="employeeGoalMenu" class="action-menu-btn">
+                      <mat-icon>more_vert</mat-icon>
                     </button>
+                    <mat-menu #employeeGoalMenu="matMenu">
+                      <button mat-menu-item (click)="viewEmployeeGoalDetails(goal)">
+                        <mat-icon>visibility</mat-icon><span>View Details</span>
+                      </button>
+                      <mat-divider></mat-divider>
+                      <button mat-menu-item (click)="updateGoalStatusTo(goal, 'ToStart')"
+                              [disabled]="goal.progress.toLowerCase() === 'tostart'">
+                        <mat-icon>play_arrow</mat-icon><span>Start</span>
+                      </button>
+                      <button mat-menu-item (click)="updateGoalStatusTo(goal, 'InProgress')"
+                              [disabled]="goal.progress.toLowerCase() === 'inprogress'">
+                        <mat-icon>loop</mat-icon><span>In Progress</span>
+                      </button>
+                      <button mat-menu-item (click)="updateGoalStatusTo(goal, 'Completed')"
+                              [disabled]="goal.progress.toLowerCase() === 'completed'">
+                        <mat-icon>check_circle</mat-icon><span>Completed</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-                    <button mat-menu-item *ngIf="hasPermission('EDIT_GOAL_BUTTON')" (click)="openEditGoalDialog(goal)">
-                      <mat-icon>edit</mat-icon>
-                      <span>Edit</span>
-                    </button>
+            <div *ngIf="employeeGoals.length === 0" class="pm-empty-state">
+              <div class="pm-empty-icon"><mat-icon>flag</mat-icon></div>
+              <h3>No Employee Goals Found</h3>
+              <p>No employee goals assigned yet.</p>
+            </div>
+          </div>
 
-                    <button mat-menu-item (click)="toggleGoalStatus(goal)">
-                      <mat-icon>{{ goal.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-                      <span>{{ goal.isActive ? 'Deactivate' : 'Activate' }}</span>
-                    </button>
-
-                    <mat-divider></mat-divider>
-
-                    <button mat-menu-item *ngIf="hasPermission('DELETE_GOAL_BUTTON')" (click)="deleteGoal(goal)">
-                      <mat-icon>delete</mat-icon>
-                      <span>Delete</span>
-                    </button>
-                </mat-menu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div *ngIf="goals.length === 0" class="empty-state">
-          <span class="material-icon empty-icon">flag</span>
-          <h3>No Goals Found</h3>
-          <p>Create your first goal to get started.</p>
-          <button *ngIf="hasPermission('CREATE_GOAL_BUTTON')" class="btn-primary" (click)="openCreateGoalDialog()">
-            <span class="material-icon">add</span>
-            Create Your First Goal
-          </button>
-        </div>
-      </div>
-
-      <div class="loading-state" *ngIf="isLoadingGoals">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading Goals...</p>
-      </div>
-
-      <div class="goals-footer" *ngIf="!isLoadingGoals && goals.length > 0">
-        <mat-paginator #goalsPaginator
-          [length]="totalGoals"
-          [pageSize]="goalPageSize"
-          [pageIndex]="goalPageIndex"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (page)="onGoalPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </div>
-    </div>
-
-    <!-- Employee Goals Section -->
-    <div class="section-card" *ngIf="hasPermission('EMPLOYEE_GOAL_TABLE')" style="margin-top: 24px;">
-
-      <div class="section-header">
-        <h3>Employee Goals <span class="count-badge">{{ employeeGoals.length }}</span></h3>
-      </div>
-
-      <div class="filter-bar">
-        <div class="filter-left">
-          <div class="search-wrap">
-            <span class="search-icon material-icon">search</span>
-            <input class="search-input"
-                   [(ngModel)]="employeeGoalsSearchTerm"
-                   (ngModelChange)="filterEmployeeGoals()"
-                   placeholder="Search Employee Goals..." />
+          <div *ngIf="!isLoadingEmployeeGoals && employeeGoals.length > 0">
+            <mat-paginator #employeeGoalsPaginator
+              [length]="totalEmployeeGoals"
+              [pageSize]="employeeGoalPageSize"
+              [pageIndex]="employeeGoalPageIndex"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="onEmployeeGoalPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
           </div>
         </div>
       </div>
-
-      <div class="table-wrap" *ngIf="!isLoadingEmployeeGoals">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Goal Title</th>
-              <th>KRA</th>
-              <th>Assigned To</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let goal of employeeGoalsDataSource.data" class="table-row">
-              <td>
-                <div class="cell-title">{{ goal.title }}</div>
-              </td>
-              <td>
-                <span class="kra-link-badge">
-                  {{ goal.kraName || 'N/A' }}
-                </span>
-              </td>
-              <td>
-                <span class="assigned-to-text">
-                  {{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}
-                </span>
-              </td>
-              <td class="date-cell">{{ goal.startDate | localizedDate:'MMM dd, yyyy' }}</td>
-              <td class="date-cell">{{ goal.endDate | localizedDate:'MMM dd, yyyy' }}</td>
-              <td>
-                <span [class]="'progress-badge progress-' + goal.progress.toLowerCase()">
-                  {{ goal.progress | titlecase }}
-                </span>
-              </td>
-              <td>
-                <span [class]="'status-badge ' + (goal.isActive ? 'status-active' : 'status-inactive')">
-                  {{ goal.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="text-right">
-                <button mat-icon-button [matMenuTriggerFor]="employeeGoalMenu" class="action-btn">
-                  <span style="font-weight: normal; font-size: 20px;">⋮</span>
-                </button>
-
-                <mat-menu #employeeGoalMenu="matMenu">
-                  <button mat-menu-item (click)="viewEmployeeGoalDetails(goal)">
-                    <mat-icon>visibility</mat-icon>
-                    <span>View Details</span>
-                  </button>
-
-                  <mat-divider></mat-divider>
-
-                  <button mat-menu-item 
-                          (click)="updateGoalStatusTo(goal, 'ToStart')"
-                          [disabled]="goal.progress.toLowerCase() === 'tostart'">
-                    <mat-icon>play_arrow</mat-icon>
-                    <span>Start</span>
-                  </button>
-
-                  <button mat-menu-item 
-                          (click)="updateGoalStatusTo(goal, 'InProgress')"
-                          [disabled]="goal.progress.toLowerCase() === 'inprogress'">
-                    <mat-icon>loop</mat-icon>
-                    <span>In Progress</span>
-                  </button>
-
-                  <button mat-menu-item 
-                          (click)="updateGoalStatusTo(goal, 'Completed')"
-                          [disabled]="goal.progress.toLowerCase() === 'completed'">
-                    <mat-icon>check_circle</mat-icon>
-                    <span>Completed</span>
-                  </button>
-                </mat-menu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div *ngIf="employeeGoals.length === 0" class="empty-state">
-          <span class="material-icon empty-icon">flag</span>
-          <h3>No Employee Goals Found</h3>
-          <p>No employee goals assigned yet.</p>
-        </div>
-      </div>
-
-      <div class="loading-state" *ngIf="isLoadingEmployeeGoals">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading Employee Goals...</p>
-      </div>
-
-      <div class="goals-footer" *ngIf="!isLoadingEmployeeGoals && employeeGoals.length > 0">
-        <mat-paginator #employeeGoalsPaginator
-          [length]="totalEmployeeGoals"
-          [pageSize]="employeeGoalPageSize"
-          [pageIndex]="employeeGoalPageIndex"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (page)="onEmployeeGoalPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </div>
     </div>
   </div>
-    </div>
-  </div>
+</div>

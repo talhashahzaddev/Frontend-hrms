@@ -1,835 +1,718 @@
 <!-- Appraisals Container -->
-<div class="appraisals-container">
+<div class="ts-page-layout">
 
-  <!-- Page Header -->
-  <header class="page-header">
-    <div class="header-inner">
-      <div class="header-top">
-        <nav class="breadcrumbs">
-          <span>Performance</span>
-          <span class="breadcrumb-sep">/</span>
-          <span class="active">Appraisal Review</span>
-        </nav>
-        <!-- <h1 class="page-title">Appraisal <em>Review</em></h1> -->
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+  <app-page-header matIcon="assessment" title="Appraisal Review" subtitle="Performance / Appraisal Review">
+  </app-page-header>
+
+  <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
+  <div class="perf-tabs">
+    <button *ngIf="hasPermission('MANAGER_APPRAISAL_SECTION')"
+            class="perf-tab" [class.active]="selectedTab === 0" (click)="selectedTab = 0; onTabChange(0)">
+      <mat-icon>rate_review</mat-icon>
+      <span>Manager Appraisals</span>
+    </button>
+    <button *ngIf="hasPermission('SELF_ASSESSMENT_SECTION')"
+            class="perf-tab" [class.active]="selectedTab === 1" (click)="selectedTab = 1; onTabChange(1)">
+      <mat-icon>person_search</mat-icon>
+      <span>Self Assessment</span>
+    </button>
+    <button *ngIf="hasPermission('HR_REVIEWS_SECTION')"
+            class="perf-tab" [class.active]="selectedTab === 2" (click)="selectedTab = 2; onTabChange(2)">
+      <mat-icon>verified_user</mat-icon>
+      <span>HR Review</span>
+    </button>
+  </div>
+
+  <!-- ═══ TAB 0 — MANAGER APPRAISALS ═══════════════════════════════════ -->
+  <div *ngIf="selectedTab === 0 && hasPermission('MANAGER_APPRAISAL_SECTION')" class="appraisal-tab-body">
+
+    <!-- Manager Reviews Section -->
+    <div class="ts-card" style="margin-bottom:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">Manager Reviews
+            <span class="pm-count-badge">{{ managerReviewTotalItems }}</span>
+          </h3>
+        </div>
       </div>
 
-      <!-- Tab Navigation integrated in header bottom -->
-      <div class="header-tabs">
-        <mat-tab-group [(selectedIndex)]="selectedTab"
-                       (selectedIndexChange)="onTabChange($event)"
-                       class="appraisals-tabs">
+      <div *ngIf="isLoadingManagerReviews" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading manager reviews...</p>
+      </div>
 
-          <!-- Manager Appraisals Tab -->
-          <ng-container *ngIf="hasPermission('MANAGER_APPRAISAL_SECTION')">
-            <mat-tab label="Manager Appraisals">
-              <ng-template matTabContent>
-              <!-- Manager Reviews Section -->
-              <div class="tab-content-wrapper">
-                <div class="content-card">
+      <div *ngIf="!isLoadingManagerReviews" class="pm-table-wrap">
+        <table mat-table [dataSource]="managerReviewsDataSource" class="ref-table" style="width:100%;">
 
-                  <!-- Manager Reviews -->
-                  <section class="card-section">
-                    <div class="section-header">
-                      <h2>Manager Reviews</h2>
-                      <span class="section-meta">{{ managerReviewTotalItems }} Total Reviews</span>
-                    </div>
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
+          </ng-container>
 
-                    <div *ngIf="isLoadingManagerReviews" class="loading-container">
-                      <mat-spinner diameter="40"></mat-spinner>
-                      <p>Loading manager reviews...</p>
-                    </div>
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="name-primary">{{ review.employeeName }}</span>
+            </td>
+          </ng-container>
 
-                    <div *ngIf="!isLoadingManagerReviews" class="table-wrapper">
-                      <table mat-table [dataSource]="managerReviewsDataSource" class="ref-table">
+          <ng-container matColumnDef="kraName">
+            <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="pm-kra-badge">{{ review.kraName }}</span>
+            </td>
+          </ng-container>
 
-                        <ng-container matColumnDef="cycleName">
-                          <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-                          <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
-                        </ng-container>
+          <ng-container matColumnDef="goalName">
+            <th mat-header-cell *matHeaderCellDef>Goal Name</th>
+            <td mat-cell *matCellDef="let review">{{ review.goalName }}</td>
+          </ng-container>
 
-                        <ng-container matColumnDef="employeeName">
-                          <th mat-header-cell *matHeaderCellDef>Employee</th>
-                          <td mat-cell *matCellDef="let review">
-                            <span class="name-primary">{{ review.employeeName }}</span>
-                          </td>
-                        </ng-container>
+          <ng-container matColumnDef="rating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let review">
+              <div class="pm-star-rating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, review.rating)">star</mat-icon>
+              </div>
+              <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
+            </td>
+          </ng-container>
 
-                        <ng-container matColumnDef="kraName">
-                          <th mat-header-cell *matHeaderCellDef>KRA Name</th>
-                          <td mat-cell *matCellDef="let review">
-                            <mat-chip [class]="getKraChipClass(review.kraName)">{{ review.kraName }}</mat-chip>
-                          </td>
-                        </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let review">
+              <mat-chip [class]="getStatusChipClass(review.status)">{{ review.status | titlecase }}</mat-chip>
+            </td>
+          </ng-container>
 
-                        <ng-container matColumnDef="goalName">
-                          <th mat-header-cell *matHeaderCellDef>Goal Name</th>
-                          <td mat-cell *matCellDef="let review">{{ review.goalName }}</td>
-                        </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let review">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(review)">
+                  <mat-icon>visibility</mat-icon><span>View Details</span>
+                </button>
+                <hr style="margin:4px 0;border:none;border-top:1px solid #f0f1f5;">
+                <button mat-menu-item class="danger-action">
+                  <mat-icon>delete</mat-icon><span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
 
-                        <ng-container matColumnDef="rating">
-                          <th mat-header-cell *matHeaderCellDef>Rating</th>
-                          <td mat-cell *matCellDef="let review">
-                            <div class="star-row">
-                              <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                        [ngClass]="getStarClass(star, review.rating)">star</mat-icon>
-                            </div>
-                            <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
-                          </td>
-                        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="managerReviewDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let review; columns: managerReviewDisplayedColumns;"></tr>
+        </table>
 
-                        <ng-container matColumnDef="status">
-                          <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
-                          <td mat-cell *matCellDef="let review" class="col-right">
-                            <mat-chip [class]="getStatusChipClass(review.status)">
-                              {{ review.status | titlecase }}
-                            </mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="actions">
-                          <th mat-header-cell *matHeaderCellDef>Actions</th>
-                          <td mat-cell *matCellDef="let review">
-                            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #actionMenu="matMenu">
-                              <button mat-menu-item (click)="openAllTablesViewDetails(review)">
-                                <mat-icon>visibility</mat-icon>
-                                <span>View Details</span>
-                              </button>
-                              <button mat-menu-item class="danger-action">
-                                <mat-icon>delete</mat-icon>
-                                <span>Delete</span>
-                              </button>
-                            </mat-menu>
-                          </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="managerReviewDisplayedColumns"></tr>
-                        <tr mat-row *matRowDef="let review; columns: managerReviewDisplayedColumns;"></tr>
-                      </table>
-
-                      <div *ngIf="managerReviewTotalItems === 0" class="empty-state">
-                        <mat-icon>assessment</mat-icon>
-                        <h3>No Manager Reviews Found</h3>
-                        <p>You haven't created any manager reviews yet.</p>
-                      </div>
-
-                      <div class="table-pagination" *ngIf="!isLoadingManagerReviews && managerReviewTotalItems > 0">
-                        <mat-paginator #managerReviewsPaginator
-                          [length]="managerReviewTotalItems"
-                          [pageSize]="managerReviewPageSize"
-                          [pageSizeOptions]="managerReviewPageSizeOptions"
-                          [pageIndex]="managerReviewPageIndex"
-                          (page)="onManagerReviewPageChange($event)"
-                          showFirstLastButtons>
-                        </mat-paginator>
-                      </div>
-                    </div>
-                  </section>
-
-                  <!-- Divider -->
-                  <div class="section-divider"></div>
-
-                  <!-- All Manager Reviews Section -->
-                  <section class="card-section" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')">
-  <div class="section-header">
-    <h2>All Manager Reviews  table  onlny for hr</h2>
-    <span class="section-meta">{{ allManagerReviewTotalItems }} Total Reviews</span>
-  </div>
-
-  <!-- Loader -->
-  <div *ngIf="isLoadingAllManagerReviews" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading manager reviews...</p>
-  </div>
-
-  <!-- Table -->
-  <div *ngIf="!isLoadingAllManagerReviews" class="table-wrapper">
-    <table mat-table [dataSource]="allManagerReviewsDataSource" class="ref-table">
-
-      <!-- Cycle -->
-      <ng-container matColumnDef="cycleName">
-        <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-        <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
-      </ng-container>
-
-      <!-- Employee -->
-      <ng-container matColumnDef="employeeName">
-        <th mat-header-cell *matHeaderCellDef>Employee</th>
-        <td mat-cell *matCellDef="let review">
-          <span class="name-primary">{{ review.employeeName }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Manager -->
-      <ng-container matColumnDef="managerName">
-        <th mat-header-cell *matHeaderCellDef>Manager</th>
-        <td mat-cell *matCellDef="let review">
-          <span class="name-primary">{{ review.managerName }}</span>
-        </td>
-      </ng-container>
-
-      <!-- KRA -->
-      <ng-container matColumnDef="kraName">
-        <th mat-header-cell *matHeaderCellDef>KRA Name</th>
-        <td mat-cell *matCellDef="let review">
-          <mat-chip [class]="getKraChipClass(review.kraName)">
-            {{ review.kraName }}
-          </mat-chip>
-        </td>
-      </ng-container>
-
-      <!-- Goal -->
-      <ng-container matColumnDef="goalName">
-        <th mat-header-cell *matHeaderCellDef>Goal Name</th>
-        <td mat-cell *matCellDef="let review">
-          {{ review.goalName }}
-        </td>
-      </ng-container>
-
-      <!-- Rating -->
-      <ng-container matColumnDef="rating">
-        <th mat-header-cell *matHeaderCellDef>Rating</th>
-        <td mat-cell *matCellDef="let review">
-          <div class="star-row">
-            <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                      [ngClass]="getStarClass(star, review.rating)">
-              star
-            </mat-icon>
-          </div>
-          <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Status -->
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
-        <td mat-cell *matCellDef="let review" class="col-right">
-          <mat-chip [class]="getStatusChipClass(review.status)">
-            {{ review.status | titlecase }}
-          </mat-chip>
-        </td>
-      </ng-container>
-
-      <!-- Actions -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let review">
-          <button mat-icon-button [matMenuTriggerFor]="allManagerActionMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-
-          <mat-menu #allManagerActionMenu="matMenu">
-            <button mat-menu-item (click)="openAllTablesViewDetails(review)">
-              <mat-icon>visibility</mat-icon>
-              <span>View Details</span>
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
-
-      <!-- Rows -->
-      <tr mat-header-row *matHeaderRowDef="allManagerReviewDisplayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: allManagerReviewDisplayedColumns;"></tr>
-
-    </table>
-
-    <!-- Empty -->
-    <div *ngIf="allManagerReviewTotalItems === 0" class="empty-state">
-      <mat-icon>assessment</mat-icon>
-      <h3>No Manager Reviews</h3>
-      <p>No manager reviews found.</p>
-    </div>
-
-    <!-- Pagination -->
-    <div class="table-pagination"
-         *ngIf="!isLoadingAllManagerReviews && allManagerReviewTotalItems > 0">
-
-      <mat-paginator #allManagerReviewsPaginator
-        [length]="allManagerReviewTotalItems"
-        [pageSize]="allManagerReviewPageSize"
-        [pageSizeOptions]="allManagerReviewPageSizeOptions"
-        [pageIndex]="allManagerReviewPageIndex"
-        (page)="onAllManagerReviewPageChange($event)"
-        showFirstLastButtons>
-      </mat-paginator>
-
-    </div>
-  </div>
-</section>
-
-      <!-- Reviews Received Section -->
-      <section>
-        <div class="section-header">
-          <h2>Reviews Received from Managers</h2>
-          <span class="section-meta">{{ receivedReviews.length }} Total Reviews</span>
+        <div *ngIf="managerReviewTotalItems === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>assessment</mat-icon></div>
+          <h3>No Manager Reviews Found</h3>
+          <p>You haven't created any manager reviews yet.</p>
         </div>
 
-        <div class="table-card">
-
-          <!-- Loading -->
-          <div *ngIf="isLoadingReceivedReviews" class="loading-container">
-            <mat-spinner diameter="50"></mat-spinner>
-            <p>Loading received reviews...</p>
-          </div>
-
-          <div *ngIf="!isLoadingReceivedReviews" class="table-container">
-            <div class="table-wrapper">
-              <table mat-table [dataSource]="receivedReviewsDataSource" class="ref-table">
-
-                <!-- Cycle Name -->
-                <ng-container matColumnDef="cycleName">
-                  <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-                  <td mat-cell *matCellDef="let review">
-                    <span class="goal-cell">{{ review.cycleName }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- Manager Name -->
-                <ng-container matColumnDef="employeeName">
-                  <th mat-header-cell *matHeaderCellDef>Manager</th>
-                  <td mat-cell *matCellDef="let review">
-                    <div class="employee-cell">
-                      <span class="employee-name">{{ review.employeeName }}</span>
-                    </div>
-                  </td>
-                </ng-container>
-
-                <!-- KRA Name -->
-                <ng-container matColumnDef="kraName">
-                  <th mat-header-cell *matHeaderCellDef>KRA Name</th>
-                  <td mat-cell *matCellDef="let review">
-                    <mat-chip [class]="getKraChipClass(review.kraName)">
-                      {{ review.kraName }}
-                    </mat-chip>
-                  </td>
-                </ng-container>
-
-                <!-- Goal Name -->
-                <ng-container matColumnDef="goalName">
-                  <th mat-header-cell *matHeaderCellDef>Goal Name</th>
-                  <td mat-cell *matCellDef="let review">
-                    <span class="goal-cell">{{ review.goalName }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- Rating -->
-                <ng-container matColumnDef="rating">
-                  <th mat-header-cell *matHeaderCellDef>Rating</th>
-                  <td mat-cell *matCellDef="let review">
-                    <div class="star-row">
-                      <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                [ngClass]="getStarClass(star, review.rating)">star</mat-icon>
-                    </div>
-                    <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
-                  </td>
-                </ng-container>
-
-                <!-- Actions -->
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let review">
-                    <button mat-icon-button [matMenuTriggerFor]="receivedActionMenu">
-                      <mat-icon>more_vert</mat-icon>
-                    </button>
-                    <mat-menu #receivedActionMenu="matMenu">
-                      <button mat-menu-item (click)="openAllTablesViewDetails(review)">
-                        <mat-icon>visibility</mat-icon>
-                        <span>View Details</span>
-                      </button>
-                    </mat-menu>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="receivedReviewDisplayedColumns"></tr>
-                <tr mat-row *matRowDef="let review; columns: receivedReviewDisplayedColumns;"></tr>
-
-              </table>
-            </div>
-
-            <!-- Empty State -->
-            <div *ngIf="receivedReviewsDataSource.data.length === 0" class="empty-state">
-              <mat-icon>assessment</mat-icon>
-              <h3>No Reviews Received</h3>
-              <p>You haven't received any reviews from your managers yet.</p>
-            </div>
-
-            <!-- Pagination -->
-            <div class="table-pagination" *ngIf="!isLoadingReceivedReviews && receivedReviewTotalItems > 0">
-              <mat-paginator #receivedReviewsPaginator
-                [length]="receivedReviewTotalItems"
-                [pageSize]="receivedReviewPageSize"
-                [pageSizeOptions]="receivedReviewPageSizeOptions"
-                [pageIndex]="receivedReviewPageIndex"
-                (page)="onReceivedReviewsPageChange($event)"
-                showFirstLastButtons>
-              </mat-paginator>
-            </div>
-
-          </div>
+        <div *ngIf="!isLoadingManagerReviews && managerReviewTotalItems > 0">
+          <mat-paginator #managerReviewsPaginator
+            [length]="managerReviewTotalItems"
+            [pageSize]="managerReviewPageSize"
+            [pageSizeOptions]="managerReviewPageSizeOptions"
+            [pageIndex]="managerReviewPageIndex"
+            (page)="onManagerReviewPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
         </div>
-      </section>
-
-                </div>
-              </div>
-            </ng-template>
-            </mat-tab>
-          </ng-container>
-
-          <!-- Self Assessment Tab -->
-          <ng-container *ngIf="hasPermission('SELF_ASSESSMENT_SECTION')">
-            <mat-tab label="Self Assessment">
-              <ng-template matTabContent>
-              <div class="tab-content-wrapper">
-                <div class="content-card">
-
-                  <!-- Your Self Assessment -->
-                  <section class="card-section" *ngIf="hasPermission('YOUR_SELF_ASSESSMENT_TABLE')">
-                    <div class="section-header">
-                      <h2>Your Self Assessment</h2>
-                      <span class="section-meta">Draft Saved 2h ago</span>
-                    </div>
-
-                    <!-- Filters -->
-                    <div class="filters-bar" [formGroup]="managerSelfAssessmentFilterForm">
-                      <div class="search-wrap">
-                        <mat-icon class="search-icon">search</mat-icon>
-                        <input matInput formControlName="search" placeholder="Search goal..." class="search-input" />
-                      </div>
-                      <mat-form-field appearance="outline" class="filter-field">
-                        <mat-select formControlName="cycleId" placeholder="Select Cycle Name">
-                          <mat-option [value]="">All Cycles</mat-option>
-                          <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-                            {{ cycle.cycleName }}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="filter-field">
-                        <mat-select formControlName="kraId" placeholder="Select KRA">
-                          <mat-option [value]="">All KRAs</mat-option>
-                          <mat-option *ngFor="let kra of allKras" [value]="kra.kraId">
-                            {{ kra.title }}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-
-                    <!-- Table -->
-                    <div *ngIf="isLoadingManagerSelfAssessments" class="loading-container">
-                      <mat-spinner diameter="40"></mat-spinner>
-                      <p>Loading self-assessments...</p>
-                    </div>
-
-                    <div *ngIf="!isLoadingManagerSelfAssessments" class="table-wrapper">
-                      <table mat-table [dataSource]="managerSelfAssessmentsDataSource" class="ref-table">
-
-                        <ng-container matColumnDef="goalName">
-                          <th mat-header-cell *matHeaderCellDef>Goal Name</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <span class="name-primary">{{ assessment.goalName || 'N/A' }}</span>
-                            <span class="name-sub" *ngIf="assessment.goalDescription">{{ assessment.goalDescription }}</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="kraName">
-                          <th mat-header-cell *matHeaderCellDef>KRA Name</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <mat-chip [class]="getKraChipClass(assessment.kraName)">{{ assessment.kraName || 'N/A' }}</mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="cycleName">
-                          <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-                          <td mat-cell *matCellDef="let assessment">{{ assessment.cycleName || 'N/A' }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="selfRating">
-                          <th mat-header-cell *matHeaderCellDef>Rating</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <div class="star-row" *ngIf="assessment.selfRating">
-                              <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                        [ngClass]="getStarClass(star, assessment.selfRating)">star</mat-icon>
-                            </div>
-                            <span class="numeric-rating" *ngIf="assessment.selfRating !== null && assessment.selfRating !== undefined">{{ getRatingDisplay(assessment.selfRating) }}</span>
-                            <span *ngIf="!assessment.selfRating" class="no-rating">N/A</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="status">
-                          <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
-                          <td mat-cell *matCellDef="let assessment" class="col-right">
-                            <mat-chip [class]="getStatusChipClass(assessment.status)">
-                              {{ assessment.status | titlecase }}
-                            </mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="actions">
-                          <th mat-header-cell *matHeaderCellDef>Actions</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <button mat-icon-button [matMenuTriggerFor]="managerSelfActionMenu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #managerSelfActionMenu="matMenu">
-                              <button mat-menu-item (click)="openAllTablesViewDetails(assessment)">
-                                <mat-icon>visibility</mat-icon>
-                                <span>View</span>
-                              </button>
-                            </mat-menu>
-                          </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="['goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions']"></tr>
-                        <tr mat-row *matRowDef="let assessment; columns: ['goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions'];"></tr>
-                      </table>
-
-                      <div *ngIf="managerSelfAssessmentsDataSource.data.length === 0" class="empty-state">
-                        <mat-icon>rate_review</mat-icon>
-                        <h3>No Self-Assessments Found</h3>
-                        <p>You haven't submitted any self-assessments yet.</p>
-                      </div>
-
-                      <div class="table-pagination" *ngIf="!isLoadingManagerSelfAssessments && managerSelfAssessmentTotalItems > 0">
-                        <mat-paginator #managerSelfAssessmentPaginator
-                          [length]="managerSelfAssessmentTotalItems"
-                          [pageSize]="managerSelfAssessmentPageSize"
-                          [pageSizeOptions]="managerSelfAssessmentPageSizeOptions"
-                          [pageIndex]="managerSelfAssessmentPageIndex"
-                          (page)="onManagerSelfAssessmentPageChange($event)"
-                          showFirstLastButtons>
-                        </mat-paginator>
-                      </div>
-                    </div>
-                  </section>
-
-                  <!-- Divider -->
-                  <div class="section-divider"></div>
-
-                  <!-- Team's Self Assessments -->
-                  <section class="card-section" *ngIf="hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')">
-                    <div class="section-header">
-                      <h2>Team's Self Assessments</h2>
-                    </div>
-
-                    <!-- Filters -->
-                    <div class="filters-bar" [formGroup]="teamSelfAssessmentFilterForm">
-                      <div class="search-wrap">
-                        <mat-icon class="search-icon">search</mat-icon>
-                        <input matInput formControlName="search" placeholder="Search employee or goal..." class="search-input" />
-                      </div>
-                      <mat-form-field appearance="outline" class="filter-field">
-                        <mat-select formControlName="cycleId" placeholder="Select Cycle Name">
-                          <mat-option [value]="">All Cycles</mat-option>
-                          <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-                            {{ cycle.cycleName }}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="filter-field">
-                        <mat-select formControlName="kraId" placeholder="Select KRA">
-                          <mat-option [value]="">All KRAs</mat-option>
-                          <mat-option *ngFor="let kra of allKras" [value]="kra.kraId">
-                            {{ kra.title }}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-
-                    <div *ngIf="isLoadingTeamSelfAssessments" class="loading-container">
-                      <mat-spinner diameter="40"></mat-spinner>
-                      <p>Loading team self-assessments...</p>
-                    </div>
-
-                    <div *ngIf="!isLoadingTeamSelfAssessments" class="table-wrapper">
-                      <table mat-table [dataSource]="teamSelfAssessmentsDataSource" class="ref-table">
-
-                        <ng-container matColumnDef="employeeName">
-                          <th mat-header-cell *matHeaderCellDef>Employee</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <span class="name-primary">{{ assessment.employeeName || 'N/A' }}</span>
-                            <span class="name-sub" *ngIf="assessment.employeeRole">{{ assessment.employeeRole }}</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="goalName">
-                          <th mat-header-cell *matHeaderCellDef>Goal Name</th>
-                          <td mat-cell *matCellDef="let assessment">{{ assessment.goalName || 'N/A' }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="kraName">
-                          <th mat-header-cell *matHeaderCellDef>KRA Name</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <mat-chip [class]="getKraChipClass(assessment.kraName)">{{ assessment.kraName || 'N/A' }}</mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="cycleName">
-                          <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-                          <td mat-cell *matCellDef="let assessment">{{ assessment.cycleName || 'N/A' }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="selfRating">
-                          <th mat-header-cell *matHeaderCellDef>Rating</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <div class="star-row" *ngIf="assessment.selfRating">
-                              <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                        [ngClass]="getStarClass(star, assessment.selfRating)">star</mat-icon>
-                            </div>
-                            <span class="numeric-rating" *ngIf="assessment.selfRating !== null && assessment.selfRating !== undefined">{{ getRatingDisplay(assessment.selfRating) }}</span>
-                            <span *ngIf="!assessment.selfRating" class="no-rating">N/A</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="status">
-                          <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
-                          <td mat-cell *matCellDef="let assessment" class="col-right">
-                            <mat-chip [class]="getStatusChipClass(assessment.status)">
-                              {{ assessment.status | titlecase }}
-                            </mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="actions">
-                          <th mat-header-cell *matHeaderCellDef>Actions</th>
-                          <td mat-cell *matCellDef="let assessment">
-                            <button mat-icon-button [matMenuTriggerFor]="teamActionMenu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #teamActionMenu="matMenu">
-                              <button mat-menu-item (click)="openAllTablesViewDetails(assessment)">
-                                <mat-icon>visibility</mat-icon>
-                                <span>View</span>
-                              </button>
-                              <button mat-menu-item (click)="openManagerReviewDialog(assessment)" *ngIf="assessment.managerReview">
-                                <mat-icon>rate_review</mat-icon>
-                                <span>Give Appraisal</span>
-                              </button>
-                            </mat-menu>
-                          </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="['employeeName', 'goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions']"></tr>
-                        <tr mat-row *matRowDef="let assessment; columns: ['employeeName', 'goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions'];"></tr>
-                      </table>
-
-                      <div *ngIf="teamSelfAssessmentsDataSource.data.length === 0" class="empty-state-inline">
-                        No team assessments found for the selected criteria.
-                      </div>
-
-                      <div class="table-pagination" *ngIf="!isLoadingTeamSelfAssessments && teamSelfAssessmentTotalItems > 0">
-                        <mat-paginator #teamSelfAssessmentPaginator
-                          [length]="teamSelfAssessmentTotalItems"
-                          [pageSize]="teamSelfAssessmentPageSize"
-                          [pageSizeOptions]="teamSelfAssessmentPageSizeOptions"
-                          [pageIndex]="teamSelfAssessmentPageIndex"
-                          (page)="onTeamSelfAssessmentPageChange($event)"
-                          showFirstLastButtons>
-                        </mat-paginator>
-                      </div>
-                    </div>
-                  </section>
-
-                </div>
-              </div>
-            </ng-template>
-            </mat-tab>
-          </ng-container>
-
-          <!-- HR Review Tab -->
-          <ng-container *ngIf="hasPermission('HR_REVIEWS_SECTION')">
-            <mat-tab label="HR Review">
-              <ng-template matTabContent>
-              <div class="tab-content-wrapper">
-                <div class="content-card">
-
-                  <!-- HR Reviews -->
-                  <section class="card-section" *ngIf="hasPermission('MY_HR_REVIEWS_TABLE')">
-                            <div class="section-header">
-                      <h2>HR Reviews</h2>
-                      <div class="section-header-right">
-                        <span class="section-meta">{{ hrReviewsDataSource.data.length }} Total Reviews</span>
-                        <button *ngIf="hasPermission('CREATE_HR_APPRAISAL_BUTTON')" mat-raised-button color="primary" (click)="openHrReviewDialog()" class="header-action-button">
-                          <mat-icon>rate_review</mat-icon>
-                          <span>Create HR Appraisal</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div *ngIf="isLoadingHrReviews" class="loading-container">
-                                          <mat-spinner diameter="40"></mat-spinner>
-                      <p>Loading HR reviews...</p>
-                    </div>
-
-                    <div *ngIf="!isLoadingHrReviews" class="table-wrapper">
-                                          <table mat-table [dataSource]="hrReviewsDataSource" class="ref-table">
-
-                        <ng-container matColumnDef="cycleName">
-                          <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-                          <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="employeeName">
-                          <th mat-header-cell *matHeaderCellDef>Employee</th>
-                          <td mat-cell *matCellDef="let review">
-                            <span class="name-primary">{{ review.employeeName }}</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="finalRating">
-                          <th mat-header-cell *matHeaderCellDef>Rating</th>
-                          <td mat-cell *matCellDef="let review">
-                            <div class="star-row">
-                              <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                        [ngClass]="getStarClass(star, review.finalRating)">star</mat-icon>
-                            </div>
-                            <span class="numeric-rating" *ngIf="review.finalRating !== null && review.finalRating !== undefined">{{ getRatingDisplay(review.finalRating) }}</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="status">
-                          <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
-                          <td mat-cell *matCellDef="let review" class="col-right">
-                            <mat-chip [class]="getStatusChipClass(review.status)">
-                              {{ review.status | titlecase }}
-                            </mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="actions">
-                          <th mat-header-cell *matHeaderCellDef>Actions</th>
-                          <td mat-cell *matCellDef="let review">
-                            <button mat-icon-button [matMenuTriggerFor]="hrActionMenu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #hrActionMenu="matMenu">
-                              <button mat-menu-item (click)="openAllTablesViewDetails(review)">
-                                <mat-icon>visibility</mat-icon>
-                                <span>View Details</span>
-                              </button>
-                              <button mat-menu-item class="danger-action">
-                                <mat-icon>delete</mat-icon>
-                                <span>Delete</span>
-                              </button>
-                            </mat-menu>
-                          </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="hrReviewDisplayedColumns"></tr>
-                        <tr mat-row *matRowDef="let review; columns: hrReviewDisplayedColumns;"></tr>
-                      </table>
-
-                      <div *ngIf="hrReviewsDataSource.data.length === 0" class="empty-state-inline">
-                        No HR reviews available for this cycle.
-                      </div>
-
-                      <div class="table-pagination" *ngIf="!isLoadingHrReviews && hrReviewTotalItems > 0">
-                        <mat-paginator #hrReviewsPaginator
-                          [length]="hrReviewTotalItems"
-                          [pageSize]="hrReviewPageSize"
-                          [pageSizeOptions]="hrReviewPageSizeOptions"
-                          [pageIndex]="hrReviewPageIndex"
-                          (page)="onHrReviewPageChange($event)"
-                          showFirstLastButtons>
-                        </mat-paginator>
-                      </div>
-                    </div>
-                  </section>
-
-                  <!-- Divider -->
-                  <div class="section-divider"></div>
-
-                  <!-- HR Reviews Given to Me -->
-                  <section class="card-section" *ngIf="hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')">
-                    <div class="section-header">
-                                          <h2>HR Reviews Given to Me</h2>
-                      <span class="section-meta">{{ employeeHrReviewsDataSource.data.length }} Total Reviews</span>
-                    </div>
-
-                    <div *ngIf="isLoadingEmployeeHrReviews" class="loading-container">
-                                          <mat-spinner diameter="40"></mat-spinner>
-                      <p>Loading HR reviews...</p>
-                    </div>
-
-                    <div *ngIf="!isLoadingEmployeeHrReviews" class="table-wrapper">
-                                          <table mat-table [dataSource]="employeeHrReviewsDataSource" class="ref-table">
-
-                        <ng-container matColumnDef="cycleName">
-                          <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
-                          <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="finalRating">
-                          <th mat-header-cell *matHeaderCellDef>Rating</th>
-                          <td mat-cell *matCellDef="let review">
-                            <div class="star-row">
-                              <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                        [ngClass]="getStarClass(star, review.finalRating)">star</mat-icon>
-                            </div>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="hrName">
-                          <th mat-header-cell *matHeaderCellDef>HR Reviewer</th>
-                          <td mat-cell *matCellDef="let review">
-                            <span class="name-primary">{{ review.hrName }}</span>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="status">
-                          <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
-                          <td mat-cell *matCellDef="let review" class="col-right">
-                            <mat-chip [class]="getStatusChipClass(review.status)">
-                              {{ review.status | titlecase }}
-                            </mat-chip>
-                          </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="actions">
-                          <th mat-header-cell *matHeaderCellDef>Actions</th>
-                          <td mat-cell *matCellDef="let review">
-                            <button mat-icon-button [matMenuTriggerFor]="employeeHrActionMenu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #employeeHrActionMenu="matMenu">
-                              <button mat-menu-item (click)="openAllTablesViewDetails(review)">
-                                <mat-icon>visibility</mat-icon>
-                                <span>View Details</span>
-                              </button>
-                            </mat-menu>
-                          </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="employeeHrReviewDisplayedColumns"></tr>
-                        <tr mat-row *matRowDef="let review; columns: employeeHrReviewDisplayedColumns;"></tr>
-                      </table>
-
-                      <div *ngIf="employeeHrReviewsDataSource.data.length === 0" class="empty-state-inline">
-                        You haven't received any HR reviews yet.
-                      </div>
-
-                      <div class="table-pagination" *ngIf="!isLoadingEmployeeHrReviews && employeeHrReviewTotalItems > 0">
-                        <mat-paginator #employeeHrReviewsPaginator
-                          [length]="employeeHrReviewTotalItems"
-                          [pageSize]="employeeHrReviewPageSize"
-                          [pageSizeOptions]="employeeHrReviewPageSizeOptions"
-                          [pageIndex]="employeeHrReviewPageIndex"
-                          (page)="onEmployeeHrReviewPageChange($event)"
-                          showFirstLastButtons>
-                        </mat-paginator>
-                      </div>
-                    </div>
-                  </section>
-
-                </div>
-              </div>
-            </ng-template>
-            </mat-tab>
-          </ng-container>
-
-        </mat-tab-group>
       </div>
     </div>
-  </header>
+
+    <div class="pm-section-divider"></div>
+
+    <!-- All Manager Reviews (HR only) -->
+    <div class="ts-card" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">All Manager Reviews
+            <span class="pm-count-badge">{{ allManagerReviewTotalItems }}</span>
+          </h3>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingAllManagerReviews" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading manager reviews...</p>
+      </div>
+
+      <div *ngIf="!isLoadingAllManagerReviews" class="pm-table-wrap">
+        <table mat-table [dataSource]="allManagerReviewsDataSource" class="ref-table" style="width:100%;">
+
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="name-primary">{{ review.employeeName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="managerName">
+            <th mat-header-cell *matHeaderCellDef>Manager</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="name-primary">{{ review.managerName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="kraName">
+            <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="pm-kra-badge">{{ review.kraName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="goalName">
+            <th mat-header-cell *matHeaderCellDef>Goal Name</th>
+            <td mat-cell *matCellDef="let review">{{ review.goalName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let review">
+              <div class="pm-star-rating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, review.rating)">star</mat-icon>
+              </div>
+              <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let review">
+              <mat-chip [class]="getStatusChipClass(review.status)">{{ review.status | titlecase }}</mat-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let review">
+              <button mat-icon-button [matMenuTriggerFor]="allManagerActionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #allManagerActionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(review)">
+                  <mat-icon>visibility</mat-icon><span>View Details</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="allManagerReviewDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: allManagerReviewDisplayedColumns;"></tr>
+        </table>
+
+        <div *ngIf="allManagerReviewTotalItems === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>assessment</mat-icon></div>
+          <h3>No Manager Reviews</h3>
+          <p>No manager reviews found.</p>
+        </div>
+
+        <div *ngIf="!isLoadingAllManagerReviews && allManagerReviewTotalItems > 0">
+          <mat-paginator #allManagerReviewsPaginator
+            [length]="allManagerReviewTotalItems"
+            [pageSize]="allManagerReviewPageSize"
+            [pageSizeOptions]="allManagerReviewPageSizeOptions"
+            [pageIndex]="allManagerReviewPageIndex"
+            (page)="onAllManagerReviewPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+
+    <div class="pm-section-divider"></div>
+
+    <!-- Reviews Received from Managers -->
+    <div class="ts-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">Reviews Received from Managers
+            <span class="pm-count-badge">{{ receivedReviews.length }}</span>
+          </h3>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingReceivedReviews" class="pm-loading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading received reviews...</p>
+      </div>
+
+      <div *ngIf="!isLoadingReceivedReviews" class="pm-table-wrap">
+        <table mat-table [dataSource]="receivedReviewsDataSource" class="ref-table" style="width:100%;">
+
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="goal-cell">{{ review.cycleName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Manager</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="name-primary">{{ review.employeeName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="kraName">
+            <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="pm-kra-badge">{{ review.kraName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="goalName">
+            <th mat-header-cell *matHeaderCellDef>Goal Name</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="goal-cell">{{ review.goalName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="rating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let review">
+              <div class="pm-star-rating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, +review.rating)">star</mat-icon>
+              </div>
+              <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let review">
+              <button mat-icon-button [matMenuTriggerFor]="receivedActionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #receivedActionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(review)">
+                  <mat-icon>visibility</mat-icon><span>View Details</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="receivedReviewDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let review; columns: receivedReviewDisplayedColumns;"></tr>
+        </table>
+
+        <div *ngIf="receivedReviewsDataSource.data.length === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>assessment</mat-icon></div>
+          <h3>No Reviews Received</h3>
+          <p>You haven't received any reviews from your managers yet.</p>
+        </div>
+
+        <div *ngIf="!isLoadingReceivedReviews && receivedReviewTotalItems > 0">
+          <mat-paginator #receivedReviewsPaginator
+            [length]="receivedReviewTotalItems"
+            [pageSize]="receivedReviewPageSize"
+            [pageSizeOptions]="receivedReviewPageSizeOptions"
+            [pageIndex]="receivedReviewPageIndex"
+            (page)="onReceivedReviewsPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ TAB 1 — SELF ASSESSMENT ══════════════════════════════════════ -->
+  <div *ngIf="selectedTab === 1 && hasPermission('SELF_ASSESSMENT_SECTION')" class="appraisal-tab-body">
+
+    <!-- Your Self Assessment -->
+    <div class="ts-card" *ngIf="hasPermission('YOUR_SELF_ASSESSMENT_TABLE')" style="margin-bottom:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">Your Self Assessment</h3>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-section" [formGroup]="managerSelfAssessmentFilterForm">
+        <div class="filters-row">
+          <div class="ts-search-wrapper">
+            <mat-icon class="ts-search-icon">search</mat-icon>
+            <input class="ts-search-input" formControlName="search" placeholder="Search goal..." />
+          </div>
+          <div class="filter-select-wrap">
+            <mat-icon class="filter-select-icon">schedule</mat-icon>
+            <select class="filter-select" formControlName="cycleId">
+              <option value="">All Cycles</option>
+              <option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">{{ cycle.cycleName }}</option>
+            </select>
+          </div>
+          <div class="filter-select-wrap">
+            <mat-icon class="filter-select-icon">category</mat-icon>
+            <select class="filter-select" formControlName="kraId">
+              <option value="">All KRAs</option>
+              <option *ngFor="let kra of allKras" [value]="kra.kraId">{{ kra.title }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingManagerSelfAssessments" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading self-assessments...</p>
+      </div>
+
+      <div *ngIf="!isLoadingManagerSelfAssessments" class="pm-table-wrap">
+        <table mat-table [dataSource]="managerSelfAssessmentsDataSource" class="ref-table" style="width:100%;">
+          <ng-container matColumnDef="goalName">
+            <th mat-header-cell *matHeaderCellDef>Goal Name</th>
+            <td mat-cell *matCellDef="let assessment">
+              <span class="name-primary">{{ assessment.goalName || 'N/A' }}</span>
+              <span class="name-sub" *ngIf="assessment.goalDescription">{{ assessment.goalDescription }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="kraName">
+            <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+            <td mat-cell *matCellDef="let assessment">
+              <span class="pm-kra-badge">{{ assessment.kraName || 'N/A' }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let assessment">{{ assessment.cycleName || 'N/A' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="selfRating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let assessment">
+              <div class="pm-star-rating" *ngIf="assessment.selfRating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, assessment.selfRating)">star</mat-icon>
+              </div>
+              <span class="numeric-rating" *ngIf="assessment.selfRating !== null && assessment.selfRating !== undefined">{{ getRatingDisplay(assessment.selfRating) }}</span>
+              <span *ngIf="!assessment.selfRating" class="no-rating">N/A</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let assessment">
+              <mat-chip [class]="getStatusChipClass(assessment.status)">{{ assessment.status | titlecase }}</mat-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let assessment">
+              <button mat-icon-button [matMenuTriggerFor]="managerSelfActionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #managerSelfActionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(assessment)">
+                  <mat-icon>visibility</mat-icon><span>View</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions']"></tr>
+          <tr mat-row *matRowDef="let assessment; columns: ['goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions'];"></tr>
+        </table>
+
+        <div *ngIf="managerSelfAssessmentsDataSource.data.length === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>rate_review</mat-icon></div>
+          <h3>No Self-Assessments Found</h3>
+          <p>You haven't submitted any self-assessments yet.</p>
+        </div>
+
+        <div *ngIf="!isLoadingManagerSelfAssessments && managerSelfAssessmentTotalItems > 0">
+          <mat-paginator #managerSelfAssessmentPaginator
+            [length]="managerSelfAssessmentTotalItems"
+            [pageSize]="managerSelfAssessmentPageSize"
+            [pageSizeOptions]="managerSelfAssessmentPageSizeOptions"
+            [pageIndex]="managerSelfAssessmentPageIndex"
+            (page)="onManagerSelfAssessmentPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+
+    <div class="pm-section-divider"></div>
+
+    <!-- Team's Self Assessments -->
+    <div class="ts-card" *ngIf="hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">Team's Self Assessments</h3>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-section" [formGroup]="teamSelfAssessmentFilterForm">
+        <div class="filters-row">
+          <div class="ts-search-wrapper">
+            <mat-icon class="ts-search-icon">search</mat-icon>
+            <input class="ts-search-input" formControlName="search" placeholder="Search employee or goal..." />
+          </div>
+          <div class="filter-select-wrap">
+            <mat-icon class="filter-select-icon">schedule</mat-icon>
+            <select class="filter-select" formControlName="cycleId">
+              <option value="">All Cycles</option>
+              <option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">{{ cycle.cycleName }}</option>
+            </select>
+          </div>
+          <div class="filter-select-wrap">
+            <mat-icon class="filter-select-icon">category</mat-icon>
+            <select class="filter-select" formControlName="kraId">
+              <option value="">All KRAs</option>
+              <option *ngFor="let kra of allKras" [value]="kra.kraId">{{ kra.title }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingTeamSelfAssessments" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading team self-assessments...</p>
+      </div>
+
+      <div *ngIf="!isLoadingTeamSelfAssessments" class="pm-table-wrap">
+        <table mat-table [dataSource]="teamSelfAssessmentsDataSource" class="ref-table" style="width:100%;">
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let assessment">
+              <span class="name-primary">{{ assessment.employeeName || 'N/A' }}</span>
+              <span class="name-sub" *ngIf="assessment.employeeRole">{{ assessment.employeeRole }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="goalName">
+            <th mat-header-cell *matHeaderCellDef>Goal Name</th>
+            <td mat-cell *matCellDef="let assessment">{{ assessment.goalName || 'N/A' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="kraName">
+            <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+            <td mat-cell *matCellDef="let assessment">
+              <span class="pm-kra-badge">{{ assessment.kraName || 'N/A' }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let assessment">{{ assessment.cycleName || 'N/A' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="selfRating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let assessment">
+              <div class="pm-star-rating" *ngIf="assessment.selfRating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, assessment.selfRating)">star</mat-icon>
+              </div>
+              <span class="numeric-rating" *ngIf="assessment.selfRating !== null && assessment.selfRating !== undefined">{{ getRatingDisplay(assessment.selfRating) }}</span>
+              <span *ngIf="!assessment.selfRating" class="no-rating">N/A</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let assessment">
+              <mat-chip [class]="getStatusChipClass(assessment.status)">{{ assessment.status | titlecase }}</mat-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let assessment">
+              <button mat-icon-button [matMenuTriggerFor]="teamActionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #teamActionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(assessment)">
+                  <mat-icon>visibility</mat-icon><span>View</span>
+                </button>
+                <button mat-menu-item (click)="openManagerReviewDialog(assessment)" *ngIf="assessment.managerReview">
+                  <mat-icon>rate_review</mat-icon><span>Give Appraisal</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['employeeName', 'goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions']"></tr>
+          <tr mat-row *matRowDef="let assessment; columns: ['employeeName', 'goalName', 'kraName', 'cycleName', 'selfRating', 'status', 'actions'];"></tr>
+        </table>
+
+        <div *ngIf="teamSelfAssessmentsDataSource.data.length === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>group</mat-icon></div>
+          <h3>No Team Assessments Found</h3>
+          <p>No team assessments found for the selected criteria.</p>
+        </div>
+
+        <div *ngIf="!isLoadingTeamSelfAssessments && teamSelfAssessmentTotalItems > 0">
+          <mat-paginator #teamSelfAssessmentPaginator
+            [length]="teamSelfAssessmentTotalItems"
+            [pageSize]="teamSelfAssessmentPageSize"
+            [pageSizeOptions]="teamSelfAssessmentPageSizeOptions"
+            [pageIndex]="teamSelfAssessmentPageIndex"
+            (page)="onTeamSelfAssessmentPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ TAB 2 — HR REVIEW ════════════════════════════════════════════ -->
+  <div *ngIf="selectedTab === 2 && hasPermission('HR_REVIEWS_SECTION')" class="appraisal-tab-body">
+
+    <!-- HR Reviews -->
+    <div class="ts-card" *ngIf="hasPermission('MY_HR_REVIEWS_TABLE')" style="margin-bottom:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">HR Reviews
+            <span class="pm-count-badge">{{ hrReviewsDataSource.data.length }}</span>
+          </h3>
+        </div>
+        <button *ngIf="hasPermission('CREATE_HR_APPRAISAL_BUTTON')" class="btn-submit" (click)="openHrReviewDialog()">
+          <mat-icon>rate_review</mat-icon> Create HR Appraisal
+        </button>
+      </div>
+
+      <div *ngIf="isLoadingHrReviews" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading HR reviews...</p>
+      </div>
+
+      <div *ngIf="!isLoadingHrReviews" class="pm-table-wrap">
+        <table mat-table [dataSource]="hrReviewsDataSource" class="ref-table" style="width:100%;">
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="employeeName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="name-primary">{{ review.employeeName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="finalRating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let review">
+              <div class="pm-star-rating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, review.finalRating)">star</mat-icon>
+              </div>
+              <span class="numeric-rating" *ngIf="review.finalRating !== null && review.finalRating !== undefined">{{ getRatingDisplay(review.finalRating) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let review">
+              <mat-chip [class]="getStatusChipClass(review.status)">{{ review.status | titlecase }}</mat-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let review">
+              <button mat-icon-button [matMenuTriggerFor]="hrActionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #hrActionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(review)">
+                  <mat-icon>visibility</mat-icon><span>View Details</span>
+                </button>
+                <hr style="margin:4px 0;border:none;border-top:1px solid #f0f1f5;">
+                <button mat-menu-item class="danger-action">
+                  <mat-icon>delete</mat-icon><span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="hrReviewDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let review; columns: hrReviewDisplayedColumns;"></tr>
+        </table>
+
+        <div *ngIf="hrReviewsDataSource.data.length === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>verified_user</mat-icon></div>
+          <h3>No HR Reviews</h3>
+          <p>No HR reviews available for this cycle.</p>
+        </div>
+
+        <div *ngIf="!isLoadingHrReviews && hrReviewTotalItems > 0">
+          <mat-paginator #hrReviewsPaginator
+            [length]="hrReviewTotalItems"
+            [pageSize]="hrReviewPageSize"
+            [pageSizeOptions]="hrReviewPageSizeOptions"
+            [pageIndex]="hrReviewPageIndex"
+            (page)="onHrReviewPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+
+    <div class="pm-section-divider"></div>
+
+    <!-- HR Reviews Given to Me -->
+    <div class="ts-card" *ngIf="hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">HR Reviews Given to Me
+            <span class="pm-count-badge">{{ employeeHrReviewsDataSource.data.length }}</span>
+          </h3>
+        </div>
+      </div>
+
+      <div *ngIf="isLoadingEmployeeHrReviews" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading HR reviews...</p>
+      </div>
+
+      <div *ngIf="!isLoadingEmployeeHrReviews" class="pm-table-wrap">
+        <table mat-table [dataSource]="employeeHrReviewsDataSource" class="ref-table" style="width:100%;">
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let review">{{ review.cycleName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="finalRating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let review">
+              <div class="pm-star-rating">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" [ngClass]="getStarClass(star, review.finalRating)">star</mat-icon>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="hrName">
+            <th mat-header-cell *matHeaderCellDef>HR Reviewer</th>
+            <td mat-cell *matCellDef="let review">
+              <span class="name-primary">{{ review.hrName }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let review">
+              <mat-chip [class]="getStatusChipClass(review.status)">{{ review.status | titlecase }}</mat-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let review">
+              <button mat-icon-button [matMenuTriggerFor]="employeeHrActionMenu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #employeeHrActionMenu="matMenu">
+                <button mat-menu-item (click)="openAllTablesViewDetails(review)">
+                  <mat-icon>visibility</mat-icon><span>View Details</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="employeeHrReviewDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let review; columns: employeeHrReviewDisplayedColumns;"></tr>
+        </table>
+
+        <div *ngIf="employeeHrReviewsDataSource.data.length === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>verified_user</mat-icon></div>
+          <h3>No HR Reviews Received</h3>
+          <p>You haven't received any HR reviews yet.</p>
+        </div>
+
+        <div *ngIf="!isLoadingEmployeeHrReviews && employeeHrReviewTotalItems > 0">
+          <mat-paginator #employeeHrReviewsPaginator
+            [length]="employeeHrReviewTotalItems"
+            [pageSize]="employeeHrReviewPageSize"
+            [pageSizeOptions]="employeeHrReviewPageSizeOptions"
+            [pageIndex]="employeeHrReviewPageIndex"
+            (page)="onEmployeeHrReviewPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>

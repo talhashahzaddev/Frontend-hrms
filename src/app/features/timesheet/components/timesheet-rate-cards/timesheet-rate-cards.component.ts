@@ -22,31 +22,31 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
       } @else {
         <div class="ts-card ts-table-card">
           <p-table [value]="rateCards()" [tableStyle]="{'width': '100%'}" [paginator]="true" [rows]="20"
-                   styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines">
+                   styleClass="ts-rate-cards-table">
             <ng-template pTemplate="header">
               <tr>
                 <th>Employee</th>
                 <th>Code</th>
-                <th style="text-align: right;">Standard</th>
-                <th style="text-align: right;">Overtime</th>
-                <th style="text-align: right;">Weekend</th>
-                <th style="text-align: right;">Holiday</th>
+                <th class="ts-col-num">Standard</th>
+                <th class="ts-col-num">Overtime</th>
+                <th class="ts-col-num">Weekend</th>
+                <th class="ts-col-num">Holiday</th>
                 <th>Effective</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-r>
               <tr>
-                <td>{{ r.employeeName }}</td>
-                <td>{{ r.employeeCode }}</td>
-                <td style="text-align: right;">{{ r.standardRate | currency }}</td>
-                <td style="text-align: right;">{{ r.overtimeRate | currency }}</td>
-                <td style="text-align: right;">{{ r.weekendRate | currency }}</td>
-                <td style="text-align: right;">{{ r.holidayRate | currency }}</td>
-                <td>{{ r.effectiveFrom | date:'MMM d, y' }}</td>
+                <td class="ts-cell-name">{{ r.employeeName }}</td>
+                <td class="ts-cell-code">{{ r.employeeCode }}</td>
+                <td class="ts-cell-rate">{{ r.standardRate | currency }}</td>
+                <td class="ts-cell-rate">{{ r.overtimeRate | currency }}</td>
+                <td class="ts-cell-rate">{{ r.weekendRate | currency }}</td>
+                <td class="ts-cell-rate">{{ r.holidayRate | currency }}</td>
+                <td class="ts-cell-date">{{ r.effectiveFrom | date:'MMM d, y' }}</td>
               </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
-              <tr><td colspan="7" style="text-align: center; padding: var(--ts-space-8);">No rate cards found</td></tr>
+              <tr class="ts-empty-row"><td colspan="7">No rate cards found</td></tr>
             </ng-template>
           </p-table>
         </div>

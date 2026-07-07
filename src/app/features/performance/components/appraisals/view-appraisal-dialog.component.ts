@@ -27,69 +27,112 @@ export interface ViewAppraisalDialogData {
     MatChipsModule
   ],
   template: `
-    <div class="dialog-header">
-      <h2 mat-dialog-title>
-        <mat-icon>visibility</mat-icon>
-        Appraisal Details
-      </h2>
-      <button mat-icon-button mat-dialog-close class="close-button">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <div class="header-left">
+          <div class="header-icon">
+            <mat-icon>visibility</mat-icon>
+          </div>
+          <div>
+            <h2 class="header-title">Appraisal Details</h2>
+            <p class="header-subtitle">View full appraisal information</p>
+          </div>
+        </div>
+        <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
 
-    <mat-dialog-content class="dialog-content">
-      <div class="appraisal-details">
-        <div class="detail-section mb-4">
-          <h3 class="text-xl font-semibold mb-2">Appraisal Information</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <strong>Cycle:</strong> {{ data.appraisal.cycleName }}
+      <mat-dialog-content class="dialog-body">
+        
+        <div class="assign-section">
+          <div class="assign-section-header">
+            <mat-icon>info</mat-icon>
+            <span>Appraisal Information</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="assign-dates-grid">
+              <div class="assign-field-group">
+                <label class="field-label">Cycle</label>
+                <div class="readonly-value">{{ data.appraisal.cycleName }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Employee</label>
+                <div class="readonly-value">{{ data.appraisal.employeeName }}</div>
+              </div>
             </div>
-            <div>
-              <strong>Employee:</strong> {{ data.appraisal.employeeName }}
+            
+            <div class="assign-dates-grid">
+              <div class="assign-field-group">
+                <label class="field-label">Review Type</label>
+                <div class="readonly-value">{{ data.appraisal.reviewType | titlecase }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Reviewer</label>
+                <div class="readonly-value">{{ data.appraisal.reviewerName || 'N/A' }}</div>
+              </div>
             </div>
-            <div>
-              <strong>Review Type:</strong> {{ data.appraisal.reviewType | titlecase }}
-            </div>
-            <div>
-              <strong>Reviewer:</strong> {{ data.appraisal.reviewerName || 'N/A' }}
-            </div>
-            <div>
-              <strong>Overall Rating:</strong> 
-              <span *ngIf="data.appraisal.overallRating">{{ data.appraisal.overallRating | number:'1.1-1' }}</span>
-              <span *ngIf="!data.appraisal.overallRating">N/A</span>
-            </div>
-            <div>
-              <strong>Status:</strong>
-              <mat-chip [class]="getStatusChipClass(data.appraisal.status)">
-                {{ data.appraisal.status | titlecase }}
-              </mat-chip>
+            
+            <div class="assign-dates-grid">
+              <div class="assign-field-group">
+                <label class="field-label">Overall Rating</label>
+                <div class="readonly-value">
+                  <span *ngIf="data.appraisal.overallRating">{{ data.appraisal.overallRating | number:'1.1-1' }} / 5.0</span>
+                  <span *ngIf="!data.appraisal.overallRating">N/A</span>
+                </div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Status</label>
+                <div>
+                  <mat-chip [class]="getStatusChipClass(data.appraisal.status)">
+                    {{ data.appraisal.status | titlecase }}
+                  </mat-chip>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="detail-section mb-4" *ngIf="data.appraisal.feedback">
-          <h3 class="text-lg font-semibold mb-2">Feedback</h3>
-          <p>{{ data.appraisal.feedback }}</p>
+        <div class="assign-section" *ngIf="data.appraisal.feedback">
+          <div class="assign-section-header">
+            <mat-icon>chat</mat-icon>
+            <span>Feedback</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="readonly-value">{{ data.appraisal.feedback }}</div>
+          </div>
         </div>
 
-        <div class="detail-section mb-4" *ngIf="data.appraisal.improvementAreas">
-          <h3 class="text-lg font-semibold mb-2">Improvement Areas</h3>
-          <p>{{ data.appraisal.improvementAreas }}</p>
+        <div class="assign-section" *ngIf="data.appraisal.improvementAreas">
+          <div class="assign-section-header">
+            <mat-icon>trending_up</mat-icon>
+            <span>Improvement Areas</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="readonly-value">{{ data.appraisal.improvementAreas }}</div>
+          </div>
         </div>
 
-        <div class="detail-section mb-4" *ngIf="data.appraisal.developmentPlan">
-          <h3 class="text-lg font-semibold mb-2">Development Plan</h3>
-          <p>{{ data.appraisal.developmentPlan }}</p>
+        <div class="assign-section" *ngIf="data.appraisal.developmentPlan">
+          <div class="assign-section-header">
+            <mat-icon>school</mat-icon>
+            <span>Development Plan</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="readonly-value">{{ data.appraisal.developmentPlan }}</div>
+          </div>
         </div>
 
         <!-- KRA Ratings Section -->
-        <div class="detail-section mb-4" *ngIf="hasKraRatings(data.appraisal)">
-          <h3 class="text-lg font-semibold mb-2">KRA Ratings</h3>
-          <div class="kra-ratings-list">
-            <div *ngFor="let kraRating of getKraRatingsList(data.appraisal.kraRatings)" class="kra-rating-item">
-              <div class="kra-rating-header">
-                <strong>{{ kraRating.kraName || 'KRA' }}</strong>
+        <div class="assign-section" *ngIf="hasKraRatings(data.appraisal)">
+          <div class="assign-section-header">
+            <mat-icon>track_changes</mat-icon>
+            <span>KRA Ratings</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="rating-grid">
+              <div *ngFor="let kraRating of getKraRatingsList(data.appraisal.kraRatings)" class="rating-item">
+                <span class="rating-name">{{ kraRating.kraName || 'KRA' }}</span>
                 <span class="rating-badge">{{ kraRating.rating }}/5</span>
               </div>
             </div>
@@ -97,236 +140,109 @@ export interface ViewAppraisalDialogData {
         </div>
 
         <!-- Skill Ratings Section -->
-        <div class="detail-section mb-4" *ngIf="hasSkillRatings(data.appraisal)">
-          <h3 class="text-lg font-semibold mb-2">Skill Ratings</h3>
-          <div class="skill-ratings-list">
-            <div *ngFor="let skillRating of getSkillRatingsList(data.appraisal.skillRatings)" class="skill-rating-item">
-              <div class="skill-rating-header">
-                <strong>{{ skillRating.skillName || 'Skill' }}</strong>
+        <div class="assign-section" *ngIf="hasSkillRatings(data.appraisal)">
+          <div class="assign-section-header">
+            <mat-icon>psychology</mat-icon>
+            <span>Skill Ratings</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="rating-grid">
+              <div *ngFor="let skillRating of getSkillRatingsList(data.appraisal.skillRatings)" class="rating-item">
+                <span class="rating-name">{{ skillRating.skillName || 'Skill' }}</span>
                 <span class="rating-badge">{{ skillRating.rating }}/5</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="detail-section mb-4" *ngIf="data.appraisal.createdAt || data.appraisal.submittedAt || data.appraisal.reviewedAt">
-          <h3 class="text-lg font-semibold mb-2">Timeline</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div *ngIf="data.appraisal.createdAt">
-              <strong>Created:</strong> {{ data.appraisal.createdAt | localizedDate:'medium' }}
-            </div>
-            <div>
-              <strong>Submitted:</strong> 
-              <span *ngIf="data.appraisal.submittedAt">{{ data.appraisal.submittedAt | localizedDate:'medium' }}</span>
-              <span *ngIf="!data.appraisal.submittedAt">Not submitted</span>
-            </div>
-            <div>
-              <strong>Reviewed:</strong>
-              <span *ngIf="data.appraisal.reviewedAt">{{ data.appraisal.reviewedAt | localizedDate:'medium' }}</span>
-              <span *ngIf="!data.appraisal.reviewedAt">Not reviewed</span>
+        <div class="assign-section" *ngIf="data.appraisal.createdAt || data.appraisal.submittedAt || data.appraisal.reviewedAt">
+          <div class="assign-section-header">
+            <mat-icon>schedule</mat-icon>
+            <span>Timeline</span>
+          </div>
+          <div class="assign-section-body">
+            <div class="assign-dates-grid">
+              <div class="assign-field-group" *ngIf="data.appraisal.createdAt">
+                <label class="field-label">Created</label>
+                <div class="readonly-value">{{ data.appraisal.createdAt | localizedDate:'medium' }}</div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Submitted</label>
+                <div class="readonly-value">
+                  <span *ngIf="data.appraisal.submittedAt">{{ data.appraisal.submittedAt | localizedDate:'medium' }}</span>
+                  <span *ngIf="!data.appraisal.submittedAt">Not submitted</span>
+                </div>
+              </div>
+              <div class="assign-field-group">
+                <label class="field-label">Reviewed</label>
+                <div class="readonly-value">
+                  <span *ngIf="data.appraisal.reviewedAt">{{ data.appraisal.reviewedAt | localizedDate:'medium' }}</span>
+                  <span *ngIf="!data.appraisal.reviewedAt">Not reviewed</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </mat-dialog-content>
 
-    <div class="dialog-actions">
-      <button mat-stroked-button mat-dialog-close>
-        <mat-icon>close</mat-icon>
-        Close
-      </button>
+      </mat-dialog-content>
+
+      <div class="dialog-footer">
+        <button mat-stroked-button class="btn-cancel" mat-dialog-close>
+          <mat-icon>close</mat-icon> Close
+        </button>
+      </div>
     </div>
   `,
   styles: [`
-    ::ng-deep .mat-mdc-dialog-container {
-      border-radius: 16px !important;
-      padding: 0 !important;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-      max-width: 900px !important;
-      width: 90vw !important;
+    @use '../../styles/performance-shared';
+
+    .readonly-value {
+      font-size: 14px;
+      color: #1e293b;
+      font-weight: 500;
+      padding: 10px 14px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      min-height: 20px;
     }
 
-    .dialog-header {
+    .rating-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .rating-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 28px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+
+    .rating-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .rating-badge {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       color: white;
-
-      h2 {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 0;
-        font-size: 22px;
-        font-weight: 700;
-        color: white;
-
-        mat-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-          color: white;
-        }
-      }
-
-      .close-button {
-        color: white;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: rotate(90deg);
-        }
-      }
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
-    .dialog-content {
-      padding: 28px !important;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    .appraisal-details {
-      .detail-section {
-        margin-bottom: 24px;
-
-        h3 {
-          font-size: 1.125rem;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0 0 16px 0;
-          padding-bottom: 12px;
-          border-bottom: 2px solid #e5e7eb;
-        }
-
-        .grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-
-          div {
-            strong {
-              color: #374151;
-              font-weight: 600;
-              margin-right: 8px;
-            }
-          }
-        }
-      }
-
-      .kra-ratings-list,
-      .skill-ratings-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .kra-rating-item,
-      .skill-rating-item {
-        padding: 12px;
-        background: #f9fafb;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-      }
-
-      .kra-rating-header,
-      .skill-rating-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        strong {
-          color: #1f2937;
-          font-weight: 600;
-        }
-
-        .rating-badge {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 4px 12px;
-          border-radius: 12px;
-          font-weight: 600;
-          font-size: 0.875rem;
-        }
-      }
-    }
-
-    .dialog-actions {
-      padding: 20px 28px !important;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-
-      button {
-        height: 44px;
-        padding: 0 28px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        text-transform: none !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        &[mat-stroked-button] {
-          background: white !important;
-          color: #6b7280 !important;
-          border: 2px solid #e5e7eb !important;
-
-          &:hover:not([disabled]) {
-            background: #f9fafb !important;
-            border-color: #cbd5e1 !important;
-            color: #374151 !important;
-          }
-        }
-      }
-    }
-
-    .status-completed {
-      background-color: #10b981 !important;
-      color: white !important;
-    }
-
-    .status-submitted {
-      background-color: #3b82f6 !important;
-      color: white !important;
-    }
-
-    .status-under-review {
-      background-color: #f59e0b !important;
-      color: white !important;
-    }
-
-    .status-draft {
-      background-color: #6b7280 !important;
-      color: white !important;
-    }
-
-    .status-rejected {
-      background-color: #ef4444 !important;
-      color: white !important;
-    }
-
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr !important;
-      }
-
-      ::ng-deep .mat-mdc-dialog-container {
-        width: 95vw !important;
-        max-width: 95vw !important;
-      }
-
-      .dialog-content {
-        max-height: 80vh;
-      }
-    }
+    .status-completed { background-color: #10b981 !important; color: white !important; }
+    .status-submitted { background-color: #3b82f6 !important; color: white !important; }
+    .status-under-review { background-color: #f59e0b !important; color: white !important; }
+    .status-draft { background-color: #64748b !important; color: white !important; }
+    .status-rejected { background-color: #ef4444 !important; color: white !important; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

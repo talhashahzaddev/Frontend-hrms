@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import {
   Component,
   OnInit,
@@ -49,6 +50,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     MatFormFieldModule,
     MatSelectModule,

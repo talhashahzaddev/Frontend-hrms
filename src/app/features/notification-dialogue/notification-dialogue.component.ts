@@ -195,7 +195,9 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   private openRejectDialog(leaveRequest: LeaveRequest, notification: ServerNotification): void {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName: leaveRequest.employeeName || 'Employee',
         leaveTypeName: leaveRequest.leaveTypeName || 'Leave',

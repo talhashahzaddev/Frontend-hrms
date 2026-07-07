@@ -1,12 +1,4 @@
-.confirmation-page {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-}
+@use '../../performance/styles/performance-shared' as pm;
 
 .confirmation-container {
   max-width: 520px;
@@ -14,7 +6,6 @@
 }
 
 .confirmation-card {
-  border-radius: 20px;
   padding: 48px 36px;
   text-align: center;
   overflow: hidden;
@@ -130,5 +121,39 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &.btn-primary {
+      background-color: #3b82f6;
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.1);
+
+      &:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3), 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+      }
+    }
+
+    &.btn-secondary {
+      background-color: #f8fafc;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+
+      &:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-color: #94a3b8;
+      }
+    }
   }
 }

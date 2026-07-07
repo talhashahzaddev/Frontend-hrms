@@ -1,125 +1,96 @@
-<!-- Performance Reports Container -->
-<div class="performance-reports-container">
-  
-  <!-- Header Section -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
-        <mat-icon>assessment</mat-icon>
-        Performance Reports
-      </h1>
-      <p class="page-subtitle">View comprehensive performance analytics and summaries</p>
+<div class="ts-page-layout">
+
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <mat-icon style="color:white;font-size:22px;width:22px;height:22px;">assessment</mat-icon>
+      </div>
+      <div>
+        <h1 style="margin:0 0 2px;font-size:1.375rem;font-weight:700;color:#0f172a;letter-spacing:-0.3px;">Performance Reports</h1>
+        <p style="margin:0;font-size:0.8125rem;color:#64748b;">View comprehensive performance analytics and summaries</p>
+      </div>
     </div>
   </div>
 
-  <!-- Cycle Selection Card -->
-  <mat-card class="selection-card">
-    <div class="selection-header">
-      <h3>
-        <mat-icon>schedule</mat-icon>
-        Select Appraisal Cycle
-      </h3>
-    </div>
-    <div class="selection-content">
-      <form [formGroup]="reportForm" class="report-form">
-        <mat-form-field appearance="outline" class="cycle-select-field">
-          <mat-label>Appraisal Cycle</mat-label>
-          <mat-icon matPrefix>schedule</mat-icon>
-          <mat-select formControlName="cycleId">
-            <mat-option [value]="">All Cycles</mat-option>
-            <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-              {{ cycle.cycleName }} ({{ cycle.startDate | localizedDate:'shortDate' }} - {{ cycle.endDate | localizedDate:'shortDate' }})
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-    </div>
-  </mat-card>
-
-  <!-- Empty State -->
-  <div *ngIf="!reportForm.get('cycleId')?.value" class="empty-state">
-    <div class="empty-state-content">
-      <mat-icon>assessment</mat-icon>
-      <h3>Select an Appraisal Cycle</h3>
-      <p>Choose an appraisal cycle from the dropdown above to view performance reports and analytics</p>
+  <!-- ═══ CYCLE SELECTION (FILTERS) ═════════════════════════════════════ -->
+  <div class="filters-section" [formGroup]="reportForm" style="margin-bottom:1.5rem;">
+    <div class="filters-row">
+      <div class="filter-select-wrap" style="width: 340px;">
+        <mat-icon class="filter-select-icon">schedule</mat-icon>
+        <select class="filter-select" formControlName="cycleId" style="width: 100%;">
+          <option value="">Select Appraisal Cycle...</option>
+          <option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+            {{ cycle.cycleName }} ({{ cycle.startDate | localizedDate:'shortDate' }} - {{ cycle.endDate | localizedDate:'shortDate' }})
+          </option>
+        </select>
+      </div>
     </div>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-state">
+  <div *ngIf="isLoading" class="pm-loading" style="padding:4rem;">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Loading performance reports...</p>
   </div>
 
-  <!-- Summary Section -->
-  <div *ngIf="summary && reportForm.get('cycleId')?.value && !isLoading" class="summary-section">
+  <!-- Empty State (No Cycle Selected) -->
+  <div *ngIf="!reportForm.get('cycleId')?.value && !isLoading" class="pm-empty-state">
+    <div class="pm-empty-icon"><mat-icon>assessment</mat-icon></div>
+    <h3>Select an Appraisal Cycle</h3>
+    <p>Choose an appraisal cycle from the dropdown above to view performance reports and analytics</p>
+  </div>
+
+  <!-- Main Content (Reports) -->
+  <div *ngIf="summary && reportForm.get('cycleId')?.value && !isLoading">
     
-    <!-- Summary Cards Grid -->
-    <div class="stats-grid">
+    <!-- ═══ STATS GRID ════════════════════════════════════════════════════ -->
+    <div class="pm-stats-grid">
       <!-- Average Rating Card -->
-      <mat-card class="stat-card stat-card-primary">
-        <mat-card-content>
-          <div class="stat-item">
-            <div class="stat-icon-wrapper">
-              <mat-icon class="stat-icon">star</mat-icon>
-            </div>
-            <div class="stat-details">
-              <div class="stat-label">Average Rating</div>
-              <div class="stat-value">{{ summary.averageRating | number:'1.1-1' }}</div>
-              <div class="stat-footer">
-                <span class="stat-hint">Out of 5.0</span>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <div class="pm-stat-card">
+        <div class="pm-stat-icon blue">
+          <mat-icon>star</mat-icon>
+        </div>
+        <div class="pm-stat-body">
+          <div class="pm-stat-label">Average Rating</div>
+          <div class="pm-stat-value">{{ summary.averageRating | number:'1.1-1' }}</div>
+          <div class="pm-stat-hint">Out of 5.0</div>
+        </div>
+      </div>
 
       <!-- Total Appraisals Card -->
-      <mat-card class="stat-card stat-card-success">
-        <mat-card-content>
-          <div class="stat-item">
-            <div class="stat-icon-wrapper">
-              <mat-icon class="stat-icon">assignment</mat-icon>
-            </div>
-            <div class="stat-details">
-              <div class="stat-label">Total Appraisals</div>
-              <div class="stat-value">{{ summary.totalAppraisals }}</div>
-              <div class="stat-footer">
-                <span class="stat-hint">Completed reviews</span>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <div class="pm-stat-card">
+        <div class="pm-stat-icon green">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <div class="pm-stat-body">
+          <div class="pm-stat-label">Total Appraisals</div>
+          <div class="pm-stat-value">{{ summary.totalAppraisals }}</div>
+          <div class="pm-stat-hint">Completed reviews</div>
+        </div>
+      </div>
 
       <!-- Pending Appraisals Card -->
-      <mat-card class="stat-card stat-card-warning">
-        <mat-card-content>
-          <div class="stat-item">
-            <div class="stat-icon-wrapper">
-              <mat-icon class="stat-icon">pending_actions</mat-icon>
-            </div>
-            <div class="stat-details">
-              <div class="stat-label">Pending Appraisals</div>
-              <div class="stat-value">{{ summary.pendingAppraisals }}</div>
-              <div class="stat-footer">
-                <span class="stat-hint">Awaiting completion</span>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <div class="pm-stat-card">
+        <div class="pm-stat-icon yellow">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+        <div class="pm-stat-body">
+          <div class="pm-stat-label">Pending Appraisals</div>
+          <div class="pm-stat-value">{{ summary.pendingAppraisals }}</div>
+          <div class="pm-stat-hint">Awaiting completion</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Rating Distribution Card -->
-    <mat-card class="content-card" *ngIf="hasRatingDistribution()">
-      <div class="card-header">
-        <h3>
-          <mat-icon>bar_chart</mat-icon>
-          Rating Distribution
-        </h3>
-      </div>
-      <mat-card-content>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <!-- ═══ RATING DISTRIBUTION ═══════════════════════════════════════════ -->
+      <div class="ts-card" *ngIf="hasRatingDistribution()">
+        <div class="pm-sub-section">
+          <h3>Rating Distribution</h3>
+          <p style="margin:0;font-size:0.8125rem;color:#64748b;">Distribution of final ratings across employees</p>
+        </div>
+
         <div class="rating-distribution">
           <div *ngFor="let rating of getRatingDistributionKeys()" class="rating-item">
             <div class="rating-header">
@@ -129,30 +100,28 @@
               </div>
               <span class="rating-count">{{ getRatingCount(rating) }} employee{{ getRatingCount(rating) !== 1 ? 's' : '' }}</span>
             </div>
-            <mat-progress-bar 
-              mode="determinate" 
-              [value]="getRatingPercentage(rating)"
-              [class]="'rating-progress rating-progress-' + rating"
-              class="rating-progress">
-            </mat-progress-bar>
-            <div class="rating-percentage">{{ getRatingPercentage(rating) | number:'1.1-1' }}%</div>
+            <div class="rating-progress-bar-wrap">
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getRatingPercentage(rating)"
+                [class]="'rating-progress rating-progress-' + rating"
+                class="rating-progress">
+              </mat-progress-bar>
+              <div class="rating-percentage">{{ getRatingPercentage(rating) | number:'1.1-1' }}%</div>
+            </div>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Top Performers Card -->
-    <mat-card class="content-card" *ngIf="summary.topPerformers && summary.topPerformers.length > 0">
-      <div class="card-header">
-        <h3>
-          <mat-icon>emoji_events</mat-icon>
-          Top Performers
-        </h3>
       </div>
-      <mat-card-content>
+
+      <!-- ═══ TOP PERFORMERS ═══════════════════════════════════════════════ -->
+      <div class="ts-card" *ngIf="summary.topPerformers && summary.topPerformers.length > 0">
+        <div class="pm-sub-section">
+          <h3>Top Performers</h3>
+          <p style="margin:0;font-size:0.8125rem;color:#64748b;">Highest rated employees for this cycle</p>
+        </div>
+
         <div class="top-performers-list">
-          <div *ngFor="let performer of summary.topPerformers; let i = index" 
-               class="performer-item">
+          <div *ngFor="let performer of summary.topPerformers; let i = index" class="performer-item">
             <div class="performer-rank">
               <span class="rank-number" [ngClass]="'rank-' + (i + 1)">
                 <mat-icon *ngIf="i === 0" class="trophy-icon">emoji_events</mat-icon>
@@ -162,10 +131,9 @@
             <div class="performer-info">
               <div class="performer-name">{{ performer.employeeName }}</div>
               <div class="performer-details">
-                <mat-icon>work</mat-icon>
-                <span>{{ performer.position }}</span>
-                <mat-icon>business</mat-icon>
-                <span>{{ performer.department }}</span>
+                <mat-icon>work</mat-icon> <span>{{ performer.position }}</span>
+                <span style="color:#cbd5e1;">•</span>
+                <mat-icon>business</mat-icon> <span>{{ performer.department }}</span>
               </div>
             </div>
             <div class="performer-rating">
@@ -180,18 +148,20 @@
             </div>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
 
-    <!-- No Top Performers -->
-    <mat-card class="content-card" *ngIf="!summary.topPerformers || summary.topPerformers.length === 0">
-      <mat-card-content>
-        <div class="empty-card-state">
-          <mat-icon>info</mat-icon>
-          <p>No top performers data available for this cycle</p>
+      <!-- No Top Performers -->
+      <div class="ts-card" *ngIf="!summary.topPerformers || summary.topPerformers.length === 0">
+        <div class="pm-sub-section">
+          <h3>Top Performers</h3>
         </div>
-      </mat-card-content>
-    </mat-card>
-
+        <div class="pm-empty-state" style="padding:2rem;">
+          <div class="pm-empty-icon"><mat-icon>emoji_events</mat-icon></div>
+          <h3>No Data Available</h3>
+          <p>There are no top performers recorded for this cycle yet.</p>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>

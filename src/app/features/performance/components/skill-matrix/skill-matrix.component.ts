@@ -19,6 +19,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
 import { PerformanceService } from '../../services/performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -34,6 +35,7 @@ import {
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule, FormsModule, ReactiveFormsModule,
     MatTableModule, MatIconModule, MatButtonModule, MatMenuModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule,
@@ -275,7 +277,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   openCreateSkillDialog() {
     this.createSkillForm.reset({ isActive: true });
     this.filteredSkillsForCreate = [];
-    this.dialog.open(this.createSkillTpl, { width: '520px', disableClose: false });
+    this.dialog.open(this.createSkillTpl, { width: '540px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel', disableClose: false });
   }
 
   onCreateCategoryChange(cat: string) {
@@ -334,7 +336,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   viewSkillEmployees(skill: SkillSet) {
     this.viewingSkill = { ...skill, employees: [] };
     this.loadingViewSkill = true;
-    this.dialog.open(this.viewSkillTpl, { width: '820px', maxWidth: '95vw' });
+    this.dialog.open(this.viewSkillTpl, { width: '820px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel' });
     this.performanceService.getSkillWithEmployees(skill.skillId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         if (res.success && res.data) this.viewingSkill = res.data;
@@ -349,7 +351,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   viewEmployeeSkillDetail(emp: EmployeeSkillSummary) {
     this.viewingEmployee = null;
     this.loadingViewEmployee = true;
-    this.dialog.open(this.viewEmployeeTpl, { width: '680px', maxWidth: '95vw' });
+    this.dialog.open(this.viewEmployeeTpl, { width: '680px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel' });
     this.performanceService.getEmployeeSkillDetail(emp.employeeId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         if (res.success && res.data) this.viewingEmployee = res.data;
@@ -367,7 +369,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.assessRatings = {};
     this.assessNotes = {};
     this.loadingAssessSkills = true;
-    this.dialog.open(this.assessTpl, { width: '620px', maxWidth: '95vw' });
+    this.dialog.open(this.assessTpl, { width: '620px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel' });
 
     this.performanceService.getEmployeeSkillDetail(emp.employeeId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
@@ -435,7 +437,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.filteredSkillsForAdd = [];
     // Build categories from existing org skills
     this.availableSkillCategories = [...new Set(this.skills.map(s => s.category).filter(Boolean))] as string[];
-    this.dialog.open(this.addMySkillTpl, { width: '520px', disableClose: false });
+    this.dialog.open(this.addMySkillTpl, { width: '540px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel', disableClose: false });
   }
 
   onAddSkillCategoryChange(cat: string) {
@@ -482,7 +484,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   editMySkill(skill: EmployeeSkill) {
     this.editingSkill = skill;
     this.editMySkillForm.setValue({ proficiencyLevel: skill.proficiencyLevel, notes: skill.notes || '' });
-    this.dialog.open(this.editMySkillTpl, { width: '480px', disableClose: false });
+    this.dialog.open(this.editMySkillTpl, { width: '500px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel', disableClose: false });
   }
 
   submitEditMySkill() {

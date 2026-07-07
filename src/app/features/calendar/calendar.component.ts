@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
@@ -49,7 +51,9 @@ type EventFilter = 'ALL' | 'ATTENDANCE' | 'LEAVE' | 'HOLIDAY';
     standalone: true,
     imports: [
     SharedCommonModule,
+    PageHeaderComponent,
         CommonModule,
+        FormsModule,
         MatCardModule,
         MatButtonModule,
         MatIconModule,
