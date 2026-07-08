@@ -1,3 +1,5 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -34,6 +36,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatMenuModule,
     MatButtonModule,
     MatIconModule
+    ,PageHeaderComponent, MatProgressSpinnerModule
   ],
   templateUrl: './ticket-involvement.component.html',
   styleUrl: './ticket-involvement.component.scss',
@@ -146,3 +149,5 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
   }
   
 }
+
+

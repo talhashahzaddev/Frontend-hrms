@@ -1,233 +1,193 @@
-<div class="ticket-page">
+<div class="ts-page-layout">
 
   <!-- Loader -->
-  <div *ngIf="loading" class="loading">
-    <div class="loader-spinner"></div>
+  <div *ngIf="loading" class="hd-loader">
+    <mat-spinner diameter="36"></mat-spinner>
     <p>Loading ticket details...</p>
   </div>
 
   <!-- Content -->
-  <div *ngIf="!loading && ticket" class="ticket-content">
+  <div *ngIf="!loading && ticket" class="ticket-detail-grid">
 
-    <!-- ============================================ -->
-    <!-- LEFT COLUMN (CHAT) - REDESIGNED              -->
-    <!-- ============================================ -->
-    <div class="chat-container">
+    <!-- ========== LEFT COLUMN (CHAT) ========== -->
+    <div class="ts-card chat-container" style="overflow: hidden;">
 
-      <!-- Sub-Header: Mail Inbox + Action Buttons -->
+      <!-- Sub-Header -->
       <div class="chat-subheader">
-        <a href="#" class="chat-inbox-link">Mail Inbox</a>
-        <div class="chat-subheader-actions">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <mat-icon style="color:#2563eb; font-size:1.25rem;">inbox</mat-icon>
+          <span style="font-weight:600; color:#0f172a; font-size:0.9375rem;">Mail Inbox</span>
+        </div>
+        <div class="chat-actions">
           @if(hasPermission('Involve_Employee_Button')) {
-            <button mat-raised-button class="btn btn-primary chat-action-btn" (click)="openInvolveEmployeeDialog()">
-              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="hd-btn-create" (click)="openInvolveEmployeeDialog()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px; height:16px;">
                 <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               Involve Employees
-          </button>
-        }
-
-          <!-- <button class="btn btn-primary chat-action-btn" (click)="openReplyDialog(ticket)">
-            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-            Reply
-          </button> -->
-          
+            </button>
+          }
         </div>
       </div>
 
-      <!-- Messages & Reply Wrapper (Scrollable Container) -->
-      <div class="chat-messages-reply-wrapper">
+      <!-- Messages + Reply Wrapper -->
+      <div class="chat-messages-wrapper">
 
-        <!-- Messages List -->
+        <!-- Messages -->
         <div class="chat-body">
           <div *ngFor="let msg of messages; let i = index"
-               class="chat-message-card"
-               [class.chat-message-reply]="(msg.senderEmail | lowercase) === currentUserEmail">
-
-            <!-- Message Header -->
-            <div class="msg-header">
-              <div class="msg-sender-info">
-                <!-- <div class="msg-avatar" [class.msg-avatar-primary]="i === 0" [class.msg-avatar-secondary]="i > 0">
-                  {{ msg.senderFullName?.charAt(0) || 'U' }}{{ msg.senderFullName?.split(' ')[1]?.charAt(0) || '' }}
-                </div> -->
-                <div class="msg-sender-details">
-                  <span class="msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
-                  <span class="msg-separator">|</span>
-                  <a class="msg-sender-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
-                </div>
+               class="hd-msg-card"
+               [class.is-reply]="(msg.senderEmail | lowercase) === currentUserEmail">
+            <div class="hd-msg-header">
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                <span class="hd-msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
+                <span class="hd-msg-sep">|</span>
+                <a class="hd-msg-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
               </div>
-              <span class="msg-time">{{ msg.createdAt | localizedDate:'MMM d, y, h:mm a' }}</span>
-              <!-- <span class="message-type">{{ msg.messageType }}</span> -->
+              <span class="hd-msg-time">{{ msg.createdAt | localizedDate:'MMM d, y, h:mm a' }}</span>
             </div>
-            <!-- Message Body -->
-            <div class="msg-body">
-              {{ msg.message }}
-            </div>
-
+            <div class="hd-msg-body">{{ msg.message }}</div>
           </div>
         </div>
 
         <!-- Reply Composer -->
-        <div class="reply-composer" id="reply-composer">
+        <div class="hd-reply-composer" id="reply-composer">
           <textarea
-            class="reply-textarea"
             placeholder="Type your reply here..."
             [(ngModel)]="replyText">
           </textarea>
-          <div class="reply-composer-footer">
-            <!-- <button class="reply-attach-btn">
-              <span class="attach-plus">+</span> Attach File
-            </button> -->
-            <div class="reply-send-actions">
-              <button class="btn btn-reply-cancel" (click)="cancelReply()">Cancel</button>
-              <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText.trim()">Send</button>
-            </div>
+          <div class="reply-footer">
+            <button class="hd-btn-cancel" (click)="cancelReply()">Cancel</button>
+            <button class="hd-btn-submit" (click)="sendReply()" [disabled]="!replyText.trim()">
+              <mat-icon style="font-size:16px; width:16px; height:16px;">send</mat-icon>
+              Send
+            </button>
           </div>
         </div>
 
       </div>
-
     </div>
-    <!-- ============================================ -->
-    <!-- END LEFT COLUMN                              -->
-    <!-- ============================================ -->
 
-    <!-- Right Column — UNTOUCHED -->
+    <!-- ========== RIGHT COLUMN ========== -->
     <div class="ticket-right">
 
       <!-- Action Buttons -->
-      <div class="action-buttons">
+      <div class="action-buttons" style="display:flex; gap:8px; margin-bottom:1rem; justify-content:flex-end;">
         <button
           *ngIf="!isEditMode && hasPermission('Ticket_View_Edit_Button')"
-          class="btn btn-primary"
+          class="hd-btn-create"
           (click)="enableEditMode()">
-          <span class="material-icons">edit</span>
+          <mat-icon style="font-size:16px; width:16px; height:16px;">edit</mat-icon>
           Edit Ticket
         </button>
-
-        <div *ngIf="isEditMode" class="edit-actions">
-          <button
-            class="btn btn-secondary"
-            (click)="cancelEdit()"
-            [disabled]="updating">
-            Cancel
-          </button>
-
-          <button
-            class="btn btn-primary"
-            (click)="updateTicket()"
-            [disabled]="updating">
-            <span class="material-icons">check</span>
+        <div *ngIf="isEditMode" style="display:flex; gap:8px;">
+          <button class="hd-btn-cancel" (click)="cancelEdit()" [disabled]="updating">Cancel</button>
+          <button class="hd-btn-create" (click)="updateTicket()" [disabled]="updating">
+            <mat-icon style="font-size:16px; width:16px; height:16px;">check</mat-icon>
             {{ updating ? 'Updating...' : 'Update' }}
           </button>
         </div>
       </div>
 
       <!-- Details Card -->
-      <div class="card details-card">
-        <div class="card-header">
-          <h3>Ticket Details</h3>
-          <span class="material-icons">info</span>
+      <div class="ts-card" style="margin-bottom:1rem; padding:1.25rem 1.5rem;">
+        <div style="font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:0.875rem; display:flex; align-items:center; gap:6px;">
+          <mat-icon style="font-size:14px; width:14px; height:14px;">info</mat-icon>
+          Ticket Details
         </div>
+        <div class="details-grid">
 
-        <div class="card-body">
+          <!-- Department -->
+          <div class="detail-field">
+            <label class="field-label">Department</label>
+            <div *ngIf="!isEditMode" class="field-value">{{ ticket.departmentName || 'N/A' }}</div>
+            <mat-form-field *ngIf="isEditMode" appearance="outline" class="mat-field" style="width: 100%;">
+              <mat-select [(ngModel)]="ticket.departmentId">
+                <mat-option value="">Select Department</mat-option>
+                <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">{{ dept.departmentName }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-          <!-- Two Column Grid -->
-          <div class="details-grid">
+          <!-- Type -->
+          <div class="detail-field">
+            <label class="field-label">Type</label>
+            <div *ngIf="!isEditMode" class="field-value">{{ ticket.ticketType || 'N/A' }}</div>
+            <mat-form-field *ngIf="isEditMode" appearance="outline" class="mat-field" style="width: 100%;">
+              <mat-select [(ngModel)]="ticket.ticketType">
+                <mat-option value="">Select Type</mat-option>
+                <mat-option *ngFor="let type of ticketTypes" [value]="type">{{ type }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-            <!-- Department -->
-            <div class="detail-field">
-              <label class="field-label">Department</label>
-              <div *ngIf="!isEditMode" class="field-value">{{ ticket.departmentName || 'N/A' }}</div>
-              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.departmentId">
-                <option value="">Select Department</option>
-                <option *ngFor="let dept of departments" [value]="dept.departmentId">{{ dept.departmentName }}</option>
-              </select>
+          <!-- Category -->
+          <div class="detail-field">
+            <label class="field-label">Category</label>
+            <div *ngIf="!isEditMode" class="field-value">{{ getCategoryName(ticket.category) }}</div>
+            <mat-form-field *ngIf="isEditMode" appearance="outline" class="mat-field" style="width: 100%;">
+              <mat-select [(ngModel)]="ticket.category" (selectionChange)="onCategoryChange(ticket.category)">
+                <mat-option value="">Select Category</mat-option>
+                <mat-option *ngFor="let cat of filteredCategories" [value]="cat.categoryId">{{ cat.categoryName }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Priority -->
+          <div class="detail-field">
+            <label class="field-label">Priority</label>
+            <div *ngIf="!isEditMode" class="field-value priority-value">
+              <span class="priority-dot" [class]="'priority-' + (ticket.priority.toLowerCase() || 'medium')"></span>
+              {{ ticket.priority || 'N/A' }}
             </div>
-
-            <!-- Type -->
-            <div class="detail-field">
-              <label class="field-label">Type</label>
-              <div *ngIf="!isEditMode" class="field-value">{{ ticket.ticketType || 'N/A' }}</div>
-              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.ticketType">
-                <option value="">Select Type</option>
-                <option *ngFor="let type of ticketTypes" [value]="type">{{ type }}</option>
-              </select>
+            <div *ngIf="isEditMode" class="priority-select-wrapper">
+              <mat-form-field appearance="outline" class="mat-field" style="width: 100%;">
+                <mat-select [(ngModel)]="ticket.priority">
+                  <mat-select-trigger>
+                    <span class="priority-dot" [class]="'priority-' + (ticket.priority.toLowerCase() || 'medium')"></span>
+                    {{ ticket.priority || 'Select Priority' }}
+                  </mat-select-trigger>
+                  <mat-option value="">Select Priority</mat-option>
+                  <mat-option *ngFor="let priority of priorities" [value]="priority">
+                    <span class="priority-dot" [class]="'priority-' + (priority.toLowerCase() || 'medium')"></span>
+                    {{ priority }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
+          </div>
 
-            <!-- Category -->
-            <div class="detail-field">
-              <label class="field-label">Category</label>
-              <div *ngIf="!isEditMode" class="field-value">{{ getCategoryName(ticket.category) }}</div>
-              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.category" (change)="onCategoryChange(ticket.category)">
-                <option value="">Select Category</option>
-                <option *ngFor="let cat of filteredCategories" [value]="cat.categoryId">{{ cat.categoryName }}</option>
-              </select>
+          <!-- Status -->
+          <div class="detail-field">
+            <label class="field-label">Status</label>
+            <div *ngIf="!isEditMode" class="field-value status-value">{{ ticket.status || 'N/A' }}</div>
+            <mat-form-field *ngIf="isEditMode" appearance="outline" class="mat-field" style="width: 100%;">
+              <mat-select [(ngModel)]="ticket.status">
+                <mat-option value="">Select Status</mat-option>
+                <mat-option *ngFor="let status of statuses" [value]="status">{{ status }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Group -->
+          <div class="detail-field">
+            <label class="field-label">Group Name</label>
+            <div *ngIf="!isEditMode" class="field-value">{{ getGroupName(ticket.groupId) }}</div>
+            <mat-form-field *ngIf="isEditMode" appearance="outline" class="mat-field" style="width: 100%;">
+              <mat-select [(ngModel)]="ticket.groupId" [disabled]="groups.length === 0">
+                <mat-option value="">Select Group</mat-option>
+                <mat-option *ngFor="let group of groups" [value]="group.groupId">{{ group.groupTitle }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Group Employees -->
+          <div class="detail-field">
+            <label class="field-label">Group Employees</label>
+            <div class="field-value">
+              <span class="employee-chip" *ngFor="let emp of ticket.groupEmployeeNames">{{ emp }}</span>
             </div>
-
-            <!-- Priority -->
-            <div class="detail-field">
-              <label class="field-label">Priority</label>
-              <div *ngIf="!isEditMode" class="field-value priority-value">
-                <span class="priority-dot" [class]="'priority-' + (ticket.priority.toLowerCase() || 'medium')"></span>
-                {{ ticket.priority || 'N/A' }}
-              </div>
-              <div *ngIf="isEditMode" class="priority-select-wrapper">
-                <span class="priority-dot" [class]="'priority-' + (ticket.priority.toLowerCase() || 'medium')"></span>
-                <select class="field-input priority-select" [(ngModel)]="ticket.priority">
-                  <option value="">Select Priority</option>
-                  <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Status -->
-            <div class="detail-field">
-              <label class="field-label">Status</label>
-              <div *ngIf="!isEditMode" class="field-value status-value">{{ ticket.status || 'N/A' }}</div>
-              <select *ngIf="isEditMode" class="field-input status-select" [(ngModel)]="ticket.status">
-                <option value="">Select Status</option>
-                <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
-              </select>
-            </div>
-
-            <!-- Group -->
-            <div class="detail-field">
-              <label class="field-label">Group Name</label>
-              <div *ngIf="!isEditMode" class="field-value">{{ getGroupName(ticket.groupId) }}</div>
-              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.groupId" [disabled]="groups.length === 0">
-                <option value="">Select Group</option>
-                <option *ngFor="let group of groups" [value]="group.groupId">{{ group.groupTitle }}</option>
-              </select>
-            </div>
-
-            <!-- ✅ Group Employees (ONLY if groupId exists) -->
-            <!-- <div class="detail-field"
-              *ngIf="ticket?.groupId && (ticket?.groupEmployeeNames?.length ?? 0) > 0">
-              <label class="field-label">Group Employees</label>
-                <div class="field-value">
-                 <span class="employee-chip" *ngFor="let emp of ticket?.groupEmployeeNames">
-                      {{ emp }}
-                      </span>
-                    </div>
-                   </div>
-
-          </div> -->
-
-  <!-- Group Employees -->
-  <div class="detail-field"
->
-    <label class="field-label">Group Employees</label>
-
-    <div class="field-value">
-      <span class="employee-chip" *ngFor="let emp of ticket.groupEmployeeNames">
-        {{ emp }}
-      </span>
-    </div>
-  </div>
-
+          </div>
 
           <!-- Assigned Employees (Full Width) -->
           <div class="detail-field full-width" data-dropdown="employee">
@@ -246,19 +206,13 @@
                        [checked]="isAllVisibleSelected()"
                        (click)="$event.stopPropagation(); toggleSelectAll()" />
               </div>
-
-              <!-- DROPDOWN -->
               <div class="employee-checklist-box" *ngIf="employeeDropdownOpen">
                 <div class="employee-checklist-scroll">
-                  <div *ngIf="filteredEmployees.length === 0" class="no-results">
-                    No employees found
-                  </div>
-
+                  <div *ngIf="filteredEmployees.length === 0" class="no-results">No employees found</div>
                   <div *ngFor="let emp of filteredEmployees"
                        class="employee-row"
                        (click)="$event.stopPropagation(); toggleEmployee(emp)">
-                    <input type="checkbox"
-                           [checked]="isEmployeeSelected(emp.id)" />
+                    <input type="checkbox" [checked]="isEmployeeSelected(emp.id)" />
                     <div class="employee-data">
                       <span class="employee-name">{{ emp.name }}</span>
                       <span *ngIf="emp.code" class="employee-code">({{ emp.code }})</span>
@@ -266,16 +220,12 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Selected Employees Count -->
-              <p class="employee-count-text">
-                {{ getSelectedEmployeeNames() }}
-              </p>
+              <p class="employee-count-text">{{ getSelectedEmployeeNames() }}</p>
             </div>
           </div>
 
-          <!-- Metadata Section -->
-          <div class="metadata-section">
+          <!-- Metadata -->
+          <div class="detail-field full-width metadata-section">
             <div class="metadata-row">
               <span class="metadata-label">Created By</span>
               <span class="metadata-value">{{ ticket.createdByName || 'N/A' }}</span>
@@ -290,125 +240,106 @@
       </div>
 
       <!-- Description Card -->
-      <div class="card description-card">
-        <div class="card-header">
-          <span class="material-icons">notes</span>
-          <h3>Description</h3>
+      <div class="ts-card" style="margin-bottom:1rem; padding:1.25rem 1.5rem;">
+        <div style="font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:0.875rem; display:flex; align-items:center; gap:6px;">
+          <mat-icon style="font-size:14px; width:14px; height:14px;">notes</mat-icon>
+          Description
         </div>
-        <div class="card-body">
-          <textarea *ngIf="isEditMode" class="description-textarea" [(ngModel)]="ticket.description" placeholder="Describe the issue in detail..."></textarea>
-          <p *ngIf="!isEditMode" class="description-text">{{ ticket.description || 'No description provided' }}</p>
-        </div>
+        <textarea *ngIf="isEditMode" class="description-textarea" [(ngModel)]="ticket.description" placeholder="Describe the issue in detail..."></textarea>
+        <p *ngIf="!isEditMode" class="description-text">{{ ticket.description || 'No description provided' }}</p>
       </div>
 
       <!-- Attachment Card -->
-      <div class="card attachment-card">
-        <div class="card-header">
-          <div class="header-left">
-            <span class="material-icons">attach_file</span>
-            <h3>Attachment</h3>
-          </div>
-          <span class="attachment-count" *ngIf="ticket.attachment && !isEditMode">1 File</span>
+      <div class="ts-card" style="padding:1.25rem 1.5rem;">
+        <div style="font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:0.875rem; display:flex; align-items:center; justify-content:space-between;">
+          <span style="display:flex; align-items:center; gap:6px;">
+            <mat-icon style="font-size:14px; width:14px; height:14px;">attach_file</mat-icon>
+            Attachment
+          </span>
+          <span *ngIf="ticket.attachment && !isEditMode" style="background:#eff6ff; color:#2563eb; font-size:0.75rem; padding:2px 10px; border-radius:9999px;">1 File</span>
         </div>
-        <div class="card-body">
-          
-          <!-- VIEW MODE: Show existing attachment -->
-          <div *ngIf="!isEditMode">
-            <div *ngIf="ticket.attachment" class="attachment-item" (click)="showFilePrev(ticket.attachment)">
-              <div class="attachment-info">
-                <span class="material-icons file-icon">attach_file</span>
-                <div class="file-details">
-                  <span class="file-name">{{ ticket.attachment.split('/').pop() }}</span>
-                  <span class="file-size">View Attachment</span>
-                </div>
+
+        <!-- View Mode -->
+        <div *ngIf="!isEditMode">
+          <div *ngIf="ticket.attachment" class="attachment-item" (click)="showFilePrev(ticket.attachment)">
+            <div class="attachment-info">
+              <mat-icon class="file-icon" style="color:#2563eb;">attach_file</mat-icon>
+              <div class="file-details">
+                <span class="file-name">{{ ticket.attachment.split('/').pop() }}</span>
+                <span class="file-size">View Attachment</span>
               </div>
             </div>
-            <p *ngIf="!ticket.attachment" class="no-attachment">No attachment</p>
+          </div>
+          <p *ngIf="!ticket.attachment" class="no-attachment">No attachment</p>
+        </div>
+
+        <!-- Edit Mode -->
+        <div *ngIf="isEditMode">
+          <div class="upload-area-edit"
+            [class.drag-over]="isDragOver"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            (click)="fileInput.click()">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <p class="upload-text">Drag &amp; drop file or <span class="upload-link">browse</span></p>
+            <p class="upload-hint">PDF, DOCX, JPG, PNG • Max 5MB</p>
+            <input type="file" class="file-input-hidden"
+              accept=".pdf,.docx,.jpg,.jpeg,.png"
+              (change)="onFileInputChange($event)"
+              #fileInput
+              (click)="$event.stopPropagation()"/>
           </div>
 
-          <!-- EDIT MODE: Drag & Drop + File Upload -->
-          <div *ngIf="isEditMode">
-            
-            <!-- Drag & Drop Area -->
-            <div class="upload-area-edit"
-              [class.drag-over]="isDragOver"
-              (dragover)="onDragOver($event)"
-              (dragleave)="onDragLeave($event)"
-              (drop)="onDrop($event)"
-              (click)="fileInput.click()">
-              <span class="material-icons upload-icon">cloud_upload</span>
-              <p class="upload-text">Drag & drop file or <span class="upload-link">browse</span></p>
-              <p class="upload-hint">PDF, DOCX, JPG, PNG • Max 5MB</p>
-              <input type="file" class="file-input-hidden" 
-                accept=".pdf,.docx,.jpg,.jpeg,.png"
-                (change)="onFileInputChange($event)"
-                #fileInput
-                (click)="$event.stopPropagation()"/>
-            </div>
-
-            <!-- Uploading Files List -->
-            <div *ngIf="attachedFiles.length > 0" class="uploading-files">
-              <div *ngFor="let entry of attachedFiles; let i = index" class="upload-item">
-                <div class="upload-item-header">
-                  <span class="material-icons file-icon" [ngSwitch]="getFileIcon(entry.file)">
-                    <ng-container *ngSwitchCase="'picture_as_pdf'">picture_as_pdf</ng-container>
-                    <ng-container *ngSwitchCase="'image'">image</ng-container>
-                    <ng-container *ngSwitchDefault>description</ng-container>
-                  </span>
-                  <div class="upload-item-details">
-                    <span class="upload-file-name">{{ entry.file.name }}</span>
-                    <span class="upload-file-size">{{ formatFileSize(entry.file.size) }}</span>
-                  </div>
-                </div>
-
-                <!-- Uploading State -->
-                <div *ngIf="entry.uploading" class="upload-progress">
-                  <div class="progress-bar"></div>
-                  <span class="progress-text">Uploading...</span>
-                </div>
-
-                <!-- Success State -->
-                <div *ngIf="!entry.uploading && !entry.error" class="upload-success">
-                  <span class="material-icons success-icon">check_circle</span>
-                  <span class="success-text">Uploaded</span>
-                  <button class="remove-upload-btn" (click)="removeFile(i)" type="button">
-                    <span class="material-icons">close</span>
-                  </button>
-                </div>
-
-                <!-- Error State -->
-                <div *ngIf="entry.error" class="upload-error">
-                  <span class="material-icons error-icon">error</span>
-                  <span class="error-text">Upload failed</span>
-                  <button class="retry-upload-btn" (click)="retryUpload(i)" type="button">Retry</button>
-                  <button class="remove-upload-btn" (click)="removeFile(i)" type="button">
-                    <span class="material-icons">close</span>
-                  </button>
+          <div *ngIf="attachedFiles.length > 0" class="uploading-files">
+            <div *ngFor="let entry of attachedFiles; let i = index" class="upload-item">
+              <div class="upload-item-header">
+                <mat-icon class="file-icon" [ngSwitch]="getFileIcon(entry.file)">
+                  <ng-container *ngSwitchCase="'picture_as_pdf'">picture_as_pdf</ng-container>
+                  <ng-container *ngSwitchCase="'image'">image</ng-container>
+                  <ng-container *ngSwitchDefault>description</ng-container>
+                </mat-icon>
+                <div class="upload-item-details">
+                  <span class="upload-file-name">{{ entry.file.name }}</span>
+                  <span class="upload-file-size">{{ formatFileSize(entry.file.size) }}</span>
                 </div>
               </div>
-            </div>
-
-            <!-- Current Attachment (if exists in edit mode) -->
-            <div *ngIf="ticket.attachment && attachedFiles.length === 0" class="current-attachment-edit">
-              <div class="attachment-item">
-                <div class="attachment-info">
-                  <span class="material-icons file-icon">attach_file</span>
-                  <div class="file-details">
-                    <span class="file-name">{{ ticket.attachment.split('/').pop() }}</span>
-                    <span class="file-size">(Current)</span>
-                  </div>
-                </div>
-                <button class="remove-btn" (click)="removeAttachment(); $event.stopPropagation()" type="button">
-                  <span class="material-icons">close</span>
+              <div *ngIf="!entry.uploading && !entry.error" class="upload-success">
+                <mat-icon class="success-icon">check_circle</mat-icon>
+                <span class="success-text">Uploaded</span>
+                <button class="remove-upload-btn" (click)="removeFile(i)" type="button">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <div *ngIf="entry.error" class="upload-error">
+                <mat-icon class="error-icon">error</mat-icon>
+                <span class="error-text">Upload failed</span>
+                <button class="retry-upload-btn" (click)="retryUpload(i)" type="button">Retry</button>
+                <button class="remove-upload-btn" (click)="removeFile(i)" type="button">
+                  <mat-icon>close</mat-icon>
                 </button>
               </div>
             </div>
-
           </div>
 
+          <div *ngIf="ticket.attachment && attachedFiles.length === 0" class="current-attachment-edit">
+            <div class="attachment-item">
+              <div class="attachment-info">
+                <mat-icon class="file-icon" style="color:#2563eb;">attach_file</mat-icon>
+                <div class="file-details">
+                  <span class="file-name">{{ ticket.attachment.split('/').pop() }}</span>
+                  <span class="file-size">(Current)</span>
+                </div>
+              </div>
+              <button class="remove-btn" (click)="removeAttachment(); $event.stopPropagation()" type="button">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
+
 </div>

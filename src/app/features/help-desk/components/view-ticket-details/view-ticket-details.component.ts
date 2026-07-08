@@ -1,3 +1,8 @@
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -35,6 +40,7 @@ interface CategoryDto {
     FormsModule,
     MatDialogModule,
     MatButtonModule,
+    MatProgressSpinnerModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule
   ],
   templateUrl: './view-ticket-details.component.html',
   styleUrls: ['./view-ticket-details.component.scss'],
@@ -700,3 +706,6 @@ sendReply(): void {
   }
 
 }
+
+
+

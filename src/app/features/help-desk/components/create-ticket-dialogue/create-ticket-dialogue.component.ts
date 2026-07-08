@@ -1,3 +1,4 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -27,6 +28,7 @@ interface Category {
   selector: 'app-create-ticket-dialogue',
   standalone: true,
   imports: [
+    MatProgressSpinnerModule,
     SharedCommonModule,
     CommonModule,
     FormsModule,
@@ -267,3 +269,4 @@ export class CreateTicketDialogueComponent implements OnInit, OnDestroy {
     this.dialogRef.close(false);
   }
 }
+

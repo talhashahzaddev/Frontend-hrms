@@ -1,3 +1,5 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -31,7 +33,9 @@ export interface ReplyChatDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatIconModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './reply-chat-dialog.component.html',
   styleUrls: ['./reply-chat-dialog.component.scss'],
@@ -134,3 +138,6 @@ employees: Employee[] = [];
     this.dialogRef.close();
   }
 }
+
+
+

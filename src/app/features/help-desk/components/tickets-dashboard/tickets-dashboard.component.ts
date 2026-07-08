@@ -1,3 +1,5 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { SharedCommonModule } from '@shared/shared-common.module';
 // tickets-dashboard.component.ts
 
@@ -36,6 +38,7 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@/app/shared/co
     MatMenuModule,
     MatButtonModule,
     MatIconModule
+    ,MatProgressSpinnerModule, PageHeaderComponent
   ],
   templateUrl: './tickets-dashboard.component.html',
   styleUrl: './tickets-dashboard.component.scss'
@@ -189,3 +192,4 @@ export class TicketsDashboardComponent implements OnInit, OnDestroy {
 
 
 }
+
