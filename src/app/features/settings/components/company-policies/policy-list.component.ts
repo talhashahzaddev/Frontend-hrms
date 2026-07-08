@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,6 +28,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     FormsModule,
     MatTableModule,
@@ -168,3 +170,4 @@ export class PolicyListComponent implements OnInit, OnDestroy {
     return this.authService.hasMenuPermission('Settings', 'Company Policies', actionKey);
   }
 }
+

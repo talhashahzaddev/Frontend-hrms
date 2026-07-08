@@ -1,286 +1,80 @@
-@use "sass:color";
-// ── Variables ────────────────────────────────────────────────
-$primary: #5e37f0;
-$primary-light: rgba(94, 55, 240, 0.08);
-$success: #10b981;
-$warning: #f59e0b;
-$danger: #ef4444;
-$text-primary: #111827;
-$text-secondary: #6b7280;
-$border: #e5e7eb;
-$surface: #ffffff;
-$bg: #f5f6fa;
-$radius-card: 18px;
-$radius-chip: 8px;
+@use '../../styles/settings-shared';
 
-// ── Page ─────────────────────────────────────────────────────
-.policies-page {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: $bg;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-}
+.pl-card { padding: 0; overflow: hidden; }
 
-// ── Header ───────────────────────────────────────────────────
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-
-  .page-title {
-    margin: 0 0 4px;
-    font-size: 26px;
-    font-weight: 700;
-    color: $text-primary;
-    letter-spacing: -0.4px;
-  }
-
-  .page-subtitle {
-    margin: 0;
-    font-size: 14px;
-    color: $text-secondary;
-  }
-}
-
-.add-btn {
-  height: 42px !important;
-  padding: 0 20px !important;
-  border-radius: 10px !important;
-  background: $primary !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
-  letter-spacing: 0.1px !important;
-  box-shadow: 0 4px 14px rgba($primary, 0.25) !important;
-  transition: all 0.2s ease !important;
-
-  mat-icon {
-    margin-right: 4px;
-    font-size: 18px;
-  }
-
-  &:hover {
-    background: color.adjust($primary, $lightness: -8%) !important;
-    box-shadow: 0 6px 20px rgba($primary, 0.35) !important;
-  }
-}
-
-// ── Card ─────────────────────────────────────────────────────
-.policies-card {
-  background: $surface;
-  border-radius: $radius-card;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.06);
-  overflow: hidden;
-  border: 1px solid $border;
-}
-
-.card-meta {
+// Toolbar
+.pl-toolbar {
   display: flex;
   align-items: center;
-  padding: 14px 24px;
-  background: #fafafa;
-  border-bottom: 1px solid $border;
-}
+  padding: 14px 20px;
+  border-bottom: 1px solid #e2e8f0;
 
-.count-badge {
-  font-size: 12px;
-  font-weight: 600;
-  color: $text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-// ── States ───────────────────────────────────────────────────
-.state-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px;
-  gap: 12px;
-  text-align: center;
-
-  p {
-    margin: 0;
-    color: $text-secondary;
-    font-size: 14px;
-  }
-
-  h3 {
-    margin: 0;
-    font-size: 18px;
+  .pl-record-count {
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: $text-primary;
+    color: #64748b;
   }
 }
 
-.empty-icon {
-  width: 64px;
-  height: 64px;
+// Table
+.pl-table-wrap { overflow-x: auto; }
+
+// Policy name cell
+.pl-name-cell {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 16px;
-  background: $primary-light;
-  color: $primary;
-  margin-bottom: 4px;
+  gap: 12px;
 
-  mat-icon {
-    font-size: 30px;
-    width: 30px;
-    height: 30px;
-  }
-}
-
-// ── Table ────────────────────────────────────────────────────
-.table-wrapper {
-  overflow-x: auto;
-}
-
-.policies-table {
-  width: 100%;
-  min-width: 680px;
-
-  ::ng-deep {
-    .mat-mdc-header-row {
-      background: #fafafa;
-    }
-
-    .mat-mdc-header-cell {
-      color: $text-secondary;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      padding: 16px 20px;
-      border-bottom: 1px solid $border;
-    }
-
-    .mat-mdc-cell {
-      padding: 16px 20px;
-      color: $text-primary;
-      font-size: 14px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-
-    .mat-mdc-row:last-child .mat-mdc-cell {
-      border-bottom: none;
-    }
-  }
-}
-
-.table-row {
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: #fafbff !important;
-  }
-}
-
-.policy-name {
-  font-weight: 600;
-  color: $text-primary;
-}
-
-.date-cell {
-  color: $text-secondary !important;
-  font-size: 13px !important;
-}
-
-// ── Chips ────────────────────────────────────────────────────
-.category-chip {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: $radius-chip;
-  font-size: 12px;
-  font-weight: 600;
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-}
-
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: $radius-chip;
-  font-size: 12px;
-  font-weight: 600;
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+  .pl-policy-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+
+    mat-icon { font-size: 17px; width: 17px; height: 17px; color: #2563eb; }
   }
 
-  &.published {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-
-    .status-dot { background: $success; }
-  }
-
-  &.draft {
-    background: #fff7ed;
-    color: #92400e;
-    border: 1px solid #fde68a;
-
-    .status-dot { background: $warning; }
-  }
+  .pl-policy-name { font-size: 0.875rem; font-weight: 600; color: #0f172a; }
 }
 
-// ── Actions ──────────────────────────────────────────────────
-.action-btn {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 8px !important;
-  color: $text-secondary !important;
-  transition: all 0.15s ease !important;
+.pl-date-cell { font-size: 0.8125rem; color: #64748b; white-space: nowrap; }
 
-  &:hover {
-    background: $primary-light !important;
-    color: $primary !important;
-  }
+.pl-table-row {
+  transition: background 0.12s ease;
+  &:hover { background: #f8fafc; }
 }
 
-::ng-deep .policy-action-menu {
-  .mat-mdc-menu-panel {
-    border-radius: 12px !important;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
-    min-width: 160px !important;
-  }
+// Action menu
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+  min-width: 160px !important;
 
-  .mat-mdc-menu-item {
-    font-size: 14px;
-  }
+  .mat-mdc-menu-content {
+    padding: 6px !important;
 
-  .delete-item {
-    color: $danger !important;
+    .mat-mdc-menu-item {
+      border-radius: 6px !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      font-size: 0.875rem !important;
+      color: #374151 !important;
 
-    mat-icon { color: $danger !important; }
-  }
-}
+      &:hover { background: #f8fafc !important; }
+      mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #64748b; }
 
-// ── Responsive ───────────────────────────────────────────────
-@media (max-width: 768px) {
-  .policies-page {
-    padding: 16px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-
-    .add-btn {
-      width: 100%;
+      &.danger-action {
+        color: #dc2626 !important;
+        mat-icon { color: #dc2626 !important; }
+        &:hover { background: #fef2f2 !important; }
+      }
     }
+
+    mat-divider { margin: 4px 0 !important; border-color: #e2e8f0 !important; }
   }
 }

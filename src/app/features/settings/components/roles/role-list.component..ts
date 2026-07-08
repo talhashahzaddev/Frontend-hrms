@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -35,7 +36,8 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
     MatMenuModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    MatDialogModule
+    MatDialogModule,
+    PageHeaderComponent
   ],
   templateUrl: './role-list.component.html',
   styleUrls: ['./role-list.component.scss']
@@ -57,8 +59,8 @@ export class RoleListComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private dialog: MatDialog,
     private router: Router,
-    private route: ActivatedRoute
-    , private authService: AuthService
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -110,8 +112,6 @@ export class RoleListComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ─── Navigation to full-page form ─────────────────────────────
-
   openAddRoleDialog(): void {
     this.router.navigate(['add'], {
       relativeTo: this.route,
@@ -132,8 +132,6 @@ export class RoleListComponent implements OnInit, OnDestroy {
       state: { mode: 'edit', role }
     });
   }
-
-  // ─── Delete (keep as dialog) ───────────────────────────────────
 
   deleteRole(role: Role): void {
     const dialogData: ConfirmDeleteData = {

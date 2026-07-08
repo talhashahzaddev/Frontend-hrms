@@ -1,339 +1,149 @@
-/* ===============================
-   GENERAL SETTINGS CONTAINER
-================================*/
-.settings-general-container {
-  padding: 20px; /* increased padding */
-  min-height: calc(100vh - 64px);
-  background: #f9fafb;
-  max-width: 1100px;
-  margin: auto;
-}
+@use '../../styles/settings-shared';
 
-
-/* ===============================
-   HEADER
-================================*/
-.settings-header {
-  margin-bottom: 10px;
-
-  .settings-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 6px;
-  }
-
-  .settings-description {
-    font-size: 15px;
-    color: #6b7280;
-    max-width: 600px;
-  }
-}
-
-
-/* ===============================
-   ACCESS DENIED
-================================*/
-.access-denied {
-  background: white;
-  border-radius: 14px;
-  padding: 40px;
-  text-align: center;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-
-  .access-denied-icon {
-    font-size: 56px;
-    width: 56px;
-    height: 56px;
-    color: #9ca3af;
-    margin-bottom: 16px;
-  }
-
-  h2 {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #111827;
-  }
-
-  p {
-    color: #6b7280;
-  }
-}
-
-
-/* ===============================
-   SETTINGS CONTENT
-================================*/
-.settings-content {
+// Loading state
+.sg-loading {
   display: flex;
-  padding: 0px;
   flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 16px;
+
+  p { margin: 0; font-size: 0.875rem; color: #94a3b8; }
+  ::ng-deep .mat-mdc-progress-spinner circle { stroke: #2563eb; }
 }
 
-
-/* ===============================
-   SETTINGS CARD
-================================*/
-.settings-card {
-  border-radius: 16px !important;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-  background: white;
-
-  ::ng-deep .mat-mdc-card-content {
-    padding: 20px;
-  }
+// Settings card
+.sg-card {
+  padding: 0;
+  overflow: hidden;
 }
 
+// Card section header
+.sg-card-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
 
-/* ===============================
-   CARD HEADER
-================================*/
-.card-header {
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg,#eef2ff,#f5f3ff);
-
-  .header-content {
+  .sg-section-icon {
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    flex-shrink: 0;
 
-    .header-icon {
-      font-size: 34px;
-      width: 34px;
-      height: 34px;
-      color: #4f46e5;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #94a3b8; }
+  }
+
+  .sg-section-title {
+    margin: 0 0 2px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .sg-section-subtitle {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+  }
+}
+
+// Form grid — 3 columns
+.sg-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 32px;
+  padding: 24px;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.sg-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.sg-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+  display: block;
+}
+
+// Material form field override
+.sg-mat-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: #ffffff !important;
+      border-radius: 8px !important;
     }
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #e2e8f0 !important;
+    }
+    .mat-mdc-form-field-infix { padding: 10px 0 !important; min-height: unset; }
+    input, .mat-mdc-select-value-text { font-size: 0.875rem; color: #0f172a; }
+    mat-icon[matPrefix] { color: #94a3b8; font-size: 18px; width: 18px; height: 18px; margin-right: 8px; }
+    .mat-mdc-form-field-hint { font-size: 0.75rem; color: #94a3b8; }
 
-    .header-text {
-
-      .card-title {
-        font-size: 20px;
-        font-weight: 600;
-        color: #111827;
-      }
-
-      .card-subtitle {
-        font-size: 13px;
-        color: #6b7280;
-      }
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing { border-color: #2563eb !important; border-width: 1.5px !important; }
     }
   }
 }
 
-
-/* ===============================
-   CARD CONTENT
-================================*/
-.card-content {
-  padding: 24px;
-}
-
-
-/* ===============================
-   FORM GRID
-================================*/
-
-.settings-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* two equal columns */
-  gap: 20px;
-}
-
-.section-row {
-  width: 100%;
-}
-
-.full-width {
-  width: 100%;
-}
-
-
-/* ===============================
-   OPTION ROWS
-================================*/
-.option-row {
+// Option row for currency
+.sg-option-row {
   display: flex;
   align-items: center;
   gap: 10px;
 
-  .code-badge {
-    background: #eef2ff;
-    color: #4f46e5;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-  }
-
-  .name-text {
-    font-size: 14px;
-    color: #374151;
+  .sg-code-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
   }
 }
 
-
-/* ===============================
-   CULTURE DROPDOWN OPTION
-================================*/
-.culture-option-container {
+// Culture option
+.sg-culture-option {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
 
-  .culture-main {
-    display: flex;
-    gap: 6px;
-
-    .culture-code {
-      font-weight: 600;
-      color: #111827;
-      font-size: 14px;
-    }
-
-    .culture-name {
-      color: #6b7280;
-      font-size: 13px;
-    }
+  .sg-culture-main {
+    .sg-culture-code { font-weight: 700; color: #0f172a; font-size: 0.875rem; }
+    .sg-culture-name { color: #64748b; font-size: 0.8125rem; }
   }
 
-  .culture-preview {
-    font-size: 12px;
-    color: #9ca3af;
-  }
+  .sg-culture-preview { font-size: 0.75rem; color: #94a3b8; }
 }
 
-
-/* ===============================
-   ANGULAR MATERIAL FIELD STYLE
-================================*/
-::ng-deep .mat-mdc-form-field {
-
-  .mat-mdc-text-field-wrapper {
-    border-radius: 10px;
-  }
-
-  .mat-mdc-form-field-hint {
-    font-size: 12px;
-    color: #9ca3af;
-  }
-}
-
-
-/* ===============================
-   DROPDOWN PANEL
-================================*/
-::ng-deep .mat-mdc-select-panel {
-  border-radius: 12px !important;
-  border: 1px solid #e5e7eb !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
-  max-height: 280px !important;
-}
-
-::ng-deep .mat-mdc-option:hover {
-  background: #f9fafb !important;
-}
-
-
-/* ===============================
-   FORM ACTIONS
-================================*/
-.form-actions {
+// Form actions — span full width in grid
+.sg-actions {
+  grid-column: 1 / -1;
   display: flex;
-  gap: 16px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-  grid-column: span 2;
-
-  button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-}
-
-
-/* SAVE BUTTON */
-.save-button {
-  padding: 12px 26px;
-  border-radius: 10px;
-  font-weight: 600;
-  background: linear-gradient(135deg,#4f46e5,#6366f1);
-  color: white;
-  transition: all .2s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(79,70,229,.25);
-  }
-
-  &:disabled {
-    opacity: .6;
-  }
-}
-
-
-/* RESET BUTTON */
-.cancel-button {
-  padding: 12px 26px;
-  border-radius: 10px;
-  font-weight: 500;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  background: white;
-
-  &:hover:not(:disabled) {
-    background: #f9fafb;
-  }
-}
-
-
-/* ===============================
-   LOADING STATE
-================================*/
-.loading-container {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 60px;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
 
-  .loading-text {
-    margin-top: 16px;
-    color: #6b7280;
-  }
-}
-
-
-/* ===============================
-   RESPONSIVE
-================================*/
-@media (max-width: 768px) {
-
-  .settings-general-container {
-    padding: 20px;
-  }
-
-  .settings-title {
-    font-size: 22px;
-  }
-
-  .settings-form {
-    grid-template-columns: 1fr;
-  }
-
-  .form-actions {
-    flex-direction: column;
-    grid-column: span 1;
-
-    .save-button,
-    .cancel-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
+  @media (max-width: 768px) { flex-direction: column; }
 }

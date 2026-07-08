@@ -1,144 +1,325 @@
-.add-ip-button {
-  height: 42px;
-  padding: 0 20px !important;
-  border-radius: 8px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  background: #2563eb !important;
-  color: white !important;
-  letter-spacing: 0.1px;
-  transition: all 0.2s ease !important;
-  box-shadow: 0 2px 6px rgba(26, 31, 46, 0.2) !important;
+// Manage Office IPs — aligned with Slate/Blue design system
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    margin-right: 6px;
-  }
+$primary: #2563eb;
+$primary-hover: #1d4ed8;
+$primary-light: #eff6ff;
+$border: #e2e8f0;
+$surface: #f8fafc;
+$text: #0f172a;
+$text-secondary: #64748b;
+$text-muted: #94a3b8;
 
-  &:hover {
-    background: #1d4ed8 !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
-  }
-}
-.profile-container {
+// ── Page layout ───────────────────────────────────────────────────────────────
+.ts-page-layout {
   padding: 2rem;
   background: #f8fafc;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
+}
 
-  .page-header {
-    margin-bottom: 24px;
-    .page-title {
-      font-size: 24px;
-      font-weight: 700;
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.ips-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .ips-header-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: $primary-light;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    mat-icon { font-size: 24px; width: 24px; height: 24px; color: $primary; }
+  }
+
+  .ips-page-title { margin: 0 0 4px; font-size: 1.375rem; font-weight: 800; color: $text; }
+  .ips-page-subtitle { margin: 0; font-size: 0.875rem; color: $text-secondary; max-width: 600px; }
+}
+
+// ── Form card ─────────────────────────────────────────────────────────────────
+.ips-form-card { padding: 0; overflow: hidden; margin-bottom: 1.25rem; }
+
+.ips-form-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid $border;
+
+  .ips-form-header-icon {
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: $text-muted; }
+  }
+
+  .ips-form-title { margin: 0 0 2px; font-size: 1rem; font-weight: 600; color: $text; }
+  .ips-form-subtitle { margin: 0; font-size: 0.8125rem; color: $text-muted; }
+}
+
+// Form row — horizontal fields + button
+.ips-form-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  flex-wrap: wrap;
+}
+
+.ips-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 300px;
+  max-width: 400px;
+
+  .ips-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+  }
+}
+
+// Mat form field
+.ips-mat-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: #ffffff !important;
+      border-radius: 8px !important;
+      padding: 0 16px !important;
+      border: 1px solid $border !important;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .mdc-notched-outline { display: none !important; }
+    .mat-mdc-form-field-infix {
+      min-height: 42px !important;
+      padding: 0 12px !important;
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 4px;
+      border: none !important;
     }
-    .page-subtitle {
-      color: #6b7280;
-      font-size: 14px;
-    }
-  }
+    input.mat-mdc-input-element { height: 42px !important; padding: 0; font-size: 0.875rem; color: $text; }
+    mat-icon[matPrefix] { color: $text-muted; font-size: 18px; width: 18px; height: 18px; margin-right: 8px; }
+    .mat-mdc-form-field-subscript-wrapper { padding: 4px 0 0 !important; }
 
-  .profile-card {
-    background: white;
-    border-radius: 12px;
-    padding: 32px;
-    border: 1px solid #e9eaf0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: #374151;
-    }
-
-    // Horizontal Row Layout
-    .ip-form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: flex-start; // Keeps inputs aligned even if one has an error message
-      margin-bottom: 32px;
-
-      .form-field {
-        flex: 1;
-        min-width: 200px;
-        
-        ::ng-deep .mat-mdc-text-field-wrapper {
-          background: #f8f9fc !important;
-        }
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 8px;
-        padding-top: 4px; // Align with input height
-      }
-
-      .save-button {
-        height: 52px; // Matches Angular Material Outline height
-        padding: 0 24px !important;
-        border-radius: 8px !important;
-        background: #2563eb !important;
-        color: white !important;
-        font-weight: 600 !important;
-      }
-
-      .cancel-btn {
-        height: 52px;
-        border-radius: 8px !important;
-      }
+    &:hover .mat-mdc-text-field-wrapper { border-color: #94a3b8 !important; }
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $primary !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
   }
+}
 
-  .table-section {
-    margin-top: 32px;
-    
-    .section-subtitle {
-      font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 20px;
-    }
+// Form actions
+.ips-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 22px; // align with field height + label
+  flex-shrink: 0;
+  margin-left: auto;
+}
 
-    .office-ips-table {
-      width: 100%;
-      border-radius: 8px;
-      overflow: hidden;
+// btn-submit / btn-cancel (local definitions for this attendance component)
+.btn-submit {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 42px !important;
+  padding: 0 20px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: $primary !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.28) !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 
-      th {
-        background: #f9fafb;
-        color: #4b5563;
-        font-weight: 600;
-        padding: 16px;
-      }
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; margin: 0 !important; }
+  mat-spinner { flex-shrink: 0; }
 
-      td {
-        padding: 16px;
-        border-bottom: 1px solid #f3f4f6;
-      }
+  &:hover:not([disabled]) { background: $primary-hover !important; box-shadow: 0 3px 8px rgba(37,99,235,0.38) !important; }
+  &[disabled], &:disabled { opacity: 0.5 !important; cursor: not-allowed !important; }
+}
 
-      .ip-cell {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        .ip-icon { color: #2563eb; }
-        .ip-text { font-family: monospace; font-weight: 600; }
-      }
+.btn-cancel {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 42px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid $border !important;
+  cursor: pointer;
+  white-space: nowrap;
 
-      .danger-action { color: #ef4444; }
-    }
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; margin: 0 !important; }
+  &:hover:not([disabled]) { background: $surface !important; border-color: #94a3b8 !important; }
+}
+
+// ── Table card ────────────────────────────────────────────────────────────────
+.ips-table-card { padding: 0; overflow: hidden; }
+
+.ips-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: $surface;
+  border-bottom: 1px solid $border;
+
+  .ips-table-title { margin: 0 0 2px; font-size: 0.9375rem; font-weight: 700; color: $text; }
+  .ips-table-subtitle { margin: 0; font-size: 0.8125rem; color: $text-secondary; }
+
+  .ips-record-count {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $text-secondary;
+    background: $primary-light;
+    color: $primary;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+}
+
+.ips-table-wrap { overflow-x: auto; }
+
+// IP cell
+.ips-ip-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .ips-ip-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: $primary-light;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    mat-icon { font-size: 16px; width: 16px; height: 16px; color: $primary; }
   }
 
-  .empty-state {
-    text-align: center;
-    padding: 60px 0;
-    mat-icon { font-size: 48px; width: 48px; height: 48px; color: #d1d5db; }
-    color: #6b7280;
+  .ips-ip-text { font-family: 'Roboto Mono', monospace; font-size: 0.875rem; font-weight: 700; color: $text; }
+}
+
+.ips-name-text { font-size: 0.875rem; color: $text-secondary; }
+
+.ips-table-row {
+  transition: background 0.12s ease;
+  &:hover { background: $surface; }
+}
+
+// St-table override (inline since this is in attendance module)
+.st-table {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-header-row {
+      background: $surface;
+      height: 44px;
+
+      .mat-mdc-header-cell {
+        font-size: 11px;
+        font-weight: 700;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        border-bottom: 1px solid $border;
+        padding: 0 16px;
+      }
+    }
+
+    .mat-mdc-row {
+      height: 60px;
+      transition: background 0.12s ease;
+      &:hover { background: $surface; }
+
+      .mat-mdc-cell {
+        padding: 0 16px;
+        border-bottom: 1px solid $border;
+        font-size: 0.875rem;
+        color: $text;
+      }
+    }
+  }
+}
+
+// Action btn
+.st-action-btn {
+  width: 32px !important; height: 32px !important;
+  border-radius: 7px !important;
+  color: $text-secondary !important;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { background: $surface !important; }
+}
+
+// Loading state
+.st-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 16px;
+  p { margin: 0; font-size: 0.875rem; color: $text-muted; }
+  ::ng-deep .mat-mdc-progress-spinner circle { stroke: $primary; }
+}
+
+// Empty state
+.st-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 24px;
+
+  .st-empty-icon {
+    width: 64px; height: 64px; border-radius: 14px;
+    background: $surface;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    border: 1px solid $border;
+    mat-icon { font-size: 32px; width: 32px; height: 32px; color: $text-muted; }
+  }
+
+  h3 { margin: 0 0 8px; font-size: 1.0625rem; font-weight: 700; color: $text; }
+  p { margin: 0; font-size: 0.875rem; color: $text-secondary; max-width: 340px; }
+}
+
+// Action menu items
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+  border: 1px solid $border !important;
+  min-width: 160px !important;
+
+  .mat-mdc-menu-content {
+    padding: 6px !important;
+
+    .mat-mdc-menu-item {
+      border-radius: 6px !important;
+      height: 38px !important; min-height: 38px !important;
+      font-size: 0.875rem !important;
+      color: #374151 !important;
+      &:hover { background: $surface !important; }
+      mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: $text-secondary; }
+
+      &.danger-action {
+        color: #dc2626 !important;
+        mat-icon { color: #dc2626 !important; }
+        &:hover { background: #fef2f2 !important; }
+      }
+    }
+
+    mat-divider { margin: 4px 0 !important; border-color: $border !important; }
   }
 }

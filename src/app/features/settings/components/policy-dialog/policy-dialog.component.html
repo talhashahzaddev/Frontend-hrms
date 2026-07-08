@@ -40,35 +40,37 @@
   <!-- ── Body ────────────────────────────────────────────────────────────── -->
   <div class="dialog-body" [formGroup]="form">
 
-    <!-- ── Policy Name (UNCHANGED) ─────────────────────────────────────── -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>
-        Policy Name
-        <span class="req-star" *ngIf="toggles.nameRequired && !isView">*</span>
-      </mat-label>
-      <input
-        matInput
-        formControlName="policyName"
-        placeholder="e.g. Code of Conduct"
-        [readonly]="isView" />
-      <mat-error *ngIf="form.get('policyName')?.hasError('required')">
-        Policy name is required
-      </mat-error>
-    </mat-form-field>
+    <div class="form-row">
+      <!-- ── Policy Name ─────────────────────────────────────── -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>
+          Policy Name
+          <span class="req-star" *ngIf="toggles.nameRequired && !isView">*</span>
+        </mat-label>
+        <input
+          matInput
+          formControlName="policyName"
+          placeholder="e.g. Code of Conduct"
+          [readonly]="isView" />
+        <mat-error *ngIf="form.get('policyName')?.hasError('required')">
+          Policy name is required
+        </mat-error>
+      </mat-form-field>
 
-    <!-- ── Category (UNCHANGED) ────────────────────────────────────────── -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>
-        Category
-        <span class="req-star" *ngIf="toggles.categoryRequired && !isView">*</span>
-      </mat-label>
-      <mat-select formControlName="category">
-        <mat-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('category')?.hasError('required')">
-        Category is required
-      </mat-error>
-    </mat-form-field>
+      <!-- ── Category ────────────────────────────────────────── -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>
+          Category
+          <span class="req-star" *ngIf="toggles.categoryRequired && !isView">*</span>
+        </mat-label>
+        <mat-select formControlName="category">
+          <mat-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('category')?.hasError('required')">
+          Category is required
+        </mat-error>
+      </mat-form-field>
+    </div>
 
     <!-- ── Policy Content (UNCHANGED) ──────────────────────────────────── -->
     <div class="content-section">
