@@ -19,8 +19,9 @@ import { NewsService } from '../../services/news.services';
 import { AuthService } from '@/app/core/services/auth.service';
 import { QuillModule } from 'ngx-quill';
 
-
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { MatDividerModule } from '@angular/material/divider';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-create-news',
   standalone: true,
@@ -35,7 +36,9 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     QuillModule ,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
+    MatDividerModule,
+    PageHeaderComponent
   ],
   templateUrl: './create-news.component.html',
   styleUrls: ['./create-news.component.scss']

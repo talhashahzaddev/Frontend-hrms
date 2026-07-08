@@ -1,216 +1,165 @@
-<div class="news-dashboard-container">
+<div class="ts-page-layout">
 
-  <!-- Filters Section -->
-  <section class="filters-section">
-    <div class="filters-card">
-      <div class="filters-header">
-        <h2 class="filters-title">
-          News Management
-        </h2>
-        <p class="filters-subtitle">Broadcast updates across your organization</p>
-      </div>
-
-      <div class="filters-content">
-        <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="loadNews()">
-          <div class="filters-row">
-            <!-- Search Field -->
-            <div class="search-field-wrapper">
-              <mat-icon class="search-icon">search</mat-icon>
-              <input 
-                class="search-input" 
-                formControlName="search" 
-                placeholder="Search news articles, authors or categories..." 
-                type="text"
-                (keyup.enter)="loadNews()">
-            </div>
-
-            <!-- Status Field -->
-            <div class="select-wrapper">
-              <select class="custom-select" formControlName="status" (change)="loadNews()">
-                <option value="">All Statuses</option>
-                <option value="Draft">Draft</option>
-                <option value="Published">Published</option>
-              </select>
-              <mat-icon class="select-arrow">expand_more</mat-icon>
-            </div>
-
-            <!-- Filter Buttons -->
-            <div class="filter-actions">
-              <button class="btn-primary" type="button" (click)="loadNews()">
-                Apply Filters
-              </button>
-              <button 
-                class="btn-secondary" 
-                type="button" 
-                (click)="clearFilters()"
-                [disabled]="!filterForm.value.search && !filterForm.value.status">
-                Clear
-              </button>
-            </div>
-
-            <!-- Create Button -->
-            <div class="create-button-wrapper" *ngIf="hasPermission('Create_News_Button')">
-              <button class="btn-create" type="button" (click)="openCreateDialog()">
-                <mat-icon>add</mat-icon>
-                <span>Create News</span>
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+  <!-- PAGE HEADER -->
+  <app-page-header 
+    matIcon="newspaper" 
+    title="News Management" 
+    subtitle="Broadcast updates across your organization">
+    
+    <div class="page-header-actions" *ngIf="hasPermission('Create_News_Button')">
+      <button mat-flat-button class="btn-submit" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> Create News
+      </button>
     </div>
-  </section>
+  </app-page-header>
 
-  <!-- Table Section -->
-  <section class="table-section">
-    <div class="table-card">
-      <div class="table-wrapper">
-        <table mat-table [dataSource]="newsDataSource" class="news-table">
-          
-          <!-- Title Column -->
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>TITLE</th>
-            <td mat-cell *matCellDef="let news">
-              <a class="news-title-link" (click)="openViewDialog(news); $event.stopPropagation()">
-                {{ news.title }}
-              </a>
-              <p class="news-author">By {{ news.author || 'Unknown' }}</p>
-            </td>
-          </ng-container>
+  <!-- FILTERS -->
+  <div class="ts-card nd-filters-card">
+    <form [formGroup]="filterForm" class="nd-filters-form" (ngSubmit)="loadNews()">
+      <div class="nd-filters-row">
+        
+        <!-- Search Field -->
+        <mat-form-field appearance="outline" class="nd-mat-field flex-grow">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput formControlName="search" placeholder="Search news articles, authors or categories..." (keyup.enter)="loadNews()">
+        </mat-form-field>
 
-          <!-- Category Column -->
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>CATEGORY</th>
-            <td mat-cell *matCellDef="let news">
-              <span class="category-badge" [ngClass]="'category-' + news.category?.toLowerCase()">
-                {{ news.category }}
-              </span>
-            </td>
-          </ng-container>
+        <!-- Status Field -->
+        <mat-form-field appearance="outline" class="nd-mat-field width-sm">
+          <mat-select formControlName="status" (selectionChange)="loadNews()">
+            <mat-option value="">All Statuses</mat-option>
+            <mat-option value="Draft">Draft</mat-option>
+            <mat-option value="Published">Published</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>STATUS</th>
-            <td mat-cell *matCellDef="let news">
-              <label *ngIf="hasPermission('Status_News_Toggle')" class="status-toggle" (click)="$event.stopPropagation()">
-                <input 
-                  type="checkbox" 
-                  class="toggle-checkbox" 
-                  [checked]="news.status === 'Published'" 
-                  (click)="$event.stopPropagation()"
-                  (change)="onStatusToggle(news)" 
-                  [disabled]="isLoading">
-                <div class="toggle-switch">
-                  <div class="toggle-dot"></div>
-                </div>
-                <span class="toggle-text" [ngClass]="{'text-active': news.status === 'Published'}">
-                  {{ news.status }}
-                </span>
-              </label>
-
-              <!-- Read-only status for Employee / Manager -->
-              <span class="status-text"
-                [ngClass]="{'status-published': news.status === 'Published', 'status-draft': news.status !== 'Published'}">
-                {{ news.status }}
-              </span>
-            </td>
-          </ng-container>
-
-          <!-- Published At Column -->
-          <ng-container matColumnDef="publishedAt">
-            <th mat-header-cell *matHeaderCellDef>PUBLISHED AT</th>
-            <td mat-cell *matCellDef="let news">
-              <span class="date-text">{{ news.publishedAt ? (news.publishedAt | localizedDate:'MMM dd, yyyy') : '--' }}</span>
-            </td>
-          </ng-container>
-
-          <!-- VisibleTo Column -->
-          <ng-container matColumnDef="VisibleTo">
-            <th mat-header-cell *matHeaderCellDef>VISIBLE TO</th>
-            <td mat-cell *matCellDef="let news">
-              <div class="visible-icons">
-                <div class="icon-circle" [title]="news.visibleTo">
-                  <mat-icon>
-                    {{ news.visibleTo?.toLowerCase().includes('public') || news.visibleTo?.toLowerCase().includes('all') ? 'public' : 
-                       news.visibleTo?.toLowerCase().includes('internal') || news.visibleTo?.toLowerCase().includes('company') ? 'domain' : 
-                       news.visibleTo?.toLowerCase().includes('private') || news.visibleTo?.toLowerCase().includes('restricted') ? 'lock' : 
-                       news.visibleTo?.toLowerCase().includes('group') || news.visibleTo?.toLowerCase().includes('team') ? 'groups' : 'public' }}
-                  </mat-icon>
-                </div>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="actions-header">ACTIONS</th>
-            <td mat-cell *matCellDef="let news" class="actions-cell">
-              <button 
-               
-                class="action-menu-btn" 
-                [matMenuTriggerFor]="menu" 
-                (click)="$event.stopPropagation()">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item *ngIf="hasPermission('Edit_News_Button')" (click)="$event.stopPropagation(); navigateToEdit(news)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
-                </button>
-                <button mat-menu-item *ngIf="hasPermission('Delete_News_Button')" (click)="$event.stopPropagation(); deleteNews(news.newsId)">
-                  <mat-icon>delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr 
-            mat-row 
-            *matRowDef="let row; columns: displayedColumns;" 
-            (click)="openViewDialog(row)"
-            [ngClass]="{'row-unread': !row.isRead, 'row-read': row.isRead}">
-          </tr>
-        </table>
-
-        <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="40" class="loading-spinner"></mat-progress-spinner>
-      </div>
-
-      <!-- Pagination -->
-      <div class="pagination-container">
-        <div class="pagination-left">
-          <span class="pagination-label">Items per page:</span>
-          <div class="pagination-select-wrapper">
-            <select class="pagination-select" [(ngModel)]="pageSize" (change)="onPageChange({pageIndex: pageIndex, pageSize: pageSize, length: totalItems})">
-              <option [value]="5">5</option>
-              <option [value]="10">10</option>
-              <option [value]="20">20</option>
-            </select>
-            <mat-icon class="pagination-arrow">expand_more</mat-icon>
-          </div>
+        <div class="nd-filter-actions">
+          <button mat-flat-button class="btn-submit" type="button" (click)="loadNews()">
+            Apply
+          </button>
+          <button mat-stroked-button class="btn-cancel" type="button" (click)="clearFilters()" [disabled]="!filterForm.value.search && !filterForm.value.status">
+            Clear
+          </button>
         </div>
 
-        <div class="pagination-right">
-          <span class="pagination-info">{{ (pageIndex * pageSize + 1) }}-{{ ((pageIndex + 1) * pageSize > totalItems ? totalItems : (pageIndex + 1) * pageSize) }} of {{ totalItems }}</span>
-          <div class="pagination-buttons">
-            <button 
-              class="pagination-btn" 
-              [disabled]="pageIndex === 0"
-              (click)="onPageChange({pageIndex: pageIndex - 1, pageSize: pageSize, length: totalItems})">
-              <mat-icon>chevron_left</mat-icon>
+      </div>
+    </form>
+  </div>
+
+  <!-- TABLE -->
+  <div class="ts-card nd-table-card">
+    <div class="nd-table-container">
+      <table mat-table [dataSource]="newsDataSource" class="ts-table">
+        
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>TITLE</th>
+          <td mat-cell *matCellDef="let news">
+            <a class="nd-title-link" (click)="openViewDialog(news); $event.stopPropagation()">
+              {{ news.title }}
+            </a>
+            <p class="nd-author">By {{ news.author || 'Unknown' }}</p>
+          </td>
+        </ng-container>
+
+        <!-- Category Column -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>CATEGORY</th>
+          <td mat-cell *matCellDef="let news">
+            <span class="ts-chip" [ngClass]="'ts-chip-' + (news.category?.toLowerCase() || 'default')">
+              <span class="ts-dot"></span> {{ news.category || 'General' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>STATUS</th>
+          <td mat-cell *matCellDef="let news">
+            <label *ngIf="hasPermission('Status_News_Toggle')" class="ts-toggle" [class.ts-toggle-active]="news.status === 'Published'" (click)="$event.stopPropagation()">
+              <input type="checkbox" [checked]="news.status === 'Published'" (change)="onStatusToggle(news)" [disabled]="isLoading">
+              <span class="ts-toggle-track">
+                <span class="ts-toggle-thumb"></span>
+              </span>
+              <span class="ts-toggle-label">{{ news.status }}</span>
+            </label>
+            <span *ngIf="!hasPermission('Status_News_Toggle')" class="ts-chip" [ngClass]="news.status === 'Published' ? 'ts-chip-published' : 'ts-chip-draft'">
+              <span class="ts-dot"></span> {{ news.status }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Published At Column -->
+        <ng-container matColumnDef="publishedAt">
+          <th mat-header-cell *matHeaderCellDef>PUBLISHED AT</th>
+          <td mat-cell *matCellDef="let news">
+            <span class="nd-date">{{ news.publishedAt ? (news.publishedAt | localizedDate:'MMM dd, yyyy') : '--' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- VisibleTo Column -->
+        <ng-container matColumnDef="VisibleTo">
+          <th mat-header-cell *matHeaderCellDef>VISIBLE TO</th>
+          <td mat-cell *matCellDef="let news">
+            <div class="nd-visible-icon" [matTooltip]="news.visibleTo">
+              <mat-icon>
+                {{ news.visibleTo?.toLowerCase().includes('public') || news.visibleTo?.toLowerCase().includes('all') ? 'public' : 
+                   news.visibleTo?.toLowerCase().includes('internal') || news.visibleTo?.toLowerCase().includes('company') ? 'domain' : 
+                   news.visibleTo?.toLowerCase().includes('private') || news.visibleTo?.toLowerCase().includes('restricted') ? 'lock' : 
+                   news.visibleTo?.toLowerCase().includes('group') || news.visibleTo?.toLowerCase().includes('team') ? 'groups' : 'public' }}
+              </mat-icon>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="nd-actions-header">ACTIONS</th>
+          <td mat-cell *matCellDef="let news" class="nd-actions-cell">
+            <button mat-icon-button class="ts-action-btn" [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
             </button>
-            <button 
-              class="pagination-btn"
-              [disabled]="(pageIndex + 1) * pageSize >= totalItems"
-              (click)="onPageChange({pageIndex: pageIndex + 1, pageSize: pageSize, length: totalItems})">
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
-        </div>
+            <mat-menu #menu="matMenu" class="ts-action-menu">
+              <button mat-menu-item *ngIf="hasPermission('Edit_News_Button')" (click)="navigateToEdit(news)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item *ngIf="hasPermission('Delete_News_Button')" class="ts-menu-danger" (click)="deleteNews(news.newsId)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="openViewDialog(row)" class="ts-row-hover"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && newsList.length === 0" class="ts-empty-state">
+        <div class="ts-empty-icon"><mat-icon>article</mat-icon></div>
+        <h3>No news articles found</h3>
+        <p>There are no news articles matching your current filters.</p>
+        <button mat-stroked-button class="btn-cancel mt-3" (click)="clearFilters()">Clear Filters</button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="ts-loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
       </div>
     </div>
-  </section>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)"
+      class="ts-paginator">
+    </mat-paginator>
+
+  </div>
 
 </div>

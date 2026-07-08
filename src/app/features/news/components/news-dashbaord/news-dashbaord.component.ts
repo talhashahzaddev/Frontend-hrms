@@ -22,7 +22,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { NewsViewDialogueboxComponent } from './news-view-dialoguebox';
 import { MatMenuModule } from '@angular/material/menu';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
-
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-news-dashbaord',
@@ -44,7 +44,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatProgressSpinnerModule,
     MatDialogModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    PageHeaderComponent
   ],
   templateUrl: './news-dashbaord.component.html',
   styleUrls: ['./news-dashbaord.component.scss']
