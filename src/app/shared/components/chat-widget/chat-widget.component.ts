@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChatService, ChatMessage } from '../../services/chat.service';
@@ -18,7 +19,7 @@ interface FormattedMessagePart {
   selector: 'app-chat-widget',
   standalone: true,
   imports: [
-    SharedCommonModule,CommonModule, FormsModule],
+    SharedCommonModule,CommonModule, FormsModule, DragDropModule],
   templateUrl: './chat-widget.component.html',
   styleUrls: ['./chat-widget.component.scss']
 })

@@ -1,6 +1,6 @@
-<div class="chat-widget-container">
+<div class="chat-widget-container" cdkDrag cdkDragBoundary="#page-content-boundary">
   <div class="chat-window" [class.open]="isOpen" *ngIf="isOpen">
-    <div class="chat-header">
+    <div class="chat-header" cdkDragHandle style="cursor: move;">
       <div class="chat-header-content">
         <div class="chat-title">
           <span class="header-avatar">
@@ -12,10 +12,12 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="header-icon-btn" (click)="clearChat()" *ngIf="messages.length > 0" aria-label="Clear chat" title="Clear chat">
+          <button class="header-icon-btn" (click)="clearChat()" *ngIf="messages.length > 0" aria-label="Clear chat"
+            title="Clear chat">
             <i class="pi pi-trash"></i>
           </button>
-          <button class="header-icon-btn" (click)="navigateToAiAssistant()" aria-label="Open full page" title="Open in full page">
+          <button class="header-icon-btn" (click)="navigateToAiAssistant()" aria-label="Open full page"
+            title="Open in full page">
             <i class="pi pi-external-link"></i>
           </button>
           <button class="header-icon-btn close-button" (click)="closeChat()" aria-label="Close chat">
@@ -34,7 +36,8 @@
         <p class="hint">Leave, payroll, attendance, policies, and more.</p>
       </div>
 
-      <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'" [class.ai]="message.sender === 'ai'">
+      <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'"
+        [class.ai]="message.sender === 'ai'">
         <div class="message-avatar" *ngIf="message.sender === 'ai'">
           <i class="pi pi-comments"></i>
         </div>
@@ -45,10 +48,7 @@
                 <ng-container [ngSwitch]="part.type">
                   <span *ngSwitchCase="'text'">{{ part.content }}</span>
                   <br *ngSwitchCase="'linebreak'" />
-                  <button
-                    *ngSwitchCase="'url'"
-                    class="message-link-button"
-                    (click)="navigateToUrl(part.url!)"
+                  <button *ngSwitchCase="'url'" class="message-link-button" (click)="navigateToUrl(part.url!)"
                     type="button">
                     <i class="pi pi-arrow-up-right"></i>
                     <span>{{ part.content }}</span>
@@ -78,31 +78,18 @@
 
     <div class="chat-input-container">
       <div class="input-shell">
-        <textarea
-          class="chat-input"
-          [(ngModel)]="newMessage"
-          (keydown)="onKeyPress($event)"
-          placeholder="Message AI Assistant..."
-          rows="1"
-          [disabled]="isLoading">
+        <textarea class="chat-input" [(ngModel)]="newMessage" (keydown)="onKeyPress($event)"
+          placeholder="Message AI Assistant..." rows="1" [disabled]="isLoading">
         </textarea>
-        <button
-          class="send-button"
-          (click)="sendMessage()"
-          [disabled]="!newMessage.trim() || isLoading"
-          [class.active]="newMessage.trim()"
-          aria-label="Send message">
+        <button class="send-button" (click)="sendMessage()" [disabled]="!newMessage.trim() || isLoading"
+          [class.active]="newMessage.trim()" aria-label="Send message">
           <i class="pi" [ngClass]="isLoading ? 'pi-spin pi-spinner' : 'pi-send'"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <button
-    class="chat-button"
-    (click)="toggleChat()"
-    [class.open]="isOpen"
-    aria-label="Open chat">
+  <button class="chat-button" cdkDragHandle (click)="toggleChat()" [class.open]="isOpen" aria-label="Open chat">
     <i class="pi pi-comments" *ngIf="!isOpen"></i>
     <i class="pi pi-times" *ngIf="isOpen"></i>
   </button>

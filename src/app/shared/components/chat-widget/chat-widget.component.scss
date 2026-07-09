@@ -16,6 +16,10 @@ $slate-900: #0f172a;
   font-family: 'Public Sans', 'Inter', sans-serif;
 }
 
+::ng-deep .chat-widget-container.cdk-drag-placeholder {
+  display: none !important;
+}
+
 .chat-button {
   width: 58px;
   height: 58px;
