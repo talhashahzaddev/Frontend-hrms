@@ -11,10 +11,10 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import {
   PayrollService,
-  SocialSecurityAuthorityOption,
-  SocialSecurityJurisdictionOption,
   SocialSecurityRuleOption,
-  SocialSecuritySchemeOption
+  SocialSecurityClaim,
+  SocialSecurityEnrollmentRequest,
+  SocialSecurityEnrollmentRoster
 } from '../../services/payroll.service';
 import {
   AddSocialSecurityTransactionDialogComponent,
@@ -29,39 +29,18 @@ import {
   SocialSecurityBulkAssignDialogPayload
 } from '../dialogs/add-social-security-bulk-assign-dialog/add-social-security-bulk-assign-dialog.component';
 import {
-  AddSocialSecurityJurisdictionDialogComponent,
-  SocialSecurityJurisdictionDialogPayload
-} from '../dialogs/add-social-security-jurisdiction-dialog/add-social-security-jurisdiction-dialog.component';
-import {
-  AddSocialSecurityAuthorityDialogComponent,
-  SocialSecurityAuthorityDialogPayload
-} from '../dialogs/add-social-security-authority-dialog/add-social-security-authority-dialog.component';
-import {
-  AddSocialSecuritySchemeDialogComponent,
-  SocialSecuritySchemeDialogPayload
-} from '../dialogs/add-social-security-scheme-dialog/add-social-security-scheme-dialog.component';
-import {
-  AddSocialSecurityRuleDialogComponent,
-  SocialSecurityRuleDialogPayload
-} from '../dialogs/add-social-security-rule-dialog/add-social-security-rule-dialog.component';
-import {
   SocialSecurityAdminActionDialogComponent,
   SocialSecurityAdminActionDialogData,
   SocialSecurityAdminActionResult
 } from '../dialogs/social-security-admin-action-dialog/social-security-admin-action-dialog.component';
-import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import {
   SocialSecurityDocumentsDialogComponent,
   SocialSecurityDocumentsDialogData
 } from '../dialogs/social-security-documents-dialog/social-security-documents-dialog.component';
-import {
-  SocialSecurityClaim,
-  SocialSecurityEnrollmentRequest,
-  SocialSecurityEnrollmentRoster
-} from '../../services/payroll.service';
+import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
-type SocialTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules' | 'requests' | 'enrollments' | 'transactions' | 'claims';
+type SocialTab = 'requests' | 'enrollments' | 'transactions' | 'claims';
 
 interface SocialTransactionRow {
   id: string;
@@ -100,13 +79,8 @@ export class SocialSecurityComponent implements OnInit {
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
-  currentTab: SocialTab = 'jurisdictions';
+  currentTab: SocialTab = 'transactions';
 
-  isMasterLoading = false;
-
-  jurisdictions: SocialSecurityJurisdictionOption[] = [];
-  authorities: SocialSecurityAuthorityOption[] = [];
-  schemes: SocialSecuritySchemeOption[] = [];
   rules: SocialSecurityRuleOption[] = [];
 
   transactionRows: SocialTransactionRow[] = [];
@@ -166,7 +140,7 @@ export class SocialSecurityComponent implements OnInit {
 
     this.loadEmployees();
     this.loadPeriods();
-    this.loadSocialMasterData();
+    this.loadRules();
     this.loadConfigOptions();
     this.loadSocialTransactions();
     this.loadEnrollmentRequests();
@@ -176,14 +150,6 @@ export class SocialSecurityComponent implements OnInit {
 
   get showPoliciesBackButton(): boolean {
     return this.router.url.includes('/payroll/policies/');
-  }
-
-  get jurisdictionsCount(): number {
-    return this.jurisdictions.length;
-  }
-
-  get authoritiesCount(): number {
-    return this.authorities.length;
   }
 
   get enrolledEmployeesCount(): number {
@@ -220,355 +186,6 @@ export class SocialSecurityComponent implements OnInit {
 
   goBackToPolicies(): void {
     this.router.navigate(['/payroll/policies']);
-  }
-
-  getJurisdictionName(jurisdictionId?: string): string {
-    return this.jurisdictions.find((item) => item.jurisdictionId === jurisdictionId)?.jurisdictionName ?? '-';
-  }
-
-  getAuthorityName(authorityId?: string): string {
-    return this.authorities.find((item) => item.authorityId === authorityId)?.authorityName ?? '-';
-  }
-
-  getSchemeName(schemeId?: string): string {
-    return this.schemes.find((item) => item.schemeId === schemeId)?.schemeName ?? '-';
-  }
-
-  openCreateJurisdictionDialog(): void {
-    this.openJurisdictionDialog('create');
-  }
-
-  openEditJurisdictionDialog(item: SocialSecurityJurisdictionOption): void {
-    this.openJurisdictionDialog('edit', item);
-  }
-
-  private openJurisdictionDialog(mode: 'create' | 'edit', item?: SocialSecurityJurisdictionOption): void {
-    const dialogRef = this.dialog.open(AddSocialSecurityJurisdictionDialogComponent, {
-      width: '560px',
-      maxWidth: '95vw',
-      panelClass: 'social-security-transaction-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        mode,
-        initialValue: item
-          ? {
-              jurisdictionCode: String(item.jurisdictionCode ?? ''),
-              jurisdictionName: String(item.jurisdictionName ?? ''),
-              countryCode: String(item.countryCode ?? ''),
-              currency: String(item.currency ?? ''),
-              isDefault: !!item.isDefault
-            }
-          : undefined
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((payload: SocialSecurityJurisdictionDialogPayload | undefined) => {
-      if (!payload) {
-        return;
-      }
-
-      const request$ = mode === 'edit' && item
-        ? this.payrollService.updateSocialSecurityJurisdiction(item.jurisdictionId, payload)
-        : this.payrollService.createSocialSecurityJurisdiction(payload);
-
-      request$.pipe(take(1)).subscribe({
-        next: () => {
-          this.notification.showSuccess(`Jurisdiction ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} jurisdiction.`));
-        }
-      });
-    });
-  }
-
-  deleteJurisdiction(item: SocialSecurityJurisdictionOption): void {
-    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
-      width: '420px',
-      panelClass: 'delete-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        title: 'Delete jurisdiction',
-        message: `Delete jurisdiction ${item.jurisdictionName}? This action cannot be undone.`,
-        confirmText: 'Delete jurisdiction'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (!confirmed) {
-        return;
-      }
-
-      this.payrollService.deleteSocialSecurityJurisdiction(item.jurisdictionId)
-        .pipe(take(1))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Jurisdiction deleted successfully.');
-            this.loadSocialMasterData();
-          },
-          error: (error) => {
-            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete jurisdiction.'));
-          }
-        });
-    });
-  }
-
-  openCreateAuthorityDialog(): void {
-    this.openAuthorityDialog('create');
-  }
-
-  openEditAuthorityDialog(item: SocialSecurityAuthorityOption): void {
-    this.openAuthorityDialog('edit', item);
-  }
-
-  private openAuthorityDialog(mode: 'create' | 'edit', item?: SocialSecurityAuthorityOption): void {
-    const dialogRef = this.dialog.open(AddSocialSecurityAuthorityDialogComponent, {
-      width: '560px',
-      maxWidth: '95vw',
-      panelClass: 'social-security-transaction-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        mode,
-        jurisdictions: this.jurisdictions,
-        initialValue: item
-          ? {
-              jurisdictionId: String(item.jurisdictionId ?? ''),
-              authorityCode: String(item.authorityCode ?? ''),
-              authorityName: String(item.authorityName ?? ''),
-              portalUrl: String(item.portalUrl ?? ''),
-              remittanceFrequency: String(item.remittanceFrequency ?? '')
-            }
-          : undefined
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((payload: SocialSecurityAuthorityDialogPayload | undefined) => {
-      if (!payload) {
-        return;
-      }
-
-      const request$ = mode === 'edit' && item
-        ? this.payrollService.updateSocialSecurityAuthority(item.authorityId, payload)
-        : this.payrollService.createSocialSecurityAuthority(payload);
-
-      request$.pipe(take(1)).subscribe({
-        next: () => {
-          this.notification.showSuccess(`Authority ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} authority.`));
-        }
-      });
-    });
-  }
-
-  deleteAuthority(item: SocialSecurityAuthorityOption): void {
-    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
-      width: '420px',
-      panelClass: 'delete-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        title: 'Delete authority',
-        message: `Delete authority ${item.authorityName}? This action cannot be undone.`,
-        confirmText: 'Delete authority'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (!confirmed) {
-        return;
-      }
-
-      this.payrollService.deleteSocialSecurityAuthority(item.authorityId)
-        .pipe(take(1))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Authority deleted successfully.');
-            this.loadSocialMasterData();
-          },
-          error: (error) => {
-            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete authority.'));
-          }
-        });
-    });
-  }
-
-  openCreateSchemeDialog(): void {
-    this.openSchemeDialog('create');
-  }
-
-  openEditSchemeDialog(item: SocialSecuritySchemeOption): void {
-    this.openSchemeDialog('edit', item);
-  }
-
-  private openSchemeDialog(mode: 'create' | 'edit', item?: SocialSecuritySchemeOption): void {
-    const dialogRef = this.dialog.open(AddSocialSecuritySchemeDialogComponent, {
-      width: '640px',
-      maxWidth: '95vw',
-      panelClass: 'social-security-transaction-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        mode,
-        jurisdictions: this.jurisdictions,
-        authorities: this.authorities,
-        initialValue: item
-          ? {
-              jurisdictionId: String(item.jurisdictionId ?? ''),
-              authorityId: String(item.authorityId ?? ''),
-              schemeCode: String(item.schemeCode ?? ''),
-              schemeName: String(item.schemeName ?? ''),
-              schemeType: String(item.schemeType ?? ''),
-              mandatoryMode: String(item.mandatoryMode ?? '')
-            }
-          : undefined
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((payload: SocialSecuritySchemeDialogPayload | undefined) => {
-      if (!payload) {
-        return;
-      }
-
-      const request$ = mode === 'edit' && item
-        ? this.payrollService.updateSocialSecurityScheme(item.schemeId, payload)
-        : this.payrollService.createSocialSecurityScheme(payload);
-
-      request$.pipe(take(1)).subscribe({
-        next: () => {
-          this.notification.showSuccess(`Scheme ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} scheme.`));
-        }
-      });
-    });
-  }
-
-  deleteScheme(item: SocialSecuritySchemeOption): void {
-    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
-      width: '420px',
-      panelClass: 'delete-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        title: 'Delete scheme',
-        message: `Delete scheme ${item.schemeName}? This action cannot be undone.`,
-        confirmText: 'Delete scheme'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (!confirmed) {
-        return;
-      }
-
-      this.payrollService.deleteSocialSecurityScheme(item.schemeId)
-        .pipe(take(1))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Scheme deleted successfully.');
-            this.loadSocialMasterData();
-          },
-          error: (error) => {
-            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete scheme.'));
-          }
-        });
-    });
-  }
-
-  openCreateRuleDialog(): void {
-    this.openRuleDialog('create');
-  }
-
-  openEditRuleDialog(item: SocialSecurityRuleOption): void {
-    this.openRuleDialog('edit', item);
-  }
-
-  private openRuleDialog(mode: 'create' | 'edit', item?: SocialSecurityRuleOption): void {
-    const dialogRef = this.dialog.open(AddSocialSecurityRuleDialogComponent, {
-      width: '720px',
-      maxWidth: '95vw',
-      panelClass: 'social-security-transaction-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        mode,
-        schemes: this.schemes,
-        initialValue: item
-          ? {
-              schemeId: String(item.schemeId ?? ''),
-              ruleName: String(item.ruleName ?? ''),
-              contributionBasis: String(item.contributionBasis ?? 'gross'),
-              employeeDefaultPct: Number(item.employeeDefaultPct ?? 0),
-              employerDefaultPct: Number(item.employerDefaultPct ?? 0),
-              employeeFixedAmount: item.employeeFixedAmount == null ? null : Number(item.employeeFixedAmount),
-              employerFixedAmount: item.employerFixedAmount == null ? null : Number(item.employerFixedAmount),
-              minSalaryLimit: item.minSalaryLimit == null ? null : Number(item.minSalaryLimit),
-              maxSalaryLimit: item.maxSalaryLimit == null ? null : Number(item.maxSalaryLimit)
-            }
-          : undefined
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((payload: SocialSecurityRuleDialogPayload | undefined) => {
-      if (!payload) {
-        return;
-      }
-
-      const request$ = mode === 'edit' && item
-        ? this.payrollService.updateSocialSecurityRule(item.ruleId, payload)
-        : this.payrollService.createSocialSecurityRule(payload);
-
-      request$.pipe(take(1)).subscribe({
-        next: () => {
-          this.notification.showSuccess(`Rule ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} rule.`));
-        }
-      });
-    });
-  }
-
-  deleteRule(item: SocialSecurityRuleOption): void {
-    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
-      width: '420px',
-      panelClass: 'delete-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        title: 'Delete rule',
-        message: `Delete rule ${item.ruleName}? This action cannot be undone.`,
-        confirmText: 'Delete rule'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (!confirmed) {
-        return;
-      }
-
-      this.payrollService.deleteSocialSecurityRule(item.ruleId)
-        .pipe(take(1))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Rule deleted successfully.');
-            this.loadSocialMasterData();
-          },
-          error: (error) => {
-            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete rule.'));
-          }
-        });
-    });
   }
 
   hasPendingTransactionFilters(): boolean {
@@ -896,45 +513,38 @@ export class SocialSecurityComponent implements OnInit {
     });
   }
 
-  private loadSocialMasterData(): void {
-    this.isMasterLoading = true;
+  private loadRules(): void {
+    this.payrollService.getSocialSecurityRules().pipe(take(1)).subscribe({
+      next: (rules: any) => {
+        this.rules = (rules ?? []).map((item: any) => ({
+          ruleId: String(item.ruleId ?? ''),
+          schemeId: String(item.schemeId ?? ''),
+          ruleName: String(item.ruleName ?? ''),
+          contributionBasis: item.contributionBasis ? String(item.contributionBasis) : undefined,
+          employeeDefaultPct: item.employeeDefaultPct == null ? undefined : Number(item.employeeDefaultPct),
+          employerDefaultPct: item.employerDefaultPct == null ? undefined : Number(item.employerDefaultPct),
+          employeeFixedAmount: item.employeeFixedAmount == null ? null : Number(item.employeeFixedAmount),
+          employerFixedAmount: item.employerFixedAmount == null ? null : Number(item.employerFixedAmount),
+          minSalaryLimit: item.minSalaryLimit == null ? null : Number(item.minSalaryLimit),
+          maxSalaryLimit: item.maxSalaryLimit == null ? null : Number(item.maxSalaryLimit)
+        })).filter((item: SocialSecurityRuleOption) => !!item.ruleId && !!item.ruleName);
 
-    forkJoin({
-      jurisdictions: this.payrollService.getSocialSecurityJurisdictions().pipe(catchError(() => of([]))),
-      authorities: this.payrollService.getSocialSecurityAuthorities().pipe(catchError(() => of([]))),
-      schemes: this.payrollService.getSocialSecuritySchemes().pipe(catchError(() => of([]))),
-      rules: this.payrollService.getSocialSecurityRules().pipe(catchError(() => of([])))
-    }).pipe(take(1)).subscribe(({ jurisdictions, authorities, schemes, rules }: any) => {
-      this.jurisdictions = [...(jurisdictions ?? [])];
-      this.authorities = [...(authorities ?? [])];
-      this.schemes = [...(schemes ?? [])];
-
-      this.rules = (rules ?? []).map((item: any) => ({
-        ruleId: String(item.ruleId ?? ''),
-        schemeId: String(item.schemeId ?? ''),
-        ruleName: String(item.ruleName ?? ''),
-        contributionBasis: item.contributionBasis ? String(item.contributionBasis) : undefined,
-        employeeDefaultPct: item.employeeDefaultPct == null ? undefined : Number(item.employeeDefaultPct),
-        employerDefaultPct: item.employerDefaultPct == null ? undefined : Number(item.employerDefaultPct),
-        employeeFixedAmount: item.employeeFixedAmount == null ? null : Number(item.employeeFixedAmount),
-        employerFixedAmount: item.employerFixedAmount == null ? null : Number(item.employerFixedAmount),
-        minSalaryLimit: item.minSalaryLimit == null ? null : Number(item.minSalaryLimit),
-        maxSalaryLimit: item.maxSalaryLimit == null ? null : Number(item.maxSalaryLimit)
-      })).filter((item: SocialSecurityRuleOption) => !!item.ruleId && !!item.ruleName);
-
-      this.ruleOptions = this.rules.map((rule) => ({
-        ruleId: rule.ruleId,
-        ruleName: rule.ruleName,
-        employeeDefaultPct: rule.employeeDefaultPct,
-        employerDefaultPct: rule.employerDefaultPct,
-        employeeFixedAmount: rule.employeeFixedAmount,
-        employerFixedAmount: rule.employerFixedAmount,
-        minSalaryLimit: rule.minSalaryLimit,
-        maxSalaryLimit: rule.maxSalaryLimit,
-        contributionBasis: rule.contributionBasis
-      }));
-
-      this.isMasterLoading = false;
+        this.ruleOptions = this.rules.map((rule) => ({
+          ruleId: rule.ruleId,
+          ruleName: rule.ruleName,
+          employeeDefaultPct: rule.employeeDefaultPct,
+          employerDefaultPct: rule.employerDefaultPct,
+          employeeFixedAmount: rule.employeeFixedAmount,
+          employerFixedAmount: rule.employerFixedAmount,
+          minSalaryLimit: rule.minSalaryLimit,
+          maxSalaryLimit: rule.maxSalaryLimit,
+          contributionBasis: rule.contributionBasis
+        }));
+      },
+      error: () => {
+        this.rules = [];
+        this.ruleOptions = [];
+      }
     });
   }
 

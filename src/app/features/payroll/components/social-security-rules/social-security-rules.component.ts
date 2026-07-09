@@ -1,12 +1,15 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
 
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   PayrollService,
   SocialSecurityRuleOption,
@@ -18,13 +21,14 @@ import {
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
-
 import { SharedCommonModule } from '@shared/shared-common.module';
+
 @Component({
   selector: 'app-social-security-rules',
   standalone: true,
   imports: [
-    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule],
+    SharedCommonModule, CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule
+  ],
   templateUrl: './social-security-rules.component.html',
   styleUrl: './social-security-rules.component.scss'
 })
@@ -33,6 +37,14 @@ export class SocialSecurityRulesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
+
+  readonly ssTabs = [
+    { key: 'jurisdictions', label: 'Jurisdictions', route: '/payroll/policies/social-security-jurisdictions' },
+    { key: 'authorities', label: 'Authorities', route: '/payroll/policies/social-security-authorities' },
+    { key: 'schemes', label: 'Schemes', route: '/payroll/policies/social-security-schemes' },
+    { key: 'rules', label: 'Rules', route: '/payroll/policies/social-security-rules' }
+  ];
 
   readonly rules = signal<SocialSecurityRuleOption[]>([]);
   readonly schemes = signal<SocialSecuritySchemeOption[]>([]);
@@ -47,7 +59,10 @@ export class SocialSecurityRulesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'social_security_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchRules(): void {
@@ -77,17 +92,20 @@ export class SocialSecurityRulesComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/payroll/policies']);
+    this.router.navigate(['/payroll/social-security']);
+  }
+
+  navigateToTab(route: string): void {
+    this.router.navigate([route]);
   }
 
   getSchemeName(schemeId?: string): string {
-    if (!schemeId) {
-      return '-';
-    }
+    if (!schemeId) return '-';
     return this.schemeMap().get(String(schemeId)) ?? '-';
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('social_security_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -102,6 +120,7 @@ export class SocialSecurityRulesComponent implements OnInit {
   }
 
   editRule(rule: SocialSecurityRuleOption): void {
+    if (!this.hasPermission('social_security_rule_edit')) return;
     if (!(rule.isActive ?? true)) {
       this.notification.showError('Enable this rule before editing.');
       return;
@@ -129,6 +148,7 @@ export class SocialSecurityRulesComponent implements OnInit {
   }
 
   onToggleStatus(rule: SocialSecurityRuleOption): void {
+    if (!this.hasPermission('social_security_rule_edit')) return;
     if (!rule?.ruleId) {
       this.notification.showError('Unable to toggle status for this rule.');
       return;
@@ -164,6 +184,7 @@ export class SocialSecurityRulesComponent implements OnInit {
   }
 
   onDelete(rule: SocialSecurityRuleOption): void {
+    if (!this.hasPermission('social_security_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Rule',
       message: 'Are you sure you want to delete this social security rule?',
@@ -178,10 +199,7 @@ export class SocialSecurityRulesComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result !== true) {
-        return;
-      }
-
+      if (result !== true) return;
       this.payrollService.deleteSocialSecurityRule(rule.ruleId).pipe(take(1)).subscribe({
         next: () => {
           this.notification.showSuccess('Rule deleted successfully');
@@ -193,5 +211,9 @@ export class SocialSecurityRulesComponent implements OnInit {
         }
       });
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

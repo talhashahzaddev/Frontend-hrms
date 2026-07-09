@@ -125,7 +125,7 @@ export class RuleDialogComponent implements OnInit {
   readonly socialSecurityAuthorities = signal<SocialSecurityAuthorityOption[]>([]);
   readonly socialSecuritySchemes = signal<SocialSecuritySchemeOption[]>([]);
   readonly socialSecurityRulesList = signal<any[]>([]);
-  readonly socialMode = signal<'select-existing' | 'create-new'>('select-existing');
+  readonly socialMode = signal<'select-existing' | 'create-new'>('create-new');
 
   get isEditMode(): boolean {
     return this.data?.mode === 'edit';
@@ -183,8 +183,7 @@ export class RuleDialogComponent implements OnInit {
     socialMaxSalaryLimit: [null as number | null],
     socialAnnualSalaryCap: [null as number | null],
     socialEffectiveFrom: [null as Date | null],
-    socialEffectiveTo: [null as Date | null],
-    socialSelectedRuleId: ['']
+    socialEffectiveTo: [null as Date | null]
   }, {
     validators: [this.socialSecurityDateRangeValidator()]
   });
@@ -655,21 +654,6 @@ export class RuleDialogComponent implements OnInit {
       error: () => {
         this.socialSecuritySchemes.set([]);
         this.notification.showError('Unable to load social security schemes.');
-      }
-    });
-
-    this.payrollService.getSocialSecurityRules().pipe(take(1)).subscribe({
-      next: (rules) => {
-        const list = (rules ?? []).filter((r: any) => (r?.isActive ?? true));
-        this.socialSecurityRulesList.set(list);
-        // If no existing rules, default to create mode so admins aren't stuck on an empty dropdown.
-        if (list.length === 0) {
-          this.socialMode.set('create-new');
-        }
-      },
-      error: () => {
-        this.socialSecurityRulesList.set([]);
-        this.socialMode.set('create-new');
       }
     });
   }
@@ -1207,21 +1191,6 @@ export class RuleDialogComponent implements OnInit {
           }
         });
     } else if (formValue.selectedPolicy === 11) { // 11 is Social Security Policy
-      if (this.socialMode() === 'select-existing') {
-        const existingRuleId = String(formValue.socialSelectedRuleId ?? '').trim();
-        if (!existingRuleId) {
-          this.isSubmitting.set(false);
-          this.notification.showError('Please pick an existing rule or switch to "Create new rule".');
-          return;
-        }
-        const selected = this.socialSecurityRulesList().find((r) => String(r.ruleId) === existingRuleId);
-        this.isSubmitting.set(false);
-        this.notification.showSuccess('Social security policy linked to existing rule.');
-        this.dialogRef.close({ success: true, data: selected, policyId: 11, mode: 'existing' });
-        return;
-      }
-
-      // create-new mode: re-use the existing form fields and the same create endpoint
       if (this.ruleForm.hasError('socialInvalidDateRange')) {
         this.ruleForm.get('socialEffectiveFrom')?.markAsTouched();
         this.ruleForm.get('socialEffectiveTo')?.markAsTouched();
