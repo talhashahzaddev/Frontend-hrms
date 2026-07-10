@@ -9,8 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 
-
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { MatDividerModule } from '@angular/material/divider';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-news-view',
   standalone: true,
@@ -19,7 +21,10 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     CommonModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule,
+    MatButtonModule,
+    PageHeaderComponent
   ],
   templateUrl: './news-view.component.html',
   styleUrls: ['./news-view.component.scss'],

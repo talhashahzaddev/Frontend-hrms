@@ -1,700 +1,329 @@
-// News Dashboard - Modern Clean Design (Reference-based)
-.news-dashboard-container {
-  padding: 32px;
-  max-width: 100%;
-  margin: 0 auto;
-  background: #F9FAFB;
+// News Dashboard Styles — Slate/Blue Design System
+
+$primary: #2563eb;
+$primary-hover: #1d4ed8;
+$primary-light: #eff6ff;
+$success: #16a34a;
+$success-light: #dcfce7;
+$border: #e2e8f0;
+$surface: #f8fafc;
+$text: #0f172a;
+$text-secondary: #64748b;
+$text-muted: #94a3b8;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+.ts-page-layout {
+  padding: 24px;
+  background: $surface;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
-  // Filters Section
-  .filters-section {
-    margin-bottom: 32px;
+// ── Card defaults ─────────────────────────────────────────────────────────────
+.ts-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid $border;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
 
-    .filters-card {
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      border: 1px solid #E5E7EB;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+// ── Filters Section ───────────────────────────────────────────────────────────
+.nd-filters-card {
+  padding: 20px 24px;
+}
 
-      .filters-header {
-        border-bottom: 1px solid #E5E7EB;
-        padding-bottom: 24px;
-        margin-bottom: 24px;
+.nd-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 
-        .filters-title {
-          font-size: 24px;
-          font-weight: 700;
-          color: #1F2937;
-          margin: 0 0 4px 0;
-          line-height: 1.3;
-        }
+  .flex-grow { flex: 1; min-width: 250px; max-width: 400px; }
+  .width-sm { width: 180px; flex-shrink: 0; }
+}
 
-        .filters-subtitle {
-          font-size: 14px;
-          color: #6B7280;
-          margin: 0;
-        }
-      }
+.nd-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-      .filters-content {
-        .filters-form {
-          .filters-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px;
+// Mat form field overrides for filters
+::ng-deep .nd-mat-field {
+  .mat-mdc-text-field-wrapper {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 0 16px !important;
+    border: 1px solid $border !important;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .mdc-notched-outline { display: none !important; }
+  .mat-mdc-form-field-infix {
+    min-height: 42px !important;
+    padding: 0 8px !important;
+    display: flex;
+    align-items: center;
+    border: none !important;
+  }
+  .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+  input.mat-mdc-input-element { height: 42px !important; padding: 0; font-size: 0.875rem; color: $text; }
+  .mat-mdc-select-value { font-size: 0.875rem; color: $text; }
+  mat-icon[matPrefix] { color: $text-muted; font-size: 20px; width: 20px; height: 20px; margin-right: 8px; }
 
-            .search-field-wrapper {
-              position: relative;
-              flex: 1 1 280px;
-              min-width: 280px;
-              max-width: 400px;
+  &:hover .mat-mdc-text-field-wrapper { border-color: $text-muted !important; }
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    border-color: $primary !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
 
-              .search-icon {
-                position: absolute;
-                left: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #6B7280;
-                font-size: 20px;
-                width: 20px;
-                height: 20px;
-                pointer-events: none;
-              }
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.btn-submit {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 42px !important;
+  padding: 0 20px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: $primary !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.28) !important;
+  border: none !important;
+  cursor: pointer;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover:not(:disabled) { background: $primary-hover !important; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
 
-              .search-input {
-                width: 100%;
-                padding: 8px 16px 8px 40px;
-                background: #F9FAFB;
-                border: 1px solid #E5E7EB;
-                border-radius: 8px;
-                font-size: 14px;
-                color: #1F2937;
-                transition: all 0.2s;
+.btn-cancel {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 42px !important;
+  padding: 0 20px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid $border !important;
+  cursor: pointer;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover:not(:disabled) { background: $surface !important; }
+  &:disabled { opacity: 0.5; }
+}
 
-                &:focus {
-                  outline: none;
-                  border-color: #4F46E5;
-                  ring: 2px;
-                  ring-color: rgba(79, 70, 229, 0.1);
-                  background: white;
-                }
+// ── Table ─────────────────────────────────────────────────────────────────────
+.nd-table-card {
+  display: flex;
+  flex-direction: column;
+}
 
-                &::placeholder {
-                  color: #9CA3AF;
-                }
-              }
-            }
+.nd-table-container {
+  position: relative;
+  overflow-x: auto;
+  border-bottom: 1px solid $border;
+}
 
-            .select-wrapper {
-              position: relative;
-              width: 160px;
-              flex-shrink: 0;
+.ts-table {
+  width: 100%;
+  background: #ffffff;
+  border-collapse: separate;
+  border-spacing: 0;
 
-              .custom-select {
-                width: 100%;
-                padding: 8px 36px 8px 12px;
-                background: #F9FAFB;
-                border: 1px solid #E5E7EB;
-                border-radius: 8px;
-                font-size: 14px;
-                color: #1F2937;
-                appearance: none;
-                cursor: pointer;
-                transition: all 0.2s;
-
-                &:focus {
-                  outline: none;
-                  border-color: #4F46E5;
-                  ring: 2px;
-                  ring-color: rgba(79, 70, 229, 0.1);
-                  background: white;
-                }
-              }
-
-              .select-arrow {
-                position: absolute;
-                right: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #6B7280;
-                pointer-events: none;
-                font-size: 20px;
-                width: 20px;
-                height: 20px;
-              }
-            }
-
-            .filter-actions {
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              flex-shrink: 0;
-
-              .btn-primary {
-                background: #4F46E5;
-                color: white;
-                padding: 8px 16px;
-                border-radius: 8px;
-                border: none;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-                white-space: nowrap;
-
-                &:hover {
-                  background: #4338CA;
-                }
-
-                &:active {
-                  transform: scale(0.98);
-                }
-              }
-
-              .btn-secondary {
-                background: white;
-                color: #1F2937;
-                padding: 8px 16px;
-                border-radius: 8px;
-                border: 1px solid #E5E7EB;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-                white-space: nowrap;
-
-                &:hover:not(:disabled) {
-                  background: #F9FAFB;
-                }
-
-                &:disabled {
-                  opacity: 0.5;
-                  cursor: not-allowed;
-                }
-
-                &:active:not(:disabled) {
-                  transform: scale(0.98);
-                }
-              }
-            }
-
-            .create-button-wrapper {
-              margin-left: auto;
-              flex-shrink: 0;
-
-              .btn-create {
-                background: #4F46E5;
-                color: white;
-                padding: 10px 20px;
-                border-radius: 8px;
-                border: none;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                transition: all 0.2s;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-                white-space: nowrap;
-
-                mat-icon {
-                  font-size: 20px;
-                  width: 20px;
-                  height: 20px;
-                }
-
-                &:hover {
-                  background: #4338CA;
-                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }
-
-                &:active {
-                  transform: scale(0.98);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  th.mat-mdc-header-cell {
+    background: #f8fafc;
+    color: $text-secondary;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 24px;
+    border-bottom: 1px solid $border;
   }
 
-  // Table Section
-  .table-section {
-    .table-card {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 12px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
+  td.mat-mdc-cell {
+    padding: 16px 24px;
+    border-bottom: 1px solid $border;
+    vertical-align: middle;
+  }
 
-      .table-wrapper {
-        position: relative;
-        overflow-x: auto;
+  .ts-row-hover:hover td {
+    background: #f1f5f9;
+    cursor: pointer;
+  }
+}
 
-        .news-table {
-          width: 100%;
-          border-collapse: collapse;
+// Table cell contents
+.nd-title-link {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: $text;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 4px;
+  &:hover { color: $primary; }
+}
 
-          ::ng-deep {
-            .mat-mdc-header-row {
-              background: #F9FAFB;
-              border-bottom: 1px solid #E5E7EB;
+.nd-author {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: $text-secondary;
+}
 
-              .mat-mdc-header-cell {
-                font-size: 11px;
-                font-weight: 700;
-                color: #6B7280;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                padding: 16px 24px;
-                border-bottom: none;
+.nd-date {
+  font-size: 0.875rem;
+  color: $text-secondary;
+}
 
-                &.actions-header {
-                  text-align: right;
-                }
-              }
-            }
+.nd-visible-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: $surface;
+  border: 1px solid $border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
 
-            .mat-mdc-row {
-              transition: background-color 0.2s;
-              cursor: pointer;
-              border-bottom: 1px solid #E5E7EB;
+// ── Chips ─────────────────────────────────────────────────────────────────────
+.ts-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: $surface;
+  color: $text-secondary;
+  border: 1px solid $border;
 
-              &:hover {
-                background: rgba(249, 250, 251, 0.8);
-              }
+  .ts-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: $text-muted;
+  }
 
-              &.row-unread {
-                background: rgba(229, 231, 235, 0.3);
+  &.ts-chip-published {
+    background: $success-light; border-color: transparent; color: $success;
+    .ts-dot { background: $success; }
+  }
+  &.ts-chip-draft {
+    background: #f1f5f9;
+  }
+  &.ts-chip-announcement, &.ts-chip-company {
+    background: $primary-light; border-color: transparent; color: $primary;
+    .ts-dot { background: $primary; }
+  }
+  &.ts-chip-policy {
+    background: #fef3c7; border-color: transparent; color: #d97706;
+    .ts-dot { background: #d97706; }
+  }
+}
 
-                &:hover {
-                  background: rgba(229, 231, 235, 0.5);
-                }
-              }
+// ── Toggles ───────────────────────────────────────────────────────────────────
+.ts-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  
+  input { display: none; }
+  
+  .ts-toggle-track {
+    width: 36px; height: 20px; border-radius: 10px;
+    background: #cbd5e1;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .ts-toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+  
+  input:checked + .ts-toggle-track {
+    background: $success;
+    .ts-toggle-thumb { transform: translateX(16px); }
+  }
 
-              &.row-read {
-                background: white;
-              }
+  .ts-toggle-label {
+    font-size: 0.8125rem; font-weight: 600; color: $text-secondary;
+  }
+  &.ts-toggle-active .ts-toggle-label { color: $success; }
+}
 
-              .mat-mdc-cell {
-                padding: 20px 24px;
-                font-size: 14px;
-                color: #1F2937;
-                border-bottom: none;
+// ── Actions Menu ──────────────────────────────────────────────────────────────
+.ts-action-btn {
+  width: 32px !important; height: 32px !important;
+  color: $text-muted !important;
+  &:hover { background: #f1f5f9 !important; color: $text !important; }
+}
 
-                &.actions-cell {
-                  text-align: right;
-                }
-              }
-            }
-          }
-
-          // Title Column Styling
-          .news-title-link {
-            font-size: 14px;
-            font-weight: 700;
-            color: #4F46E5;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-
-            &:hover {
-              text-decoration: underline;
-              text-decoration-color: rgba(79, 70, 229, 0.3);
-            }
-          }
-
-          .news-author {
-            font-size: 12px;
-            color: #6B7280;
-            margin: 4px 0 0 0;
-          }
-
-          // Category Badge
-          .category-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-
-            &.category-announcement {
-              background: rgba(59, 130, 246, 0.1);
-              color: #2563EB;
-            }
-
-            &.category-event {
-              background: rgba(16, 185, 129, 0.1);
-              color: #059669;
-            }
-
-            &.category-culture {
-              background: rgba(168, 85, 247, 0.1);
-              color: #9333EA;
-            }
-          }
-
-          // Status Toggle
-          .status-toggle {
-            display: inline-flex;
-            align-items: center;
-            cursor: pointer;
-            gap: 12px;
-
-            .toggle-checkbox {
-              position: absolute;
-              opacity: 0;
-              width: 0;
-              height: 0;
-            }
-
-            .toggle-switch {
-              position: relative;
-              width: 36px;
-              height: 20px;
-              background: #CBD5E1;
-              border-radius: 9999px;
-              transition: background-color 0.3s;
-
-              .toggle-dot {
-                position: absolute;
-                top: 2px;
-                left: 2px;
-                width: 16px;
-                height: 16px;
-                background: white;
-                border-radius: 50%;
-                transition: transform 0.3s;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-              }
-            }
-
-            .toggle-checkbox:checked + .toggle-switch {
-              background: #10B981;
-
-              .toggle-dot {
-                transform: translateX(16px);
-              }
-            }
-
-            .toggle-checkbox:disabled + .toggle-switch {
-              opacity: 0.4;
-              cursor: not-allowed;
-            }
-
-            .toggle-text {
-              font-size: 12px;
-              font-weight: 500;
-              color: #6B7280;
-              transition: color 0.3s;
-
-              &.text-active {
-                color: #1F2937;
-              }
-            }
-          }
-
-          // Read-only Status
-          .status-text {
-            display: inline-block;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 4px;
-
-            &.status-published {
-              background: rgba(16, 185, 129, 0.1);
-              color: #059669;
-            }
-
-            &.status-draft {
-              background: rgba(251, 146, 60, 0.1);
-              color: #D97706;
-            }
-          }
-
-          // Date Text
-          .date-text {
-            font-size: 14px;
-            color: #6B7280;
-          }
-
-          // Visibility Icons
-          .visible-icons {
-            display: flex;
-            align-items: center;
-            gap: -4px;
-
-            .icon-circle {
-              width: 24px;
-              height: 24px;
-              border-radius: 50%;
-              background: #F3F4F6;
-              border: 2px solid white;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-
-              mat-icon {
-                font-size: 14px;
-                width: 14px;
-                height: 14px;
-                color: #6B7280;
-              }
-            }
-          }
-
-          // Action Menu Button
-          .action-menu-btn {
-            background: transparent;
-            border: none;
-            padding: 6px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            color: #6B7280;
-
-            mat-icon {
-              font-size: 20px;
-              width: 20px;
-              height: 20px;
-            }
-
-            &:hover {
-              background: #F3F4F6;
-            }
-          }
-        }
-
-        .loading-spinner {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 10;
-        }
-      }
-
-      // Pagination
-      .pagination-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 24px;
-        background: white;
-        border-top: 1px solid #E5E7EB;
-
-        .pagination-left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-
-          .pagination-label {
-            font-size: 14px;
-            color: #6B7280;
-          }
-
-          .pagination-select-wrapper {
-            position: relative;
-
-            .pagination-select {
-              padding: 6px 32px 6px 8px;
-              background: #F9FAFB;
-              border: 1px solid #E5E7EB;
-              border-radius: 8px;
-              font-size: 12px;
-              font-weight: 500;
-              color: #1F2937;
-              appearance: none;
-              cursor: pointer;
-              transition: all 0.2s;
-
-              &:focus {
-                outline: none;
-                border-color: #4F46E5;
-              }
-            }
-
-            .pagination-arrow {
-              position: absolute;
-              right: 6px;
-              top: 50%;
-              transform: translateY(-50%);
-              color: #6B7280;
-              pointer-events: none;
-              font-size: 16px;
-              width: 16px;
-              height: 16px;
-            }
-          }
-        }
-
-        .pagination-right {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-
-          .pagination-info {
-            font-size: 14px;
-            color: #6B7280;
-            font-weight: 500;
-          }
-
-          .pagination-buttons {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-
-            .pagination-btn {
-              background: transparent;
-              border: none;
-              padding: 6px;
-              border-radius: 8px;
-              cursor: pointer;
-              transition: background-color 0.2s;
-              color: #1F2937;
-
-              mat-icon {
-                font-size: 20px;
-                width: 20px;
-                height: 20px;
-              }
-
-              &:hover:not(:disabled) {
-                background: #F3F4F6;
-              }
-
-              &:disabled {
-                opacity: 0.3;
-                cursor: not-allowed;
-              }
-            }
-          }
-        }
-      }
+::ng-deep .ts-action-menu {
+  min-width: 160px !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+  
+  .mat-mdc-menu-item {
+    min-height: 36px !important;
+    border-radius: 6px !important;
+    font-size: 0.875rem !important;
+    color: $text !important;
+    mat-icon { margin-right: 8px !important; color: $text-secondary !important; }
+    
+    &:hover { background: #f8fafc !important; }
+    &.ts-menu-danger {
+      color: #dc2626 !important;
+      mat-icon { color: #dc2626 !important; }
+      &:hover { background: #fef2f2 !important; }
     }
   }
 }
 
-// Responsive Design
-@media (max-width: 1200px) {
-  .news-dashboard-container {
-    .filters-section .filters-card .filters-content .filters-form .filters-inputs {
-      flex-wrap: wrap;
-    }
-  }
+// ── States ────────────────────────────────────────────────────────────────────
+.ts-loading-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
 }
 
-@media (max-width: 768px) {
-  .news-dashboard-container {
-    padding: 16px;
+.ts-empty-state {
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 
-    .filters-section {
-      margin-bottom: 16px;
-
-      .filters-card {
-        padding: 16px;
-
-        .filters-header {
-          padding-bottom: 16px;
-          margin-bottom: 16px;
-
-          .filters-title {
-            font-size: 20px;
-          }
-
-          .filters-subtitle {
-            font-size: 13px;
-          }
-        }
-
-        .filters-content {
-          .filters-form {
-            .filters-row {
-              flex-direction: column;
-              align-items: stretch;
-              gap: 12px;
-
-              .search-field-wrapper {
-                width: 100%;
-                min-width: 0;
-                max-width: none;
-              }
-
-              .select-wrapper {
-                width: 100%;
-              }
-
-              .filter-actions {
-                width: 100%;
-                
-                .btn-primary,
-                .btn-secondary {
-                  flex: 1;
-                }
-              }
-
-              .create-button-wrapper {
-                width: 100%;
-                margin-left: 0;
-
-                .btn-create {
-                  width: 100%;
-                  justify-content: center;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    .table-section {
-      .table-card {
-        .table-wrapper {
-          .news-table {
-            ::ng-deep {
-              .mat-mdc-header-cell,
-              .mat-mdc-cell {
-                padding: 12px 16px;
-                font-size: 13px;
-              }
-            }
-
-            .news-title-link {
-              font-size: 13px;
-            }
-
-            .news-author {
-              font-size: 11px;
-            }
-
-            .category-badge {
-              font-size: 9px;
-              padding: 3px 8px;
-            }
-          }
-        }
-
-        .pagination-container {
-          flex-direction: column;
-          gap: 16px;
-          align-items: flex-start;
-          padding: 16px;
-
-          .pagination-left,
-          .pagination-right {
-            width: 100%;
-            justify-content: space-between;
-          }
-        }
-      }
-    }
+  .ts-empty-icon {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: #f1f5f9; color: $text-muted;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    mat-icon { font-size: 32px; width: 32px; height: 32px; }
   }
+
+  h3 { margin: 0 0 8px; font-size: 1.125rem; font-weight: 600; color: $text; }
+  p { margin: 0; font-size: 0.875rem; color: $text-secondary; max-width: 300px; }
+  .mt-3 { margin-top: 16px; }
+}
+
+// ── Paginator ─────────────────────────────────────────────────────────────────
+::ng-deep .ts-paginator {
+  background: transparent !important;
+  border-radius: 0 0 12px 12px;
+  .mat-mdc-paginator-container { min-height: 52px; padding: 0 16px; }
+  .mat-mdc-paginator-range-label { font-size: 0.875rem; color: $text-secondary; }
+  .mat-mdc-paginator-page-size-label { font-size: 0.875rem; color: $text-secondary; }
 }

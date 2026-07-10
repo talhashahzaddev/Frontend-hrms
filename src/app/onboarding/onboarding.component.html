@@ -16,99 +16,128 @@
 
       <div class="card two-col-card">
         <div class="photo-panel" *ngIf="isFieldEnabled('Personal Information', 'Profile Photo')">
-          <div class="photo-circle" (click)="triggerFileInput()">
+          <div class="ob-file-upload-zone photo-zone" [class.has-file]="photoPreview" (click)="triggerFileInput()">
+            <input type="file" #photoInput accept="image/*" (change)="onFileSelected($event)" hidden />
             <img *ngIf="photoPreview" [src]="photoPreview" class="photo-img" alt="Profile" />
-            <span *ngIf="!photoPreview" class="photo-icon">👤</span>
+            
+            <div *ngIf="!photoPreview" class="upload-state">
+              <div class="upload-icon-wrapper"><mat-icon>add_a_photo</mat-icon></div>
+              <p class="upload-title">Upload Photo</p>
+              <p class="upload-hint">Professional headshot</p>
+            </div>
+
+            <div *ngIf="photoPreview" class="photo-overlay">
+              <mat-icon>edit</mat-icon>
+            </div>
           </div>
-          <p class="photo-label">Profile Photo <span class="req" *ngIf="isFieldRequired('Personal Information', 'Profile Photo')">*</span></p>
-          <p class="photo-hint">Please upload a professional headshot.</p>
-          <input type="file" #photoInput accept="image/*" (change)="onFileSelected($event)" hidden />
-          <button type="button" class="upload-btn" (click)="triggerFileInput()">Upload Image</button>
+          <span class="req-indicator" *ngIf="isFieldRequired('Personal Information', 'Profile Photo')">* Required</span>
         </div>
 
         <div class="fields-panel">
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Full Name')">
-              <label class="field-label">FULL NAME <span class="req" *ngIf="isFieldRequired('Personal Information', 'Full Name')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. Alexander Graham"
-                     [(ngModel)]="form.fullName" name="fullName" />
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Job Title')">
-              <label class="field-label">JOB TITLE <span class="req" *ngIf="isFieldRequired('Personal Information', 'Job Title')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. Senior UX Designer"
-                     [(ngModel)]="form.jobTitle" name="jobTitle" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Full Name')">
+              <mat-label>Full Name</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput type="text" placeholder="e.g. Alexander Graham"
+                     [(ngModel)]="form.fullName" name="fullName" [required]="isFieldRequired('Personal Information', 'Full Name')" />
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Job Title')">
+              <mat-label>Job Title</mat-label>
+              <mat-icon matPrefix>work</mat-icon>
+              <input matInput type="text" placeholder="e.g. Senior UX Designer"
+                     [(ngModel)]="form.jobTitle" name="jobTitle" [required]="isFieldRequired('Personal Information', 'Job Title')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Email Address')">
-              <label class="field-label">EMAIL ADDRESS <span class="req" *ngIf="isFieldRequired('Personal Information', 'Email Address')">*</span></label>
-              <input class="field-input" type="email" placeholder="e.g. alex@company.com"
-                     [(ngModel)]="form.email" name="email" />
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Phone Number')">
-              <label class="field-label">PHONE NUMBER <span class="req" *ngIf="isFieldRequired('Personal Information', 'Phone Number')">*</span></label>
-              <input class="field-input" type="tel" placeholder="+1 (555) 000-0000"
-                     [(ngModel)]="form.phone" name="phone" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Email Address')">
+              <mat-label>Email Address</mat-label>
+              <mat-icon matPrefix>email</mat-icon>
+              <input matInput type="email" placeholder="e.g. alex@company.com"
+                     [(ngModel)]="form.email" name="email" [required]="isFieldRequired('Personal Information', 'Email Address')" />
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Phone Number')">
+              <mat-label>Phone Number</mat-label>
+              <mat-icon matPrefix>phone</mat-icon>
+              <input matInput type="tel" placeholder="+1 (555) 000-0000"
+                     [(ngModel)]="form.phone" name="phone" [required]="isFieldRequired('Personal Information', 'Phone Number')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Department')">
-              <label class="field-label">DEPARTMENT <span class="req" *ngIf="isFieldRequired('Personal Information', 'Department')">*</span></label>
-              <div class="select-wrapper">
-                <select class="field-input" [(ngModel)]="form.department" name="department">
-                  <option value="" disabled>Select Department</option>
-                  <option value="engineering">Engineering</option>
-                  <option value="hr">Human Resources</option>
-                  <option value="finance">Finance</option>
-                  <option value="marketing">Marketing</option>
-                  <option value="operations">Operations</option>
-                  <option value="design">Design</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Gender')">
-              <label class="field-label">GENDER <span class="req" *ngIf="isFieldRequired('Personal Information', 'Gender')">*</span></label>
-              <div class="select-wrapper">
-                <select class="field-input" [(ngModel)]="form.gender" name="gender">
-                  <option value="" disabled>Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer_not">Prefer not to say</option>
-                </select>
-              </div>
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Department')">
+              <mat-label>Department</mat-label>
+              <mat-icon matPrefix>domain</mat-icon>
+              <mat-select [(ngModel)]="form.department" name="department" [required]="isFieldRequired('Personal Information', 'Department')">
+                <mat-option value="engineering">Engineering</mat-option>
+                <mat-option value="hr">Human Resources</mat-option>
+                <mat-option value="finance">Finance</mat-option>
+                <mat-option value="marketing">Marketing</mat-option>
+                <mat-option value="operations">Operations</mat-option>
+                <mat-option value="design">Design</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Gender')">
+              <mat-label>Gender</mat-label>
+              <mat-icon matPrefix>wc</mat-icon>
+              <mat-select [(ngModel)]="form.gender" name="gender" [required]="isFieldRequired('Personal Information', 'Gender')">
+                <mat-option value="male">Male</mat-option>
+                <mat-option value="female">Female</mat-option>
+                <mat-option value="other">Other</mat-option>
+                <mat-option value="prefer_not">Prefer not to say</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
+          
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Nationality')">
-              <label class="field-label">NATIONALITY <span class="req" *ngIf="isFieldRequired('Personal Information', 'Nationality')">*</span></label>
-              <div class="select-wrapper">
-                <select class="field-input" [(ngModel)]="form.nationality" name="nationality">
-                  <option value="" disabled>Select Nationality</option>
-                  <option value="pk">Pakistani</option>
-                  <option value="us">American</option>
-                  <option value="gb">British</option>
-                  <option value="ae">Emirati</option>
-                  <option value="in">Indian</option>
-                  <option value="sa">Saudi Arabian</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'National ID/CNIC')">
-              <label class="field-label">NATIONAL ID / CNIC <span class="req" *ngIf="isFieldRequired('Personal Information', 'National ID/CNIC')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. 35202-1234567-8"
-                     [(ngModel)]="form.idNumber" name="idNumber" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'Nationality')">
+              <mat-label>Nationality</mat-label>
+              <mat-icon matPrefix>public</mat-icon>
+              <mat-select [(ngModel)]="form.nationality" name="nationality" [required]="isFieldRequired('Personal Information', 'Nationality')">
+                <mat-option value="pk">Pakistani</mat-option>
+                <mat-option value="us">American</mat-option>
+                <mat-option value="gb">British</mat-option>
+                <mat-option value="ae">Emirati</mat-option>
+                <mat-option value="in">Indian</mat-option>
+                <mat-option value="sa">Saudi Arabian</mat-option>
+                <mat-option value="other">Other</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Personal Information', 'National ID/CNIC')">
+              <mat-label>National ID / CNIC</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <input matInput type="text" placeholder="e.g. 35202-1234567-8"
+                     [(ngModel)]="form.idNumber" name="idNumber" [required]="isFieldRequired('Personal Information', 'National ID/CNIC')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row" *ngIf="isFieldEnabled('Personal Information', 'Resume/CV')">
-            <div class="field-group full-span">
-              <label class="field-label">RESUME / CV <span class="req" *ngIf="isFieldRequired('Personal Information', 'Resume/CV')">*</span></label>
-              <div class="file-input-wrapper">
-                <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" (change)="onResumeSelected($event)" />
-                <label for="resumeFile" class="file-label-btn">📄 Choose File</label>
-                <span class="file-name">{{ form.resumeFileName || (form.resumeUrl ? 'Resume already uploaded' : 'No file selected') }}</span>
-                <a *ngIf="form.resumeUrl" class="file-link" [href]="form.resumeUrl" target="_blank" rel="noopener noreferrer">Open</a>
+            <div class="ob-file-upload-zone full-width" (click)="resumeInput.click()">
+              <input type="file" #resumeInput id="resumeFile" accept=".pdf,.doc,.docx" (change)="onResumeSelected($event)" class="hidden-input" />
+              
+              <div *ngIf="!form.resumeFileName && !form.resumeUrl" class="empty-state">
+                <div class="upload-icon-wrapper"><mat-icon>upload_file</mat-icon></div>
+                <p class="upload-title">Upload Resume / CV <span class="req-star" *ngIf="isFieldRequired('Personal Information', 'Resume/CV')">*</span></p>
+                <p class="upload-hint">PDF, DOC, or DOCX</p>
+              </div>
+
+              <div *ngIf="form.resumeFileName || form.resumeUrl" class="file-present-state" (click)="$event.stopPropagation()">
+                <div class="file-chip">
+                  <div class="file-icon"><mat-icon>description</mat-icon></div>
+                  <div class="file-details">
+                    <span class="file-name">{{ form.resumeFileName || 'Resume already uploaded' }}</span>
+                  </div>
+                  <a mat-icon-button *ngIf="form.resumeUrl" [href]="form.resumeUrl" target="_blank" color="primary" matTooltip="View File">
+                    <mat-icon>open_in_new</mat-icon>
+                  </a>
+                  <button mat-icon-button class="remove-btn" type="button" (click)="resumeInput.click()" matTooltip="Replace file">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -118,9 +147,10 @@
       <div *ngIf="personalInfoError" class="alert-error">❌ {{ personalInfoError }}</div>
 
       <div class="nav-actions">
-        <button class="btn-next" type="button" (click)="onSubmit()" [disabled]="isSavingPersonalInfo">
-          <span *ngIf="!isSavingPersonalInfo">Save & Continue →</span>
-          <span *ngIf="isSavingPersonalInfo">⏳ Saving…</span>
+        <button mat-flat-button class="btn-submit" type="button" (click)="onSubmit()" [disabled]="isSavingPersonalInfo">
+          <mat-spinner *ngIf="isSavingPersonalInfo" diameter="20" class="btn-spinner"></mat-spinner>
+          <span *ngIf="!isSavingPersonalInfo">Save & Continue <mat-icon iconPositionEnd>arrow_forward</mat-icon></span>
+          <span *ngIf="isSavingPersonalInfo">Saving...</span>
         </button>
       </div>
     </div>
@@ -163,81 +193,113 @@
       </div>
 
       <div class="card" *ngIf="isSectionEnabled('Qualification Details')">
-        <h3 class="card-title">{{ editingEducationIndex !== null ? '✎ Edit Qualification' : '+ Add Qualification' }}</h3>
+        <h3 class="card-title">
+          <mat-icon>{{ editingEducationIndex !== null ? 'edit' : 'add_circle' }}</mat-icon>
+          {{ editingEducationIndex !== null ? 'Edit Qualification' : 'Add Qualification' }}
+        </h3>
         <div class="fields-panel">
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'Degree Level')">
-              <label class="field-label">DEGREE LEVEL <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Degree Level')">*</span></label>
-              <div class="select-wrapper">
-                <select class="field-input" [(ngModel)]="education.degree" name="degree">
-                  <option value="" disabled>Select Level</option>
-                  <option value="bachelor">Bachelor</option>
-                  <option value="master">Master</option>
-                  <option value="phd">PhD</option>
-                  <option value="diploma">Diploma</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'Institute Name')">
-              <label class="field-label">INSTITUTION NAME <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Institute Name')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. Harvard University"
-                     [(ngModel)]="education.institution" name="institution" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Qualification Details', 'Degree Level')">
+              <mat-label>Degree Level</mat-label>
+              <mat-icon matPrefix>school</mat-icon>
+              <mat-select [(ngModel)]="education.degree" name="degree" [required]="isFieldRequired('Qualification Details', 'Degree Level')">
+                <mat-option value="bachelor">Bachelor</mat-option>
+                <mat-option value="master">Master</mat-option>
+                <mat-option value="phd">PhD</mat-option>
+                <mat-option value="diploma">Diploma</mat-option>
+                <mat-option value="other">Other</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Qualification Details', 'Institute Name')">
+              <mat-label>Institution Name</mat-label>
+              <mat-icon matPrefix>account_balance</mat-icon>
+              <input matInput type="text" placeholder="e.g. Harvard University"
+                     [(ngModel)]="education.institution" name="institution" [required]="isFieldRequired('Qualification Details', 'Institute Name')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'Field of Study')">
-              <label class="field-label">FIELD OF STUDY <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Field of Study')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. Business Administration"
-                     [(ngModel)]="education.field" name="field" />
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'GPA')">
-              <label class="field-label">GPA <span class="req" *ngIf="isFieldRequired('Qualification Details', 'GPA')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. 3.8 / 4.0"
-                     [(ngModel)]="education.gpa" name="gpa" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Qualification Details', 'Field of Study')">
+              <mat-label>Field of Study</mat-label>
+              <mat-icon matPrefix>book</mat-icon>
+              <input matInput type="text" placeholder="e.g. Business Administration"
+                     [(ngModel)]="education.field" name="field" [required]="isFieldRequired('Qualification Details', 'Field of Study')" />
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Qualification Details', 'GPA')">
+              <mat-label>GPA</mat-label>
+              <mat-icon matPrefix>grade</mat-icon>
+              <input matInput type="text" placeholder="e.g. 3.8 / 4.0"
+                     [(ngModel)]="education.gpa" name="gpa" [required]="isFieldRequired('Qualification Details', 'GPA')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row" *ngIf="isFieldEnabled('Qualification Details', 'ATTACH DOCOMENT')">
-            <div class="field-group full-span">
-              <label class="field-label">ATTACH CERTIFICATE <span class="req" *ngIf="isFieldRequired('Qualification Details', 'ATTACH DOCOMENT')">*</span></label>
-              <div class="file-input-wrapper">
-                <input type="file" id="eduFile" (change)="onEducationFileSelected($event)" />
-                <label for="eduFile" class="file-label-btn">📎 Choose File</label>
-                <span class="file-name">
-                  <ng-container *ngIf="isUploadingEducationFile">Uploading...</ng-container>
-                  <ng-container *ngIf="!isUploadingEducationFile">
-                    {{ education.fileUrl ? 'Uploaded: ' + education.fileName : (education.fileName || 'No file selected') }}
-                  </ng-container>
-                </span>
+            <div class="ob-file-upload-zone full-width" (click)="eduFile.click()">
+              <input type="file" #eduFile id="eduFile" (change)="onEducationFileSelected($event)" class="hidden-input" />
+              
+              <div *ngIf="!education.fileName && !education.fileUrl" class="empty-state">
+                <div class="upload-icon-wrapper"><mat-icon>upload_file</mat-icon></div>
+                <p class="upload-title">Attach Certificate <span class="req-star" *ngIf="isFieldRequired('Qualification Details', 'ATTACH DOCOMENT')">*</span></p>
+                <p class="upload-hint">Upload your degree or transcript</p>
+              </div>
+
+              <div *ngIf="education.fileName || education.fileUrl" class="file-present-state" (click)="$event.stopPropagation()">
+                <div class="file-chip">
+                  <div class="file-icon"><mat-icon>description</mat-icon></div>
+                  <div class="file-details">
+                    <span class="file-name">{{ education.fileName || 'Certificate uploaded' }}</span>
+                  </div>
+                  <a mat-icon-button *ngIf="education.fileUrl" [href]="education.fileUrl" target="_blank" color="primary" matTooltip="View File">
+                    <mat-icon>open_in_new</mat-icon>
+                  </a>
+                  <button mat-icon-button class="remove-btn" type="button" (click)="eduFile.click()" matTooltip="Replace file">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+          
           <div class="field-row" *ngIf="isFieldEnabled('Qualification Details', 'Discription')">
-            <div class="field-group full-span">
-              <label class="field-label">DESCRIPTION <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Discription')">*</span></label>
-              <textarea class="field-input" rows="3" placeholder="Thesis, major projects, academic honours…"
-                        [(ngModel)]="education.description" name="description"></textarea>
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full">
+              <mat-label>Description</mat-label>
+              <mat-icon matPrefix>notes</mat-icon>
+              <textarea matInput rows="3" class="centered-textarea" placeholder="Thesis, major projects, academic honours…"
+                        [(ngModel)]="education.description" name="description" [required]="isFieldRequired('Qualification Details', 'Discription')"></textarea>
+            </mat-form-field>
           </div>
         </div>
-        <div class="form-actions">
-          <button class="btn-cancel" type="button" *ngIf="editingEducationIndex !== null" (click)="cancelEducationEdit()">Cancel</button>
-          <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(2)" *ngIf="editingEducationIndex === null">← Back</button>
-          <div style="flex:1"></div>
-          <button class="btn-primary" type="button" *ngIf="editingEducationIndex === null"
+        <div class="form-actions" style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
+          <button mat-stroked-button color="warn" type="button" *ngIf="editingEducationIndex !== null" (click)="cancelEducationEdit()">Cancel</button>
+          
+          <button mat-flat-button color="primary" type="button" *ngIf="editingEducationIndex === null"
                   [disabled]="isSavingEducation || !isEducationFormValid()"
-                  (click)="addEducation()">{{ isSavingEducation ? '⏳ Saving…' : '+ Add Education' }}</button>
-          <button class="btn-primary" type="button" *ngIf="editingEducationIndex !== null"
+                  (click)="addEducation()">
+            <mat-spinner *ngIf="isSavingEducation" diameter="20" class="btn-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isSavingEducation">add</mat-icon>
+            {{ isSavingEducation ? 'Saving...' : 'Add Education' }}
+          </button>
+          
+          <button mat-flat-button color="primary" type="button" *ngIf="editingEducationIndex !== null"
                   [disabled]="!isEducationFormValid()"
-                  (click)="updateEducation()">✓ Update Education</button>
+                  (click)="updateEducation()">
+            <mat-icon>check</mat-icon> Update Education
+          </button>
         </div>
       </div>
 
-      <div class="nav-actions">
-        <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(2)" *ngIf="editingEducationIndex === null">← Back</button>
-        <div style="flex:1"></div>
-        <span *ngIf="educationList.length === 0" class="minor-note">No entries added. You can continue and add later.</span>
-        <button class="btn-next" type="button" (click)="continueToWorkExperience()" *ngIf="editingEducationIndex === null">Continue →</button>
+      <div class="nav-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+        <button mat-stroked-button class="btn-cancel" type="button" (click)="step = getPreviousEnabledStep(2)" *ngIf="editingEducationIndex === null">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        
+        <span *ngIf="educationList.length === 0" class="minor-note" style="color: #64748b; font-size: 0.875rem;">No entries added. You can continue and add later.</span>
+        
+        <button mat-flat-button class="btn-submit" type="button" (click)="continueToWorkExperience()" *ngIf="editingEducationIndex === null">
+          Continue <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
       </div>
     </div>
 
@@ -281,102 +343,137 @@
       </div>
 
       <div class="card" *ngIf="isSectionEnabled('Work Experience')">
-        <h3 class="card-title">{{ editingExperienceIndex !== null ? '✎ Edit Experience' : '+ Add Experience' }}</h3>
+        <h3 class="card-title">
+          <mat-icon>{{ editingExperienceIndex !== null ? 'edit' : 'add_circle' }}</mat-icon>
+          {{ editingExperienceIndex !== null ? 'Edit Experience' : 'Add Experience' }}
+        </h3>
         <div class="fields-panel">
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'JOB TITTLE')">
-              <label class="field-label">JOB TITLE <span class="req" *ngIf="isFieldRequired('Work Experience', 'JOB TITTLE')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. Lead Developer"
-                     [(ngModel)]="workExperience.jobTitle" name="jobTitle" />
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'COMPANY')">
-              <label class="field-label">COMPANY <span class="req" *ngIf="isFieldRequired('Work Experience', 'COMPANY')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. Google"
-                     [(ngModel)]="workExperience.company" name="company" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Work Experience', 'JOB TITTLE')">
+              <mat-label>Job Title</mat-label>
+              <mat-icon matPrefix>work_outline</mat-icon>
+              <input matInput type="text" placeholder="e.g. Lead Developer"
+                     [(ngModel)]="workExperience.jobTitle" name="jobTitle" [required]="isFieldRequired('Work Experience', 'JOB TITTLE')" />
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Work Experience', 'COMPANY')">
+              <mat-label>Company</mat-label>
+              <mat-icon matPrefix>business</mat-icon>
+              <input matInput type="text" placeholder="e.g. Google"
+                     [(ngModel)]="workExperience.company" name="company" [required]="isFieldRequired('Work Experience', 'COMPANY')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'EMPLOYMENT TYPE')">
-              <label class="field-label">EMPLOYMENT TYPE <span class="req" *ngIf="isFieldRequired('Work Experience', 'EMPLOYMENT TYPE')">*</span></label>
-              <div class="select-wrapper">
-                <select class="field-input" [(ngModel)]="workExperience.employmentType" name="employmentType">
-                  <option value="" disabled>Select Type</option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Freelance">Freelance</option>
-                  <option value="Internship">Internship</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'LOCATION')">
-              <label class="field-label">LOCATION <span class="req" *ngIf="isFieldRequired('Work Experience', 'LOCATION')">*</span></label>
-              <input class="field-input" type="text" placeholder="e.g. San Francisco, CA"
-                     [(ngModel)]="workExperience.location" name="location" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Work Experience', 'EMPLOYMENT TYPE')">
+              <mat-label>Employment Type</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <mat-select [(ngModel)]="workExperience.employmentType" name="employmentType" [required]="isFieldRequired('Work Experience', 'EMPLOYMENT TYPE')">
+                <mat-option value="Full-time">Full-time</mat-option>
+                <mat-option value="Part-time">Part-time</mat-option>
+                <mat-option value="Contract">Contract</mat-option>
+                <mat-option value="Freelance">Freelance</mat-option>
+                <mat-option value="Internship">Internship</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Work Experience', 'LOCATION')">
+              <mat-label>Location</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <input matInput type="text" placeholder="e.g. San Francisco, CA"
+                     [(ngModel)]="workExperience.location" name="location" [required]="isFieldRequired('Work Experience', 'LOCATION')" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row">
-            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'SATRT DATE')">
-              <label class="field-label">START DATE <span class="req" *ngIf="isFieldRequired('Work Experience', 'SATRT DATE')">*</span></label>
-              <input class="field-input" type="date" [(ngModel)]="workExperience.startDate" name="startDate" />
-            </div>
-            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'END DATE')">
-              <label class="field-label">END DATE <span class="req" *ngIf="isFieldRequired('Work Experience', 'END DATE')">*</span></label>
-              <input class="field-input" type="date" [(ngModel)]="workExperience.endDate" name="endDate"
-                     [disabled]="workExperience.currentlyWorking" />
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Work Experience', 'SATRT DATE')">
+              <mat-label>Start Date</mat-label>
+              <mat-icon matPrefix>calendar_today</mat-icon>
+              <input matInput type="date" [(ngModel)]="workExperience.startDate" name="startDate" [required]="isFieldRequired('Work Experience', 'SATRT DATE')" />
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('Work Experience', 'END DATE')">
+              <mat-label>End Date</mat-label>
+              <mat-icon matPrefix>event</mat-icon>
+              <input matInput type="date" [(ngModel)]="workExperience.endDate" name="endDate"
+                     [disabled]="workExperience.currentlyWorking" [required]="isFieldRequired('Work Experience', 'END DATE') && !workExperience.currentlyWorking" />
+            </mat-form-field>
           </div>
+          
           <div class="field-row" *ngIf="isFieldEnabled('Work Experience', 'Currently working here')">
-            <div class="field-group full-span">
-              <label class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="workExperience.currentlyWorking" name="currentlyWorking" />
-                <span>Currently working here</span>
-              </label>
-            </div>
+            <mat-checkbox color="primary" [(ngModel)]="workExperience.currentlyWorking" name="currentlyWorking">
+              Currently working here
+            </mat-checkbox>
           </div>
+          
           <div class="field-row" *ngIf="isFieldEnabled('Work Experience', 'KEY RESPONSIBILTIES')">
-            <div class="field-group full-span">
-              <label class="field-label">KEY RESPONSIBILITIES <span class="req" *ngIf="isFieldRequired('Work Experience', 'KEY RESPONSIBILTIES')">*</span></label>
-              <textarea class="field-input" rows="3" placeholder="Describe your main achievements and roles…"
-                        [(ngModel)]="workExperience.responsibilities" name="responsibilities"></textarea>
-            </div>
+            <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full">
+              <mat-label>Key Responsibilities</mat-label>
+              <mat-icon matPrefix>notes</mat-icon>
+              <textarea matInput rows="3" class="centered-textarea" placeholder="Describe your main achievements and roles…"
+                        [(ngModel)]="workExperience.responsibilities" name="responsibilities" [required]="isFieldRequired('Work Experience', 'KEY RESPONSIBILTIES')"></textarea>
+            </mat-form-field>
           </div>
+          
           <div class="field-row" *ngIf="isFieldEnabled('Work Experience', 'ATTACH DOCOMENT')">
-            <div class="field-group full-span">
-              <label class="field-label">ATTACH DOCUMENT <span class="req" *ngIf="isFieldRequired('Work Experience', 'ATTACH DOCOMENT')">*</span></label>
-              <div class="file-input-wrapper">
-                <input type="file" id="workExpFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                       (change)="onWorkExperienceFileSelected($event)" />
-                <label for="workExpFile" class="file-label-btn">📎 Choose File</label>
-                <span class="file-name">
-                  <ng-container *ngIf="isUploadingWorkExpFile">Uploading...</ng-container>
-                  <ng-container *ngIf="!isUploadingWorkExpFile">
-                    {{ workExperience.fileUrl ? 'Uploaded: ' + workExperience.fileName : (workExperience.fileName || 'No file selected') }}
-                  </ng-container>
-                </span>
+            <div class="ob-file-upload-zone full-width" (click)="workExpFile.click()">
+              <input type="file" #workExpFile id="workExpFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onWorkExperienceFileSelected($event)" class="hidden-input" />
+              
+              <div *ngIf="!workExperience.fileName && !workExperience.fileUrl" class="empty-state">
+                <div class="upload-icon-wrapper"><mat-icon>upload_file</mat-icon></div>
+                <p class="upload-title">Attach Document <span class="req-star" *ngIf="isFieldRequired('Work Experience', 'ATTACH DOCOMENT')">*</span></p>
+                <p class="upload-hint">Upload offer letter or experience certificate</p>
+              </div>
+
+              <div *ngIf="workExperience.fileName || workExperience.fileUrl" class="file-present-state" (click)="$event.stopPropagation()">
+                <div class="file-chip">
+                  <div class="file-icon"><mat-icon>description</mat-icon></div>
+                  <div class="file-details">
+                    <span class="file-name">{{ workExperience.fileName || 'Document uploaded' }}</span>
+                  </div>
+                  <a mat-icon-button *ngIf="workExperience.fileUrl" [href]="workExperience.fileUrl" target="_blank" color="primary" matTooltip="View File">
+                    <mat-icon>open_in_new</mat-icon>
+                  </a>
+                  <button mat-icon-button class="remove-btn" type="button" (click)="workExpFile.click()" matTooltip="Replace file">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div *ngIf="workExperienceError" class="alert-error" style="margin: 0 0 12px;">❌ {{ workExperienceError }}</div>
-        <div class="form-actions">
-          <button class="btn-cancel" type="button" *ngIf="editingExperienceIndex !== null" (click)="cancelExperienceEdit()">Cancel</button>
-          <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(3)" *ngIf="editingExperienceIndex === null">← Back</button>
-          <div style="flex:1"></div>
-          <button class="btn-primary" type="button" *ngIf="editingExperienceIndex === null"
+        
+        <div *ngIf="workExperienceError" class="alert-error" style="margin-bottom: 12px;">❌ {{ workExperienceError }}</div>
+        
+        <div class="form-actions" style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
+          <button mat-stroked-button color="warn" type="button" *ngIf="editingExperienceIndex !== null" (click)="cancelExperienceEdit()">Cancel</button>
+          
+          <button mat-flat-button color="primary" type="button" *ngIf="editingExperienceIndex === null"
                   [disabled]="isSavingWorkExperience || !isWorkExperienceFormValid()"
-                  (click)="addWorkExperience()">{{ isSavingWorkExperience ? '⏳ Saving…' : '+ Add Experience' }}</button>
-          <button class="btn-primary" type="button" *ngIf="editingExperienceIndex !== null"
+                  (click)="addWorkExperience()">
+            <mat-spinner *ngIf="isSavingWorkExperience" diameter="20" class="btn-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isSavingWorkExperience">add</mat-icon>
+            {{ isSavingWorkExperience ? 'Saving...' : 'Add Experience' }}
+          </button>
+          
+          <button mat-flat-button color="primary" type="button" *ngIf="editingExperienceIndex !== null"
                   [disabled]="!isWorkExperienceFormValid()"
-                  (click)="updateWorkExperience()">✓ Update Experience</button>
+                  (click)="updateWorkExperience()">
+            <mat-icon>check</mat-icon> Update Experience
+          </button>
         </div>
       </div>
 
-      <div class="nav-actions">
-        <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(3)" *ngIf="editingExperienceIndex === null">← Back</button>
-        <div style="flex:1"></div>
-        <span *ngIf="workExperienceList.length === 0" class="minor-note">No entries added. You can continue and add later.</span>
-        <button class="btn-next" type="button" (click)="continueFromWorkExperience()" *ngIf="editingExperienceIndex === null">Continue →</button>
+      <div class="nav-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+        <button mat-stroked-button class="btn-cancel" type="button" (click)="step = getPreviousEnabledStep(3)" *ngIf="editingExperienceIndex === null">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        
+        <span *ngIf="workExperienceList.length === 0" class="minor-note" style="color: #64748b; font-size: 0.875rem;">No entries added. You can continue and add later.</span>
+        
+        <button mat-flat-button class="btn-submit" type="button" (click)="continueFromWorkExperience()" *ngIf="editingExperienceIndex === null">
+          Continue <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
       </div>
     </div>
 
@@ -448,48 +545,47 @@
 
           <div class="fields-panel">
             <div class="field-row">
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT HOLDER NAME')">
-                <label class="field-label">ACCOUNT HOLDER NAME <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'ACCOUNT HOLDER NAME')">*</span></label>
-                <input class="field-input" type="text" placeholder="Full legal name"
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT HOLDER NAME')">
+                <mat-label>Account Holder Name</mat-label>
+                <mat-icon matPrefix>person</mat-icon>
+                <input matInput type="text" placeholder="Full legal name"
                        [(ngModel)]="bankForm.accountHolderName" name="accountHolderName"
-                       [class.field-error]="bankErrors['accountHolderName']"
-                       (input)="clearBankError('accountHolderName')" />
-                <span class="inline-error" *ngIf="bankErrors['accountHolderName']">{{ bankErrors['accountHolderName'] }}</span>
-              </div>
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'PAYMENT METHOD')">
-                <label class="field-label">PAYMENT METHOD <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'PAYMENT METHOD')">*</span></label>
-                <div class="select-wrapper">
-                  <select class="field-input" [(ngModel)]="bankForm.paymentMethod" name="paymentMethod"
-                          [class.field-error]="bankErrors['paymentMethod']"
-                          (change)="clearBankError('paymentMethod')">
-                    <option value="" disabled>Select payment method</option>
-                    <option value="Bank Transfer (EFT)">Bank Transfer (EFT)</option>
-                    <option value="Cheque">Cheque</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Wire Transfer">Wire Transfer</option>
-                  </select>
-                </div>
-                <span class="inline-error" *ngIf="bankErrors['paymentMethod']">{{ bankErrors['paymentMethod'] }}</span>
-              </div>
+                       (input)="clearBankError('accountHolderName')" [required]="isFieldRequired('BANK DETAILS', 'ACCOUNT HOLDER NAME')" />
+                <mat-error *ngIf="bankErrors['accountHolderName']">{{ bankErrors['accountHolderName'] }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'PAYMENT METHOD')">
+                <mat-label>Payment Method</mat-label>
+                <mat-icon matPrefix>payments</mat-icon>
+                <mat-select [(ngModel)]="bankForm.paymentMethod" name="paymentMethod"
+                            (selectionChange)="clearBankError('paymentMethod')" [required]="isFieldRequired('BANK DETAILS', 'PAYMENT METHOD')">
+                  <mat-option value="Bank Transfer (EFT)">Bank Transfer (EFT)</mat-option>
+                  <mat-option value="Cheque">Cheque</mat-option>
+                  <mat-option value="Cash">Cash</mat-option>
+                  <mat-option value="Wire Transfer">Wire Transfer</mat-option>
+                </mat-select>
+                <mat-error *ngIf="bankErrors['paymentMethod']">{{ bankErrors['paymentMethod'] }}</mat-error>
+              </mat-form-field>
             </div>
 
             <div class="field-row">
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT NUMBER')">
-                <label class="field-label">ACCOUNT NUMBER <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'ACCOUNT NUMBER')">*</span></label>
-                <input class="field-input" type="password" placeholder="••••••••••••"
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT NUMBER')">
+                <mat-label>Account Number</mat-label>
+                <mat-icon matPrefix>pin</mat-icon>
+                <input matInput type="password" placeholder="••••••••••••"
                        [(ngModel)]="bankForm.accountNumber" name="accountNumber"
-                       [class.field-error]="bankErrors['accountNumber']"
-                       (input)="clearBankError('accountNumber')" />
-                <span class="inline-error" *ngIf="bankErrors['accountNumber']">{{ bankErrors['accountNumber'] }}</span>
-              </div>
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')">
-                <label class="field-label">CONFIRM ACCOUNT NUMBER <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')">*</span></label>
-                <input class="field-input" type="text" placeholder="Re-enter account number"
+                       (input)="clearBankError('accountNumber')" [required]="isFieldRequired('BANK DETAILS', 'ACCOUNT NUMBER')" />
+                <mat-error *ngIf="bankErrors['accountNumber']">{{ bankErrors['accountNumber'] }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')">
+                <mat-label>Confirm Account Number</mat-label>
+                <mat-icon matPrefix>pin</mat-icon>
+                <input matInput type="text" placeholder="Re-enter account number"
                        [(ngModel)]="bankForm.confirmAccountNumber" name="confirmAccountNumber"
-                       [class.field-error]="bankErrors['confirmAccountNumber']"
-                       (input)="clearBankError('confirmAccountNumber')" />
-                <span class="inline-error" *ngIf="bankErrors['confirmAccountNumber']">{{ bankErrors['confirmAccountNumber'] }}</span>
-              </div>
+                       (input)="clearBankError('confirmAccountNumber')" [required]="isFieldRequired('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')" />
+                <mat-error *ngIf="bankErrors['confirmAccountNumber']">{{ bankErrors['confirmAccountNumber'] }}</mat-error>
+              </mat-form-field>
             </div>
           </div>
 
@@ -497,85 +593,90 @@
 
           <div class="fields-panel">
             <div class="field-row">
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'BANK NAME')">
-                <label class="field-label">BANK NAME <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'BANK NAME')">*</span></label>
-                <div class="select-wrapper">
-                  <select class="field-input" [(ngModel)]="bankForm.bankName" name="bankName"
-                          [class.field-error]="bankErrors['bankName']"
-                          (change)="clearBankError('bankName')">
-                    <option value="" disabled>Select your bank</option>
-                    <option value="ABN AMRO">ABN AMRO</option>
-                    <option value="Allied Bank">Allied Bank</option>
-                    <option value="Bank Al Habib">Bank Al Habib</option>
-                    <option value="Bank Alfalah">Bank Alfalah</option>
-                    <option value="Barclays">Barclays</option>
-                    <option value="Citibank">Citibank</option>
-                    <option value="Deutsche Bank">Deutsche Bank</option>
-                    <option value="Faysal Bank">Faysal Bank</option>
-                    <option value="First Abu Dhabi Bank">First Abu Dhabi Bank</option>
-                    <option value="HSBC">HSBC</option>
-                    <option value="Habib Bank Limited">Habib Bank Limited (HBL)</option>
-                    <option value="JP Morgan Chase">JP Morgan Chase</option>
-                    <option value="MCB Bank">MCB Bank</option>
-                    <option value="Meezan Bank">Meezan Bank</option>
-                    <option value="National Bank of Pakistan">National Bank of Pakistan</option>
-                    <option value="Silk Bank">Silk Bank</option>
-                    <option value="Standard Chartered">Standard Chartered</option>
-                    <option value="United Bank Limited">United Bank Limited (UBL)</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <span class="inline-error" *ngIf="bankErrors['bankName']">{{ bankErrors['bankName'] }}</span>
-              </div>
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'IBN/SWIFT CODE')">
-                <label class="field-label">IBAN / SWIFT CODE <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'IBN/SWIFT CODE')">*</span></label>
-                <input class="field-input" type="text" placeholder="Optional for domestic transfers"
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'BANK NAME')">
+                <mat-label>Bank Name</mat-label>
+                <mat-icon matPrefix>account_balance</mat-icon>
+                <mat-select [(ngModel)]="bankForm.bankName" name="bankName"
+                            (selectionChange)="clearBankError('bankName')" [required]="isFieldRequired('BANK DETAILS', 'BANK NAME')">
+                  <mat-option value="ABN AMRO">ABN AMRO</mat-option>
+                  <mat-option value="Allied Bank">Allied Bank</mat-option>
+                  <mat-option value="Bank Al Habib">Bank Al Habib</mat-option>
+                  <mat-option value="Bank Alfalah">Bank Alfalah</mat-option>
+                  <mat-option value="Barclays">Barclays</mat-option>
+                  <mat-option value="Citibank">Citibank</mat-option>
+                  <mat-option value="Deutsche Bank">Deutsche Bank</mat-option>
+                  <mat-option value="Faysal Bank">Faysal Bank</mat-option>
+                  <mat-option value="First Abu Dhabi Bank">First Abu Dhabi Bank</mat-option>
+                  <mat-option value="HSBC">HSBC</mat-option>
+                  <mat-option value="Habib Bank Limited">Habib Bank Limited (HBL)</mat-option>
+                  <mat-option value="JP Morgan Chase">JP Morgan Chase</mat-option>
+                  <mat-option value="MCB Bank">MCB Bank</mat-option>
+                  <mat-option value="Meezan Bank">Meezan Bank</mat-option>
+                  <mat-option value="National Bank of Pakistan">National Bank of Pakistan</mat-option>
+                  <mat-option value="Silk Bank">Silk Bank</mat-option>
+                  <mat-option value="Standard Chartered">Standard Chartered</mat-option>
+                  <mat-option value="United Bank Limited">United Bank Limited (UBL)</mat-option>
+                  <mat-option value="Other">Other</mat-option>
+                </mat-select>
+                <mat-error *ngIf="bankErrors['bankName']">{{ bankErrors['bankName'] }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'IBN/SWIFT CODE')">
+                <mat-label>IBAN / SWIFT Code</mat-label>
+                <mat-icon matPrefix>public</mat-icon>
+                <input matInput type="text" placeholder="Optional for domestic transfers"
                        [(ngModel)]="bankForm.iban" name="iban"
-                       [class.field-error]="bankErrors['iban']"
-                       (input)="clearBankError('iban')" />
-                <span class="inline-error" *ngIf="bankErrors['iban']">{{ bankErrors['iban'] }}</span>
-              </div>
+                       (input)="clearBankError('iban')" [required]="isFieldRequired('BANK DETAILS', 'IBN/SWIFT CODE')" />
+                <mat-error *ngIf="bankErrors['iban']">{{ bankErrors['iban'] }}</mat-error>
+              </mat-form-field>
             </div>
 
             <div class="field-row">
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH NAME')">
-                <label class="field-label">BRANCH NAME <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'BRANCH NAME')">*</span></label>
-                <input class="field-input" type="text" placeholder="e.g. Downtown Manhattan"
-                       [(ngModel)]="bankForm.branchName" name="branchName" />
-              </div>
-              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH CODE')">
-                <label class="field-label">BRANCH CODE <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'BRANCH CODE')">*</span></label>
-                <input class="field-input" type="text" placeholder="Routing number or Sort code"
-                       [(ngModel)]="bankForm.branchCode" name="branchCode" />
-              </div>
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH NAME')">
+                <mat-label>Branch Name</mat-label>
+                <mat-icon matPrefix>store</mat-icon>
+                <input matInput type="text" placeholder="e.g. Downtown Manhattan"
+                       [(ngModel)]="bankForm.branchName" name="branchName" [required]="isFieldRequired('BANK DETAILS', 'BRANCH NAME')" />
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH CODE')">
+                <mat-label>Branch Code</mat-label>
+                <mat-icon matPrefix>tag</mat-icon>
+                <input matInput type="text" placeholder="Routing number or Sort code"
+                       [(ngModel)]="bankForm.branchCode" name="branchCode" [required]="isFieldRequired('BANK DETAILS', 'BRANCH CODE')" />
+              </mat-form-field>
             </div>
           </div>
 
         </ng-container>
 
         <!-- Save Details button -->
-        <div class="bank-footer">
-          <button class="btn-bank-save" type="button"
+        <div class="form-actions" style="margin-top: 24px; display: flex; justify-content: flex-end;">
+          <button mat-flat-button color="primary" type="button"
                   [disabled]="isSavingBankDetails"
                   (click)="saveBankDetails()">
-            <span *ngIf="!isSavingBankDetails">Save Details</span>
-            <span *ngIf="isSavingBankDetails">⏳ Saving…</span>
+            <mat-spinner *ngIf="isSavingBankDetails" diameter="20" class="btn-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isSavingBankDetails">save</mat-icon>
+            {{ isSavingBankDetails ? 'Saving...' : 'Save Details' }}
           </button>
         </div>
 
       </div><!-- /bank-card -->
 
-      <div *ngIf="bankDetailsError" class="alert-error">❌ {{ bankDetailsError }}</div>
+      <div *ngIf="bankDetailsError" class="alert-error" style="margin-bottom: 12px;">❌ {{ bankDetailsError }}</div>
 
-      <div class="nav-actions">
-        <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(4)">← Back</button>
-        <div style="flex:1"></div>
-        <span *ngIf="!bankDetailsSaved && !bankForm.noBankAccount && isSectionEnabled('BANK DETAILS')" class="minor-note">
+      <div class="nav-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+        <button mat-stroked-button class="btn-cancel" type="button" (click)="step = getPreviousEnabledStep(4)">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        
+        <span *ngIf="!bankDetailsSaved && !bankForm.noBankAccount && isSectionEnabled('BANK DETAILS')" class="minor-note" style="color: #64748b; font-size: 0.875rem;">
           Please save your bank details before continuing.
         </span>
-        <button class="btn-next" type="button" (click)="continueFromBankDetails()"
+        
+        <button mat-flat-button class="btn-submit" type="button" (click)="continueFromBankDetails()"
                 [disabled]="!isBankDetailsCompleted()">
-          Continue →
+          Continue <mat-icon iconPositionEnd>arrow_forward</mat-icon>
         </button>
       </div>
     </div>
@@ -605,7 +706,9 @@
             <div class="review-section">
               <div class="review-section-header">
                 <h4>Personal Information</h4>
-                <button type="button" class="btn-edit-small" (click)="editPersonalFromVerification()">✎ Edit</button>
+                <button mat-button color="primary" type="button" (click)="editPersonalFromVerification()">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
               </div>
               <div class="details-grid">
                 <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Full Name')"><label>Full Name</label><p>{{ form.fullName }}</p></div>
@@ -623,7 +726,9 @@
             <div class="review-section" *ngIf="isSectionEnabled('Qualification Details') && educationList.length > 0">
               <div class="review-section-header">
                 <h4>Qualification Background</h4>
-                <button type="button" class="btn-edit-small" (click)="step = 2">+ Add</button>
+                <button mat-button color="primary" type="button" (click)="step = 2">
+                  <mat-icon>add</mat-icon> Add
+                </button>
               </div>
               <div class="review-card" *ngFor="let edu of educationList; let i = index">
                 <div class="review-card-header">
@@ -632,8 +737,8 @@
                     <p class="rv-secondary">{{ edu.institution }}</p>
                   </div>
                   <div class="entry-actions">
-                    <button type="button" class="icon-btn edit-btn" (click)="editEducationFromVerification(i)">✎</button>
-                    <button type="button" class="icon-btn delete-btn" (click)="deleteEducationFromVerification(i)">✕</button>
+                    <button mat-icon-button color="primary" type="button" (click)="editEducationFromVerification(i)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn" type="button" (click)="deleteEducationFromVerification(i)"><mat-icon>delete</mat-icon></button>
                   </div>
                 </div>
                 <p class="rv-detail">{{ edu.field }}<span *ngIf="edu.gpa"> · GPA: {{ edu.gpa }}</span></p>
@@ -644,7 +749,9 @@
             <div class="review-section" *ngIf="isSectionEnabled('Work Experience') && workExperienceList.length > 0">
               <div class="review-section-header">
                 <h4>Work Experience</h4>
-                <button type="button" class="btn-edit-small" (click)="step = 3">+ Add</button>
+                <button mat-button color="primary" type="button" (click)="step = 3">
+                  <mat-icon>add</mat-icon> Add
+                </button>
               </div>
               <div class="review-card" *ngFor="let exp of workExperienceList; let i = index">
                 <div class="review-card-header">
@@ -653,8 +760,8 @@
                     <p class="rv-secondary">{{ exp.company }} · {{ exp.employmentType }}</p>
                   </div>
                   <div class="entry-actions">
-                    <button type="button" class="icon-btn edit-btn" (click)="editExperienceFromVerification(i)">✎</button>
-                    <button type="button" class="icon-btn delete-btn" (click)="deleteExperienceFromVerification(i)">✕</button>
+                    <button mat-icon-button color="primary" type="button" (click)="editExperienceFromVerification(i)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn" type="button" (click)="deleteExperienceFromVerification(i)"><mat-icon>delete</mat-icon></button>
                   </div>
                 </div>
                 <p class="rv-detail">
@@ -668,7 +775,9 @@
             <div class="review-section" *ngIf="isSectionEnabled('BANK DETAILS')">
               <div class="review-section-header">
                 <h4>Bank Details</h4>
-                <button type="button" class="btn-edit-small" (click)="step = 4">✎ Edit</button>
+                <button mat-button color="primary" type="button" (click)="step = 4">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
               </div>
               <div class="details-grid" *ngIf="!bankForm.noBankAccount && bankDetailsSaved">
                 <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'BANK NAME')"><label>Bank</label><p>{{ bankForm.bankName || '—' }}</p></div>
@@ -710,10 +819,12 @@
             <!-- Notes -->
             <div class="review-section">
               <h4>Additional Notes</h4>
-              <textarea class="notes-textarea" rows="4" maxlength="500"
-                        placeholder="Add any clarifications regarding document authenticity…"
-                        [(ngModel)]="documentNotes" name="documentNotes"></textarea>
-              <p class="notes-counter">{{ documentNotes.length }} / 500</p>
+              <mat-form-field appearance="outline" floatLabel="always" class="ob-mat-field flex-full" style="width: 100%;">
+                <textarea matInput rows="4" maxlength="500" class="centered-textarea"
+                          placeholder="Add any clarifications regarding document authenticity…"
+                          [(ngModel)]="documentNotes" name="documentNotes"></textarea>
+                <mat-hint align="end">{{ documentNotes.length }} / 500</mat-hint>
+              </mat-form-field>
             </div>
           </div>
         </div>
@@ -776,10 +887,14 @@
         </div>
       </div>
 
-      <div class="nav-actions">
-        <button class="btn-prev" (click)="step = getPreviousEnabledStep(5)">← Back</button>
-        <div style="flex:1"></div>
-        <button class="btn-next" (click)="proceedFromVerification()">Continue to Policies →</button>
+      <div class="nav-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+        <button mat-stroked-button class="btn-cancel" (click)="step = getPreviousEnabledStep(5)">
+          <mat-icon>arrow_back</mat-icon> Back
+        </button>
+        
+        <button mat-flat-button class="btn-submit" (click)="proceedFromVerification()">
+          Continue to Policies <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
       </div>
     </div>
 
@@ -818,31 +933,34 @@
           </div>
         </div>
 
-        <div class="policy-accept" *ngIf="policies.length > 0">
-          <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="policyAccepted" name="policyAccepted" />
-            <span>I have read and agree to all the company policies, terms of service, and privacy guidelines outlined above.</span>
-          </label>
+        <div class="policy-accept" *ngIf="policies.length > 0" style="margin-top: 16px; padding: 16px; background: rgba(37, 99, 235, 0.05); border-radius: 8px; border: 1px solid rgba(37, 99, 235, 0.2);">
+          <mat-checkbox color="primary" [(ngModel)]="policyAccepted" name="policyAccepted">
+            <span style="font-size: 0.875rem; color: #1e293b; font-weight: 500;">I have read and agree to all the company policies, terms of service, and privacy guidelines outlined above.</span>
+          </mat-checkbox>
         </div>
 
-        <div class="nav-actions" style="margin-top:24px; margin-bottom:0;">
-          <button class="btn-prev" (click)="step = 5">← Back</button>
-          <div style="flex:1"></div>
-
+        <div class="nav-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 0;">
+          <button mat-stroked-button class="btn-cancel" (click)="step = 5">
+            <mat-icon>arrow_back</mat-icon> Back
+          </button>
+          
           <!-- Show finish button when not completed -->
           <ng-container *ngIf="!onboardingCompleted">
-            <button class="btn-next" [disabled]="(!policyAccepted && policies.length > 0) || isSubmitting"
+            <button mat-flat-button class="btn-submit" color="primary" [disabled]="(!policyAccepted && policies.length > 0) || isSubmitting"
                     (click)="finishOnboarding()">
-              <span *ngIf="!isSubmitting">Complete Onboarding ✓</span>
-              <span *ngIf="isSubmitting">⏳ Submitting…</span>
+              <mat-spinner *ngIf="isSubmitting" diameter="20" class="btn-spinner"></mat-spinner>
+              <mat-icon *ngIf="!isSubmitting">check_circle</mat-icon>
+              {{ isSubmitting ? 'Submitting...' : 'Complete Onboarding' }}
             </button>
           </ng-container>
 
           <!-- Professional completed state -->
           <div *ngIf="onboardingCompleted" class="completed-state" style="display:flex;align-items:center;gap:12px;">
             <div style="display:flex;flex-direction:column;align-items:flex-end;">
-              <div class="completed-badge" style="font-size:18px;color:#4caf50;font-weight:600;">✓ Completed</div>
-              <div class="minor-note" style="font-size:13px;color:#666;margin-top:6px;">Thank you — your onboarding is complete.</div>
+              <div class="completed-badge" style="font-size:18px;color:#4caf50;font-weight:600;display:flex;align-items:center;gap:4px;">
+                <mat-icon>verified</mat-icon> Completed
+              </div>
+              <div class="minor-note" style="font-size:13px;color:#64748b;margin-top:6px;">Thank you — your onboarding is complete.</div>
             </div>
           </div>
         </div>

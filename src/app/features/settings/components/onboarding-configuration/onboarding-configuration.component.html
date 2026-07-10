@@ -1,97 +1,142 @@
-<div class="onboarding-config-page" >
-  <div class="page-header">
-    <div>
-      <p class="eyebrow">Settings / Onboarding Configuration</p>
-      <h1>Onboarding Configuration</h1>
-      <p>Configure the fields and document requirements used during onboarding. Toggle a field <strong>off</strong> to hide it entirely, or mark it as <strong>Required</strong> to make it mandatory for employees.</p>
-    </div>
-  </div>
+<div class="ts-page-layout">
+
+  <!-- PAGE HEADER -->
+  <app-page-header matIcon="how_to_reg" title="Onboarding Configuration" subtitle="Configure fields and document requirements used during employee onboarding">
+  </app-page-header>
 
   <!-- Loading state -->
-  <div *ngIf="isLoading" class="loading-state">
-    <mat-icon class="spin-icon">sync</mat-icon>
+  <div *ngIf="isLoading" class="st-loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
     <p>Loading configuration…</p>
   </div>
 
   <!-- Error state -->
-  <div *ngIf="loadError && !isLoading" class="error-banner">
+  <div *ngIf="loadError && !isLoading" class="ob-error-banner">
     <mat-icon>error_outline</mat-icon>
     <span>Could not load configuration from server. Showing defaults — changes will still be saved.</span>
-    <button class="retry-btn" (click)="loadConfiguration()">Retry</button>
-  </div>
-
-  <div class="config-grid" *ngIf="!isLoading">
-    <section class="detail-panel">
-      <div class="detail-header">
-        <div>
-          <h2>Field Configuration</h2>
-          <p>Each field can be individually toggled on/off and marked as required. A <strong>Required</strong> toggle is only active when the field is enabled.</p>
-        </div>
-        <div class="legend">
-          <span class="legend-pill enabled-pill">Enabled</span>
-          <span class="legend-pill required-pill">Required</span>
-        </div>
-      </div>
-
-      <!-- ── Sections ─────────────────────────────────────────────────── -->
-      <div class="config-section" *ngFor="let section of sections">
-        <div class="section-header">
-          <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
-          <div class="section-title">
-            <h3>{{ section.displayName }}</h3>
-            <p>{{ section.description }}</p>
-          </div>
-        </div>
-
-        <!-- Column headers -->
-        <div class="fields-table-header">
-          <span class="col-field-name">Field</span>
-          <span class="col-toggle">Enabled</span>
-          <span class="col-toggle">Required</span>
-        </div>
-
-        <!-- Field rows -->
-        <div class="field-row" *ngFor="let field of section.fields" [class.field-disabled]="!field.enabled">
-          <div class="field-label">
-            <mat-icon class="field-icon" [class.icon-disabled]="!field.enabled">
-              {{ !field.enabled ? 'visibility_off' : field.required ? 'star' : 'check_circle_outline' }}
-            </mat-icon>
-            <span>{{ field.label }}</span>
-            <span *ngIf="field.required && field.enabled" class="req-badge">Required</span>
-          </div>
-
-          <!-- Enabled toggle -->
-          <div class="col-toggle">
-            <label class="switch-toggle" [title]="field.enabled ? 'Click to disable' : 'Click to enable'">
-              <input type="checkbox" [checked]="field.enabled" (change)="toggleEnabled(field)" />
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <!-- Required toggle — disabled if field is not enabled -->
-          <div class="col-toggle">
-            <label class="switch-toggle required-switch"
-                   [class.toggle-inactive]="!field.enabled"
-                   [title]="!field.enabled ? 'Enable the field first' : field.required ? 'Click to make optional' : 'Click to make required'">
-              <input type="checkbox" [checked]="field.required" [disabled]="!field.enabled" (change)="toggleRequired(field)" />
-              <span class="slider slider-required"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="config-actions" style="margin-top: 24px; display: flex; justify-content: flex-end;">
-    <button class="save-button" [disabled]="isSaving || isLoading" (click)="saveConfiguration()">
-      {{ isSaving ? 'Saving...' : 'Save Configuration' }}
+    <button mat-stroked-button class="btn-cancel" (click)="loadConfiguration()">
+      <mat-icon>refresh</mat-icon> Retry
     </button>
   </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading">
+
+    <!-- Info banner -->
+    <div class="ob-info-banner">
+      <mat-icon>info</mat-icon>
+      <span>Toggle a field <strong>off</strong> to hide it entirely, or mark it as <strong>Required</strong> to make it mandatory for employees.</span>
+    </div>
+
+    <!-- TABS -->
+    <div class="st-tabs">
+      <button *ngFor="let section of sections; let i = index"
+              class="st-tab" [class.active]="selectedTab === i" (click)="selectedTab = i">
+        <mat-icon>{{ section.icon }}</mat-icon>
+        <span>{{ section.displayName }}</span>
+      </button>
+    </div>
+
+    <!-- Field Configuration Card (Only shows the active section) -->
+    <div class="ts-card ob-card">
+      <div class="ob-card-header">
+        <div class="ob-card-icon">
+          <mat-icon>tune</mat-icon>
+        </div>
+        <div class="ob-header-content">
+          <h2 class="ob-card-title">Field Configuration</h2>
+          <p class="ob-card-subtitle">Each field can be individually toggled on/off and marked as required.</p>
+        </div>
+        <div class="ob-legend">
+          <span class="ob-legend-pill ob-legend-enabled">
+            <span class="ob-legend-dot"></span> Enabled
+          </span>
+          <span class="ob-legend-pill ob-legend-required">
+            <span class="ob-legend-dot"></span> Required
+          </span>
+        </div>
+      </div>
+
+      <!-- Sections -->
+      <div class="ob-sections">
+        <ng-container *ngFor="let section of sections; let i = index">
+          <div class="ob-section" *ngIf="selectedTab === i">
+            <div class="ob-section-header">
+              <div class="ob-section-icon">
+                <mat-icon>{{ section.icon }}</mat-icon>
+              </div>
+              <div>
+                <h3 class="ob-section-title">{{ section.displayName }}</h3>
+                <p class="ob-section-subtitle">{{ section.description }}</p>
+              </div>
+            </div>
+
+            <!-- Column headers -->
+            <div class="ob-fields-header">
+              <span class="ob-col-field">Field</span>
+              <span class="ob-col-toggle">Enabled</span>
+              <span class="ob-col-toggle">Required</span>
+            </div>
+
+            <!-- Field rows -->
+            <div class="ob-field-row" *ngFor="let field of section.fields" [class.ob-field-disabled]="!field.enabled">
+              <div class="ob-field-label">
+                <mat-icon class="ob-field-icon" [class.ob-icon-disabled]="!field.enabled">
+                  {{ !field.enabled ? 'visibility_off' : field.required ? 'star' : 'check_circle_outline' }}
+                </mat-icon>
+                <span>{{ field.label }}</span>
+                <span *ngIf="field.required && field.enabled" class="ob-req-badge">Required</span>
+              </div>
+
+              <!-- Enabled toggle -->
+              <div class="ob-col-toggle">
+                <label class="ob-toggle" [title]="field.enabled ? 'Click to disable' : 'Click to enable'">
+                  <input type="checkbox" [checked]="field.enabled" (change)="toggleEnabled(field)">
+                  <span class="ob-toggle-track">
+                    <span class="ob-toggle-thumb"></span>
+                  </span>
+                </label>
+              </div>
+
+              <!-- Required toggle -->
+              <div class="ob-col-toggle">
+                <label class="ob-toggle ob-toggle-required"
+                       [class.ob-toggle-inactive]="!field.enabled"
+                       [title]="!field.enabled ? 'Enable the field first' : field.required ? 'Click to make optional' : 'Click to make required'">
+                  <input type="checkbox" [checked]="field.required" [disabled]="!field.enabled" (change)="toggleRequired(field)">
+                  <span class="ob-toggle-track ob-toggle-track-green">
+                    <span class="ob-toggle-thumb"></span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Actions Footer -->
+    <div class="ob-footer-actions">
+      <!-- Show "Next" button if not on the last tab -->
+      <button mat-stroked-button class="btn-cancel" *ngIf="selectedTab < sections.length - 1" (click)="selectedTab = selectedTab + 1">
+        Next Section <mat-icon>arrow_forward</mat-icon>
+      </button>
+
+      <!-- Save Actions (only on the last tab) -->
+      <button mat-flat-button class="btn-submit" [disabled]="isSaving || isLoading" (click)="saveConfiguration()" *ngIf="selectedTab === sections.length - 1">
+        <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        {{ isSaving ? 'Saving...' : 'Save Configuration' }}
+      </button>
+    </div>
+
+  </div>
+
 </div>
 
 <ng-template #denied>
-  <div class="unauthorized-panel">
-    <mat-icon class="denied-icon">lock</mat-icon>
+  <div class="ob-access-denied">
+    <mat-icon class="ob-denied-icon">lock</mat-icon>
     <h2>Access Denied</h2>
     <p>Only Super Admin users can access onboarding configuration.</p>
   </div>

@@ -1,216 +1,98 @@
-<div class="settings-general-container">
-
-  <div class="settings-header">
-    <div class="header-top">
-      <h1 class="settings-title">General Settings</h1>
-    </div>
-
-    <p class="settings-description">
-      Configure your organization's general settings including currency, timezone and date format.
-    </p>
-  </div>
-
-
-  <!-- ACCESS DENIED -->
-   
-  <!-- <div class="access-denied">
-    <mat-icon class="access-denied-icon">lock</mat-icon>
-    <h2>Access Restricted</h2>
-    <p>Only Super Administrators can modify organization settings.</p>
-  </div> -->
-
-
-
-  <!-- SETTINGS FORM -->
-  <div *ngIf="!isLoading" class="settings-content">
-
-    <mat-card class="settings-card">
-
-      <mat-card-header class="card-header">
-        <div class="header-content">
-          <mat-icon class="header-icon">language</mat-icon>
-
-          <div class="header-text">
-            <h2 class="card-title">Localization Settings</h2>
-            <p class="card-subtitle">
-              Configure regional preferences for your organization
-            </p>
-          </div>
-        </div>
-      </mat-card-header>
-
-
-
-      <mat-card-content class="card-content">
-
-        <form [formGroup]="settingsForm" (ngSubmit)="onSave()" class="settings-form">
-
-          <!-- Currency -->
-          <div class="section-row">
-
-            <mat-form-field appearance="outline" class="full-width">
-
-              <mat-label>Default Currency</mat-label>
-
-              <mat-select formControlName="currency">
-
-                <mat-option *ngFor="let currency of availableCurrencies" [value]="currency.code">
-
-                  <div class="option-row">
-                    <span class="code-badge">
-                      {{ currency.code }}
-                    </span>
-
-                    <span class="name-text">
-                      {{ currency.name }} ({{ currency.symbol }})
-                    </span>
-                  </div>
-
-                </mat-option>
-
-              </mat-select>
-
-              <mat-icon matPrefix>payments</mat-icon>
-
-              <mat-hint>
-                Used for all financial transactions
-              </mat-hint>
-
-            </mat-form-field>
-
-          </div>
-
-
-          <!-- TIMEZONE -->
-          <div class="section-row">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>System Time Zone</mat-label>
-              <mat-select formControlName="timeZone" [disabled]="timezone.length === 0">
-                <!-- Default option when nothing selected -->
-                <mat-option [value]="null" disabled>
-                  Select Time Zone
-                </mat-option>
-                <!-- Loading -->
-                <mat-option *ngIf="timezone.length === 0" disabled>
-                  Loading timezones...
-                </mat-option>
-                <!-- Timezone list -->
-                <mat-option *ngFor="let tz of timezone" [value]="tz.value">
-                  {{ tz.value }}
-                </mat-option>
-
-              </mat-select>
-
-              <mat-icon matPrefix>schedule</mat-icon>
-
-              <mat-hint>
-                Used for attendance logs and system time
-              </mat-hint>
-
-              <mat-error *ngIf="settingsForm.get('timeZone')?.hasError('required')">
-                System time zone is required
-              </mat-error>
-
-            </mat-form-field>
-
-          </div>
-          <!-- CULTURE -->
-          <div class="section-row">
-
-            <mat-form-field appearance="outline" class="full-width">
-
-              <mat-label>Date & Time Format (Culture)</mat-label>
-
-              <mat-select formControlName="culture">
-
-                <mat-option *ngFor="let culture of availableCultures" [value]="culture.code">
-
-                  <div class="culture-option-container">
-
-                    <div class="culture-main">
-
-                      <span class="culture-code">
-                        {{ culture.code }}
-                      </span>
-
-                      <span class="culture-name">
-                        - {{ culture.name }}
-                      </span>
-
-                    </div>
-
-                    <span class="culture-preview">
-                      Example: {{ culture.preview }}
-                    </span>
-
-                  </div>
-
-                </mat-option>
-
-              </mat-select>
-
-              <mat-icon matPrefix>event_available</mat-icon>
-
-              <mat-hint>
-                Automatically controls date and time display format
-              </mat-hint>
-
-            </mat-form-field>
-
-          </div>
-
-
-
-          <!-- BUTTONS -->
-          <div class="form-actions">
-
-            <button mat-raised-button color="primary" type="submit" class="save-button"
-              [disabled]="settingsForm.invalid || isSaving" *ngIf="hasPermission('Save_Button')">
-
-              <mat-icon *ngIf="!isSaving">
-                save
-              </mat-icon>
-
-              <mat-spinner *ngIf="isSaving" diameter="20" class="button-spinner">
-              </mat-spinner>
-
-              <span>
-                {{ isSaving ? 'Saving...' : 'Save Changes' }}
-              </span>
-
-            </button>
-
-
-
-            <button mat-stroked-button type="button" (click)="loadSettings()" class="cancel-button" *ngIf="hasPermission('Reset_Button')">
-
-              <mat-icon>refresh</mat-icon>
-
-              <span>Reset</span>
-
-            </button>
-
-          </div>
-
-        </form>
-
-      </mat-card-content>
-
-    </mat-card>
-
-  </div>
-
-
+<div class="ts-page-layout">
+
+  <!-- PAGE HEADER -->
+  <app-page-header matIcon="settings" title="General Settings" subtitle="Configure currency, timezone and date format for your organization">
+  </app-page-header>
 
   <!-- LOADING -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="isLoading" class="sg-loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading settings...</p>
+  </div>
 
-    <mat-spinner diameter="50"></mat-spinner>
+  <!-- SETTINGS FORM -->
+  <div *ngIf="!isLoading" class="ts-card sg-card">
 
-    <p class="loading-text">
-      Loading settings...
-    </p>
+    <!-- Card Section Header -->
+    <div class="sg-card-section-header">
+      <div class="sg-section-icon">
+        <mat-icon>language</mat-icon>
+      </div>
+      <div>
+        <h2 class="sg-section-title">Localization Settings</h2>
+        <p class="sg-section-subtitle">Configure regional preferences for your organization</p>
+      </div>
+    </div>
 
+    <!-- Form -->
+    <form [formGroup]="settingsForm" (ngSubmit)="onSave()" class="sg-form">
+
+      <!-- Currency -->
+      <div class="sg-field-group">
+        <label class="sg-label">Default Currency</label>
+        <mat-form-field appearance="outline" class="sg-mat-field">
+          <mat-icon matPrefix>payments</mat-icon>
+          <mat-select formControlName="currency">
+            <mat-option *ngFor="let currency of availableCurrencies" [value]="currency.code">
+              <div class="sg-option-row">
+                <span class="sg-code-badge">{{ currency.code }}</span>
+                <span>{{ currency.name }} ({{ currency.symbol }})</span>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-hint>Used for all financial transactions</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Timezone -->
+      <div class="sg-field-group">
+        <label class="sg-label">System Time Zone</label>
+        <mat-form-field appearance="outline" class="sg-mat-field">
+          <mat-icon matPrefix>schedule</mat-icon>
+          <mat-select formControlName="timeZone" [disabled]="timezone.length === 0">
+            <mat-option [value]="null" disabled>Select Time Zone</mat-option>
+            <mat-option *ngIf="timezone.length === 0" disabled>Loading timezones...</mat-option>
+            <mat-option *ngFor="let tz of timezone" [value]="tz.value">{{ tz.value }}</mat-option>
+          </mat-select>
+          <mat-hint>Used for attendance logs and system time</mat-hint>
+          <mat-error *ngIf="settingsForm.get('timeZone')?.hasError('required')">System time zone is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Culture -->
+      <div class="sg-field-group">
+        <label class="sg-label">Date &amp; Time Format (Culture)</label>
+        <mat-form-field appearance="outline" class="sg-mat-field">
+          <mat-icon matPrefix>event_available</mat-icon>
+          <mat-select formControlName="culture">
+            <mat-option *ngFor="let culture of availableCultures" [value]="culture.code">
+              <div class="sg-culture-option">
+                <div class="sg-culture-main">
+                  <span class="sg-culture-code">{{ culture.code }}</span>
+                  <span class="sg-culture-name"> - {{ culture.name }}</span>
+                </div>
+                <span class="sg-culture-preview">Example: {{ culture.preview }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-hint>Automatically controls date and time display format</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Actions -->
+      <div class="sg-actions">
+        <button mat-stroked-button type="button" (click)="loadSettings()" class="btn-cancel" *ngIf="hasPermission('Reset_Button')">
+          <mat-icon>refresh</mat-icon>
+          Reset
+        </button>
+        <button mat-flat-button type="submit" class="btn-submit" [disabled]="settingsForm.invalid || isSaving" *ngIf="hasPermission('Save_Button')">
+          <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+          <mat-icon *ngIf="!isSaving">save</mat-icon>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+
+    </form>
   </div>
 
 </div>

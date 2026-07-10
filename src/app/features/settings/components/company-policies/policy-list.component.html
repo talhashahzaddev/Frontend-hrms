@@ -1,56 +1,52 @@
-<div class="policies-page">
+<div class="ts-page-layout">
 
-  <!-- ── Header ──────────────────────────────────────────────── -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Company Policies</h1>
-      <p class="page-subtitle">Manage and publish employee handbook policies</p>
-    </div>
-    <button
-      mat-flat-button
-      class="add-btn"
-      (click)="openAddDialog()"
-      *ngIf="hasPermission('Create_Policy')">
-      <mat-icon>add</mat-icon>
-      New Policy
+  <!-- PAGE HEADER -->
+  <app-page-header matIcon="policy" title="Company Policies" subtitle="Manage and publish employee handbook policies">
+    <button actions class="btn-submit" (click)="openAddDialog()" *ngIf="hasPermission('Create_Policy')">
+      <mat-icon>add</mat-icon> New Policy
     </button>
-  </div>
+  </app-page-header>
 
-  <!-- ── Card ────────────────────────────────────────────────── -->
-  <div class="policies-card">
+  <!-- MAIN CARD -->
+  <div class="ts-card pl-card">
 
-    <div class="card-meta">
-      <span class="count-badge">{{ policiesList.length }} policies</span>
+    <!-- Toolbar -->
+    <div class="pl-toolbar">
+      <span class="pl-record-count">{{ policiesList.length }} policies</span>
     </div>
 
     <!-- Loading -->
-    <div *ngIf="isLoading" class="state-container">
+    <div *ngIf="isLoading" class="st-loading-state">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading policies…</p>
     </div>
 
-    <!-- Empty -->
-    <div *ngIf="!isLoading && policiesList.length === 0 && hasPermission('Policy_Table')" class="state-container">
-      <div class="empty-icon">
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && policiesList.length === 0 && hasPermission('Policy_Table')" class="st-empty-state">
+      <div class="st-empty-icon">
         <mat-icon>policy</mat-icon>
       </div>
-      <h3>No policies yet</h3>
+      <h3>No Policies Yet</h3>
       <p>Create your first policy to get started.</p>
-      <button mat-flat-button class="add-btn" (click)="openAddDialog()" *ngIf="hasPermission('Create_Policy')">
-        <mat-icon>add</mat-icon>
-        Add Policy
+      <button mat-flat-button class="btn-submit" (click)="openAddDialog()" *ngIf="hasPermission('Create_Policy')" style="margin-top:20px;">
+        <mat-icon>add</mat-icon> Add Policy
       </button>
     </div>
 
     <!-- Table -->
-    <div *ngIf="!isLoading && policiesList.length > 0 && hasPermission('Policy_Table')" class="table-wrapper">
-      <table mat-table [dataSource]="dataSource" class="policies-table">
+    <div *ngIf="!isLoading && policiesList.length > 0 && hasPermission('Policy_Table')" class="pl-table-wrap">
+      <table mat-table [dataSource]="dataSource" class="st-table">
 
         <!-- Policy Name -->
         <ng-container matColumnDef="policyName">
           <th mat-header-cell *matHeaderCellDef>Policy Name</th>
           <td mat-cell *matCellDef="let row">
-            <span class="policy-name">{{ row.policyName }}</span>
+            <div class="pl-name-cell">
+              <div class="pl-policy-icon">
+                <mat-icon>description</mat-icon>
+              </div>
+              <span class="pl-policy-name">{{ row.policyName }}</span>
+            </div>
           </td>
         </ng-container>
 
@@ -58,7 +54,7 @@
         <ng-container matColumnDef="category">
           <th mat-header-cell *matHeaderCellDef>Category</th>
           <td mat-cell *matCellDef="let row">
-            <span class="category-chip">{{ row.category }}</span>
+            <span class="st-chip st-chip-primary">{{ row.category }}</span>
           </td>
         </ng-container>
 
@@ -66,8 +62,8 @@
         <ng-container matColumnDef="isPublished">
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let row">
-            <span class="status-chip" [class.published]="row.isPublished" [class.draft]="!row.isPublished">
-              <span class="status-dot"></span>
+            <span class="st-chip" [class.st-chip-published]="row.isPublished" [class.st-chip-draft]="!row.isPublished">
+              <span class="st-dot"></span>
               {{ row.isPublished ? 'Published' : 'Draft' }}
             </span>
           </td>
@@ -76,40 +72,38 @@
         <!-- Updated At -->
         <ng-container matColumnDef="updatedAt">
           <th mat-header-cell *matHeaderCellDef>Last Updated</th>
-          <td mat-cell *matCellDef="let row" class="date-cell">
+          <td mat-cell *matCellDef="let row" class="pl-date-cell">
             {{ row.updatedAt | localizedDate:'MMM d, y' }}
           </td>
         </ng-container>
 
         <!-- Actions -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let row">
-            <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn" matTooltip="Options">
+          <th mat-header-cell *matHeaderCellDef style="text-align:right;"></th>
+          <td mat-cell *matCellDef="let row" style="text-align:right;">
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="st-action-btn" matTooltip="Options">
               <mat-icon>more_vert</mat-icon>
             </button>
-            <mat-menu #menu="matMenu" class="policy-action-menu">
+            <mat-menu #menu="matMenu">
               <button mat-menu-item (click)="openViewDialog(row)" *ngIf="hasPermission('View_Policy')">
-                <mat-icon>visibility</mat-icon>
-                <span>View</span>
+                <mat-icon>visibility</mat-icon><span>View</span>
               </button>
               <button mat-menu-item (click)="openEditDialog(row)" *ngIf="hasPermission('Edit_Policy')">
-                <mat-icon>edit</mat-icon>
-                <span>Edit</span>
+                <mat-icon>edit</mat-icon><span>Edit</span>
               </button>
               <mat-divider *ngIf="hasPermission('Edit_Policy') || hasPermission('Delete_Policy')"></mat-divider>
-              <button mat-menu-item class="delete-item" (click)="deletePolicy(row)" *ngIf="hasPermission('Delete_Policy')">
-                <mat-icon>delete_outline</mat-icon>
-                <span>Delete</span>
+              <button mat-menu-item class="danger-action" (click)="deletePolicy(row)" *ngIf="hasPermission('Delete_Policy')">
+                <mat-icon>delete_outline</mat-icon><span>Delete</span>
               </button>
             </mat-menu>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="pl-table-row"></tr>
       </table>
     </div>
 
   </div>
+
 </div>

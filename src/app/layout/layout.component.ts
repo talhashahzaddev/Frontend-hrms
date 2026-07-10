@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, filter } from 'rxjs';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
@@ -14,6 +14,8 @@ import { MatListModule } from '@angular/material/list';
 // Components
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { ChatWidgetComponent } from '../shared/components/chat-widget/chat-widget.component';
+import { Router, NavigationEnd } from '@angular/router';
 
 // Services
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -31,7 +33,8 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
         MatIconModule,
         MatListModule,
         HeaderComponent,
-        SidebarComponent
+        SidebarComponent,
+        ChatWidgetComponent
     ],
     templateUrl: './layout.component.html',
     styleUrls: ['./layout.component.scss']
@@ -43,14 +46,25 @@ export class LayoutComponent implements OnInit, OnDestroy {
   sidenavMode: 'side' | 'over' | 'push' = 'side';
   sidenavOpened = true;
   
+  isAiAssistantPage = false;
+  
   private destroy$ = new Subject<void>();
 
   constructor(
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.observeBreakpoints();
+    
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: any) => {
+      this.isAiAssistantPage = event.urlAfterRedirects.includes('/ai-assistant');
+    });
+    this.isAiAssistantPage = this.router.url.includes('/ai-assistant');
   }
 
   ngOnDestroy(): void {

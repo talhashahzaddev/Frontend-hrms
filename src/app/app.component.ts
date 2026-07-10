@@ -20,7 +20,7 @@ import { ToastModule } from 'primeng/toast';
 // App Components
 import { LayoutComponent } from './layout/layout.component';
 import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component';
-import { ChatWidgetComponent } from './shared/components/chat-widget/chat-widget.component';
+
 import { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
 
 // Services
@@ -49,7 +49,6 @@ import { NotificationService } from './core/services/notification.service';
     ToastModule,
     LayoutComponent,
     LoadingSpinnerComponent,
-    ChatWidgetComponent,
     ProgressBarComponent
   ],
   templateUrl: './app.component.html',

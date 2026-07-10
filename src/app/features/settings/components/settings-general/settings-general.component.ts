@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,6 +36,7 @@ export interface CultureOption {
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -287,3 +289,4 @@ hasPermission(actionKey: string): boolean {
   //   });
   // }
 }
+

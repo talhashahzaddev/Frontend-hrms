@@ -1,76 +1,78 @@
 <!-- ================= LOADING & ERROR STATES ================= -->
 <ng-template #loadingOrError>
-  <div class="loading-state">
-    <mat-spinner *ngIf="isLoading" diameter="40"></mat-spinner>
-    <div *ngIf="error && !isLoading" class="error-box">
-      <mat-icon>warning</mat-icon> {{ error }}
+  <div class="ts-page-layout">
+    <div class="ts-loading-state" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading article...</p>
+    </div>
+    <div *ngIf="error && !isLoading" class="ts-error-state">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Error Loading Article</h3>
+      <p>{{ error }}</p>
+      <button mat-stroked-button class="btn-cancel" (click)="goBack()">Back to Dashboard</button>
     </div>
   </div>
 </ng-template>
 
 <!-- ================= MAIN CONTENT ================= -->
-<div class="news-view-container" *ngIf="!isLoading && news; else loadingOrError">
-  <div class="content-wrapper">
+<div class="ts-page-layout" *ngIf="!isLoading && news; else loadingOrError">
+  
+  <!-- PAGE HEADER -->
+  <app-page-header 
+    matIcon="article"
+    title="News Article" 
+    [subtitle]="'Category: ' + (news.category || 'General')">
     
-    <!-- Breadcrumbs -->
-    <nav class="breadcrumbs">
-      <a class="breadcrumb-link">News</a>
-      <mat-icon class="breadcrumb-chevron">chevron_right</mat-icon>
-      <span class="breadcrumb-current">{{ news.category }}</span>
-    </nav>
+    <div class="page-header-actions">
+      <button mat-stroked-button class="btn-cancel" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Back to Dashboard
+      </button>
+    </div>
+  </app-page-header>
 
-    <!-- Back Link -->
-    <a class="back-link" (click)="goBack()">
-      <mat-icon class="back-icon">arrow_back</mat-icon>
-      <span>Back to News Dashboard</span>
-    </a>
+  <!-- ARTICLE CARD -->
+  <div class="ts-card nv-card">
+    <div class="nv-hero" *ngIf="news.imageUrl">
+      <img [src]="news.imageUrl" [alt]="news.title" class="nv-hero-image" />
+    </div>
 
-    <!-- Article Card -->
-    <article class="article-card">
-      <div class="article-content">
-        
-        <!-- ================= BADGES ================= -->
-        <div class="badges-container">
-          <span class="badge badge-category">{{ news.category }}</span>
-          <span class="badge badge-status" [ngClass]="news.status.toLowerCase()">
-            {{ news.status }}
-          </span>
-        </div>
-
-        <!-- ================= TITLE ================= -->
-        <h1 class="article-title">{{ news.title }}</h1>
-
-        <!-- ================= METADATA ================= -->
-        <div class="article-metadata">
-          <div class="metadata-item">
-            <!-- <div class="author-avatar"></div> -->
-            <span class="author-name">{{ news.authorName }}</span>
-          </div>
-
-          <div class="metadata-item" *ngIf="news.publishedAt">
-            <mat-icon class="metadata-icon">calendar_today</mat-icon>
-            <span>{{ news.publishedAt | localizedDate:'d MMMM yyyy' }}</span>
-          </div>
-
-          <div class="metadata-item" *ngIf="news.views !== undefined">
-            <mat-icon class="metadata-icon">visibility</mat-icon>
-            <span>{{ news.views }} views</span>
-          </div>
-        </div>
-
-        <!-- ================= HERO IMAGE ================= -->
-        <div class="hero-image-container" *ngIf="news.imageUrl">
-          <img [src]="news.imageUrl" [alt]="news.title" class="hero-image" />
-        </div>
-
-        <!-- ================= DESCRIPTION CARD ================= -->
-        <div class="description-card">
-          <h2 class="description-heading">Description</h2>
-          <div class="description-content" [innerHTML]="news.description"></div>
-        </div>
-
+    <div class="nv-content">
+      
+      <!-- Badges -->
+      <div class="nv-badges">
+        <span class="ts-chip" [ngClass]="'ts-chip-' + (news.category.toLowerCase() || 'default')">
+          <span class="ts-dot"></span> {{ news.category || 'General' }}
+        </span>
+        <span class="ts-chip" [ngClass]="news.status === 'Published' ? 'ts-chip-published' : 'ts-chip-draft'">
+          <span class="ts-dot"></span> {{ news.status }}
+        </span>
       </div>
-    </article>
 
+      <!-- Title -->
+      <h1 class="nv-title">{{ news.title }}</h1>
+
+      <!-- Metadata -->
+      <div class="nv-metadata">
+        <div class="nv-meta-item">
+          <mat-icon>person</mat-icon>
+          <span>{{ news.authorName || 'Unknown Author' }}</span>
+        </div>
+        <div class="nv-meta-item" *ngIf="news.publishedAt">
+          <mat-icon>event</mat-icon>
+          <span>{{ news.publishedAt | localizedDate:'MMM dd, yyyy' }}</span>
+        </div>
+        <div class="nv-meta-item" *ngIf="news.views !== undefined">
+          <mat-icon>visibility</mat-icon>
+          <span>{{ news.views }} Views</span>
+        </div>
+      </div>
+
+      <mat-divider class="nv-divider"></mat-divider>
+
+      <!-- Rich Text Body -->
+      <div class="nv-body quill-content" [innerHTML]="news.description"></div>
+      
+    </div>
   </div>
+
 </div>

@@ -1,8 +1,11 @@
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService, OrgOnboardingConfigItem } from '../../services/settings.service';
@@ -29,7 +32,15 @@ export interface ConfigSection {
 @Component({
   selector: 'app-onboarding-configuration',
   standalone: true,
-  imports: [SharedCommonModule, CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,
+    PageHeaderComponent,
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatButtonModule
+  ],
   templateUrl: './onboarding-configuration.component.html',
   styleUrls: ['./onboarding-configuration.component.scss']
 })
@@ -37,6 +48,7 @@ export class OnboardingConfigurationComponent implements OnInit {
   isSaving = false;
   isLoading = true;
   loadError = false;
+  selectedTab = 0;
 
   readonly orgId = ORG_ID;
 
@@ -65,17 +77,12 @@ export class OnboardingConfigurationComponent implements OnInit {
         this.isLoading = false;
         this.loadError = true;
         this.notificationService.showError('Failed to load onboarding configuration.');
-        // Fall back to the default onboarding fields with all enabled
         this.buildSections([]);
       }
     });
   }
 
   private buildSections(items: OrgOnboardingConfigItem[]): void {
-    /** All fields present in the onboarding form, grouped by section.
-     *  The fieldKey must match (case-insensitively) what the API returns so
-     *  the enabled/required values from the server are applied correctly.
-     */
     const defaultSections: Array<{ sectionKey: string; displayName: string; icon: string; description: string; fields: Array<{ fieldKey: string; label: string }> }> = [
       {
         sectionKey: 'Personal Information',
@@ -145,7 +152,6 @@ export class OnboardingConfigurationComponent implements OnInit {
       }
     ];
 
-    // Build a lookup map: "SECTION:::fieldKey" → item (case-insensitive)
     const lookup = new Map<string, OrgOnboardingConfigItem>();
     for (const item of items) {
       const key = `${item.section.toUpperCase()}:::${item.fieldKey.toUpperCase()}`;
@@ -173,12 +179,12 @@ export class OnboardingConfigurationComponent implements OnInit {
   toggleEnabled(field: SectionField): void {
     field.enabled = !field.enabled;
     if (!field.enabled) {
-      field.required = false; // can't be required if disabled
+      field.required = false;
     }
   }
 
   toggleRequired(field: SectionField): void {
-    if (!field.enabled) return; // required only makes sense when enabled
+    if (!field.enabled) return;
     field.required = !field.required;
   }
 

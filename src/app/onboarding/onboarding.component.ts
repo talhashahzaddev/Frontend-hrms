@@ -5,6 +5,14 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Subject, takeUntil, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -90,7 +98,19 @@ export interface BankErrors {
   selector: 'app-onboarding',
   standalone: true,
   imports: [
-    SharedCommonModule, CommonModule, FormsModule, MatDialogModule],
+    SharedCommonModule, 
+    CommonModule, 
+    FormsModule, 
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatDividerModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss']
 })
