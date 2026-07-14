@@ -62,14 +62,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Dashboard',
       icon: 'dashboard',
       route: '/dashboard',
-      menuName: 'Admin Dashboard',
     },
-    {
-      label: 'Dashboard',
-      icon: 'dashboard',
-      route: '/employee/dashboard',
-      menuName: 'Employee Dashboard',
-    },
+
     {
       label: 'Employee Management',
       icon: 'people',

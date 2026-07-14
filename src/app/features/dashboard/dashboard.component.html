@@ -1,360 +1,615 @@
-<!-- Dashboard Container -->
 <div class="dashboard-container">
 
-  <!-- Loading Spinner -->
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="60"></mat-spinner>
-    <p>Loading dashboard...</p>
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner [diameter]="40"></mat-spinner>
+    <p>Loading your dashboard...</p>
   </div>
 
-  <!-- Dashboard Content -->
-  <div *ngIf="!isLoading" class="dashboard-content">
+  <ng-container *ngIf="!isLoading">
 
-    <!-- Welcome Header -->
-    <div class="dashboard-header">
-      <!-- Super Admin Onboarding Section -->
-      <div *ngIf="!isOnboardingComplete" class="onboarding-wrapper">
-        <mat-expansion-panel 
-          class="onboarding-main-panel"
-          [expanded]="false">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <div class="onboarding-panel-header">
-                <h2 class="onboarding-title">Welcome to Brisk People! Let's get started.</h2>
-                <div class="progress-container">
-                  <div class="progress-info">
-                    <span class="progress-label">Progress:</span>
-                    <span class="progress-percentage">{{ onboardingProgress }}%</span>
-                  </div>
-                  <mat-progress-bar 
-                    mode="determinate" 
-                    [value]="onboardingProgress"
-                    class="onboarding-progress-bar">
-                  </mat-progress-bar>
+    <!-- ── Page Header ────────────────────────────────────────────────────── -->
+    <div class="page-header">
+      <div class="title-section">
+        <h1 class="title">Global Dashboard</h1>
+        <p class="subtitle">Welcome back, {{ currentUser?.firstName }}. Here's what's happening today.</p>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live Time Block -->
+        <div class="time-block">
+          <div class="time-row">
+            <span class="live-time">{{ currentTime | localizedDate:'HH:mm:ss' }}</span>
+            <span class="live-date">{{ currentTime | localizedDate:'dd-MM-yyyy' }}</span>
+          </div>
+          <span class="elapsed-label">Current Time</span>
+        </div>
+
+        <!-- Clock In/Out Actions -->
+        <div class="clock-actions">
+          <button
+            class="btn-clock-in"
+            (click)="clockIn()"
+            [disabled]="currentSession?.isActive || isClockActionLoading"
+            *ngIf="!currentSession?.isActive">
+            <mat-spinner *ngIf="isClockActionLoading" diameter="14"></mat-spinner>
+            <mat-icon *ngIf="!isClockActionLoading">login</mat-icon>
+            Clock In
+          </button>
+
+          <button
+            class="btn-clock-out"
+            (click)="clockOut()"
+            [disabled]="!currentSession?.isActive || isClockActionLoading"
+            *ngIf="currentSession?.isActive">
+            <mat-spinner *ngIf="isClockActionLoading" diameter="14"></mat-spinner>
+            <mat-icon *ngIf="!isClockActionLoading">logout</mat-icon>
+            Clock Out
+          </button>
+        </div>
+
+        <!-- Global Quick Add -->
+        <div class="quick-add">
+          <button class="quick-add__btn" [matMenuTriggerFor]="quickAddMenu">
+            <mat-icon>add</mat-icon>
+            Global Quick Add
+          </button>
+          <mat-menu #quickAddMenu="matMenu" class="quick-add-menu">
+            <a mat-menu-item routerLink="/leave">Request Leave</a>
+            <a mat-menu-item routerLink="/expense/claims">Submit Expense</a>
+            <a mat-menu-item routerLink="/help-desk/tickets">Raise IT Ticket</a>
+            <a mat-menu-item routerLink="/jobs/openings">Post Job</a>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 1 – KPI CARDS                                               -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <section class="kpi-section">
+
+      <!-- Personal (Employee) -->
+      <h2 class="section-label">Personal</h2>
+      <div class="kpi-grid kpi-grid--4">
+
+        <div class="kpi-card kpi-card--blue">
+          <div class="kpi-header">
+            <span class="kpi-title">Leave Balances</span>
+            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+              <mat-icon>beach_access</mat-icon>
+            </span>
+          </div>
+          <div class="kpi-value">
+            {{ employeeData?.leaveBalances?.totalRemainingDays ?? '—' }} Days
+          </div>
+          <div class="kpi-sub">{{ leaveBalanceSummary }}</div>
+        </div>
+
+        <div class="kpi-card kpi-card--blue">
+          <div class="kpi-header">
+            <span class="kpi-title">Financial Snapshot</span>
+            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+              <mat-icon>account_balance_wallet</mat-icon>
+            </span>
+          </div>
+          <div class="kpi-value">
+            {{ (employeeData?.financialSnapshot?.lastNetSalary ?? 0) | currency:'PKR':'symbol':'1.0-0' }}
+          </div>
+          <div class="kpi-sub">
+            <a
+              class="kpi-link"
+              *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable"
+              [href]="employeeData?.financialSnapshot?.payslipUploadUrl"
+              target="_blank"
+              rel="noopener noreferrer">
+              ↓ Download Payslip
+            </a>
+            <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable">No payslip yet</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-card--blue">
+          <div class="kpi-header">
+            <span class="kpi-title">Active Loans / Advances</span>
+            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+              <mat-icon>credit_score</mat-icon>
+            </span>
+          </div>
+          <div class="kpi-value">
+            {{ totalLoanAdvance | currency:'PKR':'symbol':'1.0-0' }}
+          </div>
+          <div class="kpi-sub">Remaining Balance</div>
+        </div>
+
+        <div class="kpi-card kpi-card--blue">
+          <div class="kpi-header">
+            <span class="kpi-title">Pending Approvals</span>
+            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+              <mat-icon>hourglass_empty</mat-icon>
+            </span>
+          </div>
+          <div class="kpi-value">{{ pendingRequestCount }} Requests</div>
+          <div class="kpi-sub">Waiting on Manager</div>
+        </div>
+
+      </div>
+
+      <!-- Split Sections: Team & HR Side by Side -->
+      <div class="split-sections">
+        
+        <!-- Team Management (Manager+) -->
+        <div class="split-column">
+          <h2 class="section-label">Team Management</h2>
+          <div class="kpi-list">
+            
+            <div class="kpi-list-card kpi-list-card--amber">
+              <div class="kpi-list-card__icon kpi-list-card__icon--amber">
+                <mat-icon>groups</mat-icon>
+              </div>
+              <div class="kpi-list-card__content">
+                <span class="kpi-list-card__title">Team Attendance Snapshot</span>
+                <span class="kpi-list-card__value">{{ managerData?.teamAttendanceSnapshot?.presentCount ?? '—' }} Present</span>
+              </div>
+              <div class="kpi-list-card__sub">{{ teamAttendanceSummary }}</div>
+            </div>
+
+            <div class="kpi-list-card kpi-list-card--amber">
+              <div class="kpi-list-card__icon kpi-list-card__icon--amber">
+                <mat-icon>warning</mat-icon>
+              </div>
+              <div class="kpi-list-card__content">
+                <span class="kpi-list-card__title">Overtime / Burnout Risk</span>
+                <span class="kpi-list-card__value">{{ managerData?.teamOvertimeCountToday ?? 0 }} Alerts</span>
+              </div>
+              <div class="kpi-list-card__sub" [class.kpi-list-card__sub--danger]="(managerData?.teamOvertimeCountToday ?? 0) > 0">
+                {{ (managerData?.teamOvertimeCountToday ?? 0) > 0 ? 'Overtime today!' : 'No overtime today' }}
+              </div>
+            </div>
+
+            <div class="kpi-list-card kpi-list-card--amber">
+              <div class="kpi-list-card__icon kpi-list-card__icon--amber">
+                <mat-icon>assignment_late</mat-icon>
+              </div>
+              <div class="kpi-list-card__content">
+                <span class="kpi-list-card__title">Pending Manager Actions</span>
+                <span class="kpi-list-card__value">{{ managerPendingTotal }} Actions</span>
+              </div>
+              <div class="kpi-list-card__sub">{{ managerActionSummary }}</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- HR / Finance (HR & Admin+) -->
+        <div class="split-column">
+          <h2 class="section-label">HR, Finance & Operations</h2>
+          <div class="kpi-list">
+            
+            <div class="kpi-list-card kpi-list-card--indigo">
+              <div class="kpi-list-card__icon kpi-list-card__icon--indigo">
+                <mat-icon>payments</mat-icon>
+              </div>
+              <div class="kpi-list-card__content">
+                <span class="kpi-list-card__title">Payroll Run Status</span>
+                <span class="kpi-list-card__value">{{ payrollStatusLabel }}</span>
+              </div>
+              <div class="kpi-list-card__sub">{{ payrollStatusDetail }}</div>
+            </div>
+
+            <div class="kpi-list-card kpi-list-card--indigo">
+              <div class="kpi-list-card__icon kpi-list-card__icon--indigo">
+                <mat-icon>account_balance</mat-icon>
+              </div>
+              <div class="kpi-list-card__content">
+                <span class="kpi-list-card__title">Total Payroll Outflow</span>
+                <span class="kpi-list-card__value">{{ (hrOverviewData?.totalPayrollOutflow ?? 0) | currency:'PKR':'symbol':'1.0-0' }}</span>
+              </div>
+              <div class="kpi-list-card__sub">Last period</div>
+            </div>
+
+            <div class="kpi-list-card kpi-list-card--indigo">
+              <div class="kpi-list-card__icon kpi-list-card__icon--indigo">
+                <mat-icon>badge</mat-icon>
+              </div>
+              <div class="kpi-list-card__content">
+                <span class="kpi-list-card__title">Headcount & Openings</span>
+                <span class="kpi-list-card__value">{{ hrOverviewData?.workforceMetrics?.totalActiveEmployees ?? '—' }} Staff</span>
+              </div>
+              <div class="kpi-list-card__sub">{{ hrOverviewData?.workforceMetrics?.totalOpenPositions ?? 0 }} Openings</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 2 – ANALYTICS (HR only)                                     -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <section class="analytics-section">
+      <div class="analytics-grid">
+
+        <!-- Workforce Demographics -->
+        <div class="analytics-card">
+          <h3 class="analytics-card__title">Workforce Demographics</h3>
+          <div class="donut-chart" [style.background]="donutGradient">
+            <div class="donut-hole"><span>Total</span></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot legend-dot--blue"></div>
+              <span class="legend-label">Gender Ratio</span>
+              <span class="legend-value">{{ genderLabel }}</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot legend-dot--green"></div>
+              <span class="legend-label">Age Groups</span>
+              <span class="legend-value">{{ primaryAgeGroup }}</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot legend-dot--amber"></div>
+              <span class="legend-label">Dept Size</span>
+              <span class="legend-value">{{ largestDeptLabel }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payroll & Tax Outflow -->
+        <div class="analytics-card">
+          <h3 class="analytics-card__title">Payroll & Tax Outflow</h3>
+          <div class="bar-chart-area">
+            <div class="bar-group" *ngFor="let item of payrollChartItems">
+              <div class="bar-stack">
+                <div class="bar bar--bonus"
+                  [style.height.%]="(item.bonus / item.maxVal) * 100"></div>
+                <div class="bar bar--deductions"
+                  [style.height.%]="(item.deductions / item.maxVal) * 100"></div>
+                <div class="bar bar--basic"
+                  [style.height.%]="(item.basic / item.maxVal) * 100"></div>
+              </div>
+              <span class="bar-label">{{ item.label }}</span>
+            </div>
+            <div class="bar-empty" *ngIf="payrollChartItems.length === 0">No data yet</div>
+          </div>
+          <div class="chart-legend">
+            <div class="chart-legend-item">
+              <div class="chart-dot chart-dot--blue-dark"></div>
+              <span>Base Salary</span>
+            </div>
+            <div class="chart-legend-item">
+              <div class="chart-dot chart-dot--blue-light"></div>
+              <span>Tax/PF</span>
+            </div>
+            <div class="chart-legend-item">
+              <div class="chart-dot chart-dot--amber"></div>
+              <span>Bonuses</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Expense Actuals -->
+        <div class="analytics-card">
+          <h3 class="analytics-card__title">Monthly Expenses</h3>
+          <div class="bar-chart-area">
+            <div class="bar-group" *ngFor="let item of expenseChartItems">
+              <div class="bar-stack">
+                <div class="bar bar--green"
+                  [style.height.%]="(item.amount / item.maxVal) * 100"></div>
+              </div>
+              <span class="bar-label">{{ item.label }}</span>
+            </div>
+            <div class="bar-empty" *ngIf="expenseChartItems.length === 0">No data yet</div>
+          </div>
+          <div class="chart-legend">
+            <div class="chart-legend-item">
+              <div class="chart-dot chart-dot--green"></div>
+              <span>Total Expenses</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 3 – ACTION CENTER                                            -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <section class="action-center">
+      <div class="action-center__inner">
+        <div class="action-center__head">
+          <h2 class="action-center__title">Operational & Financial Action Center</h2>
+          <div class="tabs-bar">
+            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'financial'"
+              (click)="setActiveTab('financial')">Financial Approvals</button>
+            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'recruitment'"
+              (click)="setActiveTab('recruitment')">Recruitment Pipeline</button>
+            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'performance'"
+              (click)="setActiveTab('performance')">Performance & Appraisals</button>
+            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'assets'"
+              (click)="setActiveTab('assets')">Asset Allocation</button>
+          </div>
+        </div>
+
+        <div class="tab-body">
+
+          <!-- Financial -->
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'financial'">
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div class="data-table-wrap" style="max-height: 260px; overflow-y: auto; margin-bottom: 0;">
+                <table class="data-table">
+                  <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+                    <tr>
+                      <th>Employee</th>
+                      <th>Type</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                      <th class="text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngIf="combinedFinancialRequests.length === 0">
+                      <td colspan="5" class="text-center text-muted" style="padding: 2rem;">
+                        <span *ngIf="isFinanceLoading">Loading...</span>
+                        <span *ngIf="!isFinanceLoading">No pending financial requests found.</span>
+                      </td>
+                    </tr>
+                    <tr *ngFor="let req of combinedFinancialRequests">
+                      <td class="fw-medium">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                          <div class="avatar bg-blue" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem; background-color: #3b82f6;">
+                            {{ (req.employeeName || 'A').substring(0, 1) }}
+                          </div>
+                          {{ req.employeeName }}
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-pill" [ngClass]="req.requestType === 'Loan' ? 'status-warning' : 'status-success'" style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; background: #fef3c7; color: #b45309;" [style.background]="req.requestType === 'Loan' ? '#fef3c7' : '#dcfce3'" [style.color]="req.requestType === 'Loan' ? '#b45309' : '#166534'">
+                          {{ req.requestType }}
+                        </span>
+                      </td>
+                      <td class="fw-medium">${{ req.amountToDisplay | number }}</td>
+                      <td class="text-muted">{{ (req.createdAt || req.updatedAt) | date:'MMM yyyy' }}</td>
+                      <td class="text-right">
+                        <button class="tbl-btn tbl-btn--approve" (click)="reviewRequest(req)">Review</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                <p class="text-sm text-muted m-0">Page {{ financeCurrentPage }} of {{ financeTotalPages }}</p>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="financeCurrentPage === 1" [style.opacity]="financeCurrentPage === 1 ? '0.5' : '1'" (click)="prevFinancePage()">
+                    <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_left</mat-icon>
+                  </button>
+                  
+                  <ng-container *ngFor="let p of financePageRange">
+                    <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.75rem; cursor: pointer;" [style.background]="p === financeCurrentPage ? '#2563eb' : 'white'" [style.color]="p === financeCurrentPage ? 'white' : '#1e293b'" (click)="goToFinancePage(p)">
+                      {{ p }}
+                    </button>
+                  </ng-container>
+                  
+                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="financeCurrentPage === financeTotalPages" [style.opacity]="financeCurrentPage === financeTotalPages ? '0.5' : '1'" (click)="nextFinancePage()">
+                    <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_right</mat-icon>
+                  </button>
                 </div>
               </div>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+              
+            </div>
+          </div>
+
+          <!-- Recruitment -->
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'recruitment'">
+            
+            <div *ngIf="latestHires.length === 0" class="text-muted text-center py-4">
+              No recent selections found.
+            </div>
+
+            <div class="pipeline" *ngIf="latestHires.length > 0">
+              
+              <!-- Column 1: Candidate -->
+              <div class="pipeline__stage">
+                <h4 class="pipeline__stage-title">Candidate</h4>
+                <div class="pipeline__card pipeline__card--blue"
+                     [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
+                  <p class="pipeline__name" style="font-size: 1rem;">{{ latestHires[currentHireIndex].candidateName }}</p>
+                  <p class="text-xs text-muted mt-1">Recently Selected</p>
+                </div>
+              </div>
+              
+              <!-- Column 2: Interviewers -->
+              <div class="pipeline__stage">
+                <h4 class="pipeline__stage-title">Interviewers</h4>
+                <div class="pipeline__card pipeline__card--amber"
+                     [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
+                  <p class="pipeline__name" style="font-size: 0.9rem; white-space: normal; line-height: 1.4;">{{ latestHires[currentHireIndex].interviewers || '—' }}</p>
+                  <p class="text-xs text-muted mt-1">Panel</p>
+                </div>
+              </div>
+              
+              <!-- Column 3: Position -->
+              <div class="pipeline__stage">
+                <h4 class="pipeline__stage-title">Position</h4>
+                <div class="pipeline__card pipeline__card--green"
+                     [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
+                  <p class="pipeline__name" style="font-size: 1rem;">{{ latestHires[currentHireIndex].jobRoleName }}</p>
+                  <p class="text-xs text-muted mt-1">Offered Role</p>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+
+          <!-- Performance -->
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'performance'">
+            <div *ngIf="isPerformanceLoading" class="text-muted text-center py-4">
+              Loading appraisals...
+            </div>
+            
+            <div *ngIf="!isPerformanceLoading && managerAppraisals.length === 0" class="text-muted text-center py-4">
+              No pending appraisals require your review at this time.
+            </div>
+
+            <div class="perf-grid" *ngIf="managerAppraisals.length > 0">
+              <div class="perf-card" *ngFor="let appraisal of managerAppraisals">
+                <p class="perf-card__name">Review: {{ appraisal.employeeName }}</p>
+                <p class="perf-card__meta">{{ appraisal.appraisalCycleName || 'Current Cycle' }} • Needs Your Review</p>
+                <button class="btn-secondary" (click)="goToAppraisals()">Evaluate</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assets -->
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'assets'">
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div class="data-table-wrap" style="max-height: 260px; overflow-y: auto; margin-bottom: 0;">
+                <table class="data-table">
+                  <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+                    <tr>
+                      <th>Asset</th>
+                      <th>Type</th>
+                      <th>Tag / Code</th>
+                      <th>Status</th>
+                      <th>Assigned To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngIf="paginatedAssets.length === 0">
+                      <td colspan="5" class="text-center text-muted" style="padding: 2rem;">
+                        <span *ngIf="isAssetsLoading">Loading assets...</span>
+                        <span *ngIf="!isAssetsLoading">No assets found.</span>
+                      </td>
+                    </tr>
+                    <tr *ngFor="let asset of paginatedAssets">
+                      <td class="fw-medium">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                          <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem; color: #94a3b8;">devices</mat-icon>
+                          {{ asset.name }}
+                        </div>
+                      </td>
+                      <td class="text-muted">{{ asset.typeName || '—' }}</td>
+                      <td style="font-family: monospace; color: #64748b;">{{ asset.code || asset.assetTag || '—' }}</td>
+                      <td>
+                        <span class="status-pill" [ngClass]="asset.status === 'Assigned' ? 'status-success' : 'status-warning'" [style.background]="asset.status === 'Assigned' ? '#dcfce3' : '#fef3c7'" [style.color]="asset.status === 'Assigned' ? '#166534' : '#b45309'" style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600;">
+                          {{ asset.status || 'Unknown' }}
+                        </span>
+                      </td>
+                      <td class="fw-medium">
+                        {{ getAssetAssignedToDisplay(asset) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                <p class="text-sm text-muted m-0">Page {{ assetsCurrentPage }} of {{ assetsTotalPages }}</p>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="assetsCurrentPage === 1" [style.opacity]="assetsCurrentPage === 1 ? '0.5' : '1'" (click)="prevAssetsPage()">
+                    <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_left</mat-icon>
+                  </button>
+                  
+                  <ng-container *ngFor="let p of assetsPageRange">
+                    <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.75rem; cursor: pointer;" [style.background]="p === assetsCurrentPage ? '#2563eb' : 'white'" [style.color]="p === assetsCurrentPage ? 'white' : '#1e293b'" (click)="goToAssetsPage(p)">
+                      {{ p }}
+                    </button>
+                  </ng-container>
+                  
+                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="assetsCurrentPage === assetsTotalPages" [style.opacity]="assetsCurrentPage === assetsTotalPages ? '0.5' : '1'" (click)="nextAssetsPage()">
+                    <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_right</mat-icon>
+                  </button>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION 4 – CULTURE & QUICK LINKS                                   -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <section class="culture-section">
+      <div class="culture-grid">
+
+        <!-- Announcements -->
+        <div class="culture-card">
+          <h3 class="culture-card__title">Company Announcements</h3>
+          <div *ngIf="isNewsLoading" class="text-muted text-center py-2" style="font-size: 0.85rem;">
+            Loading news...
+          </div>
+          <div *ngIf="!isNewsLoading && latestNews.length === 0" class="text-muted text-center py-2" style="font-size: 0.85rem;">
+            No announcements at this time.
+          </div>
+          <ul class="announcements" *ngIf="latestNews.length > 0">
+            <li class="announcement-item" *ngFor="let news of latestNews">
+              <span class="announcement-tag" 
+                [ngClass]="{'announcement-tag--green': news.category === 'Achievement', 'announcement-tag--blue': news.category !== 'Achievement'}">
+                {{ news.category || 'General' }}
+              </span>
+              <span class="announcement-text" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;" [matTooltip]="news.title">{{ news.title }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Celebrations -->
+        <div class="culture-card">
+          <h3 class="culture-card__title">Upcoming Holidays</h3>
+          <div *ngIf="isHolidaysLoading" class="text-muted text-center py-2" style="font-size: 0.85rem;">
+            Loading holidays...
+          </div>
+          <div *ngIf="!isHolidaysLoading && upcomingHolidays.length === 0" class="text-muted text-center py-2" style="font-size: 0.85rem;">
+            No upcoming holidays this year.
+          </div>
           
-          <div class="onboarding-section">
-            <mat-accordion class="onboarding-steps" multi="false">
-              <mat-expansion-panel 
-                *ngFor="let step of onboardingSteps; let i = index" 
-                [expanded]="i === 0 && !step.completed"
-                class="onboarding-step"
-                [ngClass]="{ 'step-completed': step.completed, 'step-pending': !step.completed }">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    <div class="step-header">
-                      <div class="step-number-wrapper">
-                        <span class="step-number" [ngClass]="{ 'completed': step.completed }">
-                          <mat-icon *ngIf="step.completed" class="check-icon">check_circle</mat-icon>
-                          <span *ngIf="!step.completed">{{ step.id }}</span>
-                        </span>
-                      </div>
-                      <div class="step-title-content">
-                        <span class="step-title-text">Step {{ step.id }}. {{ step.title }}</span>
-                        <span *ngIf="step.completed" class="step-completed-badge">
-                          <mat-icon>check_circle</mat-icon>
-                          Completed
-                        </span>
-                      </div>
-                    </div>
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="step-content">
-                  <p class="step-description" [ngClass]="{ 'completed-message': step.completed }">
-                    <span *ngIf="step.completed" class="congratulations-text">
-                      <mat-icon>celebration</mat-icon>
-                      Congratulations! 
-                    </span>
-                    {{ step.description }}
-                  </p>
-                </div>
-              </mat-expansion-panel>
-            </mat-accordion>
-          </div>
-        </mat-expansion-panel>
-      </div>
-
-      <!-- Regular Welcome Section (for non-Super Admin or completed onboarding) -->
-      <div *ngIf="isOnboardingComplete" class="welcome-section">
-        <h2 class="welcome-title">
-          👋 Welcome, {{ currentUser?.firstName || 'User' }}
-        </h2>
-        <p class="welcome-subtitle">Here's your dashboard overview</p>
-      </div>
-      
-      <!-- <div class="header-actions">
-        <button mat-stroked-button class="period-button">
-          <mat-icon>calendar_today</mat-icon> This Month
-        </button>
-        <button mat-icon-button class="refresh-button" (click)="refreshDashboard()">
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </div> -->
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="stats-grid">
-      <mat-card *ngFor="let card of dashboardCards" class="stat-card stat-card-{{card.color}}" id="summary-cards">
-        <mat-card-content>
-          <div class="stat-item">
-            <div class="stat-icon-wrapper">
-              <mat-icon class="stat-icon">{{ card.icon }}</mat-icon>
+          <div class="celebration-item" *ngFor="let holiday of upcomingHolidays">
+            <div class="avatar avatar--blue">
+              <mat-icon>event</mat-icon>
             </div>
-            <div class="stat-details">
-              <div class="stat-label">{{ card.title }}</div>
-              <div class="stat-value">{{ card.value }}</div>
-              <div class="stat-footer">
-                <div *ngIf="card.change" 
-                     class="stat-change" 
-                     [ngClass]="{
-                       'change-increase': card.changeType === 'increase',
-                       'change-decrease': card.changeType === 'decrease',
-                       'change-neutral': card.changeType === 'neutral'
-                     }">
-                  <mat-icon class="stat-indicator">
-                    {{ card.changeType === 'increase' ? 'arrow_upward' 
-                      : card.changeType === 'decrease' ? 'arrow_downward' : 'remove' }}
-                  </mat-icon>
-                  <span>{{ card.change }}</span>
-                </div>
-              </div>
+            <div>
+              <span class="celebration-name">{{ holiday.holidayName }}</span>
+              <span class="celebration-sub">{{ holiday.holidayDate | date:'MMM dd, yyyy' }} • {{ holiday.holidayType | titlecase }}</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+        </div>
 
-    <!-- Main Grid -->
-    <div class="main-grid">
-
-      <!-- Left Column -->
-      <div class="left-column">
-
-        <!-- Attendance Chart -->
-        <mat-card class="chart-card chart-card-primary" *ngIf="attendanceChart">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">show_chart</mat-icon>
-                <span>Attendance Trends</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="chart-container">
-              <canvas baseChart
-                      [data]="attendanceChart.data"
-                      [options]="attendanceChart.options"
-                      [type]="attendanceChart.type">
-              </canvas>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Department Chart -->
-        <mat-card class="chart-card chart-card-accent" *ngIf="departmentChart" id="department-chart">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">pie_chart</mat-icon>
-                <span>Department Distribution</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="chart-container">
-              <canvas baseChart
-                      [data]="departmentChart.data"
-                      [options]="departmentChart.options"
-                      [type]="departmentChart.type">
-              </canvas>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Recent Activities -->
-        <mat-card class="activities-card" id="recent-activities">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">history</mat-icon>
-                <span>Recent Activities</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="activities-list">
-              <div *ngFor="let activity of recentActivities" class="activity-item">
-                <div class="activity-icon-wrapper">
-                  <mat-icon class="activity-icon">history</mat-icon>
-                </div>
-                <div class="activity-content">
-                  <p class="activity-title">{{ activity.activity }}</p>
-                  <p class="activity-description">{{ activity.description }}</p>
-                  <div class="activity-meta">
-                    <span class="activity-user">
-                      <mat-icon class="meta-icon">person</mat-icon>
-                      {{ activity.userName }}
-                    </span>
-                    <span class="activity-time">
-                      <mat-icon class="meta-icon">schedule</mat-icon>
-                      {{ formatDate(activity.timestamp) }} • {{ formatTime(activity.timestamp) }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="!recentActivities.length" class="empty-state">
-                <mat-icon>info</mat-icon>
-                <p>No recent activities</p>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+        <!-- Quick Links -->
+        <div class="culture-card">
+          <h3 class="culture-card__title">Quick Links</h3>
+          <div class="quick-links">
+            <a class="quick-link" href="#" routerLink="/policies">
+              <mat-icon>policy</mat-icon>
+              <span>Company Policies</span>
+            </a>
+            <a class="quick-link" href="#" routerLink="/employees">
+              <mat-icon>contact_page</mat-icon>
+              <span>Employee Directory</span>
+            </a>
+            <a class="quick-link" href="#">
+              <mat-icon>receipt_long</mat-icon>
+              <span>Tax Slab Docs</span>
+            </a>
+            <a class="quick-link" href="#">
+              <mat-icon>quiz</mat-icon>
+              <span>Question Bank</span>
+            </a>
+          </div>
+        </div>
 
       </div>
+    </section>
 
-      <!-- Right Column -->
-      <div class="right-column">
-
-        <!-- Quick Actions -->
-        <mat-card class="quick-actions-card" id="quick-actions">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">flash_on</mat-icon>
-                <span>Quick Actions</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="quick-actions-grid">
-              <button mat-stroked-button class="quick-action-button action-primary" (click)="quickemployee()">
-                <div class="action-icon-wrapper">
-                  <mat-icon>person_add</mat-icon>
-                </div>
-                <span>Add Employee</span>
-              </button>
-              <button mat-stroked-button class="quick-action-button action-accent" (click)="scheduleLeave()">
-                <div class="action-icon-wrapper">
-                  <mat-icon>calendar_today</mat-icon>
-                </div>
-                <span>Schedule Leave</span>
-              </button>
-              <button mat-stroked-button class="quick-action-button action-success" (click)="leaveApprovals()">
-                <div class="action-icon-wrapper">
-                  <mat-icon>check_circle</mat-icon>
-                </div>
-                <span>Leave Approvals</span>
-              </button>
-              <button mat-stroked-button class="quick-action-button action-info" (click)="quickreports()">
-                <div class="action-icon-wrapper">
-                  <mat-icon>bar_chart</mat-icon>
-                </div>
-                <span>Reports</span>
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Upcoming Events -->
-        <mat-card class="events-card" id="upcoming-events">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">event</mat-icon>
-                <span>Upcoming Events</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="events-list">
-              <div *ngFor="let event of upcomingEvents" class="event-item">
-                <div class="event-date-wrapper">
-                  <div class="event-date">
-                    <span class="date-day">{{ event.date | localizedDate:'d' }}</span>
-                    <span class="date-month">{{ event.date | localizedDate:'MMM' }}</span>
-                  </div>
-                </div>
-                <div class="event-content">
-                  <p class="event-title">{{ event.title }}</p>
-                  <p class="event-description">{{ event.description }}</p>
-                  <mat-chip class="event-type-chip event-type-{{event.eventType}}">
-                    {{ event.eventType }}
-                  </mat-chip>
-                </div>
-              </div>
-              <div *ngIf="!upcomingEvents.length" class="empty-state">
-                <mat-icon>event_busy</mat-icon>
-                <p>No upcoming events</p>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Performance Stats -->
-        <mat-card class="performance-card" *ngIf="performanceStats" id="performance-stats">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">star</mat-icon>
-                <span>Performance Summary</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="performance-stats">
-              <div class="performance-stat-item">
-                <div class="performance-stat-wrapper">
-                  <div class="performance-stat-header">
-                    <mat-icon class="performance-icon">star_rate</mat-icon>
-                    <span class="stat-label">Average Rating</span>
-                  </div>
-                  <span class="stat-value">{{ performanceStats.averageRating }}</span>
-                  <div class="rating-stars">
-                    <mat-icon *ngFor="let star of starRatings" 
-                              class="star-icon"
-                              [ngClass]="{ 'filled': star <= performanceStats.averageRating }">
-                      star
-                    </mat-icon>
-                  </div>
-                </div>
-              </div>
-              <div class="performance-stat-item">
-                <div class="performance-stat-wrapper">
-                  <div class="performance-stat-header">
-                    <mat-icon class="performance-icon">check_circle</mat-icon>
-                    <span class="stat-label">Completed Reviews</span>
-                  </div>
-                  <span class="stat-value">{{ performanceStats.completedReviews }}</span>
-                </div>
-              </div>
-              <div class="performance-stat-item">
-                <div class="performance-stat-wrapper">
-                  <div class="performance-stat-header">
-                    <mat-icon class="performance-icon">pending</mat-icon>
-                    <span class="stat-label">Pending Reviews</span>
-                  </div>
-                  <span class="stat-value">{{ performanceStats.pendingReviews }}</span>
-                </div>
-              </div>
-              <div class="performance-stat-item">
-                <div class="performance-stat-wrapper">
-                  <div class="performance-stat-header">
-                    <mat-icon class="performance-icon">assignment</mat-icon>
-                    <span class="stat-label">Total Appraisals</span>
-                  </div>
-                  <span class="stat-value">{{performanceStats.completedReviews + performanceStats.pendingReviews }}</span>
-                </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-      </div>
-
-    </div>
-  </div>
+  </ng-container>
 </div>

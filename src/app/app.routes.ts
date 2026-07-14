@@ -38,20 +38,7 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
   },
-  {
-    path: 'employee/dashboard',
-    canActivate: [AuthGuard],
-    //data: { roles: ['Employee','Manager'] },
-    loadComponent: () =>
-      import('./features/employee-dashboard/employee-dashboard.component').then(m => m.EmployeeDashboardComponent),
-    pathMatch: 'full'
-  },
-  // Redirect old path for backward compatibility
-  // {
-  //   path: 'employee-dashboard',
-  //   redirectTo: 'employee/dashboard',
-  //   pathMatch: 'full'
-  // },
+
 
 
 
