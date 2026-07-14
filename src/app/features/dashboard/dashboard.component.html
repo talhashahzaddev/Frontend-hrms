@@ -11,7 +11,7 @@
     <!-- ── Page Header ────────────────────────────────────────────────────── -->
     <div class="page-header">
       <div class="title-section">
-        <h1 class="title">Global Dashboard</h1>
+        <h1 class="title">Dashboard</h1>
         <p class="subtitle">Welcome back, {{ currentUser?.firstName }}. Here's what's happening today.</p>
       </div>
 
@@ -27,21 +27,15 @@
 
         <!-- Clock In/Out Actions -->
         <div class="clock-actions">
-          <button
-            class="btn-clock-in"
-            (click)="clockIn()"
-            [disabled]="currentSession?.isActive || isClockActionLoading"
+          <button class="btn-clock-in" (click)="clockIn()" [disabled]="currentSession?.isActive || isClockActionLoading"
             *ngIf="!currentSession?.isActive">
             <mat-spinner *ngIf="isClockActionLoading" diameter="14"></mat-spinner>
             <mat-icon *ngIf="!isClockActionLoading">login</mat-icon>
             Clock In
           </button>
 
-          <button
-            class="btn-clock-out"
-            (click)="clockOut()"
-            [disabled]="!currentSession?.isActive || isClockActionLoading"
-            *ngIf="currentSession?.isActive">
+          <button class="btn-clock-out" (click)="clockOut()"
+            [disabled]="!currentSession?.isActive || isClockActionLoading" *ngIf="currentSession?.isActive">
             <mat-spinner *ngIf="isClockActionLoading" diameter="14"></mat-spinner>
             <mat-icon *ngIf="!isClockActionLoading">logout</mat-icon>
             Clock Out
@@ -94,15 +88,11 @@
             </span>
           </div>
           <div class="kpi-value">
-            {{ (employeeData?.financialSnapshot?.lastNetSalary ?? 0) | currency:'PKR':'symbol':'1.0-0' }}
+            {{ currencySymbol() }} {{ (employeeData?.financialSnapshot?.lastNetSalary ?? 0) | number:'1.0-0' }}
           </div>
           <div class="kpi-sub">
-            <a
-              class="kpi-link"
-              *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable"
-              [href]="employeeData?.financialSnapshot?.payslipUploadUrl"
-              target="_blank"
-              rel="noopener noreferrer">
+            <a class="kpi-link" *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable"
+              [href]="employeeData?.financialSnapshot?.payslipUploadUrl" target="_blank" rel="noopener noreferrer">
               ↓ Download Payslip
             </a>
             <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable">No payslip yet</span>
@@ -117,7 +107,7 @@
             </span>
           </div>
           <div class="kpi-value">
-            {{ totalLoanAdvance | currency:'PKR':'symbol':'1.0-0' }}
+            {{ currencySymbol() }} {{ totalLoanAdvance | number:'1.0-0' }}
           </div>
           <div class="kpi-sub">Remaining Balance</div>
         </div>
@@ -137,19 +127,20 @@
 
       <!-- Split Sections: Team & HR Side by Side -->
       <div class="split-sections">
-        
+
         <!-- Team Management (Manager+) -->
         <div class="split-column">
           <h2 class="section-label">Team Management</h2>
           <div class="kpi-list">
-            
+
             <div class="kpi-list-card kpi-list-card--amber">
               <div class="kpi-list-card__icon kpi-list-card__icon--amber">
                 <mat-icon>groups</mat-icon>
               </div>
               <div class="kpi-list-card__content">
                 <span class="kpi-list-card__title">Team Attendance Snapshot</span>
-                <span class="kpi-list-card__value">{{ managerData?.teamAttendanceSnapshot?.presentCount ?? '—' }} Present</span>
+                <span class="kpi-list-card__value">{{ managerData?.teamAttendanceSnapshot?.presentCount ?? '—' }}
+                  Present</span>
               </div>
               <div class="kpi-list-card__sub">{{ teamAttendanceSummary }}</div>
             </div>
@@ -162,7 +153,8 @@
                 <span class="kpi-list-card__title">Overtime / Burnout Risk</span>
                 <span class="kpi-list-card__value">{{ managerData?.teamOvertimeCountToday ?? 0 }} Alerts</span>
               </div>
-              <div class="kpi-list-card__sub" [class.kpi-list-card__sub--danger]="(managerData?.teamOvertimeCountToday ?? 0) > 0">
+              <div class="kpi-list-card__sub"
+                [class.kpi-list-card__sub--danger]="(managerData?.teamOvertimeCountToday ?? 0) > 0">
                 {{ (managerData?.teamOvertimeCountToday ?? 0) > 0 ? 'Overtime today!' : 'No overtime today' }}
               </div>
             </div>
@@ -185,7 +177,7 @@
         <div class="split-column">
           <h2 class="section-label">HR, Finance & Operations</h2>
           <div class="kpi-list">
-            
+
             <div class="kpi-list-card kpi-list-card--indigo">
               <div class="kpi-list-card__icon kpi-list-card__icon--indigo">
                 <mat-icon>payments</mat-icon>
@@ -203,7 +195,7 @@
               </div>
               <div class="kpi-list-card__content">
                 <span class="kpi-list-card__title">Total Payroll Outflow</span>
-                <span class="kpi-list-card__value">{{ (hrOverviewData?.totalPayrollOutflow ?? 0) | currency:'PKR':'symbol':'1.0-0' }}</span>
+                <span class="kpi-list-card__value">{{ currencySymbol() }} {{ (hrOverviewData?.totalPayrollOutflow ?? 0) | number:'1.0-0' }}</span>
               </div>
               <div class="kpi-list-card__sub">Last period</div>
             </div>
@@ -214,9 +206,11 @@
               </div>
               <div class="kpi-list-card__content">
                 <span class="kpi-list-card__title">Headcount & Openings</span>
-                <span class="kpi-list-card__value">{{ hrOverviewData?.workforceMetrics?.totalActiveEmployees ?? '—' }} Staff</span>
+                <span class="kpi-list-card__value">{{ hrOverviewData?.workforceMetrics?.totalActiveEmployees ?? '—' }}
+                  Staff</span>
               </div>
-              <div class="kpi-list-card__sub">{{ hrOverviewData?.workforceMetrics?.totalOpenPositions ?? 0 }} Openings</div>
+              <div class="kpi-list-card__sub">{{ hrOverviewData?.workforceMetrics?.totalOpenPositions ?? 0 }} Openings
+              </div>
             </div>
 
           </div>
@@ -263,12 +257,9 @@
           <div class="bar-chart-area">
             <div class="bar-group" *ngFor="let item of payrollChartItems">
               <div class="bar-stack">
-                <div class="bar bar--bonus"
-                  [style.height.%]="(item.bonus / item.maxVal) * 100"></div>
-                <div class="bar bar--deductions"
-                  [style.height.%]="(item.deductions / item.maxVal) * 100"></div>
-                <div class="bar bar--basic"
-                  [style.height.%]="(item.basic / item.maxVal) * 100"></div>
+                <div class="bar bar--bonus" [style.height.%]="(item.bonus / item.maxVal) * 100"></div>
+                <div class="bar bar--deductions" [style.height.%]="(item.deductions / item.maxVal) * 100"></div>
+                <div class="bar bar--basic" [style.height.%]="(item.basic / item.maxVal) * 100"></div>
               </div>
               <span class="bar-label">{{ item.label }}</span>
             </div>
@@ -296,8 +287,7 @@
           <div class="bar-chart-area">
             <div class="bar-group" *ngFor="let item of expenseChartItems">
               <div class="bar-stack">
-                <div class="bar bar--green"
-                  [style.height.%]="(item.amount / item.maxVal) * 100"></div>
+                <div class="bar bar--green" [style.height.%]="(item.amount / item.maxVal) * 100"></div>
               </div>
               <span class="bar-label">{{ item.label }}</span>
             </div>
@@ -337,7 +327,7 @@
 
           <!-- Financial -->
           <div class="tab-panel" [class.tab-panel--active]="activeTab === 'financial'">
-            
+
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div class="data-table-wrap" style="max-height: 260px; overflow-y: auto; margin-bottom: 0;">
                 <table class="data-table">
@@ -360,18 +350,23 @@
                     <tr *ngFor="let req of combinedFinancialRequests">
                       <td class="fw-medium">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                          <div class="avatar bg-blue" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem; background-color: #3b82f6;">
+                          <div class="avatar bg-blue"
+                            style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem; background-color: #3b82f6;">
                             {{ (req.employeeName || 'A').substring(0, 1) }}
                           </div>
                           {{ req.employeeName }}
                         </div>
                       </td>
                       <td>
-                        <span class="status-pill" [ngClass]="req.requestType === 'Loan' ? 'status-warning' : 'status-success'" style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; background: #fef3c7; color: #b45309;" [style.background]="req.requestType === 'Loan' ? '#fef3c7' : '#dcfce3'" [style.color]="req.requestType === 'Loan' ? '#b45309' : '#166534'">
+                        <span class="status-pill"
+                          [ngClass]="req.requestType === 'Loan' ? 'status-warning' : 'status-success'"
+                          style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; background: #fef3c7; color: #b45309;"
+                          [style.background]="req.requestType === 'Loan' ? '#fef3c7' : '#dcfce3'"
+                          [style.color]="req.requestType === 'Loan' ? '#b45309' : '#166534'">
                           {{ req.requestType }}
                         </span>
                       </td>
-                      <td class="fw-medium">${{ req.amountToDisplay | number }}</td>
+                      <td class="fw-medium">{{ currencySymbol() }} {{ req.amountToDisplay | number }}</td>
                       <td class="text-muted">{{ (req.createdAt || req.updatedAt) | date:'MMM yyyy' }}</td>
                       <td class="text-right">
                         <button class="tbl-btn tbl-btn--approve" (click)="reviewRequest(req)">Review</button>
@@ -380,70 +375,83 @@
                   </tbody>
                 </table>
               </div>
-              
+
               <!-- Pagination -->
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
                 <p class="text-sm text-muted m-0">Page {{ financeCurrentPage }} of {{ financeTotalPages }}</p>
-                
+
                 <div style="display: flex; gap: 0.5rem;">
-                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="financeCurrentPage === 1" [style.opacity]="financeCurrentPage === 1 ? '0.5' : '1'" (click)="prevFinancePage()">
+                  <button
+                    style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;"
+                    [disabled]="financeCurrentPage === 1" [style.opacity]="financeCurrentPage === 1 ? '0.5' : '1'"
+                    (click)="prevFinancePage()">
                     <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_left</mat-icon>
                   </button>
-                  
+
                   <ng-container *ngFor="let p of financePageRange">
-                    <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.75rem; cursor: pointer;" [style.background]="p === financeCurrentPage ? '#2563eb' : 'white'" [style.color]="p === financeCurrentPage ? 'white' : '#1e293b'" (click)="goToFinancePage(p)">
+                    <button
+                      style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.75rem; cursor: pointer;"
+                      [style.background]="p === financeCurrentPage ? '#2563eb' : 'white'"
+                      [style.color]="p === financeCurrentPage ? 'white' : '#1e293b'" (click)="goToFinancePage(p)">
                       {{ p }}
                     </button>
                   </ng-container>
-                  
-                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="financeCurrentPage === financeTotalPages" [style.opacity]="financeCurrentPage === financeTotalPages ? '0.5' : '1'" (click)="nextFinancePage()">
+
+                  <button
+                    style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;"
+                    [disabled]="financeCurrentPage === financeTotalPages"
+                    [style.opacity]="financeCurrentPage === financeTotalPages ? '0.5' : '1'"
+                    (click)="nextFinancePage()">
                     <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_right</mat-icon>
                   </button>
                 </div>
               </div>
-              
+
             </div>
           </div>
 
           <!-- Recruitment -->
           <div class="tab-panel" [class.tab-panel--active]="activeTab === 'recruitment'">
-            
+
             <div *ngIf="latestHires.length === 0" class="text-muted text-center py-4">
               No recent selections found.
             </div>
 
             <div class="pipeline" *ngIf="latestHires.length > 0">
-              
+
               <!-- Column 1: Candidate -->
               <div class="pipeline__stage">
                 <h4 class="pipeline__stage-title">Candidate</h4>
                 <div class="pipeline__card pipeline__card--blue"
-                     [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
-                  <p class="pipeline__name" style="font-size: 1rem;">{{ latestHires[currentHireIndex].candidateName }}</p>
+                  [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
+                  <p class="pipeline__name" style="font-size: 1rem;">{{ latestHires[currentHireIndex].candidateName }}
+                  </p>
                   <p class="text-xs text-muted mt-1">Recently Selected</p>
                 </div>
               </div>
-              
+
               <!-- Column 2: Interviewers -->
               <div class="pipeline__stage">
                 <h4 class="pipeline__stage-title">Interviewers</h4>
                 <div class="pipeline__card pipeline__card--amber"
-                     [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
-                  <p class="pipeline__name" style="font-size: 0.9rem; white-space: normal; line-height: 1.4;">{{ latestHires[currentHireIndex].interviewers || '—' }}</p>
+                  [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
+                  <p class="pipeline__name" style="font-size: 0.9rem; white-space: normal; line-height: 1.4;">{{
+                    latestHires[currentHireIndex].interviewers || '—' }}</p>
                   <p class="text-xs text-muted mt-1">Panel</p>
                 </div>
               </div>
-              
+
               <!-- Column 3: Position -->
               <div class="pipeline__stage">
                 <h4 class="pipeline__stage-title">Position</h4>
                 <div class="pipeline__card pipeline__card--green"
-                     [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
+                  [ngStyle]="{'transition': 'opacity 0.3s ease-in-out', 'opacity': isHireAnimating ? 0 : 1}">
                   <p class="pipeline__name" style="font-size: 1rem;">{{ latestHires[currentHireIndex].jobRoleName }}</p>
                   <p class="text-xs text-muted mt-1">Offered Role</p>
                 </div>
               </div>
-              
+
             </div>
           </div>
 
@@ -452,7 +460,7 @@
             <div *ngIf="isPerformanceLoading" class="text-muted text-center py-4">
               Loading appraisals...
             </div>
-            
+
             <div *ngIf="!isPerformanceLoading && managerAppraisals.length === 0" class="text-muted text-center py-4">
               No pending appraisals require your review at this time.
             </div>
@@ -468,7 +476,7 @@
 
           <!-- Assets -->
           <div class="tab-panel" [class.tab-panel--active]="activeTab === 'assets'">
-            
+
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div class="data-table-wrap" style="max-height: 260px; overflow-y: auto; margin-bottom: 0;">
                 <table class="data-table">
@@ -491,14 +499,19 @@
                     <tr *ngFor="let asset of paginatedAssets">
                       <td class="fw-medium">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                          <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem; color: #94a3b8;">devices</mat-icon>
+                          <mat-icon
+                            style="font-size: 1rem; width: 1rem; height: 1rem; color: #94a3b8;">devices</mat-icon>
                           {{ asset.name }}
                         </div>
                       </td>
                       <td class="text-muted">{{ asset.typeName || '—' }}</td>
                       <td style="font-family: monospace; color: #64748b;">{{ asset.code || asset.assetTag || '—' }}</td>
                       <td>
-                        <span class="status-pill" [ngClass]="asset.status === 'Assigned' ? 'status-success' : 'status-warning'" [style.background]="asset.status === 'Assigned' ? '#dcfce3' : '#fef3c7'" [style.color]="asset.status === 'Assigned' ? '#166534' : '#b45309'" style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600;">
+                        <span class="status-pill"
+                          [ngClass]="asset.status === 'Assigned' ? 'status-success' : 'status-warning'"
+                          [style.background]="asset.status === 'Assigned' ? '#dcfce3' : '#fef3c7'"
+                          [style.color]="asset.status === 'Assigned' ? '#166534' : '#b45309'"
+                          style="padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600;">
                           {{ asset.status || 'Unknown' }}
                         </span>
                       </td>
@@ -509,28 +522,38 @@
                   </tbody>
                 </table>
               </div>
-              
+
               <!-- Pagination -->
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
                 <p class="text-sm text-muted m-0">Page {{ assetsCurrentPage }} of {{ assetsTotalPages }}</p>
-                
+
                 <div style="display: flex; gap: 0.5rem;">
-                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="assetsCurrentPage === 1" [style.opacity]="assetsCurrentPage === 1 ? '0.5' : '1'" (click)="prevAssetsPage()">
+                  <button
+                    style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;"
+                    [disabled]="assetsCurrentPage === 1" [style.opacity]="assetsCurrentPage === 1 ? '0.5' : '1'"
+                    (click)="prevAssetsPage()">
                     <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_left</mat-icon>
                   </button>
-                  
+
                   <ng-container *ngFor="let p of assetsPageRange">
-                    <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.75rem; cursor: pointer;" [style.background]="p === assetsCurrentPage ? '#2563eb' : 'white'" [style.color]="p === assetsCurrentPage ? 'white' : '#1e293b'" (click)="goToAssetsPage(p)">
+                    <button
+                      style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.75rem; cursor: pointer;"
+                      [style.background]="p === assetsCurrentPage ? '#2563eb' : 'white'"
+                      [style.color]="p === assetsCurrentPage ? 'white' : '#1e293b'" (click)="goToAssetsPage(p)">
                       {{ p }}
                     </button>
                   </ng-container>
-                  
-                  <button style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;" [disabled]="assetsCurrentPage === assetsTotalPages" [style.opacity]="assetsCurrentPage === assetsTotalPages ? '0.5' : '1'" (click)="nextAssetsPage()">
+
+                  <button
+                    style="border: 1px solid #e2e8f0; background: white; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer; display: flex; align-items: center;"
+                    [disabled]="assetsCurrentPage === assetsTotalPages"
+                    [style.opacity]="assetsCurrentPage === assetsTotalPages ? '0.5' : '1'" (click)="nextAssetsPage()">
                     <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">chevron_right</mat-icon>
                   </button>
                 </div>
               </div>
-              
+
             </div>
           </div>
 
@@ -550,16 +573,19 @@
           <div *ngIf="isNewsLoading" class="text-muted text-center py-2" style="font-size: 0.85rem;">
             Loading news...
           </div>
-          <div *ngIf="!isNewsLoading && latestNews.length === 0" class="text-muted text-center py-2" style="font-size: 0.85rem;">
+          <div *ngIf="!isNewsLoading && latestNews.length === 0" class="text-muted text-center py-2"
+            style="font-size: 0.85rem;">
             No announcements at this time.
           </div>
           <ul class="announcements" *ngIf="latestNews.length > 0">
             <li class="announcement-item" *ngFor="let news of latestNews">
-              <span class="announcement-tag" 
+              <span class="announcement-tag"
                 [ngClass]="{'announcement-tag--green': news.category === 'Achievement', 'announcement-tag--blue': news.category !== 'Achievement'}">
                 {{ news.category || 'General' }}
               </span>
-              <span class="announcement-text" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;" [matTooltip]="news.title">{{ news.title }}</span>
+              <span class="announcement-text"
+                style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;"
+                [matTooltip]="news.title">{{ news.title }}</span>
             </li>
           </ul>
         </div>
@@ -570,17 +596,19 @@
           <div *ngIf="isHolidaysLoading" class="text-muted text-center py-2" style="font-size: 0.85rem;">
             Loading holidays...
           </div>
-          <div *ngIf="!isHolidaysLoading && upcomingHolidays.length === 0" class="text-muted text-center py-2" style="font-size: 0.85rem;">
+          <div *ngIf="!isHolidaysLoading && upcomingHolidays.length === 0" class="text-muted text-center py-2"
+            style="font-size: 0.85rem;">
             No upcoming holidays this year.
           </div>
-          
+
           <div class="celebration-item" *ngFor="let holiday of upcomingHolidays">
             <div class="avatar avatar--blue">
               <mat-icon>event</mat-icon>
             </div>
             <div>
               <span class="celebration-name">{{ holiday.holidayName }}</span>
-              <span class="celebration-sub">{{ holiday.holidayDate | date:'MMM dd, yyyy' }} • {{ holiday.holidayType | titlecase }}</span>
+              <span class="celebration-sub">{{ holiday.holidayDate | date:'MMM dd, yyyy' }} • {{ holiday.holidayType |
+                titlecase }}</span>
             </div>
           </div>
         </div>
@@ -589,21 +617,21 @@
         <div class="culture-card">
           <h3 class="culture-card__title">Quick Links</h3>
           <div class="quick-links">
-            <a class="quick-link" href="#" routerLink="/policies">
-              <mat-icon>policy</mat-icon>
-              <span>Company Policies</span>
+            <a class="quick-link" routerLink="/payroll/my-benefits">
+              <mat-icon>volunteer_activism</mat-icon>
+              <span>My Benefits</span>
             </a>
-            <a class="quick-link" href="#" routerLink="/employees">
-              <mat-icon>contact_page</mat-icon>
-              <span>Employee Directory</span>
+            <a class="quick-link" routerLink="/profile">
+              <mat-icon>manage_accounts</mat-icon>
+              <span>Update Profile</span>
             </a>
-            <a class="quick-link" href="#">
-              <mat-icon>receipt_long</mat-icon>
-              <span>Tax Slab Docs</span>
+            <a class="quick-link" routerLink="/attendance/dashboard">
+              <mat-icon>calendar_month</mat-icon>
+              <span>My Attendance</span>
             </a>
-            <a class="quick-link" href="#">
-              <mat-icon>quiz</mat-icon>
-              <span>Question Bank</span>
+            <a class="quick-link" routerLink="/help-desk/tickets">
+              <mat-icon>support_agent</mat-icon>
+              <span>Tickets Dashboard</span>
             </a>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import {
   Component, OnInit, OnDestroy,
-  ChangeDetectionStrategy, ChangeDetectorRef, inject
+  ChangeDetectionStrategy, ChangeDetectorRef, inject, signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -25,6 +25,7 @@ import { PerformanceService } from '../performance/services/performance.service'
 import { AppraisalStatus } from '@core/models/performance.models';
 import { NewsService } from '../news/services/news.services';
 import { HolidayService } from '../holiday/services/holiday.service';
+import { SettingsService } from '../settings/services/settings.service';
 import { GeoFenceService, GeoClockInRequest } from '../attendance/services/geofence.service';
 import { TimeTrackingSession } from '@core/models/attendance.models';
 import { CommentDialogComponent } from '@shared/components/comment-dialog/comment-dialog.component';
@@ -65,6 +66,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private performanceService = inject(PerformanceService);
   private newsService = inject(NewsService);
   private holidayService = inject(HolidayService);
+  private settingsService = inject(SettingsService);
   private geoFenceService = inject(GeoFenceService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
@@ -127,6 +129,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   currentSession: TimeTrackingSession | null = null;
   isClockActionLoading = false;
   currentTime = new Date();
+  
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   activeTab: 'financial' | 'recruitment' | 'performance' | 'assets' = 'financial';
 
@@ -264,6 +268,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.loadManagerAppraisals();
         this.loadLatestNews();
         this.loadUpcomingHolidays();
+        this.loadCurrencySymbol();
+      });
+  }
+
+  private loadCurrencySymbol(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currencyCode: any) => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
       });
   }
 
