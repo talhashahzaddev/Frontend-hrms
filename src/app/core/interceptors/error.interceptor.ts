@@ -55,9 +55,9 @@ export class ErrorInterceptor implements HttpInterceptor {
 
       case 404:
         errorMessage = 'The requested resource was not found.';
-        if (!this.isApiCall(error.url)) {
-          this.router.navigate(['/404']);
-        }
+        // Note: We intentionally do NOT navigate to /404 here.
+        // A 404 HTTP response from an API should not redirect the user to an error page.
+        // Components handle missing data gracefully via their own error handlers.
         break;
 
       case 422:

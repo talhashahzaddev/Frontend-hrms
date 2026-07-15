@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -61,6 +62,7 @@ export class RoleFormComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
+    private location: Location,
     private roleService: RoleService,
     private menuService: MenuService,
     private notificationService: NotificationService
@@ -272,7 +274,7 @@ export class RoleFormComponent implements OnInit {
   // ─── Navigation ────────────────────────────────────────────────
 
   onBack(): void {
-    this.router.navigate(['/settings/roles']);
+    this.router.navigate(['/dashboard']);
   }
 
   // ─── Submit ────────────────────────────────────────────────────
@@ -327,4 +329,5 @@ export class RoleFormComponent implements OnInit {
     });
   }
 }
+
 

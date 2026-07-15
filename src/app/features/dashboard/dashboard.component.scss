@@ -293,13 +293,36 @@ $red:        #ef4444;
 
 // ── Split Sections (Compact List Cards) ───────────────────────────────────────
 .split-sections {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: 1.25rem;
   margin-top: 1rem;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+}
+
+.split-column {
+  flex: 1 1 0;
+  min-width: 0;
+
+  &:only-child {
+    .kpi-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+
+      @media (max-width: 1024px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi-list-card {
+      margin-bottom: 0;
+    }
   }
 }
 

@@ -43,16 +43,16 @@
         </div>
 
         <!-- Global Quick Add -->
-        <div class="quick-add">
+        <div class="quick-add" *ngIf="canUseQuickAdd">
           <button class="quick-add__btn" [matMenuTriggerFor]="quickAddMenu">
             <mat-icon>add</mat-icon>
             Global Quick Add
           </button>
           <mat-menu #quickAddMenu="matMenu" class="quick-add-menu">
-            <a mat-menu-item routerLink="/leave">Request Leave</a>
-            <a mat-menu-item routerLink="/expense/claims">Submit Expense</a>
-            <a mat-menu-item routerLink="/help-desk/tickets">Raise IT Ticket</a>
-            <a mat-menu-item routerLink="/jobs/openings">Post Job</a>
+            <a *ngIf="hasPermission('my_leave_request_leave')" mat-menu-item routerLink="/leave">Request Leave</a>
+            <a *ngIf="hasPermission('claims_add_claims')" mat-menu-item routerLink="/expense/claims">Submit Expense</a>
+            <a *ngIf="hasPermission('Create_Ticket_Button')" mat-menu-item routerLink="/help-desk/tickets">Raise IT Ticket</a>
+            <a *ngIf="hasPermission('opnings_create_job')" mat-menu-item routerLink="/jobs/openings">Post Job</a>
           </mat-menu>
         </div>
       </div>
@@ -64,6 +64,7 @@
     <section class="kpi-section">
 
       <!-- Personal (Employee) -->
+      <ng-container *ngIf="hasPermission('dashboard_my_overview')">
       <h2 class="section-label">Personal</h2>
       <div class="kpi-grid kpi-grid--4">
 
@@ -82,20 +83,25 @@
 
         <div class="kpi-card kpi-card--blue">
           <div class="kpi-header">
-            <span class="kpi-title">Financial Snapshot</span>
+            <span class="kpi-title">Latest Payslip</span>
             <span class="kpi-icon-wrap kpi-icon-wrap--blue">
-              <mat-icon>account_balance_wallet</mat-icon>
+              <mat-icon>receipt_long</mat-icon>
             </span>
           </div>
-          <div class="kpi-value">
-            {{ currencySymbol() }} {{ (employeeData?.financialSnapshot?.lastNetSalary ?? 0) | number:'1.0-0' }}
+          <div class="kpi-value" style="font-size: 1.25rem;">
+            <span *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable" style="display: flex; align-items: center; gap: 8px;">
+              <mat-icon style="color: #10b981;">check_circle</mat-icon> Available
+            </span>
+            <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+              <mat-icon>pending</mat-icon> Pending
+            </span>
           </div>
           <div class="kpi-sub">
             <a class="kpi-link" *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable"
               [href]="employeeData?.financialSnapshot?.payslipUploadUrl" target="_blank" rel="noopener noreferrer">
               ↓ Download Payslip
             </a>
-            <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable">No payslip yet</span>
+            <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable">Payslip not generated yet</span>
           </div>
         </div>
 
@@ -124,12 +130,13 @@
         </div>
 
       </div>
+      </ng-container>
 
       <!-- Split Sections: Team & HR Side by Side -->
       <div class="split-sections">
 
         <!-- Team Management (Manager+) -->
-        <div class="split-column">
+        <div class="split-column" *ngIf="hasPermission('dashboard_manager_overview')">
           <h2 class="section-label">Team Management</h2>
           <div class="kpi-list">
 
@@ -174,7 +181,7 @@
         </div>
 
         <!-- HR / Finance (HR & Admin+) -->
-        <div class="split-column">
+        <div class="split-column" *ngIf="hasPermission('dashboard_hr_overview')">
           <h2 class="section-label">HR, Finance & Operations</h2>
           <div class="kpi-list">
 
@@ -223,7 +230,7 @@
     <!-- ════════════════════════════════════════════════════════════════════ -->
     <!-- SECTION 2 – ANALYTICS (HR only)                                     -->
     <!-- ════════════════════════════════════════════════════════════════════ -->
-    <section class="analytics-section">
+    <section class="analytics-section" *ngIf="hasPermission('dashboard_hr_stats')">
       <div class="analytics-grid">
 
         <!-- Workforce Demographics -->
@@ -312,21 +319,21 @@
         <div class="action-center__head">
           <h2 class="action-center__title">Operational & Financial Action Center</h2>
           <div class="tabs-bar">
-            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'financial'"
+            <button *ngIf="canViewFinancialApprovals" class="tab-btn" [class.tab-btn--active]="activeTab === 'financial'"
               (click)="setActiveTab('financial')">Financial Approvals</button>
-            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'recruitment'"
+            <button *ngIf="hasPermission('dashboard_latest_hires')" class="tab-btn" [class.tab-btn--active]="activeTab === 'recruitment'"
               (click)="setActiveTab('recruitment')">Recruitment Pipeline</button>
             <button class="tab-btn" [class.tab-btn--active]="activeTab === 'performance'"
               (click)="setActiveTab('performance')">Performance & Appraisals</button>
-            <button class="tab-btn" [class.tab-btn--active]="activeTab === 'assets'"
-              (click)="setActiveTab('assets')">Asset Allocation</button>
+            <button *ngIf="hasPermission('assets_show')" class="tab-btn" [class.tab-btn--active]="activeTab === 'assets'"
+              (click)="setActiveTab('assets')">Company Assets</button>
           </div>
         </div>
 
         <div class="tab-body">
 
           <!-- Financial -->
-          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'financial'">
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'financial'" *ngIf="canViewFinancialApprovals">
 
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div class="data-table-wrap" style="max-height: 260px; overflow-y: auto; margin-bottom: 0;">
@@ -412,7 +419,7 @@
           </div>
 
           <!-- Recruitment -->
-          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'recruitment'">
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'recruitment'" *ngIf="hasPermission('dashboard_latest_hires')">
 
             <div *ngIf="latestHires.length === 0" class="text-muted text-center py-4">
               No recent selections found.
@@ -475,7 +482,7 @@
           </div>
 
           <!-- Assets -->
-          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'assets'">
+          <div class="tab-panel" [class.tab-panel--active]="activeTab === 'assets'" *ngIf="hasPermission('assets_show')">
 
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div class="data-table-wrap" style="max-height: 260px; overflow-y: auto; margin-bottom: 0;">

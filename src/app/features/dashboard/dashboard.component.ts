@@ -138,6 +138,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly showAll = true;
 
   // ── Computed helpers ────────────────────────────────────────────────────────
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
+  get canViewFinancialApprovals(): boolean {
+    return this.hasPermission('loan_admin_view') || this.hasPermission('salary_advance_admin_list');
+  }
+
+  get canUseQuickAdd(): boolean {
+    return this.hasPermission('my_leave_request_leave') 
+        || this.hasPermission('claims_add_claims') 
+        || this.hasPermission('Create_Ticket_Button') 
+        || this.hasPermission('opnings_create_job');
+  }
+
   get leaveBalanceSummary(): string {
     const types = this.employeeData?.leaveBalances?.byType ?? [];
     return types.map((t) => `${t.leaveTypeName} (${t.remainingDays})`).join(' • ') || '—';
@@ -261,6 +276,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => {
         this.currentUser = user;
+        
+        if (!this.canViewFinancialApprovals) {
+          if (this.hasPermission('dashboard_latest_hires')) {
+            this.activeTab = 'recruitment';
+          } else {
+            this.activeTab = 'performance';
+          }
+        }
+
         this.loadData();
         this.loadCurrentSession();
         this.loadFinancialRequests(1);
@@ -301,18 +325,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadFinancialRequests(page: number = 1): void {
+    const canViewLoans = this.hasPermission('loan_admin_view');
+    const canViewAdvances = this.hasPermission('salary_advance_admin_list');
+
+    if (!canViewLoans && !canViewAdvances) {
+      this.isFinanceLoading = false;
+      this.financeTotalPages = 1;
+      this.combinedFinancialRequests = [];
+      return;
+    }
+
     this.isFinanceLoading = true;
     this.financeCurrentPage = page;
     
-    const pendingLoans$ = this.payrollService.getAllLoans({ Status: 'pending', Page: page, PageSize: 5 }).pipe(
-      map(res => res?.data || {}),
-      catchError(() => of({}))
-    );
+    const pendingLoans$ = canViewLoans
+      ? this.payrollService.getAllLoans({ Status: 'pending', Page: page, PageSize: 5 }).pipe(
+          map(res => res?.data || {}),
+          catchError(() => of({}))
+        )
+      : of({});
     
-    const pendingAdvances$ = this.payrollService.getAllSalaryAdvanceRequests({ Status: 'pending', Page: page, PageSize: 5 }).pipe(
-      map(res => res?.data || {}),
-      catchError(() => of({}))
-    );
+    const pendingAdvances$ = canViewAdvances
+      ? this.payrollService.getAllSalaryAdvanceRequests({ Status: 'pending', Page: page, PageSize: 5 }).pipe(
+          map(res => res?.data || {}),
+          catchError(() => of({}))
+        )
+      : of({});
 
     forkJoin({ loansData: pendingLoans$, advancesData: pendingAdvances$ })
       .pipe(takeUntil(this.destroy$))
@@ -369,6 +407,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadDashboardAssets(): void {
+    if (!this.hasPermission('assets_show')) return;
     this.isAssetsLoading = true;
     this.assetsService.getAll$().pipe(takeUntil(this.destroy$)).subscribe({
       next: (assets) => {
@@ -495,31 +534,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadData(): void {
     this.isLoading = true;
 
-    // Fetch all APIs regardless of role — permissions will be applied later
-    const employee$: Observable<EmployeeOverview | null> = this.dashboardService.getEmployeeOverview().pipe(
-      map((res) => res?.data ?? null),
-      catchError(() => of<EmployeeOverview | null>(null))
-    );
+    const employee$: Observable<EmployeeOverview | null> = this.hasPermission('dashboard_my_overview')
+      ? this.dashboardService.getEmployeeOverview().pipe(
+          map((res) => res?.data ?? null),
+          catchError(() => of<EmployeeOverview | null>(null))
+        )
+      : of(null);
 
-    const manager$: Observable<ManagerOverview | null> = this.dashboardService.getManagerOverview().pipe(
-      map((res) => res?.data ?? null),
-      catchError(() => of<ManagerOverview | null>(null))
-    );
+    const manager$: Observable<ManagerOverview | null> = this.hasPermission('dashboard_manager_overview')
+      ? this.dashboardService.getManagerOverview().pipe(
+          map((res) => res?.data ?? null),
+          catchError(() => of<ManagerOverview | null>(null))
+        )
+      : of(null);
 
-    const hrOverview$: Observable<HrOverview | null> = this.dashboardService.getHrOverview().pipe(
-      map((res) => res?.data ?? null),
-      catchError(() => of<HrOverview | null>(null))
-    );
+    const hrOverview$: Observable<HrOverview | null> = this.hasPermission('dashboard_hr_overview')
+      ? this.dashboardService.getHrOverview().pipe(
+          map((res) => res?.data ?? null),
+          catchError(() => of<HrOverview | null>(null))
+        )
+      : of(null);
 
-    const hrStats$: Observable<HrStats | null> = this.dashboardService.getHrStats().pipe(
-      map((res) => res?.data ?? null),
-      catchError(() => of<HrStats | null>(null))
-    );
+    const hrStats$: Observable<HrStats | null> = this.hasPermission('dashboard_hr_stats')
+      ? this.dashboardService.getHrStats().pipe(
+          map((res) => res?.data ?? null),
+          catchError(() => of<HrStats | null>(null))
+        )
+      : of(null);
 
-    const latestHires$: Observable<LatestHiredEmployee[]> = this.dashboardService.getLatestHires().pipe(
-      map((res) => res?.data ?? []),
-      catchError(() => of<LatestHiredEmployee[]>([]))
-    );
+    const latestHires$: Observable<LatestHiredEmployee[]> = this.hasPermission('dashboard_latest_hires')
+      ? this.dashboardService.getLatestHires().pipe(
+          map((res) => res?.data ?? []),
+          catchError(() => of<LatestHiredEmployee[]>([]))
+        )
+      : of([]);
 
     forkJoin({
       emp: employee$,

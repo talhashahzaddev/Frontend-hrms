@@ -173,7 +173,7 @@
       <mat-icon>{{ isViewMode ? 'arrow_back' : 'cancel' }}</mat-icon>
       {{ isViewMode ? 'Back to List' : 'Cancel' }}
     </button>
-    <button *ngIf="!isViewMode" mat-flat-button (click)="onSubmit()" [disabled]="roleForm.invalid || isSaving" class="btn-submit">
+    <button *ngIf="!isViewMode" type="button" mat-flat-button (click)="onSubmit()" [disabled]="roleForm.invalid || isSaving" class="btn-submit">
       <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
       <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add_circle' }}</mat-icon>
       <span>{{ isEditMode ? 'Save Changes' : 'Add Role' }}</span>
@@ -181,3 +181,4 @@
   </div>
 
 </div>
+

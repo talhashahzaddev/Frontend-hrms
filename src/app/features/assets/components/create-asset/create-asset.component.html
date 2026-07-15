@@ -57,7 +57,7 @@
   </div>
 
   <!-- ── Table Card ─────────────────────────────────────── -->
-  <div class="ts-card" style="padding: 0; overflow: hidden;">
+  <div class="ts-card" *ngIf="hasPermission('assets_show')" style="padding: 0; overflow: hidden;">
     <div class="table-container" style="overflow-x: auto;">
       <table class="as-table" style="width: 100%; border-collapse: collapse;">
         <thead>
