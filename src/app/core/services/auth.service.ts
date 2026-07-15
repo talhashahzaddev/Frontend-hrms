@@ -790,6 +790,7 @@ export class AuthService {
 
     // Priority-ordered list: menuName → default route to navigate to
     const menuRouteMap: { menuName: string; route: string }[] = [
+      { menuName: 'Dashboard',            route: '/dashboard' },
       { menuName: 'Admin Dashboard',      route: '/dashboard' },
       { menuName: 'Employee Dashboard',   route: '/employee/dashboard' },
       { menuName: 'Employee Management',  route: '/employees' },

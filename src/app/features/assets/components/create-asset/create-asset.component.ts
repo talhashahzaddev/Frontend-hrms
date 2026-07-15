@@ -231,6 +231,12 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
   }
 
   private loadAssets(): void {
+    if (!this.hasPermission('assets_show')) {
+      this.assets = [];
+      this.allFilteredAssets = [];
+      this.applyFilters();
+      return;
+    }
     this.assetsService.getAll$().subscribe({
       next: items => {
         console.log('Loaded assets:', items);
