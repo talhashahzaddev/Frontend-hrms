@@ -62,6 +62,11 @@ export class OnboardingConfigurationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Check view permission before loading configuration
+    if (!this.authService.hasMenuPermission('Onboarding', 'Onboarding Configuration', 'onboarding_config_view')) {
+      this.router.navigate(['/403']);
+      return;
+    }
     this.loadConfiguration();
   }
 
@@ -189,6 +194,11 @@ export class OnboardingConfigurationComponent implements OnInit {
   }
 
   saveConfiguration(): void {
+    // Check edit permission before saving
+    if (!this.authService.hasMenuPermission('Onboarding', 'Onboarding Configuration', 'onboarding_config_edit')) {
+      this.notificationService.showError('You do not have permission to edit onboarding configuration.');
+      return;
+    }
     this.isSaving = true;
     const items: OrgOnboardingConfigItem[] = [];
     for (const sec of this.sections) {

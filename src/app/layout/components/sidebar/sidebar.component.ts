@@ -393,14 +393,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
         { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management', actionKey: 'career_management_view' },
         { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' },
-        { label: 'Company Policies', icon: 'policy', route: '/settings/policies', menuName: 'Settings', subMenuName: 'Company Policies' },
-        { label: 'Onboarding Configuration', icon: 'person_add', route: '/settings/onboarding-configuration', menuName: 'Settings', subMenuName: 'Onboarding Configuration' }
+        { label: 'Company Policies', icon: 'policy', route: '/settings/policies', menuName: 'Settings', subMenuName: 'Company Policies' }
       ]
     },
     {
       label: 'Onboarding',
       icon: 'person_add',
-      route: '/onboarding'
+      menuName: 'Onboarding',
+      children: [
+        { label: 'Employee Onboarding', icon: 'person_add', route: '/onboarding', menuName: 'Onboarding', subMenuName: 'Employee Onboarding' },
+        { label: 'Onboarding Configuration', icon: 'settings', route: '/settings/onboarding-configuration', menuName: 'Onboarding', subMenuName: 'Onboarding Configuration' }
+      ]
     },
   ];
 
@@ -453,8 +456,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(item: MenuItem): boolean {
-    // Show Company Policies and onboarding configuration to Super Admin always (if this route exists but permissions are missing)
-    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Onboarding Configuration' || item.subMenuName === 'Question Bank' || item.route === '/settings/payslip-template') {
+    // Show Company Policies to Super Admin always (if this route exists but permissions are missing)
+    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Question Bank' || item.route === '/settings/payslip-template') {
       if (this.currentUser?.roleName?.toLowerCase() === 'super admin' || this.currentUser?.roleName?.toLowerCase() === 'admin' || this.currentUser?.roleName?.toLowerCase() === 'hr manager') {
         return true;
       }
