@@ -210,6 +210,11 @@ export class Onboarding implements OnInit, OnDestroy {
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
+    // Check permission before loading onboarding data
+    if (!this.authService.hasPermissionByActionKey('onboarding_view')) {
+      this.router.navigate(['/403']);
+      return;
+    }
     this.initializePermissionModules();
     this.loadPublishedPolicies();
     this.loadOrgOnboardingConfig();

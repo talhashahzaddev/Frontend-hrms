@@ -15,6 +15,7 @@ export const appRoutes: Routes = [
   },
 {
   path: 'onboarding',
+  canActivate: [AuthGuard],
   loadComponent: () =>
     import('./onboarding/onboarding.component').then(m => m.Onboarding),
   title: 'Employee Onboarding - HRMS'
