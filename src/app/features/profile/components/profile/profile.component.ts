@@ -21,7 +21,6 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { User } from '../../../../core/models/auth.models';
 
-
 import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-profile',
@@ -74,7 +73,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   selectedProfileFile: File | null = null;
   profilePreviewUrl: string | ArrayBuffer | null = null;
   isUploadingProfileImage: boolean = false;
-  private backendBaseUrl = 'https://localhost:60485';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -206,9 +204,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             reader.onload = () => this.profilePreviewUrl = reader.result;
             reader.readAsDataURL(this.selectedProfileFile);
           } else if (employee.profilePictureUrl) {
-            this.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
-              ? employee.profilePictureUrl
-              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+            this.profilePreviewUrl = this.employeeService.resolveProfilePictureUrl(employee.profilePictureUrl);
           } else {
             this.profilePreviewUrl = null;
           }

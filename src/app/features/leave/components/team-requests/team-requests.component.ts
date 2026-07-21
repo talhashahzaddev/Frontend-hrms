@@ -58,7 +58,6 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 export class TeamRequestsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
-  private backendBaseUrl = 'https://localhost:60485';
 
   activeTab: 'pending' | 'balance' = 'pending';
 
@@ -125,15 +124,11 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
           this.pendingApprovals = Array.isArray(data.pendingApprovals)
             ? data.pendingApprovals.map((req: any) => {
-                req.leaveTypeName = req.leaveTypeName || req.typename || req.TypeName || '';
-                if (req.profilePictureUrl) {
-                  req.profilePreviewUrl = req.profilePictureUrl.startsWith('http')
-                    ? req.profilePictureUrl
-                    : `${this.backendBaseUrl}${req.profilePictureUrl}`;
-                } else {
-                  req.profilePreviewUrl = null;
-                }
-                return req;
+                return {
+                ...req,
+                employeeName: req.employeeName,
+                profilePreviewUrl: this.authService.resolveProfilePictureUrl(req.profilePictureUrl)
+              };
               })
             : [];
 

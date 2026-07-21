@@ -36,7 +36,6 @@ export class EmployeeDialogueComponent implements OnInit, OnDestroy {
   
   isViewMode = true;   // always view style unless editing
   employeeForm!: FormGroup;
-  private backendBaseUrl = 'https://localhost:60485';
   private destroy$ = new Subject<void>();
 
   departments: Department[] = [];
@@ -57,9 +56,8 @@ export class EmployeeDialogueComponent implements OnInit, OnDestroy {
     this.isViewMode = this.data.viewOnly === true;
     this.loadInitialData();
     // Fix profile image URL
-    if (this.data.employee.profilePictureUrl && !this.data.employee.profilePictureUrl.startsWith('http')) {
-      this.data.employee.profilePictureUrl = `${this.backendBaseUrl}${this.data.employee.profilePictureUrl}`;
-    }
+    this.data.employee.profilePictureUrl =
+      this.employeeService.resolveProfilePictureUrl(this.data.employee.profilePictureUrl) ?? undefined;
 
     if (!this.isViewMode) {
       this.buildForm();

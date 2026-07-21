@@ -33,8 +33,7 @@ interface SearchItem {
 }
 import { PaymentService } from '@core/services/payment.service';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
-import { NotificationDialogueComponent } from '../../../features/notification-dialogue/notification-dialogue.component'
-import { environment } from '@/environments/environment';
+import { NotificationDialogueComponent } from '../../../features/notification-dialogue/notification-dialogue.component';
 
 
 @Component({
@@ -299,7 +298,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   notificationCount = 0; // Mock notification count
   slectedProfileFile: File | null = null;
   profilePreviewUrl: string | null = null;
-  private backendBaseUrl = `${environment.apiUrl}`;
   // Variables
   searchQuery = '';
   isSearchOpen = false;
@@ -544,13 +542,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         next: (employee) => {
           if (!employee) return;
 
-          if (employee.profilePictureUrl) {
-            this.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
-              ? employee.profilePictureUrl
-              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
-          } else {
-            this.profilePreviewUrl = null;
-          }
+          this.profilePreviewUrl = this.employeeService.resolveProfilePictureUrl(employee.profilePictureUrl);
         },
         error: (error) => {
           console.error('Failed to load employee details', error);
