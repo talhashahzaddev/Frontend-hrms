@@ -44,8 +44,11 @@
         <div class="search-suggestions" *ngIf="searchQuery.trim()">
           <div class="suggestion-item" *ngFor="let item of filteredItems" (mousedown)="goToSection(item)"
             (click)="goToSection(item)">
-            <mat-icon class="suggestion-icon">arrow_forward</mat-icon>
-            <span class="suggestion-text">{{ item.name }}</span>
+            <mat-icon class="suggestion-icon">{{ item.icon || 'arrow_forward' }}</mat-icon>
+            <div class="suggestion-info">
+              <span class="suggestion-text">{{ item.name }}</span>
+              <span class="suggestion-category" *ngIf="item.category">{{ item.category }}</span>
+            </div>
           </div>
           <div class="no-results" *ngIf="filteredItems.length === 0">
             <mat-icon class="no-results-icon">search_off</mat-icon>
