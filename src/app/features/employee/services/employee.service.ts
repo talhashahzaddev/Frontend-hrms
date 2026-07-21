@@ -28,8 +28,23 @@ import { ApiResponse, PagedResult } from '../../../core/models/auth.models';
 })
 export class EmployeeService {
   private readonly apiUrl = `${environment.apiUrl}/Employee`;
+  private readonly backendBaseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
 
   constructor(private http: HttpClient) { }
+
+  /**
+   * Resolves a profile picture URL to a fully qualified URL.
+   * - If the URL already starts with http (e.g. Cloudinary), it is returned as-is.
+   * - If it is a relative path (e.g. /uploads/...), it is prefixed with the backend base URL.
+   * - If falsy, returns null.
+   */
+  resolveProfilePictureUrl(url: string | null | undefined): string | null {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    const normalized = url.replace(/\\/g, '/');
+    const path = normalized.startsWith('/') ? normalized : `/${normalized}`;
+    return `${this.backendBaseUrl}${path}`;
+  }
 
   // Employee CRUD Operations
   getEmployees(searchRequest?: EmployeeSearchRequest): Observable<EmployeeListResponse> {

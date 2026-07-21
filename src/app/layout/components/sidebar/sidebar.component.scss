@@ -237,18 +237,12 @@
 
 // Sub Navigation
 .nav-sub-items {
-  padding: var(--spacing-xs) 0 var(--spacing-xs) 12px;
+  padding: 8px;
+  margin: 4px 12px 8px 16px; // Extended further to the left
+  background: rgba(37, 99, 235, 0.03); // Very subtle blue tint
+  border: 1px solid rgba(37, 99, 235, 0.06);
+  border-radius: 12px;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 26px;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--slate-200, #e2e8f0);
-  }
 }
 
 .sub-nav-list {

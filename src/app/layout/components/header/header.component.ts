@@ -29,12 +29,23 @@ interface SearchItem {
   name: string;
   route: string;
   keywords: string[];
-  roles?: string[];
+  icon?: string;
+  /** Module category label shown in search results */
+  category?: string;
+  /** If set, item is visible when user has ANY sub-menu permission under this menu */
+  menuName?: string;
+  /** If set, item is visible when user has any permission under this sub-menu */
+  subMenuName?: string;
+  /** If set, item is visible only if this specific action key is granted */
+  actionKey?: string;
+  /** If set, item is visible if ANY of these action keys is granted */
+  anyOfActionKeys?: string[];
+  /** Fallback: if none of the above – always visible when authenticated */
+  alwaysVisible?: boolean;
 }
 import { PaymentService } from '@core/services/payment.service';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
-import { NotificationDialogueComponent } from '../../../features/notification-dialogue/notification-dialogue.component'
-import { environment } from '@/environments/environment';
+import { NotificationDialogueComponent } from '../../../features/notification-dialogue/notification-dialogue.component';
 
 
 @Component({
@@ -75,231 +86,371 @@ export class HeaderComponent implements OnInit, OnDestroy {
   //Search variables
   filteredItems: SearchItem[] = [];
 
-  // All searchable items with routes, keywords, and role permissions
+  // All searchable items mapped to the same permission model as the sidebar.
+  // Each item uses menuName/subMenuName/actionKey/anyOfActionKeys so that
+  // search results are ALWAYS consistent with what the user can see in the sidebar.
   private allSearchItems: SearchItem[] = [
-    // Dashboard
-    {
-      name: 'Dashboard',
-      route: '/dashboard',
-      keywords: ['dashboard', 'home', 'main', 'overview'],
-      roles: ['Super Admin', 'HR Manager']
-    },
-    {
-      name: 'Dashboard',
-      route: '/performance/dashboard',
-      keywords: ['dashboard', 'home', 'main', 'overview', 'my performance'],
-      roles: ['Manager', 'Employee']
-    },
 
-    // Attendance - Employee accessible
-    {
-      name: 'My Attendance',
-      route: '/attendance/dashboard',
-      keywords: ['attendance', 'my attendance', 'attendance dashboard', 'check in', 'check out'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Time Tracker',
-      route: '/attendance/time-tracker',
+    // ─── Dashboard ───────────────────────────────────────────────
+    { name: 'Dashboard', route: '/dashboard', icon: 'dashboard', category: 'Dashboard',
+      keywords: ['dashboard', 'home', 'main', 'overview', 'summary'],
+      alwaysVisible: true },
+
+    // ─── Employee Management ─────────────────────────────────────
+    { name: 'All Employees', route: '/employees', icon: 'group', category: 'Employees',
+      keywords: ['employees', 'employee list', 'all employees', 'staff', 'team members', 'people'],
+      menuName: 'Employee Management', subMenuName: 'All Employees' },
+
+    { name: 'Add Employee', route: '/employees/add', icon: 'person_add', category: 'Employees',
+      keywords: ['add employee', 'new employee', 'create employee', 'hire', 'register employee'],
+      menuName: 'Employee Management', subMenuName: 'Add Employee' },
+
+    { name: 'Departments', route: '/employees/departments', icon: 'apartment', category: 'Employees',
+      keywords: ['departments', 'department', 'department list', 'team structure'],
+      menuName: 'Employee Management', subMenuName: 'Department' },
+
+    { name: 'Positions', route: '/employees/positions', icon: 'work', category: 'Employees',
+      keywords: ['positions', 'position', 'job positions', 'job titles'],
+      menuName: 'Employee Management', subMenuName: 'Positions' },
+
+    // ─── Attendance ──────────────────────────────────────────────
+    { name: 'My Attendance', route: '/attendance/dashboard', icon: 'access_time', category: 'Attendance',
+      keywords: ['my attendance', 'attendance dashboard', 'check in', 'check out', 'punch in'],
+      menuName: 'Attendance', subMenuName: 'My Attendance' },
+
+    { name: 'Time Tracker', route: '/attendance/time-tracker', icon: 'timer', category: 'Attendance',
       keywords: ['time tracker', 'tracker', 'time tracking', 'clock', 'timer'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Shifts',
-      route: '/attendance/shift',
-      keywords: ['shift', 'shifts', 'schedule', 'work schedule', 'shift management'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
+      menuName: 'Attendance', subMenuName: 'Time Tracker' },
 
-    // Attendance - Manager/Admin only
-    {
-      name: 'Team Attendance',
-      route: '/attendance/team-attendance',
-      keywords: ['team attendance', 'team', 'employee attendance'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Manual Attendance',
-      route: '/attendance/manual',
-      keywords: ['manual attendance', 'manual', 'attendance entry', 'add attendance', 'edit attendance'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Attendance Reports',
-      route: '/attendance/reports',
-      keywords: ['attendance reports', 'reports', 'attendance report'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Attendance Calendar',
-      route: '/attendance/calendar',
-      keywords: ['attendance calendar', 'calendar'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
+    { name: 'Team Attendance', route: '/attendance/team-attendance', icon: 'groups', category: 'Attendance',
+      keywords: ['team attendance', 'employee attendance', 'staff attendance'],
+      menuName: 'Attendance', subMenuName: 'Team Attendance' },
 
-    // Leave - Employee accessible
-    {
-      name: 'My Leaves',
-      route: '/leave/dashboard',
-      keywords: ['leave', 'my leaves', 'leave dashboard', 'my leave', 'leaves'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Apply for Leave',
-      route: '/leave/apply',
-      keywords: ['apply leave', 'apply for leave', 'request leave', 'new leave', 'leave request'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Leave Calendar',
-      route: '/leave/calendar',
-      keywords: ['leave calendar', 'calendar', 'leave schedule'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
+    { name: 'Attendance Reports', route: '/attendance/reports', icon: 'assessment', category: 'Attendance',
+      keywords: ['attendance reports', 'attendance report', 'attendance analytics'],
+      menuName: 'Attendance', subMenuName: 'Reports' },
 
-    // Leave - Manager/Admin only
-    {
-      name: 'Team Leaves',
-      route: '/leave/team',
-      keywords: ['team leaves', 'team leave', 'employee leaves'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Leave Types',
-      route: '/leave/types',
-      keywords: ['leave types', 'leave type', 'types of leave'],
-      roles: ['Super Admin', 'HR Manager']
-    },
+    { name: 'Shifts', route: '/attendance/shift', icon: 'schedule', category: 'Attendance',
+      keywords: ['shifts', 'shift', 'work schedule', 'shift management', 'rostering'],
+      menuName: 'Attendance', subMenuName: 'Shifts' },
 
-    // Performance - Employee accessible
-    {
-      name: 'My Performance',
-      route: '/performance/dashboard',
-      keywords: ['performance', 'my performance', 'performance dashboard', 'my performance dashboard'],
-      roles: ['Employee']
-    },
-    {
-      name: 'Appraisals',
-      route: '/performance/appraisals',
-      keywords: ['appraisal', 'appraisals', 'review', 'performance review', 'evaluation'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Skills Matrix',
-      route: '/performance/skills',
+    { name: 'Overtime', route: '/attendance/overtime', icon: 'more_time', category: 'Attendance',
+      keywords: ['overtime', 'extra hours', 'ot'],
+      menuName: 'Attendance', subMenuName: 'Overtime' },
+
+    { name: 'Geo-Fences', route: '/attendance/geo-fences', icon: 'fence', category: 'Attendance',
+      keywords: ['geo fence', 'geofence', 'location fence', 'geo boundary'],
+      menuName: 'Attendance', subMenuName: 'Geo-Fences' },
+
+    { name: 'Geo Violations', route: '/attendance/geo-violations', icon: 'warning', category: 'Attendance',
+      keywords: ['geo violations', 'geofence violations', 'location violations'],
+      menuName: 'Attendance', subMenuName: 'Geo Violations' },
+
+    // ─── Timesheet ───────────────────────────────────────────────
+    { name: 'Timesheet Dashboard', route: '/timesheet/dashboard', icon: 'date_range', category: 'Timesheet',
+      keywords: ['timesheet', 'timesheet dashboard', 'timesheets'],
+      menuName: 'Timesheet', subMenuName: 'Dashboard' },
+
+    { name: 'Timesheet Periods', route: '/timesheet/periods', icon: 'view_list', category: 'Timesheet',
+      keywords: ['timesheet periods', 'periods', 'pay periods'],
+      menuName: 'Timesheet', subMenuName: 'Periods' },
+
+    { name: 'Timesheet Approvals', route: '/timesheet/approvals', icon: 'check_circle', category: 'Timesheet',
+      keywords: ['timesheet approvals', 'approve timesheet'],
+      menuName: 'Timesheet', subMenuName: 'Approvals' },
+
+    { name: 'Timesheet Projects', route: '/timesheet/projects', icon: 'work', category: 'Timesheet',
+      keywords: ['timesheet projects', 'projects'],
+      menuName: 'Timesheet', subMenuName: 'Projects' },
+
+    { name: 'Rate Cards', route: '/timesheet/rate-cards', icon: 'attach_money', category: 'Timesheet',
+      keywords: ['rate cards', 'billing rates', 'hourly rates'],
+      menuName: 'Timesheet', subMenuName: 'Rate Cards' },
+
+    { name: 'Comp Time', route: '/timesheet/comp-time', icon: 'hourglass_empty', category: 'Timesheet',
+      keywords: ['comp time', 'compensatory time', 'compensatory leave'],
+      menuName: 'Timesheet', subMenuName: 'Comp Time' },
+
+    { name: 'Payroll Export', route: '/timesheet/payroll-export', icon: 'payments', category: 'Timesheet',
+      keywords: ['payroll export', 'export payroll', 'timesheet export'],
+      menuName: 'Timesheet', subMenuName: 'Payroll Export' },
+
+    // ─── Leave Management ────────────────────────────────────────
+    { name: 'My Leaves', route: '/leave/dashboard', icon: 'event', category: 'Leave',
+      keywords: ['my leaves', 'leave dashboard', 'my leave', 'leaves', 'leave balance'],
+      menuName: 'Leave Management', subMenuName: 'My Leaves' },
+
+    { name: 'Team Leaves', route: '/leave/team', icon: 'groups', category: 'Leave',
+      keywords: ['team leaves', 'team leave', 'employee leaves', 'staff leaves'],
+      menuName: 'Leave Management', subMenuName: 'Team Leaves' },
+
+    { name: 'Team Leave Requests', route: '/leave/team-requests', icon: 'group_work', category: 'Leave',
+      keywords: ['team requests', 'leave requests', 'pending leaves', 'approve leave'],
+      menuName: 'Leave Management', subMenuName: 'Team Requests' },
+
+    { name: 'Leave Types', route: '/leave/types', icon: 'category', category: 'Leave',
+      keywords: ['leave types', 'leave type', 'types of leave', 'leave categories'],
+      menuName: 'Leave Management', subMenuName: 'Leave Types' },
+
+    // ─── Holidays ────────────────────────────────────────────────
+    { name: 'Holiday Management', route: '/holidays', icon: 'celebration', category: 'Holidays',
+      keywords: ['holidays', 'public holidays', 'holiday list', 'holiday management'],
+      menuName: 'Holidays', subMenuName: 'Holiday Management' },
+
+    { name: 'My Holidays', route: '/holidays/my-holidays', icon: 'beach_access', category: 'Holidays',
+      keywords: ['my holidays', 'personal holidays', 'upcoming holidays'],
+      menuName: 'Holidays', subMenuName: 'My Holidays' },
+
+    // ─── Performance ─────────────────────────────────────────────
+    { name: 'My Performance', route: '/performance/dashboard', icon: 'person_outline', category: 'Performance',
+      keywords: ['my performance', 'performance dashboard', 'performance overview'],
+      menuName: 'Performance', subMenuName: 'My Performance' },
+
+    { name: 'Appraisal Cycles', route: '/performance/cycles', icon: 'assessment', category: 'Performance',
+      keywords: ['appraisal cycles', 'cycles', 'appraisal cycle', 'review cycle'],
+      menuName: 'Performance', subMenuName: 'Appraisal Cycles' },
+
+    { name: 'Appraisals', route: '/performance/appraisals', icon: 'rate_review', category: 'Performance',
+      keywords: ['appraisal', 'appraisals', 'performance review', 'evaluation', 'reviews'],
+      menuName: 'Performance', subMenuName: 'Appraisals' },
+
+    { name: 'Skills Matrix', route: '/performance/skills', icon: 'psychology', category: 'Performance',
       keywords: ['skills', 'skill matrix', 'skills matrix', 'competencies', 'competency'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Goals & KRAs',
-      route: '/performance/goals',
-      keywords: ['goals', 'kra', 'kras', 'key result areas', 'objectives', 'targets', 'goals and kras'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
+      menuName: 'Performance', subMenuName: 'Skill Matrix' },
 
-    // Performance - Manager/Admin only
-    {
-      name: 'Performance Reports',
-      route: '/performance/reports',
-      keywords: ['performance reports', 'reports', 'performance report'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Appraisal Cycles',
-      route: '/performance/cycles',
-      keywords: ['appraisal cycles', 'cycles', 'appraisal cycle'],
-      roles: ['Super Admin', 'HR Manager']
-    },
+    { name: 'Goals & KRAs', route: '/performance/goals', icon: 'flag', category: 'Performance',
+      keywords: ['goals', 'kra', 'kras', 'key result areas', 'objectives', 'targets', 'okr'],
+      menuName: 'Performance', subMenuName: 'Goals & KRAs' },
 
-    // Employee Management - Admin/HR only
-    {
-      name: 'All Employees',
-      route: '/employees',
-      keywords: ['employees', 'employee list', 'all employees', 'staff', 'team members'],
-      roles: ['Super Admin', 'HR Manager']
-    },
-    {
-      name: 'Add Employee',
-      route: '/employees/add',
-      keywords: ['add employee', 'new employee', 'create employee', 'hire'],
-      roles: ['Super Admin', 'HR Manager']
-    },
-    {
-      name: 'Departments',
-      route: '/employees/departments',
-      keywords: ['departments', 'department', 'department list'],
-      roles: ['Super Admin', 'HR Manager']
-    },
-    {
-      name: 'Positions',
-      route: '/employees/positions',
-      keywords: ['positions', 'position', 'job positions', 'roles'],
-      roles: ['Super Admin', 'HR Manager']
-    },
+    { name: 'Performance Reports', route: '/performance/reports', icon: 'analytics', category: 'Performance',
+      keywords: ['performance reports', 'performance report', 'performance analytics'],
+      menuName: 'Performance', subMenuName: 'Performance Reports' },
 
-    // Profile & Settings
-    {
-      name: 'My Profile',
-      route: '/profile',
-      keywords: ['profile', 'my profile', 'user profile', 'account'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
-    {
-      name: 'Change Password',
-      route: '/change-password',
-      keywords: ['settings', 'preferences', 'configuration', 'config'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    },
+    // ─── Assets Management ───────────────────────────────────────
+    { name: 'Asset Types', route: '/assets/types', icon: 'folder', category: 'Assets',
+      keywords: ['assets', 'asset types', 'type of assets', 'asset categories'],
+      menuName: 'Assets Management', subMenuName: 'Type of Assets' },
 
-    // Payroll
-    {
-      name: 'Bonus Pay',
-      route: '/payroll/bonus',
-      keywords: ['payroll', 'bonus', 'bonus pay', 'incentive', 'bonus ledger'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Performance Pay',
-      route: '/payroll/performance',
-      keywords: ['payroll', 'performance pay', 'performance bonus', 'performance ledger'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Loans & Salary Advances',
-      route: '/payroll/loans',
-      keywords: ['payroll', 'loan', 'loans', 'salary advance', 'salary advances', 'loan payments'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
-    {
-      name: 'Payroll Policies',
-      route: '/payroll/policies',
-      keywords: ['payroll policies', 'policy', 'rules', 'salary policy'],
-      roles: ['Super Admin', 'HR Manager', 'Manager']
-    },
+    { name: 'Assets', route: '/assets/create', icon: 'inventory_2', category: 'Assets',
+      keywords: ['assets', 'manage assets', 'asset list', 'company assets'],
+      menuName: 'Assets Management', subMenuName: 'Assets' },
 
-    // AI Assistant
-    {
-      name: 'AI Assistant',
-      route: '/ai-assistant',
-      keywords: ['ai', 'assistant', 'ai assistant', 'chat', 'help', 'support'],
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
-    }
+    // ─── Calendar ────────────────────────────────────────────────
+    { name: 'Calendar', route: '/calendar', icon: 'calendar_month', category: 'Calendar',
+      keywords: ['calendar', 'events', 'schedule', 'monthly view'],
+      menuName: 'Calendar' },
+
+    // ─── AI Assistant ────────────────────────────────────────────
+    { name: 'AI Assistant', route: '/ai-assistant', icon: 'smart_toy', category: 'AI',
+      keywords: ['ai', 'assistant', 'ai assistant', 'chat', 'help', 'support', 'bot'],
+      menuName: 'AI Assistant' },
+
+    // ─── Subscription & Billing ──────────────────────────────────
+    { name: 'Subscription Plans', route: '/subscription', icon: 'subscriptions', category: 'Subscription',
+      keywords: ['subscription', 'plans', 'upgrade', 'plan', 'billing plan'],
+      menuName: 'Subscription' },
+
+    { name: 'Billing History', route: '/subscription/billing', icon: 'receipt_long', category: 'Billing',
+      keywords: ['billing', 'billing history', 'invoices', 'payments', 'receipts'],
+      menuName: 'Billings' },
+
+    // ─── Expense ─────────────────────────────────────────────────
+    { name: 'Expense Categories', route: '/expense/categories', icon: 'category', category: 'Expense',
+      keywords: ['expense', 'expense categories', 'categories'],
+      menuName: 'Expense', subMenuName: 'Category' },
+
+    { name: 'Expense Claims', route: '/expense/claims', icon: 'receipt_long', category: 'Expense',
+      keywords: ['expense claims', 'claims', 'reimbursement', 'expense request'],
+      menuName: 'Expense', subMenuName: 'Claims' },
+
+    { name: 'Recurring Expenses', route: '/expense/recurring', icon: 'repeat', category: 'Expense',
+      keywords: ['recurring expenses', 'recurring', 'scheduled expenses'],
+      menuName: 'Expense', subMenuName: 'Recurring Expenses' },
+
+    { name: 'Expense Reports', route: '/expense/expense-report', icon: 'summarize', category: 'Expense',
+      keywords: ['expense reports', 'expense report', 'expense analytics'],
+      menuName: 'Expense', subMenuName: 'Reports' },
+
+    // ─── News ────────────────────────────────────────────────────
+    { name: 'News Dashboard', route: '/news/dashboard', icon: 'newspaper', category: 'News',
+      keywords: ['news', 'news dashboard', 'company news', 'announcements'],
+      menuName: 'News', subMenuName: 'New Dashboard' },
+
+    { name: 'Create News', route: '/news/create-news', icon: 'edit', category: 'News',
+      keywords: ['create news', 'post news', 'write announcement', 'new article'],
+      menuName: 'News', subMenuName: 'Create News' },
+
+    // ─── Help Desk ───────────────────────────────────────────────
+    { name: 'Tickets Dashboard', route: '/help-desk/tickets', icon: 'confirmation_number', category: 'Help Desk',
+      keywords: ['help desk', 'tickets', 'support tickets', 'ticket dashboard', 'issue tracker'],
+      menuName: 'Help Desk', subMenuName: 'Tickets Dashboard' },
+
+    { name: 'Agent Groups', route: '/help-desk/agent-group', icon: 'groups', category: 'Help Desk',
+      keywords: ['agent group', 'agent groups', 'support team'],
+      menuName: 'Help Desk', subMenuName: 'Agent Group' },
+
+    { name: 'Ticket Involvement', route: '/help-desk/ticket-involvement', icon: 'assignment_ind', category: 'Help Desk',
+      keywords: ['ticket involvement', 'my tickets', 'ticket assignments'],
+      menuName: 'Help Desk', subMenuName: 'Ticket Involvement' },
+
+    { name: 'Ticket Category', route: '/help-desk/ticket-category', icon: 'category', category: 'Help Desk',
+      keywords: ['ticket category', 'ticket categories', 'ticket types'],
+      menuName: 'Help Desk', subMenuName: 'Ticket Category' },
+
+    // ─── Jobs ────────────────────────────────────────────────────
+    { name: 'Job Openings', route: '/jobs/openings', icon: 'work_outline', category: 'Jobs',
+      keywords: ['jobs', 'openings', 'job openings', 'vacancies', 'recruitment'],
+      anyOfActionKeys: ['opnings_view_all'] },
+
+    { name: 'Job Applications', route: '/jobs/applied', icon: 'how_to_reg', category: 'Jobs',
+      keywords: ['job applications', 'applications', 'applicants', 'candidates', 'ats'],
+      anyOfActionKeys: ['all_job_application', 'received_application_by_my_job_post', 'my_referenced_application', 'ats_inbox_view', 'my_self_application'] },
+
+    { name: 'Recruitment Stages', route: '/jobs/stage', icon: 'label', category: 'Jobs',
+      keywords: ['stages', 'recruitment stages', 'hiring stages', 'pipeline stages'],
+      anyOfActionKeys: ['stage_view_all'] },
+
+    { name: 'Question Bank', route: '/jobs/question-bank', icon: 'quiz', category: 'Jobs',
+      keywords: ['question bank', 'interview questions', 'questions', 'assessment questions'],
+      anyOfActionKeys: ['question_bank_view'] },
+
+    // ─── Payroll ─────────────────────────────────────────────────
+    { name: 'Bonus & Performance Pay', route: '/payroll/bonus', icon: 'card_giftcard', category: 'Payroll',
+      keywords: ['bonus', 'performance pay', 'performance bonus', 'incentive', 'bonus pay'],
+      anyOfActionKeys: ['bonus_entry_view', 'performance_pay_view'] },
+
+    { name: 'Loans', route: '/payroll/loans', icon: 'account_balance', category: 'Payroll',
+      keywords: ['loans', 'loan', 'employee loan', 'advance salary'],
+      anyOfActionKeys: ['loan_admin_view'] },
+
+    { name: 'Provident Funds', route: '/payroll/provident-fund', icon: 'account_balance_wallet', category: 'Payroll',
+      keywords: ['provident fund', 'pf', 'pension', 'retirement fund'],
+      anyOfActionKeys: ['pf_admin_view'] },
+
+    { name: 'Tax Ledger', route: '/payroll/tax-ledger', icon: 'history_edu', category: 'Payroll',
+      keywords: ['tax ledger', 'tax', 'transactions ledger', 'tax records'],
+      actionKey: 'get_transaction_ledger' },
+
+    { name: 'Salary Advances', route: '/payroll/salary-advances', icon: 'savings', category: 'Payroll',
+      keywords: ['salary advance', 'salary advances', 'advance pay'],
+      anyOfActionKeys: ['salary_advance_admin_list', 'salary_advance_admin_view'] },
+
+    { name: 'Gratuity', route: '/payroll/gratuity', icon: 'emoji_events', category: 'Payroll',
+      keywords: ['gratuity', 'end of service', 'eos'],
+      actionKey: 'gratuity_admin_view' },
+
+    { name: 'Social Security', route: '/payroll/social-security', icon: 'shield_person', category: 'Payroll',
+      keywords: ['social security', 'social insurance', 'insurance'],
+      menuName: 'Payroll' },
+
+    { name: 'Payslip Management', route: '/payroll/payslips', icon: 'receipt_long', category: 'Payroll',
+      keywords: ['payslip', 'payslips', 'salary slip', 'pay stub', 'paycheck'],
+      anyOfActionKeys: ['my_payslip', 'compliance_payslip_view', 'payslip_generation', 'mail_upload_payslip'] },
+
+    { name: 'Payroll Policies', route: '/payroll/policies', icon: 'rule', category: 'Payroll',
+      keywords: ['payroll policies', 'payroll rules', 'salary policy', 'pay rules'],
+      actionKey: 'payroll_rules_view' },
+
+    { name: 'Payroll Time Tracking', route: '/payroll/time-tracking', icon: 'schedule', category: 'Payroll',
+      keywords: ['payroll time tracking', 'overtime summary', 'attendance summary', 'late attendance'],
+      anyOfActionKeys: ['overtime_entry_view', 'attendance_summary_view', 'late_attendance_view', 'leave_summary_view'] },
+
+    { name: 'Payroll Periods', route: '/payroll/periods', icon: 'date_range', category: 'Payroll',
+      keywords: ['payroll periods', 'pay periods', 'payroll schedule'],
+      actionKey: 'payroll_period_view' },
+
+    { name: 'My Benefits', route: '/payroll/my-benefits', icon: 'card_giftcard', category: 'Payroll',
+      keywords: ['my benefits', 'benefits', 'employee benefits', 'perks'],
+      actionKey: 'my_benefits' },
+
+    { name: 'Payroll Calculation', route: '/payroll/calculation', icon: 'calculate', category: 'Payroll',
+      keywords: ['payroll calculation', 'calculate payroll', 'salary calculation', 'payroll results'],
+      anyOfActionKeys: ['payroll_calculation', 'payroll_result'] },
+
+    // ─── Settings ────────────────────────────────────────────────
+    { name: 'Company Settings', route: '/settings/general', icon: 'work_outline', category: 'Settings',
+      keywords: ['company settings', 'general settings', 'organization settings', 'company info'],
+      menuName: 'Settings', subMenuName: 'Company Name' },
+
+    { name: 'Payslip Template', route: '/settings/payslip-template', icon: 'receipt_long', category: 'Settings',
+      keywords: ['payslip template', 'salary slip template', 'payslip design'],
+      anyOfActionKeys: ['payslip_template_view', 'payslip_template_edit'] },
+
+    { name: 'Manage IPs', route: '/settings/ip-address', icon: 'how_to_reg', category: 'Settings',
+      keywords: ['manage ips', 'ip address', 'ip whitelist', 'ip restriction'],
+      menuName: 'Settings', subMenuName: 'Manage Ips' },
+
+    { name: 'Career Management', route: '/settings/career-management', icon: 'business_center', category: 'Settings',
+      keywords: ['career management', 'career portal', 'career page'],
+      actionKey: 'career_management_view' },
+
+    { name: 'Roles & Permissions', route: '/settings/roles', icon: 'admin_panel_settings', category: 'Settings',
+      keywords: ['roles', 'permissions', 'role management', 'access control', 'rbac'],
+      menuName: 'Settings', subMenuName: 'Roles' },
+
+    { name: 'Company Policies', route: '/settings/policies', icon: 'policy', category: 'Settings',
+      keywords: ['company policies', 'policies', 'hr policies', 'workplace policies'],
+      menuName: 'Settings', subMenuName: 'Company Policies' },
+
+    // ─── Onboarding ──────────────────────────────────────────────
+    { name: 'Employee Onboarding', route: '/onboarding', icon: 'person_add', category: 'Onboarding',
+      keywords: ['onboarding', 'employee onboarding', 'new hire', 'new joiner'],
+      menuName: 'Onboarding', subMenuName: 'Employee Onboarding' },
+
+    { name: 'Onboarding Configuration', route: '/settings/onboarding-configuration', icon: 'settings', category: 'Onboarding',
+      keywords: ['onboarding config', 'onboarding configuration', 'onboarding settings'],
+      menuName: 'Onboarding', subMenuName: 'Onboarding Configuration' },
+
+    // ─── Profile (always visible) ────────────────────────────────
+    { name: 'My Profile', route: '/profile', icon: 'person', category: 'Account',
+      keywords: ['profile', 'my profile', 'user profile', 'account', 'personal details'],
+      alwaysVisible: true },
+
+    { name: 'Change Password', route: '/change-password', icon: 'lock', category: 'Account',
+      keywords: ['change password', 'password', 'security', 'update password'],
+      alwaysVisible: true },
   ];
 
   getSearchItems(): SearchItem[] {
     if (!this.currentUser) return [];
 
-    // Filter items based on user role
-    return this.allSearchItems.filter(item => {
-      if (!item.roles || item.roles.length === 0) return true;
-      return this.authService.hasAnyRole(item.roles);
-    });
+    return this.allSearchItems.filter(item => this.canAccessItem(item));
+  }
+
+  private canAccessItem(item: SearchItem): boolean {
+    // Always visible items (Profile, Change Password, Dashboard)
+    if (item.alwaysVisible) return true;
+
+    // actionKey check – exact action must be granted
+    if (item.actionKey) {
+      if (item.menuName && item.subMenuName) {
+        return this.authService.hasMenuPermission(item.menuName, item.subMenuName, item.actionKey);
+      }
+      return this.authService.hasPermissionByActionKey(item.actionKey);
+    }
+
+    // anyOfActionKeys – any of the action keys must be granted
+    if (item.anyOfActionKeys && item.anyOfActionKeys.length > 0) {
+      return item.anyOfActionKeys.some(key => this.authService.hasPermissionByActionKey(key));
+    }
+
+    // subMenuName – user must have any permission under that submenu
+    if (item.menuName && item.subMenuName) {
+      return this.authService.hasSubMenuPermission(item.menuName, item.subMenuName);
+    }
+
+    // menuName only – user must have any permission under that top-level menu
+    if (item.menuName) {
+      return this.authService.hasMenuParentPermission(item.menuName);
+    }
+
+    // No permission requirement specified
+    return true;
   }
 
   notificationCount = 0; // Mock notification count
   slectedProfileFile: File | null = null;
   profilePreviewUrl: string | null = null;
-  private backendBaseUrl = `${environment.apiUrl}`;
   // Variables
   searchQuery = '';
   isSearchOpen = false;
@@ -544,13 +695,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         next: (employee) => {
           if (!employee) return;
 
-          if (employee.profilePictureUrl) {
-            this.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
-              ? employee.profilePictureUrl
-              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
-          } else {
-            this.profilePreviewUrl = null;
-          }
+          this.profilePreviewUrl = this.employeeService.resolveProfilePictureUrl(employee.profilePictureUrl);
         },
         error: (error) => {
           console.error('Failed to load employee details', error);

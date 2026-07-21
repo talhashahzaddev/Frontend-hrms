@@ -24,6 +24,7 @@ import {
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/Auth`;
   private readonly uploadsUrl = `${environment.apiUrl}/uploads`;
+  private readonly backendBaseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
@@ -458,6 +459,20 @@ export class AuthService {
         }),
         catchError(this.handleError)
       );
+  }
+
+  /**
+   * Resolves a profile picture URL to a fully qualified URL.
+   * - If the URL already starts with http (e.g. Cloudinary), it is returned as-is.
+   * - If it is a relative path, it is prefixed with the backend base URL.
+   * - If falsy, returns null.
+   */
+  resolveProfilePictureUrl(url: string | null | undefined): string | null {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    const normalized = url.replace(/\\/g, '/');
+    const path = normalized.startsWith('/') ? normalized : `/${normalized}`;
+    return `${this.backendBaseUrl}${path}`;
   }
 
   /** Upload file through uploads API; returns the hosted URL. */

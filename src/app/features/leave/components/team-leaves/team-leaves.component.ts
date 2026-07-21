@@ -82,7 +82,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   pendingApprovals: LeaveRequest[] = [];
   teamRequests: LeaveRequest[] = [];
   leaveTypes: LeaveType[] = [];
-  private backendBaseUrl = 'https://localhost:60485';
 
   isLoading = false;
   isProcessing = false;
@@ -360,11 +359,7 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
       profilePreviewUrl: null
     };
-    if (mappedRequest.profilePictureUrl) {
-      mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
-        ? mappedRequest.profilePictureUrl
-        : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
-    }
+    mappedRequest.profilePreviewUrl = this.authService.resolveProfilePictureUrl(mappedRequest.profilePictureUrl);
     return mappedRequest;
   }
 
