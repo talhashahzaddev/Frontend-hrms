@@ -8,16 +8,19 @@
         <!-- Avatar -->
         <div class="avatar-zone">
           <div class="avatar-ring">
-            <div class="avatar-circle">
+            <div class="avatar-circle" [class.uploading]="isUploadingProfileImage">
               <img *ngIf="profilePreviewUrl || currentUser?.profilePictureUrl; else defaultAvatar"
                    [src]="profilePreviewUrl || currentUser?.profilePictureUrl"
                    alt="Profile Photo" />
               <ng-template #defaultAvatar>
                 <mat-icon class="avatar-placeholder-icon">person</mat-icon>
               </ng-template>
+              <div class="avatar-upload-overlay" *ngIf="isUploadingProfileImage">
+                <div class="spinner-border"></div>
+              </div>
             </div>
             <!-- Upload badge -->
-            <button class="avatar-upload-btn" type="button" (click)="fileInput.click()" matTooltip="Change photo">
+            <button class="avatar-upload-btn" type="button" (click)="fileInput.click()" matTooltip="Change photo" [disabled]="isUploadingProfileImage">
               <mat-icon>photo_camera</mat-icon>
             </button>
           </div>
@@ -395,11 +398,7 @@
 
       <!-- ── Action Bar ───────────────────────────────────────── -->
       <div class="action-bar">
-        <button class="btn-reset" type="button" (click)="resetForm()" [disabled]="isLoading">
-          <mat-icon>restart_alt</mat-icon>
-          Reset
-        </button>
-        <button class="btn-save" type="submit" [disabled]="profileForm.invalid || isLoading">
+        <button class="btn-save" type="submit" [disabled]="profileForm.invalid || isLoading || isUploadingProfileImage || profileForm.pristine">
           <ng-container *ngIf="isLoading; else saveLabel">
             <span class="btn-spinner"></span>
             Saving…

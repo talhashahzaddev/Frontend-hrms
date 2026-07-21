@@ -427,9 +427,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     reader.onload = () => { this.profilePreviewUrl = reader.result as string; };
     reader.readAsDataURL(file);
 
+    this.isUploadingProfileImage = true;
     this.authService.uploadProfilePic(file).subscribe({
       next: (url: string) => {
         this.profileForm.patchValue({ profileurl: url });
+        this.profileForm.markAsDirty();
         this.isUploadingProfileImage = false;
         this.notificationService.showSuccess('Profile image uploaded successfully');
       },
