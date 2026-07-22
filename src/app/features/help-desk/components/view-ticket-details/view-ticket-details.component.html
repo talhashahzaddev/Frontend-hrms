@@ -35,32 +35,53 @@
 
         <!-- Messages -->
         <div class="chat-body">
+          <div *ngIf="messages.length === 0" class="chat-empty-state">
+            <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
+            <p class="empty-title">No conversation history yet</p>
+            <p class="empty-subtitle">Type a message below to start replying to this ticket.</p>
+          </div>
+
           <div *ngFor="let msg of messages; let i = index"
                class="hd-msg-card"
                [class.is-reply]="(msg.senderEmail | lowercase) === currentUserEmail">
-            <div class="hd-msg-header">
-              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
-                <span class="hd-msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
-                <span class="hd-msg-sep">|</span>
-                <a class="hd-msg-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
-              </div>
-              <span class="hd-msg-time">{{ msg.createdAt | localizedDate:'MMM d, y, h:mm a' }}</span>
+            <div class="hd-msg-avatar" [class.hd-avatar-self]="(msg.senderEmail | lowercase) === currentUserEmail">
+              {{ (msg.senderFullName?.charAt(0) || 'U').toUpperCase() }}
             </div>
-            <div class="hd-msg-body">{{ msg.message }}</div>
+            <div class="hd-msg-content-wrap">
+              <div class="hd-msg-header">
+                <div class="hd-msg-sender-info">
+                  <span class="hd-msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
+                  <span class="hd-msg-sep">•</span>
+                  <a class="hd-msg-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
+                </div>
+                <span class="hd-msg-time">
+                  <mat-icon class="time-icon">schedule</mat-icon>
+                  {{ msg.createdAt | localizedDate:'MMM d, y, h:mm a' }}
+                </span>
+              </div>
+              <div class="hd-msg-body">{{ msg.message }}</div>
+            </div>
           </div>
         </div>
 
         <!-- Reply Composer -->
         <div class="hd-reply-composer" id="reply-composer">
-          <textarea
-            placeholder="Type your reply here..."
-            [(ngModel)]="replyText">
-          </textarea>
+          <div class="composer-header">
+            <mat-icon class="composer-icon">mode_comment</mat-icon>
+            <span>Write a Reply</span>
+          </div>
+          <div class="textarea-wrapper">
+            <textarea
+              class="hd-reply-textarea"
+              placeholder="Type your reply here..."
+              [(ngModel)]="replyText">
+            </textarea>
+          </div>
           <div class="reply-footer">
-            <button class="hd-btn-cancel" (click)="cancelReply()">Cancel</button>
-            <button class="hd-btn-submit" (click)="sendReply()" [disabled]="!replyText.trim()">
+            <button type="button" class="hd-btn-cancel" (click)="cancelReply()">Cancel</button>
+            <button type="button" class="hd-btn-submit" (click)="sendReply()" [disabled]="!replyText.trim() || sendingMessage">
               <mat-icon style="font-size:16px; width:16px; height:16px;">send</mat-icon>
-              Send
+              {{ sendingMessage ? 'Sending...' : 'Send Reply' }}
             </button>
           </div>
         </div>

@@ -536,7 +536,7 @@ sendReply(): void {
       this.messages.push(msg);
       this.replyText = '';
       this.notification.showSuccess('Message sent successfully');
-     this.loadMessages();
+      this.loadMessages();
     },
     error: (err) => {
       console.error('Failed to send message:', err);
@@ -695,8 +695,11 @@ sendReply(): void {
     return this.attachedFiles.some(f => f.uploading);
   }
    
-   hasPermission(actionKey: string): boolean {
-    return this.authService.hasMenuPermission('Help Desk', 'Ticket Involvement', actionKey);
+  hasPermission(actionKey: string): boolean {
+    // Check both Ticket Involvement AND Tickets Dashboard so involved persons
+    // get the same edit/involve buttons as the ticket owner.
+    return this.authService.hasMenuPermission('Help Desk', 'Tickets Dashboard', actionKey)
+      || this.authService.hasMenuPermission('Help Desk', 'Ticket Involvement', actionKey);
   }
 
 }
