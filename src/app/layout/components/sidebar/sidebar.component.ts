@@ -111,6 +111,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
           subMenuName: 'Geo Violations',
           permissionAliases: ['Geo-Fence Violations', 'GeoFence Violations', 'Geofence Violations']
         },
+        {
+          label: 'Calendar',
+          icon: 'calendar_month',
+          route: '/calendar'
+        }
       ]
     },
     {
@@ -161,31 +166,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
           route: '/leave/types',
           menuName: 'Leave Management',
           subMenuName: 'Leave Types'
-        }
-      ]
-    },
-    {
-      label: 'Holidays',
-      icon: 'celebration',
-      menuName: 'Holidays',
-      children: [
+        },
         { label: 'Holiday Management', icon: 'event', route: '/holidays', menuName: 'Holidays', subMenuName: 'Holiday Management', exact: true },
         { label: 'My Holidays', icon: 'beach_access', route: '/holidays/my-holidays', menuName: 'Holidays', subMenuName: 'My Holidays' },
       ]
     },
-    // {
-    //   label: 'Payroll',
-    //   icon: 'payments',
-    //   menuName: 'Payroll',
-    //   children: [
-    //     { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods', menuName: 'Payroll', subMenuName: 'Payroll Periods' },
-    //     { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process', menuName: 'Payroll', subMenuName: 'Process Payroll' },
-    //     { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation', menuName: 'Payroll', subMenuName: 'Payroll Calculation' },
-    //     { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component', menuName: 'Payroll', subMenuName: 'Salary Components' },
-    //     { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports', menuName: 'Payroll', subMenuName: 'Payroll Reports' },
-    //     { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips', menuName: 'Payroll', subMenuName: 'Salary Slips' }
-    //   ]
-    // },
     {
       label: 'Assets Management',
       icon: 'inventory_2',
@@ -211,28 +196,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      label: 'Calendar',
-      icon: 'calendar_month',
-      route: '/calendar',
-      menuName: 'Calendar'
-    },
-    {
-      label: 'AI Assistant',
-      icon: 'smart_toy',
-      route: '/ai-assistant',
-      menuName: 'AI Assistant'
-    },
-    {
-      label: 'Subscription',
+      label: 'Subscription & Billing',
       icon: 'subscriptions',
-      route: '/subscription',
-      menuName: 'Subscription'
-    },
-    {
-      label: 'Billing',
-      icon: 'receipt_long',
-      route: '/subscription/billing',
-      menuName: 'Billings'
+      children: [
+        { label: 'Subscription', icon: 'subscriptions', route: '/subscription', menuName: 'Subscription' },
+        { label: 'Billing', icon: 'receipt_long', route: '/subscription/billing', menuName: 'Billings' },
+      ]
     },
     {
       label: 'Expense',
@@ -274,7 +243,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings', actionKey: 'opnings_view_all' },
         { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications', anyOfActionKeys: ['all_job_application', 'received_application_by_my_job_post', 'my_referenced_application', 'ats_inbox_view', 'my_self_application'] },
         { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage', actionKey: 'stage_view_all' },
-        { label: 'Question Bank', icon: 'quiz', route: '/jobs/question-bank', menuName: 'Jobs', subMenuName: 'Question Bank', actionKey: 'question_bank_view' }
+        { label: 'Question Bank', icon: 'quiz', route: '/jobs/question-bank', menuName: 'Jobs', subMenuName: 'Question Bank', actionKey: 'question_bank_view' },
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management', actionKey: 'career_management_view' }
       ]
     },
     {
@@ -330,12 +300,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true,
           actionKey: 'gratuity_admin_view'
         },
-        // {
-        //   label: 'Income Tax',
-        //   icon: 'request_quote',
-        //   route: '/payroll/tax-management',
-        //   exact: true
-        // },
         {
           label: 'Social Security',
           icon: 'shield_person',
@@ -391,7 +355,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Company Settings', icon: 'work_outline', route: '/settings/general', menuName: 'Settings', subMenuName: 'Company Name' },
         { label: 'Payslip Template', icon: 'receipt_long', route: '/settings/payslip-template', anyOfActionKeys: ['payslip_template_view', 'payslip_template_edit'] },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
-        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management', actionKey: 'career_management_view' },
         { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' },
         { label: 'Company Policies', icon: 'policy', route: '/settings/policies', menuName: 'Settings', subMenuName: 'Company Policies' }
       ]
@@ -404,6 +367,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Employee Onboarding', icon: 'person_add', route: '/onboarding', menuName: 'Onboarding', subMenuName: 'Employee Onboarding' },
         { label: 'Onboarding Configuration', icon: 'settings', route: '/settings/onboarding-configuration', menuName: 'Onboarding', subMenuName: 'Onboarding Configuration' }
       ]
+    },
+    {
+      label: 'AI Assistant',
+      icon: 'smart_toy',
+      route: '/ai-assistant',
+      menuName: 'AI Assistant'
     },
   ];
 
