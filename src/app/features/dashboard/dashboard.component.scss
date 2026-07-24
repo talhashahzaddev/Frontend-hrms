@@ -80,6 +80,8 @@ $red:        #ef4444;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   background: #ffffff;
   border: 1px solid $color-border;
   border-radius: 0.75rem;
@@ -128,7 +130,13 @@ $red:        #ef4444;
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  @media (max-width: 1100px) {
+    gap: 0.75rem;
+  }
 }
 
 // ── Time Block & Clock Actions ────────────────────────────────────────────────

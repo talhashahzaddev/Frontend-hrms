@@ -1,4 +1,10 @@
 // Global panelClass styles for attendance module dialogs
+
+// ─── Ensure panels never overflow/clip the viewport ──────────────────────────
+.cdk-overlay-pane.attendance-dialog-panel {
+  max-width: min(440px, 95vw) !important;
+}
+
 .attendance-dialog-panel {
   .mat-mdc-dialog-container,
   .mdc-dialog__surface {

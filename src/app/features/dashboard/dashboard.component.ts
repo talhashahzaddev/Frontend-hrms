@@ -603,7 +603,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   clockOut(): void {
     const dialogRef = this.dialog.open(CommentDialogComponent, {
-      width: '400px',
+      width: '440px',
+      maxWidth: '95vw',
       panelClass: 'attendance-dialog-panel',
       data: { title: 'Clock Out', label: 'Day Updates / Comments', placeholder: 'E.g., completed API integration...', required: false }
     });
