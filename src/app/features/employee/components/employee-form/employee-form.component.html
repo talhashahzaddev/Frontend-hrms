@@ -243,7 +243,7 @@
             <mat-form-field appearance="outline" class="mat-field-plain">
               <mat-label></mat-label>
               <mat-icon matPrefix class="field-icon-prefix">manage_accounts</mat-icon>
-              <mat-select formControlName="reportingManagerId" placeholder="Select manager">
+              <mat-select formControlName="reportingManagerId" placeholder="{{ !employeeForm.get('departmentId')?.value ? 'Select a department first' : (managers.length === 0 ? 'No managers available' : 'Select manager') }}">
                 <mat-option value="">No Manager</mat-option>
                 <mat-option *ngFor="let manager of managers" [value]="manager.employeeId">{{ manager.firstName }} {{ manager.lastName }}</mat-option>
               </mat-select>

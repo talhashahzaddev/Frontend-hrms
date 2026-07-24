@@ -144,7 +144,7 @@
             <mat-error>Required</mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="field">
+          <mat-form-field *ngIf="!isSuperAdmin" appearance="outline" class="field">
             <mat-label>Position *</mat-label>
             <mat-select formControlName="positionId" [disabled]="isPositionDisabled">
               <mat-option *ngFor="let pos of filteredPositions" [value]="pos.positionId">{{ pos.positionTitle }}</mat-option>

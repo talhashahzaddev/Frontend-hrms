@@ -442,9 +442,15 @@ getEmployeesByPosition(positionId: string): Observable<PositionEmployeesMainDto>
   }
 
   // Search and Filter helpers
-  getManagers(): Observable<Employee[]> {
-    const params = new HttpParams().set('role', 'manager').set('isActive', 'true');
-    return this.http.get<ApiResponse<Employee[]>>(`${this.apiUrl}/managers`)
+  getManagers(departmentId?: string): Observable<Employee[]> {
+    let params = new HttpParams().set('isActive', 'true');
+    if (departmentId) {
+      params = params.set('departmentId', departmentId);
+    } else {
+      params = params.set('role', 'manager');
+    }
+    
+    return this.http.get<ApiResponse<Employee[]>>(`${this.apiUrl}/managers`, { params })
       .pipe(
         map(response => {
           if (!response.success) {

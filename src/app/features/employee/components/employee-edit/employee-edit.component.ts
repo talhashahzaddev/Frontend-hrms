@@ -103,6 +103,23 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     this.loadDropdowns();
     this.loadInitialData();
 
+    // Fetch the complete employee details to get the exact role name from the backend user table
+    if (this.data.employee?.employeeId) {
+      this.employeeService.getEmployee(this.data.employee.employeeId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (emp) => {
+            if (emp) {
+              console.log('Fetched Full Employee Details from API:', emp);
+              this.data.employee = { ...this.data.employee, ...emp };
+              console.log('Updated this.data.employee:', this.data.employee);
+              console.log('RoleName in data:', this.data.employee.roleName);
+            }
+          },
+          error: (err) => console.error('Failed to fetch full employee details:', err)
+        });
+    }
+
     this.employeeForm.get('departmentId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((departmentId) => {
@@ -116,6 +133,26 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
         }
         if (!departmentId) {
           positionControl?.setValue(null, { emitEvent: false });
+        }
+
+        // Load managers for the selected department (plus Super Admins)
+        if (departmentId) {
+          this.employeeService.getManagers(String(departmentId))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (result) => {
+                this.managers = result.filter(m => m.employeeId !== this.data.employee.employeeId);
+                // If current manager is no longer in list, clear selection
+                const currentMgrId = this.employeeForm.get('reportingManagerId')?.value;
+                if (currentMgrId && !result.find(m => m.employeeId === currentMgrId)) {
+                  this.employeeForm.get('reportingManagerId')?.setValue(null, { emitEvent: false });
+                }
+              },
+              error: () => this.managers = []
+            });
+        } else {
+          this.managers = [];
+          this.employeeForm.get('reportingManagerId')?.setValue(null, { emitEvent: false });
         }
       });
   }
@@ -193,12 +230,18 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
       error: () => this.showError('Failed to load positions')
     });
 
-    this.employeeService.getManagers().subscribe({
-      next: (mgrs) => {
-        this.managers = mgrs.filter(m => m.employeeId !== this.data.employee.employeeId);
-      },
-      error: () => this.showError('Failed to load managers')
-    });
+    // Load managers for the existing department on initial open
+    const existingDeptId = this.data.employee.departmentId;
+    if (existingDeptId) {
+      this.employeeService.getManagers(String(existingDeptId))
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (result) => {
+            this.managers = result.filter(m => m.employeeId !== this.data.employee.employeeId);
+          },
+          error: () => this.showError('Failed to load managers')
+        });
+    }
   }
 
   formatDateForInput(date: string | undefined): string {
@@ -323,6 +366,12 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   get filteredPositions(): Position[] {
     const deptId = this.employeeForm?.get('departmentId')?.value;
     return deptId ? this.positions.filter(p => p.departmentId === deptId) : [];
+  }
+
+  get isSuperAdmin(): boolean {
+    const roleName = this.data.employee?.roleName || '';
+    console.log('isSuperAdmin checked. RoleName is:', roleName);
+    return roleName.toLowerCase().includes('super admin');
   }
 
   get isPositionDisabled(): boolean {
