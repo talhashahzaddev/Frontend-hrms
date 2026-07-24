@@ -63,73 +63,91 @@
     <!-- ════════════════════════════════════════════════════════════════════ -->
     <section class="kpi-section">
 
-      <!-- Personal (Employee) -->
+      <!-- ── Personal KPI cards + Mini Calendar ────────────────────────── -->
       <ng-container *ngIf="hasPermission('dashboard_my_overview')">
       <h2 class="section-label">Personal</h2>
-      <div class="kpi-grid kpi-grid--4">
 
-        <div class="kpi-card kpi-card--blue">
-          <div class="kpi-header">
-            <span class="kpi-title">Leave Balances</span>
-            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
-              <mat-icon>beach_access</mat-icon>
-            </span>
-          </div>
-          <div class="kpi-value">
-            {{ employeeData?.leaveBalances?.totalRemainingDays ?? '—' }} Days
-          </div>
-          <div class="kpi-sub">{{ leaveBalanceSummary }}</div>
-        </div>
+      <!-- Two-column layout: cards left, calendar right -->
+      <div class="kpi-calendar-row">
 
-        <div class="kpi-card kpi-card--blue">
-          <div class="kpi-header">
-            <span class="kpi-title">Latest Payslip</span>
-            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
-              <mat-icon>receipt_long</mat-icon>
-            </span>
-          </div>
-          <div class="kpi-value" style="font-size: 1.25rem;">
-            <span *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable" style="display: flex; align-items: center; gap: 8px;">
-              <mat-icon style="color: #10b981;">check_circle</mat-icon> Available
-            </span>
-            <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
-              <mat-icon>pending</mat-icon> Pending
-            </span>
-          </div>
-          <div class="kpi-sub">
-            <a class="kpi-link" *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable"
-              [href]="employeeData?.financialSnapshot?.payslipUploadUrl" target="_blank" rel="noopener noreferrer">
-              ↓ Download Payslip
-            </a>
-            <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable">Payslip not generated yet</span>
-          </div>
-        </div>
+        <!-- Left: 2×2 card grid -->
+        <div class="kpi-cards-panel">
+          <div class="kpi-grid kpi-grid--2x2">
 
-        <div class="kpi-card kpi-card--blue">
-          <div class="kpi-header">
-            <span class="kpi-title">Active Loans / Advances</span>
-            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
-              <mat-icon>credit_score</mat-icon>
-            </span>
-          </div>
-          <div class="kpi-value">
-            {{ currencySymbol() }} {{ totalLoanAdvance | number:'1.0-0' }}
-          </div>
-          <div class="kpi-sub">Remaining Balance</div>
-        </div>
+            <div class="kpi-card kpi-card--blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Leave Balances</span>
+                <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+                  <mat-icon>beach_access</mat-icon>
+                </span>
+              </div>
+              <div class="kpi-value">
+                {{ employeeData?.leaveBalances?.totalRemainingDays ?? '—' }} Days
+              </div>
+              <div class="kpi-sub">{{ leaveBalanceSummary }}</div>
+            </div>
 
-        <div class="kpi-card kpi-card--blue">
-          <div class="kpi-header">
-            <span class="kpi-title">Pending Approvals</span>
-            <span class="kpi-icon-wrap kpi-icon-wrap--blue">
-              <mat-icon>hourglass_empty</mat-icon>
-            </span>
+            <div class="kpi-card kpi-card--blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Latest Payslip</span>
+                <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+                  <mat-icon>receipt_long</mat-icon>
+                </span>
+              </div>
+              <div class="kpi-value" style="font-size: 1.25rem;">
+                <span *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable" style="display: flex; align-items: center; gap: 8px;">
+                  <mat-icon style="color: #10b981;">check_circle</mat-icon> Available
+                </span>
+                <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+                  <mat-icon>pending</mat-icon> Pending
+                </span>
+              </div>
+              <div class="kpi-sub">
+                <a class="kpi-link" *ngIf="employeeData?.financialSnapshot?.isPayslipAvailable"
+                  [href]="employeeData?.financialSnapshot?.payslipUploadUrl" target="_blank" rel="noopener noreferrer">
+                  ↓ Download Payslip
+                </a>
+                <span *ngIf="!employeeData?.financialSnapshot?.isPayslipAvailable">Payslip not generated yet</span>
+              </div>
+            </div>
+
+            <div class="kpi-card kpi-card--blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Active Loans / Advances</span>
+                <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+                  <mat-icon>credit_score</mat-icon>
+                </span>
+              </div>
+              <div class="kpi-value">
+                {{ currencySymbol() }} {{ totalLoanAdvance | number:'1.0-0' }}
+              </div>
+              <div class="kpi-sub">Remaining Balance</div>
+            </div>
+
+            <div class="kpi-card kpi-card--blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Pending Approvals</span>
+                <span class="kpi-icon-wrap kpi-icon-wrap--blue">
+                  <mat-icon>hourglass_empty</mat-icon>
+                </span>
+              </div>
+              <div class="kpi-value">{{ pendingRequestCount }} Requests</div>
+              <div class="kpi-sub">Waiting on Manager</div>
+            </div>
+
           </div>
-          <div class="kpi-value">{{ pendingRequestCount }} Requests</div>
-          <div class="kpi-sub">Waiting on Manager</div>
         </div>
+        <!-- /Left panel -->
+
+        <!-- Right: Mini Calendar -->
+        <div class="kpi-mini-calendar-panel">
+          <app-calendar class="dashboard-mini-calendar"></app-calendar>
+        </div>
+        <!-- /Right panel -->
 
       </div>
+      <!-- /kpi-calendar-row -->
+
       </ng-container>
 
       <!-- Split Sections: Team & HR Side by Side -->

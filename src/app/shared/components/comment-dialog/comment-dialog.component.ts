@@ -27,6 +27,7 @@ export interface CommentDialogData {
     template: `
     <div class="comment-dialog">
       <div class="comment-dialog-header">
+        <div class="header-icon">💬</div>
         <h2>{{ data.title }}</h2>
       </div>
 
@@ -59,29 +60,53 @@ export interface CommentDialogData {
     :host ::ng-deep .mdc-dialog__surface {
       min-width: unset !important;
       width: auto !important;
+      border-radius: 0.875rem !important;
+      overflow: hidden !important;
+    }
+
+    :host ::ng-deep .mat-mdc-dialog-container {
+      border-radius: 0.875rem !important;
+      padding: 0 !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
     }
 
     .comment-dialog {
-      width: 420px;
-      max-width: 90vw;
+      width: 440px;
+      max-width: 92vw;
       background: #ffffff;
-      border-radius: 12px;
+      border-radius: 0.875rem;
       overflow: hidden;
       font-family: 'Inter', sans-serif;
       box-sizing: border-box;
     }
 
     .comment-dialog-header {
-      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 1.25rem 1.5rem;
       border-bottom: 1px solid #e2e8f0;
-      background: rgba(255, 255, 255, 0.8);
+      background: #ffffff;
+
+      .header-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.625rem;
+        background: #eff6ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.125rem;
+        color: #2563eb;
+      }
 
       h2 {
         margin: 0;
-        font-size: 1.125rem;
+        font-size: 1rem;
         font-weight: 700;
         color: #0f172a;
-        line-height: 1.4;
+        line-height: 1.3;
       }
     }
 
@@ -94,7 +119,7 @@ export interface CommentDialogData {
     }
 
     .comment-dialog-field {
-      padding: 0 0.25rem;
+      padding: 0;
       box-sizing: border-box;
     }
 
@@ -103,7 +128,7 @@ export interface CommentDialogData {
       font-size: 0.8125rem;
       font-weight: 600;
       color: #475569;
-      margin: 0 0 0.625rem;
+      margin: 0 0 0.5rem;
       line-height: 1.4;
     }
 
@@ -123,18 +148,12 @@ export interface CommentDialogData {
       font-family: inherit;
       box-sizing: border-box;
       resize: vertical;
-      min-height: 112px;
-      line-height: 1.5;
+      min-height: 100px;
+      line-height: 1.55;
     }
 
-    .field-textarea::placeholder {
-      color: #94a3b8;
-    }
-
-    .field-textarea:hover {
-      border-color: #94a3b8;
-    }
-
+    .field-textarea::placeholder { color: #94a3b8; }
+    .field-textarea:hover { border-color: #94a3b8; }
     .field-textarea:focus {
       border-color: #2563eb;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -144,15 +163,15 @@ export interface CommentDialogData {
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      gap: 0.75rem;
-      padding: 1.25rem 1.5rem;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
       border-top: 1px solid #e2e8f0;
-      background: #f8fafc;
+      background: #ffffff;
     }
 
     .btn-cancel {
-      height: 2.5rem !important;
-      padding: 0 1.25rem !important;
+      height: 2.25rem !important;
+      padding: 0 1rem !important;
       border-radius: 0.5rem !important;
       font-size: 0.875rem !important;
       font-weight: 600 !important;
@@ -160,15 +179,14 @@ export interface CommentDialogData {
       border-color: #e2e8f0 !important;
       background: #ffffff !important;
     }
-
     .btn-cancel:hover {
-      background: #f1f5f9 !important;
+      background: #f8fafc !important;
       color: #0f172a !important;
     }
 
     .btn-submit {
-      height: 2.5rem !important;
-      padding: 0 1.25rem !important;
+      height: 2.25rem !important;
+      padding: 0 1rem !important;
       border-radius: 0.5rem !important;
       font-size: 0.875rem !important;
       font-weight: 600 !important;
@@ -176,25 +194,17 @@ export interface CommentDialogData {
       color: #ffffff !important;
       box-shadow: none !important;
     }
-
     .btn-submit:hover:not([disabled]) {
       background: #1d4ed8 !important;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2) !important;
     }
-
-    .btn-submit[disabled] {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .btn-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
 
     @media (max-width: 480px) {
       .comment-dialog { width: 100%; }
       .comment-dialog-header,
       .comment-dialog-body,
-      .comment-dialog-footer {
-        padding-left: 1.25rem;
-        padding-right: 1.25rem;
-      }
+      .comment-dialog-footer { padding-left: 1.25rem; padding-right: 1.25rem; }
     }
   `]
 })

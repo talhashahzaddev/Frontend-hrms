@@ -1,18 +1,25 @@
+<!-- ─── Dialog Header ─────────────────────────────────────────────────────── -->
 <div class="dialog-header">
   <div class="header-content">
-    <h2 mat-dialog-title> Day Details </h2>
-    <span class="date-badge">{{ data.date | localizedDate:'fullDate' }}</span>
+    <div class="header-icon-wrap">
+      <mat-icon>calendar_today</mat-icon>
+    </div>
+    <div class="header-text">
+      <h2>Day Details</h2>
+      <span class="date-badge">{{ data.date | localizedDate:'fullDate' }}</span>
+    </div>
   </div>
-  <button mat-icon-button (click)="closeDialog()">
+  <button mat-icon-button class="close-btn" (click)="closeDialog()">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
+<!-- ─── Dialog Content ────────────────────────────────────────────────────── -->
 <mat-dialog-content class="dialog-content custom-scrollbar">
 
   <!-- Loading Spinner -->
   <div *ngIf="isLoading" class="loading-overlay">
-    <mat-spinner diameter="40"></mat-spinner>
+    <mat-spinner diameter="36"></mat-spinner>
   </div>
 
   <!-- LEAVE DETAILS SECTION -->
@@ -51,13 +58,10 @@
         <span class="label">Shift Name</span>
         <span class="value highlight">{{ currentShift.shiftName }}</span>
       </div>
-      <div class="detail-item">
-        <span class="label">Timings</span>
-        <div class="time-range">
-          <span class="time">{{ formatShiftTime(currentShift.startTime) }}</span>
-          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-          <span class="time">{{ formatShiftTime(currentShift.endTime) }}</span>
-        </div>
+      <div class="time-range">
+        <span class="time">{{ formatShiftTime(currentShift.startTime) }}</span>
+        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+        <span class="time">{{ formatShiftTime(currentShift.endTime) }}</span>
       </div>
     </div>
     <ng-template #noShift>
@@ -76,7 +80,7 @@
       </span>
     </div>
 
-    <!-- DAILY UPDATE / NOTES SECTION -->
+    <!-- DAILY UPDATE / NOTES -->
     <div *ngIf="attendanceEvent.details?.notes" class="daily-update-card">
       <div class="update-header">
         <mat-icon>assignment</mat-icon>
@@ -116,13 +120,13 @@
       </div>
     </div>
 
-    <!-- SESSIONS LIST (Matches TimeTracker Logic) -->
+    <!-- SESSIONS LIST -->
     <div class="sessions-list" *ngIf="todaySessions.length > 0">
       <h4>Sessions</h4>
       <div class="session-item" *ngFor="let session of todaySessions">
         <div class="session-time">
           <span class="start">{{ session.checkInTime | localizedDate:'shortTime' }}</span>
-          <span class="separator">-</span>
+          <span class="separator">—</span>
           <span class="end">{{ (session.checkOutTime | localizedDate:'shortTime') || 'Ongoing' }}</span>
         </div>
         <div class="session-duration">
@@ -133,7 +137,7 @@
     </div>
   </div>
 
-  <!-- No Attendance State (if not leave and not attendance) -->
+  <!-- Empty State -->
   <div *ngIf="!attendanceEvent && !isLeave" class="empty-state">
     <mat-icon>event_note</mat-icon>
     <p>No activity recorded for this day.</p>
@@ -141,6 +145,7 @@
 
 </mat-dialog-content>
 
+<!-- ─── Dialog Actions ─────────────────────────────────────────────────────── -->
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="closeDialog()">Close</button>
+  <button mat-stroked-button (click)="closeDialog()">Close</button>
 </div>

@@ -29,6 +29,7 @@ import { SettingsService } from '../settings/services/settings.service';
 import { GeoFenceService, GeoClockInRequest } from '../attendance/services/geofence.service';
 import { TimeTrackingSession } from '@core/models/attendance.models';
 import { CommentDialogComponent } from '@shared/components/comment-dialog/comment-dialog.component';
+import { CalendarComponent } from '../calendar/calendar.component';
 import {
   EmployeeOverview,
   ManagerOverview,
@@ -48,7 +49,8 @@ import {
     MatMenuModule,
     MatDialogModule,
     MatTooltipModule,
-    SharedCommonModule
+    SharedCommonModule,
+    CalendarComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
