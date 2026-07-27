@@ -18,6 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
+import { environment } from '@environments/environment';
 
 
 @Component({
@@ -376,42 +377,25 @@ onSubmit(): void {
    * Replaces current subdomain with the user's organization domain
    */
   private redirectToSubdomain(subdomain: string, path: string): void {
-    const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     const currentPort = window.location.port ? `:${window.location.port}` : '';
+    const baseDomain = environment.baseDomain;
 
-    let newHost = '';
+    let newHost: string;
 
-    // Handle localhost (including subdomains like login.localhost)
-    if (currentHost.includes('localhost')) {
-      // Always redirect to subdomain.localhost (not subdomain.login.localhost)
+    if (baseDomain === 'localhost') {
+      // Local development: redirect to subdomain.localhost
       newHost = `${subdomain}.localhost`;
-    }
-    // Handle IP addresses
-    else if (currentHost.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-      newHost = `${subdomain}.${currentHost}`;
-    }
-    // Handle production domains
-    else {
-      const hostParts = currentHost.split('.');
-
-      if (hostParts.length >= 2) {
-        // Extract base domain (last two parts)
-        const baseDomain = hostParts.slice(-2).join('.');
-        newHost = `${subdomain}.${baseDomain}`;
-      } else {
-        // Fallback
-        newHost = `${subdomain}.${currentHost}`;
-      }
+    } else {
+      // Cloud environments (both Production and Dev)
+      // Production: company.briskpeople.com
+      // Dev:        company.dev.briskpeople.com
+      newHost = `${subdomain}.${baseDomain}`;
     }
 
-    // Construct new URL with user's subdomain
     const newUrl = `${currentProtocol}//${newHost}${currentPort}${path}`;
 
     console.log(`Redirecting to user's organization domain: ${newUrl}`);
-    console.log(`From: ${currentHost} -> To: ${newHost}`);
-
-    // Redirect to the new subdomain
     window.location.href = newUrl;
   }
 

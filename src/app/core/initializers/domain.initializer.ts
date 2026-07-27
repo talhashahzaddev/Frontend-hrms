@@ -12,39 +12,29 @@ const WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi', 'login'];
  * Extracts subdomain from current window location
  */
 function getCurrentSubdomain(): string | null {
-  const hostname = window.location.hostname;
-  
-  // Remove protocol if present
-  let cleanHostname = hostname.replace(/^https?:\/\//, '');
-  
-  // Remove www if present
-  cleanHostname = cleanHostname.replace(/^www\./, '');
-  
-  // Split by dots
-  const parts = cleanHostname.split('.');
-  
-  // If we have at least 3 parts (subdomain.domain.tld), return the first part
-  // Example: "xyz.briskpeople.com" -> ["xyz", "briskpeople", "com"] -> "xyz"
-  if (parts.length >= 3) {
-    return parts[0].toLowerCase();
-  }
-  
-  // If we have 2 parts, check if it's a subdomain pattern
-  // For localhost or IP addresses, return null
-  if (parts.length === 2) {
-    // Check if it's localhost or an IP address
-    if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-      return null;
-    }
-    // For development, might be "subdomain.localhost" or similar
-    return parts[0].toLowerCase();
-  }
-  
-  // For localhost or single-part domains, return null (skip validation in development)
-  if (hostname === 'localhost' || hostname.startsWith('127.') || hostname.startsWith('192.168.')) {
+  const hostname = window.location.hostname.toLowerCase().replace(/^www\./, '');
+  const baseDomain = environment.baseDomain.toLowerCase();
+
+  // On localhost (local dev), no subdomain validation needed
+  if (baseDomain === 'localhost' || hostname === 'localhost' || /^127\./.test(hostname) || /^192\.168\./.test(hostname)) {
     return null;
   }
-  
+
+  // If hostname exactly matches the base domain, we are on the main login page
+  if (hostname === baseDomain) {
+    return null;
+  }
+
+  // Extract company subdomain relative to the base domain
+  // e.g., "companyX.briskpeople.com" with baseDomain "briskpeople.com" -> "companyX"
+  // e.g., "companyX.dev.briskpeople.com" with baseDomain "dev.briskpeople.com" -> "companyX"
+  if (hostname.endsWith('.' + baseDomain)) {
+    const subdomain = hostname.slice(0, hostname.length - baseDomain.length - 1);
+    if (subdomain && !subdomain.includes('.')) {
+      return subdomain;
+    }
+  }
+
   return null;
 }
 
@@ -76,7 +66,7 @@ function showDomainErrorPage(subdomain: string, message: string): void {
         <div style="font-size: 64px; margin-bottom: 50px;">🚫</div>
         <h1 style="font-size: 32px; margin: 0 0 20px 0; font-weight: 700;">Domain Not Found</h1>
         <p style="font-size: 18px; margin: 0 0 30px 0; opacity: 0.9; line-height: 1.6;">
-          The domain <strong>${subdomain}.briskpeople.com</strong> is not available or has been deactivated.
+          The domain <strong>${subdomain}.${environment.baseDomain}</strong> is not available or has been deactivated.
         </p>
         <p style="font-size: 16px; margin: 0 0 30px 0; opacity: 0.8; line-height: 1.6;">
           ${message}

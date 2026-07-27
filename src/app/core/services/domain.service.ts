@@ -46,48 +46,42 @@ export class DomainService {
   /**
    * Whitelisted subdomains that don't require validation
    */
-
-
-
-    private readonly WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi','reset-password'];
+  /**
+   * Whitelisted subdomains that don't require validation
+   */
+  private readonly WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi', 'reset-password', 'login'];
   /**
    * Extracts subdomain from current window location
    * @returns The subdomain (e.g., "xyz" from "xyz.briskpeople.com")
    */
   getCurrentSubdomain(): string | null {
-    const hostname = window.location.hostname;
-    
-    // Remove protocol if present
-    let cleanHostname = hostname.replace(/^https?:\/\//, '');
-    
-    // Remove www if present
-    cleanHostname = cleanHostname.replace(/^www\./, '');
-    
-    // Split by dots
-    const parts = cleanHostname.split('.');
-    
-    // If we have at least 3 parts (subdomain.domain.tld), return the first part
-    // Example: "xyz.briskpeople.com" -> ["xyz", "briskpeople", "com"] -> "xyz"
-    if (parts.length >= 3) {
-      return parts[0].toLowerCase();
-    }
-    
-    // If we have 2 parts, check if it's a subdomain pattern
-    // For localhost or IP addresses, return null
-    if (parts.length === 2) {
-      // Check if it's localhost or an IP address
-      if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-        return null;
-      }
-      // For development, might be "subdomain.localhost" or similar
-      return parts[0].toLowerCase();
-    }
-    
-    // For localhost or single-part domains, return null (skip validation in development)
-    if (hostname === 'localhost' || hostname.startsWith('127.') || hostname.startsWith('192.168.')) {
+    const hostname = window.location.hostname.toLowerCase().replace(/^www\./, '');
+    const baseDomain = environment.baseDomain.toLowerCase();
+
+    // On localhost (local dev), no subdomain validation needed
+    if (baseDomain === 'localhost' || hostname === 'localhost' || /^127\./.test(hostname) || /^192\.168\./.test(hostname)) {
       return null;
     }
-    
+
+    // If hostname exactly matches the base domain (e.g., briskpeople.com or dev.briskpeople.com)
+    // then we are on the main login page — no company subdomain present
+    if (hostname === baseDomain) {
+      return null;
+    }
+
+    // If hostname ends with .{baseDomain}, extract whatever comes before it
+    // e.g., hostname = "companyX.briskpeople.com", baseDomain = "briskpeople.com"
+    //       -> returns "companyX"
+    // e.g., hostname = "companyX.dev.briskpeople.com", baseDomain = "dev.briskpeople.com"
+    //       -> returns "companyX"
+    if (hostname.endsWith('.' + baseDomain)) {
+      const subdomain = hostname.slice(0, hostname.length - baseDomain.length - 1);
+      // Only return if it's a single-level subdomain (no dots inside)
+      if (subdomain && !subdomain.includes('.')) {
+        return subdomain;
+      }
+    }
+
     return null;
   }
 
