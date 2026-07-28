@@ -1,0 +1,179 @@
+.invitation-list-page {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.invite-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  font-weight: 500;
+}
+
+// Filters
+.filters-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.search-field {
+  flex: 1;
+  max-width: 400px;
+}
+
+.status-field {
+  width: 180px;
+}
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 0;
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+// Table
+.table-container {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.invitations-table {
+  width: 100%;
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+// Status badges
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-pending {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.status-expired {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+// Actions
+.delete-btn {
+  color: #dc2626;
+}
+
+// Empty state
+.no-data-row {
+  height: auto !important;
+}
+
+.no-data-cell {
+  padding: 40px 20px !important;
+  text-align: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #cbd5e1;
+}
+
+.empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+// Paginator
+.mat-mdc-paginator {
+  border-top: 1px solid #e2e8f0;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .search-field,
+  .status-field {
+    max-width: 100%;
+    width: 100%;
+  }
+}
