@@ -51,6 +51,7 @@ export class PlatformLayoutComponent implements OnInit, OnDestroy {
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/platform-admin/dashboard' },
     { label: 'Organizations', icon: 'business', route: '/platform-admin/organizations' },
+    { label: 'User Invitations', icon: 'person_add', route: '/platform-admin/invitations' },
     { label: 'Roles Management', icon: 'admin_panel_settings', route: '/platform-admin/global-roles' },
     { label: 'Demo Inquiries', icon: 'contact_mail', route: '/platform-admin/inquiries' },
     { label: 'Payments', icon: 'payments', route: '/platform-admin/payments' }

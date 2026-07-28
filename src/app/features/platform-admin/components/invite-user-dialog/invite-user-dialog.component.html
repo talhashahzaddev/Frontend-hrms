@@ -1,0 +1,61 @@
+<div class="invite-dialog">
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon>person_add</mat-icon>
+    Invite New Organization Admin
+  </h2>
+
+  <mat-dialog-content class="dialog-content">
+    <p class="dialog-subtitle">
+      Send an invitation to create a new organization. They'll receive an email with a link to set their password and confirm the organization name.
+    </p>
+
+    <form [formGroup]="form" class="invite-form">
+      <!-- Email -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email Address</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="user@example.com" />
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="isFieldInvalid('email')">{{ getErrorMessage('email') }}</mat-error>
+      </mat-form-field>
+
+      <!-- First Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName" placeholder="John" />
+        <mat-error *ngIf="isFieldInvalid('firstName')">{{ getErrorMessage('firstName') }}</mat-error>
+      </mat-form-field>
+
+      <!-- Last Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" placeholder="Doe" />
+        <mat-error *ngIf="isFieldInvalid('lastName')">{{ getErrorMessage('lastName') }}</mat-error>
+      </mat-form-field>
+
+      <!-- Optional Organization Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Organization Name (optional)</mat-label>
+        <input matInput formControlName="organizationName" placeholder="e.g. Acme Corp" />
+        <mat-icon matSuffix>business</mat-icon>
+        <mat-hint>The user will see this as a suggestion and can change it</mat-hint>
+      </mat-form-field>
+
+      <!-- Error message -->
+      <div class="error-banner" *ngIf="errorMessage">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button type="button" (click)="onCancel()" [disabled]="isSubmitting">
+      Cancel
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="onSubmit()"
+            [disabled]="form.invalid || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="16" class="btn-spinner"></mat-spinner>
+      <span>{{ isSubmitting ? 'Sending...' : 'Send Invitation' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>
