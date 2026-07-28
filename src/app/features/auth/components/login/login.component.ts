@@ -404,10 +404,16 @@ onSubmit(): void {
     this.router.navigate(['/forgot-password']);
   }
   onsignup(): void {
-    const parent = (window as any)?.APP_SETTINGS?.parentUrl || 'https://www.briskpeople.com';
-    const base = typeof parent === 'string' ? parent.replace(/\/+$/, '') : 'https://www.briskpeople.com';
-    const url = `${base}/sign-up`;
-    window.location.href = url;
+    if (!environment.production) {
+      // Local / Dev environments: use internal dev-signup page
+      this.router.navigate(['/dev-signup']);
+    } else {
+      // Production: redirect to the public marketing site
+      const parent = (window as any)?.APP_SETTINGS?.parentUrl || 'https://www.briskpeople.com';
+      const base = typeof parent === 'string' ? parent.replace(/\/+$/, '') : 'https://www.briskpeople.com';
+      const url = `${base}/sign-up`;
+      window.location.href = url;
+    }
   }
 
   togglePasswordVisibility(): void {

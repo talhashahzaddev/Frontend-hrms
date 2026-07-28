@@ -33,6 +33,14 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/register/register.component').then(m => m.RegisterComponent)
   },
+  // Dev-only signup — only visible on local / preview environments
+  {
+    path: 'dev-signup',
+    canActivate: [NoAuthGuard],
+    loadComponent: () =>
+      import('./features/auth/components/dev-signup/dev-signup.component').then(m => m.DevSignupComponent),
+    title: 'Create Dev Account - HRMS'
+  },
   {
     path: 'forgot-password',
     canActivate: [NoAuthGuard],

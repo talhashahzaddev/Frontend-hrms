@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 import { ApiResponse } from '@core/models/auth.models';
@@ -41,6 +41,18 @@ export class DomainService {
         }),
         catchError(this.handleError)
       );
+  }
+
+  /**
+   * Checks if a domain slug is already taken.
+   * Returns true if taken, false if available.
+   */
+  checkDomainExists(domain: string): Observable<boolean> {
+    if (!domain) return of(false);
+    return this.validateDomain(domain).pipe(
+      map(res => res.isValid === true),
+      catchError(() => of(false))
+    );
   }
 
   /**
