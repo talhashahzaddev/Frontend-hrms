@@ -1,0 +1,247 @@
+<div class="signup-page">
+
+  <!-- ══ LEFT PANEL — same branding as login ══ -->
+  <div class="left-panel">
+    <div class="left-inner">
+      <div class="brand" (click)="goToLogin()">
+        <img src="../../../../../assets/Brisk.jpeg" alt="BriskPeople" class="brand-logo" />
+        <span class="brand-name">Brisk People</span>
+      </div>
+
+      <div class="left-copy">
+        <div class="dev-badge">
+          <span class="badge-dot"></span>
+          Development Environment
+        </div>
+        <h2>Create a test account</h2>
+        <p>
+          This signup form is only visible in <strong>local</strong> and
+          <strong>dev</strong> environments. Use it to spin up a new organisation
+          without running the marketing app.
+        </p>
+      </div>
+
+      <ul class="feature-list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+          Full multi-tenant subdomain setup
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+          Points to dev backend automatically
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+          Isolated from production data
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+          Email verification included
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ DIVIDER ══ -->
+  <div class="panel-divider"></div>
+
+  <!-- ══ RIGHT PANEL — form ══ -->
+  <div class="right-panel">
+    <div class="form-wrapper">
+
+      <!-- ── Verification sent state ─────────────────────────── -->
+      <div *ngIf="verificationEmailSent" class="verification-container">
+        <div class="verification-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+          </svg>
+        </div>
+        <h2 class="verification-title">Check Your Email</h2>
+        <p class="verification-message">
+          Your account was created! Please check your inbox and click the
+          verification link we've sent to activate your organisation.
+        </p>
+        <div class="verification-hints">
+          <div class="hint-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            The link expires in 24 hours.
+          </div>
+          <div class="hint-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            Didn't get it? Check your spam folder.
+          </div>
+        </div>
+        <button class="login-button" (click)="goToLogin()">Go to Login</button>
+      </div>
+
+      <!-- ── Sign Up Form ─────────────────────────────────────── -->
+      <ng-container *ngIf="!verificationEmailSent">
+
+        <!-- Header -->
+        <div class="form-header">
+          <h2 class="form-title">Create Account</h2>
+          <p class="form-subtitle">Set up a new organisation for dev testing</p>
+        </div>
+
+        <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="signup-form" novalidate>
+
+          <!-- Success -->
+          <div *ngIf="submitSuccess" class="alert alert-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+            Account created! You can now log in.
+          </div>
+
+          <!-- Row: First + Last -->
+          <div class="form-row">
+            <div class="field-group">
+              <label class="field-label">First Name <span class="req">*</span></label>
+              <input type="text" formControlName="firstName"
+                [class.is-error]="submitted && signUpForm.get('firstName')?.invalid"
+                placeholder="John" />
+              <span *ngIf="submitted && signUpForm.get('firstName')?.invalid" class="field-error">
+                {{ getErrorMessage('firstName') }}
+              </span>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Last Name <span class="req">*</span></label>
+              <input type="text" formControlName="lastName"
+                [class.is-error]="submitted && signUpForm.get('lastName')?.invalid"
+                placeholder="Doe" />
+              <span *ngIf="submitted && signUpForm.get('lastName')?.invalid" class="field-error">
+                {{ getErrorMessage('lastName') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="field-group">
+            <label class="field-label">Email <span class="req">*</span></label>
+            <input type="email" formControlName="email"
+              [class.is-error]="submitted && signUpForm.get('email')?.invalid"
+              placeholder="name@company.com" autocomplete="email" />
+            <span *ngIf="submitted && signUpForm.get('email')?.invalid" class="field-error">
+              {{ getErrorMessage('email') }}
+            </span>
+          </div>
+
+          <!-- Row: Password + Confirm -->
+          <div class="form-row">
+            <div class="field-group">
+              <label class="field-label">Password <span class="req">*</span></label>
+              <input type="password" formControlName="password"
+                [class.is-error]="submitted && signUpForm.get('password')?.invalid"
+                placeholder="Min 8 characters" autocomplete="new-password" />
+              <span *ngIf="submitted && signUpForm.get('password')?.invalid" class="field-error">
+                {{ getErrorMessage('password') }}
+              </span>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Confirm Password <span class="req">*</span></label>
+              <input type="password" formControlName="confirmPassword"
+                [class.is-error]="submitted && (signUpForm.get('confirmPassword')?.invalid || signUpForm.hasError('passwordMismatch'))"
+                placeholder="Re-enter password" autocomplete="new-password" />
+              <span *ngIf="submitted && (signUpForm.get('confirmPassword')?.invalid || signUpForm.hasError('passwordMismatch'))" class="field-error">
+                {{ getErrorMessage('confirmPassword') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Company Name -->
+          <div class="field-group">
+            <label class="field-label">Company Name <span class="req">*</span></label>
+            <input type="text" formControlName="companyName"
+              [class.is-error]="submitted && signUpForm.get('companyName')?.invalid"
+              placeholder="Acme Inc." />
+            <span *ngIf="submitted && signUpForm.get('companyName')?.invalid" class="field-error">
+              {{ getErrorMessage('companyName') }}
+            </span>
+          </div>
+
+          <!-- Row: Company Size + Currency -->
+          <div class="form-row">
+            <div class="field-group">
+              <label class="field-label">Company Size <span class="req">*</span></label>
+              <select formControlName="companySize"
+                [class.is-error]="submitted && signUpForm.get('companySize')?.invalid">
+                <option value="">Select size…</option>
+                <option *ngFor="let size of companySizes" [value]="size">{{ size }}</option>
+              </select>
+              <span *ngIf="submitted && signUpForm.get('companySize')?.invalid" class="field-error">
+                {{ getErrorMessage('companySize') }}
+              </span>
+            </div>
+
+            <!-- Currency custom dropdown -->
+            <div class="field-group">
+              <label class="field-label">Currency <span class="req">*</span></label>
+              <input type="hidden" formControlName="currency" />
+              <div class="currency-dropdown" [class.open]="currencyDropdownOpen"
+                [class.is-error]="submitted && signUpForm.get('currency')?.invalid">
+                <input #currencyInput class="currency-input" type="text"
+                  [placeholder]="currencyLoading ? 'Loading…' : 'Select currency'"
+                  [value]="currencyDropdownOpen ? currencySearch : (selectedCurrency?.label || '')"
+                  (focus)="openCurrencyDropdown()"
+                  (input)="onCurrencySearch($any($event.target).value)"
+                  autocomplete="off" readonly />
+                <span class="currency-chevron" (click)="toggleCurrencyDropdown()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path *ngIf="!currencyDropdownOpen" d="M6 9l6 6 6-6"/>
+                    <path *ngIf="currencyDropdownOpen"  d="M18 15l-6-6-6 6"/>
+                  </svg>
+                </span>
+                <ul class="currency-list" *ngIf="currencyDropdownOpen">
+                  <li *ngIf="filteredCurrencies.length === 0" class="currency-empty">No currencies found</li>
+                  <li *ngFor="let c of filteredCurrencies" class="currency-option"
+                    [class.currency-active]="selectedCurrency?.code === c.code"
+                    (mousedown)="selectCurrency(c)">
+                    <span class="currency-code">{{ c.code }}</span>
+                    <span class="currency-name">{{ c.name }}</span>
+                  </li>
+                </ul>
+              </div>
+              <span *ngIf="submitted && signUpForm.get('currency')?.invalid" class="field-error">
+                {{ getErrorMessage('currency') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Domain -->
+          <div class="field-group">
+            <label class="field-label">Domain <span class="req">*</span></label>
+            <div class="domain-wrapper">
+              <input type="text" formControlName="website"
+                [class.is-error]="(submitted || signUpForm.get('website')?.touched) && signUpForm.get('website')?.invalid"
+                placeholder="yourdomain"
+                (input)="onDomainInput($event)" />
+              <span class="domain-suffix">.{{ isDev ? 'dev.' : '' }}briskpeople.com</span>
+            </div>
+            <span *ngIf="signUpForm.get('website')?.pending" class="field-hint">
+              Checking availability…
+            </span>
+            <span *ngIf="(submitted || signUpForm.get('website')?.touched) && signUpForm.get('website')?.invalid" class="field-error">
+              {{ getErrorMessage('website') }}
+            </span>
+          </div>
+
+          <!-- Submit -->
+          <div class="form-actions">
+            <button type="submit" class="submit-button" [disabled]="isSubmitting">
+              <svg *ngIf="isSubmitting" class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              {{ isSubmitting ? 'Creating Account…' : 'Create Account' }}
+            </button>
+            <p class="form-footer">
+              Already have an account?
+              <button type="button" (click)="goToLogin()" class="login-link">Sign in</button>
+            </p>
+          </div>
+
+        </form>
+      </ng-container>
+
+    </div>
+  </div>
+
+</div>
