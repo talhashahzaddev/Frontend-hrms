@@ -39,7 +39,7 @@ export class DevSignupComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   submitSuccess = false;
   verificationEmailSent = false;
-  isDev = !environment.production;
+  isDev = window.location.hostname.includes('dev.briskpeople.com') || environment.baseDomain === 'dev.briskpeople.com' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   @ViewChild('currencyInput') currencyInputRef?: ElementRef<HTMLInputElement>;
 

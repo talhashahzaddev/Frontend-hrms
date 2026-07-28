@@ -404,7 +404,10 @@ onSubmit(): void {
     this.router.navigate(['/forgot-password']);
   }
   onsignup(): void {
-    if (!environment.production) {
+    // If the base domain is NOT the production domain, we are in a dev or local environment.
+    const isDevEnv = environment.baseDomain !== 'briskpeople.com';
+
+    if (isDevEnv) {
       // Local / Dev environments: use internal dev-signup page
       this.router.navigate(['/dev-signup']);
     } else {
