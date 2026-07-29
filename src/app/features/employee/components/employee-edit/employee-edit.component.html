@@ -29,6 +29,7 @@
           <mat-form-field appearance="outline" class="field">
             <mat-label>Employee Code</mat-label>
             <input matInput formControlName="employeeCode">
+            <mat-hint *ngIf="!canEditEmployeeCode">Only Super Admin can edit</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="field">
