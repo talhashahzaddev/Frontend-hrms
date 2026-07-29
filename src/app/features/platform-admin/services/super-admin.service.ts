@@ -21,6 +21,11 @@ import {
 } from '../models/global-role.models';
 import { MenusResponse } from '../../../core/models/role.models';
 import {
+  InviteUserRequest,
+  UserInvitation,
+  UserInvitationFilter
+} from '../models/user-invitation.models';
+import {
   TransactionDto,
   TransactionDetailDto,
   TransactionFilterRequest,
@@ -158,5 +163,34 @@ export class SuperAdminService {
   deleteGlobalRole(roleId: string): Observable<boolean> {
     return this.http.delete<ApiResponse<boolean>>(`${this.API_URL}/delete-global-role/${roleId}`)
       .pipe(map(res => res.data ?? false));
+  }
+
+  // ========== User Invitations ==========
+
+  /** POST /SuperAdmin/invite-user */
+  inviteUser(request: InviteUserRequest): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/invite-user`, request);
+  }
+
+  /** GET /SuperAdmin/invitations */
+  getInvitations(filter: UserInvitationFilter): Observable<ApiResponse<PagedResult<UserInvitation>>> {
+    let params = new HttpParams()
+      .set('page', filter.page.toString())
+      .set('pageSize', filter.pageSize.toString());
+
+    if (filter.search) params = params.set('search', filter.search);
+    if (filter.status) params = params.set('status', filter.status);
+
+    return this.http.get<ApiResponse<PagedResult<UserInvitation>>>(`${this.API_URL}/invitations`, { params });
+  }
+
+  /** POST /SuperAdmin/invitations/{id}/resend */
+  resendInvitation(invitationId: string): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/invitations/${invitationId}/resend`, {});
+  }
+
+  /** DELETE /SuperAdmin/invitations/{id} */
+  deleteInvitation(invitationId: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.API_URL}/invitations/${invitationId}`);
   }
 }

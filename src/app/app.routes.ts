@@ -247,6 +247,13 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
   },
+
+  // Set Password (public — for invited users)
+  {
+    path: 'set-password',
+    loadComponent: () =>
+      import('./features/auth/components/set-password/set-password.component').then(m => m.SetPasswordComponent)
+  },
   {
     path: 'platform-admin/login',
     loadComponent: () =>
@@ -271,6 +278,12 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/platform-admin/components/organization-list/organization-list.component').then(m => m.OrganizationListComponent),
         title: 'Organizations - Brisk People'
+      },
+      {
+        path: 'invitations',
+        loadComponent: () =>
+          import('./features/platform-admin/components/invitation-list/invitation-list.component').then(m => m.InvitationListComponent),
+        title: 'User Invitations - Brisk People'
       },
       {
         path: 'organizations/:id',
