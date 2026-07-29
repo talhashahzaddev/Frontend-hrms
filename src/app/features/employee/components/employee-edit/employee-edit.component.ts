@@ -12,6 +12,7 @@ import { Employee, Department, Position } from '../../../../core/models/employee
 import { Subject, takeUntil } from 'rxjs';
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { SettingsService } from '../../../settings/services/settings.service';
@@ -92,6 +93,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
+    private authService: AuthService,
     private settingsService: SettingsService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EmployeeEditComponent>,
@@ -183,7 +185,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     }
 
     this.employeeForm = this.fb.group({
-      employeeCode: [{ value: emp.employeeCode, disabled: true }],
+      employeeCode: [{ value: emp.employeeCode, disabled: !this.canEditEmployeeCode }],
       firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
       lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
       email: [emp.email, [Validators.required, Validators.email]],
@@ -372,6 +374,11 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     const roleName = this.data.employee?.roleName || '';
     console.log('isSuperAdmin checked. RoleName is:', roleName);
     return roleName.toLowerCase().includes('super admin');
+  }
+
+  /** Only logged-in Super Admins can edit employee codes */
+  get canEditEmployeeCode(): boolean {
+    return this.authService.hasRole('Super Admin');
   }
 
   get isPositionDisabled(): boolean {

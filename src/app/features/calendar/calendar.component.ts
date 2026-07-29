@@ -489,7 +489,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
         // Open dialog to prompt for date range
         const dialogRef = this.dialog.open(PromptDialogComponent, {
-            width: '400px',
+            width: '440px',
+            maxWidth: '95vw',
             data: {
                 title: 'Apply for Leave',
                 label: 'Select Date Range',
@@ -561,6 +562,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     // Open comment dialog
     const dialogRef = this.dialog.open(CommentDialogComponent, {
       width: '400px',
+      maxWidth: '95vw',
       data: {
         title: 'Clock Out',
         label: 'Day Updates / Comments',
