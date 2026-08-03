@@ -2,7 +2,7 @@
 
 // ─── Ensure panels never overflow/clip the viewport ──────────────────────────
 .cdk-overlay-pane.attendance-dialog-panel {
-  max-width: min(440px, 95vw) !important;
+  max-width: min(600px, 95vw) !important;
 }
 
 .attendance-dialog-panel {

@@ -23,8 +23,7 @@ $ad-font:         'Inter', sans-serif;
 }
 
 .prompt-dialog {
-  width: 440px;
-  max-width: 92vw;
+  width: 100%;
   background: #ffffff;
   border-radius: 0.875rem;
   overflow: hidden;
@@ -65,6 +64,33 @@ $ad-font:         'Inter', sans-serif;
     .full-width {
       width: 100%;
       margin-top: 0.5rem;
+
+      // Ensure date range input doesn't overflow the dialog
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        overflow: visible;
+      }
+
+      ::ng-deep .mat-mdc-form-field-flex {
+        min-width: 0;
+      }
+
+      // Make date range inputs responsive
+      ::ng-deep .mat-date-range-input-container {
+        width: 100%;
+      }
+
+      ::ng-deep .mat-date-range-input {
+        width: 100%;
+      }
+
+      ::ng-deep input.mat-date-range-input-start,
+      ::ng-deep input.mat-date-range-input-end {
+        min-width: 0;
+      }
     }
   }
 
