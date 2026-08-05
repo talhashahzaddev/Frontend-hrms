@@ -232,6 +232,9 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   // ─── Employee Skills Loading ──────────────────────────────────────────
   loadEmployeeSkills() {
+    if (!this.hasPermission('skill_matrix_all_employees_skills')) {
+      return;
+    }
     this.loadingEmpSkills = true;
     this.performanceService.getAllEmployeeSkills({
       search: this.empSkillsFilter.search || undefined,
@@ -256,6 +259,9 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   // ─── Team Self-Added Skills Loading ─────────────────────────────────
   loadTeamSelfAddedSkills() {
+    if (!this.hasPermission('skill_matrix_pending_skill_assessments')) {
+      return;
+    }
     this.loadingTeamSelfAdded = true;
     this.performanceService.getTeamSelfAddedSkills({
       search: this.teamSelfAddedFilter.search || undefined,

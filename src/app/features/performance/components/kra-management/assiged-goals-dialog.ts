@@ -96,54 +96,56 @@ export interface AssignGoalPayload {
               </div>
 
               <!-- Employee Selection -->
-              <div class="assign-field-group">
+              <div class="assign-field-group" style="position: relative;">
                 <label class="field-label">Assign To <span class="required">*</span></label>
 
-                <!-- Search input -->
-                <div class="employee-search-box" [class.open]="employeeDropdownOpen" [class.has-error]="assignGoalsForm.get('selectedEmployee')?.hasError('required') && submitted">
-                  <mat-icon class="search-icon">search</mat-icon>
-                  <input
-                    type="text"
-                    class="employee-search-input"
-                    placeholder="Search by name or code..."
-                    [(ngModel)]="employeeFilter"
-                    (ngModelChange)="onEmployeeSearch($event)"
-                    (focus)="openEmployeeDropdown()"
-                    [ngModelOptions]="{standalone: true}"
-                  />
-                  <button type="button" class="search-clear-btn" *ngIf="employeeFilter" (click)="employeeFilter = ''; cdr.markForCheck()">
-                    <mat-icon>close</mat-icon>
-                  </button>
-                  <mat-icon class="chevron" [class.rotated]="employeeDropdownOpen">expand_more</mat-icon>
-                </div>
+                <div style="display: flex; flex-direction: column; width: 100%;">
+                  <!-- Search input -->
+                  <div class="employee-search-box" (click)="openEmployeeDropdown()" [class.open]="employeeDropdownOpen" [class.has-error]="assignGoalsForm.get('selectedEmployee')?.hasError('required') && submitted">
+                    <mat-icon class="search-icon">search</mat-icon>
+                    <input
+                      type="text"
+                      class="employee-search-input"
+                      placeholder="Search by name or code..."
+                      [(ngModel)]="employeeFilter"
+                      (ngModelChange)="onEmployeeSearch($event)"
+                      (focus)="openEmployeeDropdown()"
+                      [ngModelOptions]="{standalone: true}"
+                    />
+                    <button type="button" class="search-clear-btn" *ngIf="employeeFilter" (click)="employeeFilter = ''; cdr.markForCheck()">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                    <mat-icon class="chevron" [class.rotated]="employeeDropdownOpen">expand_more</mat-icon>
+                  </div>
 
-                <!-- Dropdown Panel -->
-                <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
-                  <div class="dropdown-header" *ngIf="filteredEmployees.length > 0">
-                    <span class="dropdown-count">{{ filteredEmployees.length }} employee{{ filteredEmployees.length !== 1 ? 's' : '' }}</span>
-                  </div>
-                  <div class="employee-list" *ngIf="filteredEmployees.length > 0">
-                    <div
-                      class="employee-option"
-                      *ngFor="let emp of filteredEmployees"
-                      (click)="selectEmployee(emp)"
-                      [class.is-selected]="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId"
-                    >
-                      <div class="emp-avatar"
-                           [style.backgroundColor]="getAvatarBg(emp)"
-                           [style.color]="getAvatarColor(emp)">
-                        {{ getInitials(emp) }}
-                      </div>
-                      <div class="emp-info">
-                        <span class="emp-name">{{ displayName(emp) }}</span>
-                        <span class="emp-code">{{ emp.employeeCode }}</span>
-                      </div>
-                      <mat-icon class="check-icon" *ngIf="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId">check_circle</mat-icon>
+                  <!-- Dropdown Panel -->
+                  <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+                    <div class="dropdown-header" *ngIf="filteredEmployees.length > 0">
+                      <span class="dropdown-count">{{ filteredEmployees.length }} employee{{ filteredEmployees.length !== 1 ? 's' : '' }}</span>
                     </div>
-                  </div>
-                  <div class="empty-state" *ngIf="filteredEmployees.length === 0">
-                    <mat-icon>person_search</mat-icon>
-                    <p>No employees found</p>
+                    <div class="employee-list" *ngIf="filteredEmployees.length > 0">
+                      <div
+                        class="employee-option"
+                        *ngFor="let emp of filteredEmployees"
+                        (click)="selectEmployee(emp)"
+                        [class.is-selected]="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId"
+                      >
+                        <div class="emp-avatar"
+                             [style.backgroundColor]="getAvatarBg(emp)"
+                             [style.color]="getAvatarColor(emp)">
+                          {{ getInitials(emp) }}
+                        </div>
+                        <div class="emp-info">
+                          <span class="emp-name">{{ displayName(emp) }}</span>
+                          <span class="emp-code">{{ emp.employeeCode }}</span>
+                        </div>
+                        <mat-icon class="check-icon" *ngIf="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId">check_circle</mat-icon>
+                      </div>
+                    </div>
+                    <div class="empty-state" *ngIf="filteredEmployees.length === 0">
+                      <mat-icon>person_search</mat-icon>
+                      <p>No employees found</p>
+                    </div>
                   </div>
                 </div>
 
@@ -187,6 +189,10 @@ export interface AssignGoalPayload {
   `,
   styles: [`
     @use '../../styles/performance-shared';
+
+    .dialog-body {
+      overflow: visible !important;
+    }
 
     /* ── Goal Display Card ──────────────────────────────── */
     .goal-display-card {
@@ -297,9 +303,7 @@ export interface AssignGoalPayload {
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       max-height: 240px;
       overflow-y: auto;
-      position: absolute;
-      width: calc(100% - 48px);
-      z-index: 200;
+      width: 100%;
     }
 
     .dropdown-header {
@@ -527,7 +531,8 @@ export class AssignGoalsDialogComponent implements OnInit, OnDestroy {
     if (!this.employeeDropdownOpen) return;
     const target = event.target as HTMLElement | null;
     if (!target) { this.closeEmployeeDropdown(); return; }
-    const insideContainer = !!target.closest('.field-section');
+    // Check if click was inside the assign-field-group containing the dropdown
+    const insideContainer = !!target.closest('.assign-field-group');
     if (!insideContainer) {
       this.closeEmployeeDropdown();
     }
@@ -553,7 +558,7 @@ export class AssignGoalsDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           const list = res?.employees || [];
-          this.employees = list.filter((e: any) => (e.status || '').toString().toLowerCase() === 'active');
+          this.employees = list.filter((e: any) => (e.status || '').toString().toLowerCase() === 'active' || e.isActive === true);
           this.cdr.markForCheck();
         },
         error: () => this.notification.showError('Failed to load employees')
@@ -566,7 +571,7 @@ export class AssignGoalsDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (deptEmployees) => {
           const list = deptEmployees || [];
-          this.departmentEmployees = list.filter((e: any) => (e.status || '').toString().toLowerCase() === 'active');
+          this.departmentEmployees = list.filter((e: any) => (e.status || '').toString().toLowerCase() === 'active' || e.isActive === true);
           this.resetEmployeeSelection();
           this.cdr.markForCheck();
         },
@@ -583,7 +588,7 @@ export class AssignGoalsDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           if (res.success && res.data) {
-            const active = (res.data || []).filter((emp: any) => (emp.status || '').toString().toLowerCase() === 'active');
+            const active = (res.data || []).filter((emp: any) => (emp.status || '').toString().toLowerCase() === 'active' || emp.isActive === true);
             this.employees = active.map((emp: any) => ({
               employeeId: emp.employeeId ? (typeof emp.employeeId === 'string' ? emp.employeeId : emp.employeeId.toString()) : '',
               organizationId: '',
@@ -648,7 +653,7 @@ export class AssignGoalsDialogComponent implements OnInit, OnDestroy {
   }
 
   getAvatarBg(emp: any): string {
-    const colors = ['#F44336','#E91E63','#9C27B0','#3F51B5','#2196F3','#03A9F4','#009688','#4CAF50','#8BC34A','#FF9800','#795548','#607D8B'];
+    const colors = ['#F44336', '#E91E63', '#9C27B0', '#3F51B5', '#2196F3', '#03A9F4', '#009688', '#4CAF50', '#8BC34A', '#FF9800', '#795548', '#607D8B'];
     const key = (emp?.employeeId || emp?.email || emp?.fullName || emp?.employeeCode || '').toString();
     if (!key) return colors[0];
     let hash = 0;
