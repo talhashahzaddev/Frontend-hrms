@@ -48,6 +48,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject$ = new Subject<void>();
   private empSearchSubject$ = new Subject<void>();
+  private teamSelfAddedSearchSubject$ = new Subject<void>();
 
   // Templates
   @ViewChild('createSkillTpl') createSkillTpl!: TemplateRef<any>;
@@ -80,6 +81,16 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   get empSkillsTotalPages() { return Math.max(1, Math.ceil(this.totalEmployeeSkills / this.empSkillsPageSize)); }
   empSkillColumns = ['employee', 'department', 'skills', 'avgProficiency', 'actions'];
   empSkillsFilter = { search: '' };
+
+  // ─── Team Self-Added Skills (For Managers) ──────────────────────────
+  teamSelfAddedSkills: EmployeeSkill[] = [];
+  totalTeamSelfAdded = 0;
+  loadingTeamSelfAdded = false;
+  teamSelfAddedPageIndex = 0;
+  teamSelfAddedPageSize = 10;
+  get teamSelfAddedTotalPages() { return Math.max(1, Math.ceil(this.totalTeamSelfAdded / this.teamSelfAddedPageSize)); }
+  teamSelfAddedColumns = ['employee', 'skillName', 'category', 'proficiency', 'addedOn', 'actions'];
+  teamSelfAddedFilter = { search: '' };
 
   // ─── Tab 2: My Skills ────────────────────────────────────────────────
   mySkills: EmployeeSkill[] = [];
@@ -137,14 +148,14 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initForms();
     this.loadSkills();
-    if (this.hasHRRole() || this.hasManagerRole()) {
-      this.loadEmployeeSkills();
-    }
+    this.loadEmployeeSkills();
+    this.loadTeamSelfAddedSkills();
     this.loadMySkills();
 
     // Debounced search
     this.searchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadSkills());
     this.empSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadEmployeeSkills());
+    this.teamSelfAddedSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadTeamSelfAddedSkills());
   }
 
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
@@ -242,6 +253,37 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  // ─── Team Self-Added Skills Loading ─────────────────────────────────
+  loadTeamSelfAddedSkills() {
+    this.loadingTeamSelfAdded = true;
+    this.performanceService.getTeamSelfAddedSkills({
+      search: this.teamSelfAddedFilter.search || undefined,
+      page: this.teamSelfAddedPageIndex + 1,
+      limit: this.teamSelfAddedPageSize
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.teamSelfAddedSkills = res.data.data;
+          this.totalTeamSelfAdded = res.data.totalCount;
+        }
+        this.loadingTeamSelfAdded = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load team self-added skills');
+        this.loadingTeamSelfAdded = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onTeamSelfAddedSearchChange() { this.teamSelfAddedSearchSubject$.next(); }
+  goToFirstTeamSelfAddedPage() { this.teamSelfAddedPageIndex = 0; this.loadTeamSelfAddedSkills(); }
+  prevTeamSelfAddedPage() { if (this.teamSelfAddedPageIndex > 0) { this.teamSelfAddedPageIndex--; this.loadTeamSelfAddedSkills(); } }
+  nextTeamSelfAddedPage() { if (this.teamSelfAddedPageIndex < this.teamSelfAddedTotalPages - 1) { this.teamSelfAddedPageIndex++; this.loadTeamSelfAddedSkills(); } }
+  goToLastTeamSelfAddedPage() { this.teamSelfAddedPageIndex = this.teamSelfAddedTotalPages - 1; this.loadTeamSelfAddedSkills(); }
+
 
   // ─── My Skills ───────────────────────────────────────────────────────
   loadMySkills() {
@@ -390,6 +432,16 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   hasAllRatings(): boolean {
     return this.assessEmployeeSkills.every(sk => !!this.assessRatings[sk.employeeSkillId]);
+  }
+
+  openAssessSingleSkillDialog(skill: EmployeeSkill) {
+    const mockSummary: any = {
+      employeeId: skill.employeeId,
+      employeeName: skill.employeeName,
+      email: skill.employeeEmail,
+      department: ''
+    };
+    this.openAssessDialog(mockSummary);
   }
 
   submitAssessment() {
