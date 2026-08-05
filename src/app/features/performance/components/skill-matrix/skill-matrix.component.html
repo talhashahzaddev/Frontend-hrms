@@ -175,7 +175,7 @@
     </div>
 
     <!-- Employees & Skills Table -->
-    <div class="ts-card" style="margin-top:1.25rem;">
+    <div class="ts-card" style="margin-top:1.25rem;" *ngIf="hasPermission('skill_matrix_all_employees_skills')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Employees &amp; Skills <span class="pm-count-badge">{{ totalEmployeeSkills }}</span></h3>
@@ -283,8 +283,106 @@
         </div>
       </div>
     </div>
-  </div>
 
+    <!-- Team Self-Added Skills Table (For Managers) -->
+    <div class="ts-card" style="margin-top:1.25rem;" *ngIf="hasPermission('skill_matrix_pending_skill_assessments')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="pm-sub-section" style="margin:0;">
+          <h3 style="margin:0;">Pending Skill Assessments <span class="pm-count-badge">{{ totalTeamSelfAdded }}</span></h3>
+          <p class="pm-sub-desc">Skills added by your team members awaiting your assessment.</p>
+        </div>
+        <div class="ts-search-wrapper">
+          <mat-icon class="ts-search-icon">search</mat-icon>
+          <input class="ts-search-input" [(ngModel)]="teamSelfAddedFilter.search" placeholder="Search skills..."
+                 (keyup.enter)="loadTeamSelfAddedSkills()" (input)="onTeamSelfAddedSearchChange()">
+        </div>
+      </div>
+
+      <div *ngIf="loadingTeamSelfAdded" class="pm-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading pending skills...</p>
+      </div>
+
+      <div *ngIf="!loadingTeamSelfAdded" class="pm-table-wrap">
+        <table mat-table [dataSource]="teamSelfAddedSkills" class="ref-table" style="width:100%;">
+          
+          <ng-container matColumnDef="employee">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let s">
+              <div class="cell-employee">
+                <div class="cell-employee__avatar">{{ getInitials(s.employeeName) }}</div>
+                <div>
+                  <div class="cell-employee__name">{{ s.employeeName }}</div>
+                  <div class="cell-employee__email">{{ s.employeeEmail }}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="skillName">
+            <th mat-header-cell *matHeaderCellDef>Skill</th>
+            <td mat-cell *matCellDef="let s" style="font-weight: 500; color: #1e293b;">
+              {{ s.skillName }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let s">
+              <span class="badge badge--dept">{{ s.skillCategory || 'General' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="proficiency">
+            <th mat-header-cell *matHeaderCellDef>Self Rating</th>
+            <td mat-cell *matCellDef="let s">
+              <span class="pm-proficiency-badge" [class]="getProfClass(s.proficiencyLevel)">
+                {{ s.proficiencyLevel }}/10
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="addedOn">
+            <th mat-header-cell *matHeaderCellDef>Added On</th>
+            <td mat-cell *matCellDef="let s" style="color: #64748b; font-size: 0.875rem;">
+              {{ s.lastAssessed | date:'mediumDate' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let s">
+              <button mat-stroked-button color="primary" (click)="openAssessSingleSkillDialog(s)">
+                <mat-icon>rate_review</mat-icon> Assess
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="teamSelfAddedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: teamSelfAddedColumns;"></tr>
+        </table>
+
+        <div *ngIf="teamSelfAddedSkills.length === 0" class="pm-empty-state">
+          <div class="pm-empty-icon"><mat-icon>check_circle</mat-icon></div>
+          <h3>All Caught Up</h3>
+          <p>There are no pending skill assessments for your team.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingTeamSelfAdded && teamSelfAddedSkills.length > 0" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-top:1px solid #e2e8f0;">
+        <span style="font-size:0.8125rem;color:#64748b;">
+          {{ teamSelfAddedPageIndex * teamSelfAddedPageSize + 1 }}–{{ min(teamSelfAddedPageIndex * teamSelfAddedPageSize + teamSelfAddedSkills.length, totalTeamSelfAdded) }} of {{ totalTeamSelfAdded }}
+        </span>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button mat-icon-button [disabled]="teamSelfAddedPageIndex === 0" (click)="goToFirstTeamSelfAddedPage()"><mat-icon>first_page</mat-icon></button>
+          <button mat-icon-button [disabled]="teamSelfAddedPageIndex === 0" (click)="prevTeamSelfAddedPage()"><mat-icon>chevron_left</mat-icon></button>
+          <span style="font-size:0.8125rem;color:#64748b;padding:0 8px;">{{ teamSelfAddedPageIndex + 1 }} / {{ teamSelfAddedTotalPages }}</span>
+          <button mat-icon-button [disabled]="teamSelfAddedPageIndex >= teamSelfAddedTotalPages - 1" (click)="nextTeamSelfAddedPage()"><mat-icon>chevron_right</mat-icon></button>
+          <button mat-icon-button [disabled]="teamSelfAddedPageIndex >= teamSelfAddedTotalPages - 1" (click)="goToLastTeamSelfAddedPage()"><mat-icon>last_page</mat-icon></button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- TAB 1 — MY SKILLS                                                  -->
@@ -889,7 +987,7 @@
 
     <mat-dialog-content class="dialog-body" style="padding:0;">
       <div style="padding: 16px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display:flex; align-items:center; gap:12px;" *ngIf="assessingEmployee">
-        <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">
           {{ getInitials(assessingEmployee.employeeName) }}
         </div>
         <div>
@@ -921,9 +1019,9 @@
               <div class="proficiency-picker" style="display:flex; gap:6px; flex-wrap:wrap;">
                 <button *ngFor="let n of profLevels" type="button"
                   style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-weight: 600; font-size:13px; cursor: pointer; transition: all 0.2s;"
-                  [style.background]="assessRatings[sk.employeeSkillId] === n ? '#6366f1' : '#fff'"
+                  [style.background]="assessRatings[sk.employeeSkillId] === n ? '#2563eb' : '#fff'"
                   [style.color]="assessRatings[sk.employeeSkillId] === n ? '#fff' : '#334155'"
-                  [style.borderColor]="assessRatings[sk.employeeSkillId] === n ? '#6366f1' : '#cbd5e1'"
+                  [style.borderColor]="assessRatings[sk.employeeSkillId] === n ? '#2563eb' : '#cbd5e1'"
                   (click)="assessRatings[sk.employeeSkillId] = n">
                   {{ n }}
                 </button>

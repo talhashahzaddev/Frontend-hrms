@@ -28,7 +28,7 @@
   <div *ngIf="selectedTab === 0 && hasPermission('MANAGER_APPRAISAL_SECTION')" class="appraisal-tab-body">
 
     <!-- Manager Reviews Section -->
-    <div class="ts-card" style="margin-bottom:1.25rem;">
+    <div class="ts-card" style="margin-bottom:1.25rem;" *ngIf="hasPermission('appraisal_manager_appraisals_review')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Manager Reviews
@@ -127,7 +127,7 @@
       </div>
     </div>
 
-    <div class="pm-section-divider"></div>
+    <div class="pm-section-divider" *ngIf="hasPermission('appraisal_manager_appraisals_review')"></div>
 
     <!-- All Manager Reviews (HR only) -->
     <div class="ts-card" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')">
@@ -225,7 +225,7 @@
       </div>
     </div>
 
-    <div class="pm-section-divider"></div>
+    <div class="pm-section-divider" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')"></div>
 
     <!-- Reviews Received from Managers -->
     <div class="ts-card">
