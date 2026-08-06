@@ -11,7 +11,7 @@
     </button>
   </app-page-header>
 
-  <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
+  <!-- ═══ OUTER TABS ════════════════════════════════════════════════════ -->
   <div class="perf-tabs">
     <button *ngIf="hasPermission('SKILLS_SETS_SECTION')" class="perf-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
       <mat-icon>category</mat-icon>
@@ -28,154 +28,175 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- TAB 0 — SKILL SETS                                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <div *ngIf="selectedTab === 0 && hasPermission('SKILLS_SETS_SECTION')">
-
-    <!-- Filters -->
-    <div class="filters-section">
-      <div class="filters-row">
-        <div class="ts-search-wrapper">
-          <mat-icon class="ts-search-icon">search</mat-icon>
-          <input class="ts-search-input" [(ngModel)]="skillsFilter.search" placeholder="Search skills..."
-                 (keyup.enter)="loadSkills()" (input)="onSkillSearchChange()">
-        </div>
-
-        <div class="filter-select-wrap">
-          <mat-icon class="filter-select-icon">label</mat-icon>
-          <select class="filter-select" [(ngModel)]="skillsFilter.category" (change)="loadSkills()">
-            <option value="">All Categories</option>
-            <option *ngFor="let cat of allCategories" [value]="cat">{{ cat }}</option>
-          </select>
-        </div>
-
-        <div class="filter-select-wrap">
-          <mat-icon class="filter-select-icon">toggle_on</mat-icon>
-          <select class="filter-select" [(ngModel)]="skillsFilter.isActive" (change)="loadSkills()">
-            <option [ngValue]="null">All Status</option>
-            <option [ngValue]="true">Active</option>
-            <option [ngValue]="false">Inactive</option>
-          </select>
-        </div>
-
-        <button *ngIf="hasSkillFilters()" class="filter-clear-btn" (click)="clearSkillFilters()">
-          <mat-icon>clear</mat-icon> Clear
-        </button>
-      </div>
+  <div *ngIf="selectedTab === 0 && hasPermission('SKILLS_SETS_SECTION')" class="appraisal-tab-body">
+    
+    <!-- Inner Sub-Tabs for Skill Sets -->
+    <div class="perf-sub-tabs">
+      <button class="perf-sub-tab" [class.active]="skillSetsSubTab === 0" (click)="skillSetsSubTab = 0">
+        <mat-icon>category</mat-icon>
+        <span>Available Skills</span>
+      </button>
+      <button *ngIf="hasPermission('skill_matrix_all_employees_skills')"
+              class="perf-sub-tab" [class.active]="skillSetsSubTab === 1" (click)="skillSetsSubTab = 1">
+        <mat-icon>group</mat-icon>
+        <span>Employees &amp; Skills</span>
+      </button>
+      <button *ngIf="hasPermission('skill_matrix_pending_skill_assessments')"
+              class="perf-sub-tab" [class.active]="skillSetsSubTab === 2" (click)="skillSetsSubTab = 2">
+        <mat-icon>pending_actions</mat-icon>
+        <span>Pending Assessments</span>
+      </button>
     </div>
 
-    <!-- Available Skills Table -->
-    <div class="ts-card">
-      <div class="pm-sub-section">
-        <h3>Available Skills <span class="pm-count-badge">{{ totalSkills }}</span></h3>
-      </div>
+    <!-- Skill Sets Sub-Tab 0: Available Skills -->
+    <div *ngIf="skillSetsSubTab === 0">
+      <!-- Filters -->
+      <div class="filters-section">
+        <div class="filters-row">
+          <div class="ts-search-wrapper">
+            <mat-icon class="ts-search-icon">search</mat-icon>
+            <input class="ts-search-input" [(ngModel)]="skillsFilter.search" placeholder="Search skills..."
+                   (keyup.enter)="loadSkills()" (input)="onSkillSearchChange()">
+          </div>
 
-      <div *ngIf="loadingSkills" class="pm-loading">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading skills...</p>
-      </div>
+          <div class="filter-select-wrap">
+            <mat-icon class="filter-select-icon">label</mat-icon>
+            <select class="filter-select" [(ngModel)]="skillsFilter.category" (change)="loadSkills()">
+              <option value="">All Categories</option>
+              <option *ngFor="let cat of allCategories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
 
-      <div *ngIf="!loadingSkills" class="pm-table-wrap">
-        <table mat-table [dataSource]="skills" class="ref-table" style="width:100%;">
+          <div class="filter-select-wrap">
+            <mat-icon class="filter-select-icon">toggle_on</mat-icon>
+            <select class="filter-select" [(ngModel)]="skillsFilter.isActive" (change)="loadSkills()">
+              <option [ngValue]="null">All Status</option>
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
 
-          <!-- SKILL NAME -->
-          <ng-container matColumnDef="skillName">
-            <th mat-header-cell *matHeaderCellDef>Skill Name</th>
-            <td mat-cell *matCellDef="let s">
-              <div class="pm-cell-title">{{ s.skillName }}</div>
-              <div class="pm-cell-sub" *ngIf="s.description">{{ s.description }}</div>
-            </td>
-          </ng-container>
-
-          <!-- CATEGORY -->
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>Category</th>
-            <td mat-cell *matCellDef="let s">
-              <span class="badge badge--cat">{{ s.category || '—' }}</span>
-            </td>
-          </ng-container>
-
-          <!-- EMPLOYEES -->
-          <ng-container matColumnDef="employeeCount">
-            <th mat-header-cell *matHeaderCellDef>Employees</th>
-            <td mat-cell *matCellDef="let s">
-              <div class="cell-emp-count">
-                <mat-icon>group</mat-icon>
-                <span>{{ s.employeeCount }}</span>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- CREATED DATE -->
-          <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef>Created</th>
-            <td mat-cell *matCellDef="let s" class="date-cell">
-              {{ s.createdAt | localizedDate:'dd MMM yyyy' }}
-            </td>
-          </ng-container>
-
-          <!-- STATUS -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let s">
-              <span class="pm-status-badge" [class.status-active]="s.isActive" [class.status-inactive]="!s.isActive">
-                {{ s.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-          </ng-container>
-
-          <!-- ACTIONS -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let s">
-              <button mat-icon-button [matMenuTriggerFor]="skillMenu" class="action-menu-btn">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #skillMenu="matMenu">
-                <button mat-menu-item (click)="viewSkillEmployees(s)">
-                  <mat-icon>visibility</mat-icon><span>View Employees</span>
-                </button>
-                <button *ngIf="hasHRRole()" mat-menu-item (click)="toggleSkillStatus(s)">
-                  <mat-icon>{{ s.isActive ? 'toggle_off' : 'toggle_on' }}</mat-icon>
-                  <span>{{ s.isActive ? 'Deactivate' : 'Activate' }}</span>
-                </button>
-                <mat-divider *ngIf="hasHRRole()"></mat-divider>
-                <button *ngIf="hasHRRole()" mat-menu-item class="danger-action" (click)="deleteSkill(s)">
-                  <mat-icon>delete</mat-icon><span>Delete</span>
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="skillColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: skillColumns;"></tr>
-        </table>
-
-        <div *ngIf="skills.length === 0" class="pm-empty-state">
-          <div class="pm-empty-icon"><mat-icon>category</mat-icon></div>
-          <h3>No Skills Found</h3>
-          <p>No skills match your filters.</p>
-          <button *ngIf="hasPermission('CREATE_SKILLS_BUTTON')" class="btn-submit" (click)="openCreateSkillDialog()">
-            <mat-icon>add</mat-icon> Create First Skill
+          <button *ngIf="hasSkillFilters()" class="filter-clear-btn" (click)="clearSkillFilters()">
+            <mat-icon>clear</mat-icon> Clear
           </button>
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div *ngIf="!loadingSkills && skills.length > 0" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-top:1px solid #e2e8f0;">
-        <span style="font-size:0.8125rem;color:#64748b;">
-          {{ skillsPageIndex * skillsPageSize + 1 }}–{{ min(skillsPageIndex * skillsPageSize + skills.length, totalSkills) }} of {{ totalSkills }}
-        </span>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <button mat-icon-button [disabled]="skillsPageIndex === 0" (click)="goToFirstSkillPage()"><mat-icon>first_page</mat-icon></button>
-          <button mat-icon-button [disabled]="skillsPageIndex === 0" (click)="prevSkillPage()"><mat-icon>chevron_left</mat-icon></button>
-          <span style="font-size:0.8125rem;color:#64748b;padding:0 8px;">{{ skillsPageIndex + 1 }} / {{ skillsTotalPages }}</span>
-          <button mat-icon-button [disabled]="skillsPageIndex >= skillsTotalPages - 1" (click)="nextSkillPage()"><mat-icon>chevron_right</mat-icon></button>
-          <button mat-icon-button [disabled]="skillsPageIndex >= skillsTotalPages - 1" (click)="goToLastSkillPage()"><mat-icon>last_page</mat-icon></button>
+      <!-- Available Skills Table -->
+      <div class="ts-card">
+        <div class="pm-sub-section">
+          <h3>Available Skills <span class="pm-count-badge">{{ totalSkills }}</span></h3>
+        </div>
+
+        <div *ngIf="loadingSkills" class="pm-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading skills...</p>
+        </div>
+
+        <div *ngIf="!loadingSkills" class="pm-table-wrap">
+          <table mat-table [dataSource]="skills" class="ref-table" style="width:100%;">
+
+            <!-- SKILL NAME -->
+            <ng-container matColumnDef="skillName">
+              <th mat-header-cell *matHeaderCellDef>Skill Name</th>
+              <td mat-cell *matCellDef="let s">
+                <div class="pm-cell-title">{{ s.skillName }}</div>
+                <div class="pm-cell-sub" *ngIf="s.description">{{ s.description }}</div>
+              </td>
+            </ng-container>
+
+            <!-- CATEGORY -->
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let s">
+                <span class="badge badge--cat">{{ s.category || '—' }}</span>
+              </td>
+            </ng-container>
+
+            <!-- EMPLOYEES -->
+            <ng-container matColumnDef="employeeCount">
+              <th mat-header-cell *matHeaderCellDef>Employees</th>
+              <td mat-cell *matCellDef="let s">
+                <div class="cell-emp-count">
+                  <mat-icon>group</mat-icon>
+                  <span>{{ s.employeeCount }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- CREATED DATE -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Created</th>
+              <td mat-cell *matCellDef="let s" class="date-cell">
+                {{ s.createdAt | localizedDate:'dd MMM yyyy' }}
+              </td>
+            </ng-container>
+
+            <!-- STATUS -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let s">
+                <span class="pm-status-badge" [class.status-active]="s.isActive" [class.status-inactive]="!s.isActive">
+                  {{ s.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- ACTIONS -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let s">
+                <button mat-icon-button [matMenuTriggerFor]="skillMenu" class="action-menu-btn">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #skillMenu="matMenu">
+                  <button mat-menu-item (click)="viewSkillEmployees(s)">
+                    <mat-icon>visibility</mat-icon><span>View Employees</span>
+                  </button>
+                  <button *ngIf="hasHRRole()" mat-menu-item (click)="toggleSkillStatus(s)">
+                    <mat-icon>{{ s.isActive ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+                    <span>{{ s.isActive ? 'Deactivate' : 'Activate' }}</span>
+                  </button>
+                  <mat-divider *ngIf="hasHRRole()"></mat-divider>
+                  <button *ngIf="hasHRRole()" mat-menu-item class="danger-action" (click)="deleteSkill(s)">
+                    <mat-icon>delete</mat-icon><span>Delete</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="skillColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: skillColumns;"></tr>
+          </table>
+
+          <div *ngIf="skills.length === 0" class="pm-empty-state">
+            <div class="pm-empty-icon"><mat-icon>category</mat-icon></div>
+            <h3>No Skills Found</h3>
+            <p>No skills match your filters.</p>
+            <button *ngIf="hasPermission('CREATE_SKILLS_BUTTON')" class="btn-submit" (click)="openCreateSkillDialog()">
+              <mat-icon>add</mat-icon> Create First Skill
+            </button>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!loadingSkills && skills.length > 0" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-top:1px solid #e2e8f0;">
+          <span style="font-size:0.8125rem;color:#64748b;">
+            {{ skillsPageIndex * skillsPageSize + 1 }}–{{ min(skillsPageIndex * skillsPageSize + skills.length, totalSkills) }} of {{ totalSkills }}
+          </span>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <button mat-icon-button [disabled]="skillsPageIndex === 0" (click)="goToFirstSkillPage()"><mat-icon>first_page</mat-icon></button>
+            <button mat-icon-button [disabled]="skillsPageIndex === 0" (click)="prevSkillPage()"><mat-icon>chevron_left</mat-icon></button>
+            <span style="font-size:0.8125rem;color:#64748b;padding:0 8px;">{{ skillsPageIndex + 1 }} / {{ skillsTotalPages }}</span>
+            <button mat-icon-button [disabled]="skillsPageIndex >= skillsTotalPages - 1" (click)="nextSkillPage()"><mat-icon>chevron_right</mat-icon></button>
+            <button mat-icon-button [disabled]="skillsPageIndex >= skillsTotalPages - 1" (click)="goToLastSkillPage()"><mat-icon>last_page</mat-icon></button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Employees & Skills Table -->
-    <div class="ts-card" style="margin-top:1.25rem;" *ngIf="hasPermission('skill_matrix_all_employees_skills')">
+    <!-- Skill Sets Sub-Tab 1: Employees & Skills Table -->
+    <div class="ts-card" *ngIf="skillSetsSubTab === 1 && hasPermission('skill_matrix_all_employees_skills')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Employees &amp; Skills <span class="pm-count-badge">{{ totalEmployeeSkills }}</span></h3>
@@ -284,8 +305,8 @@
       </div>
     </div>
 
-    <!-- Team Self-Added Skills Table (For Managers) -->
-    <div class="ts-card" style="margin-top:1.25rem;" *ngIf="hasPermission('skill_matrix_pending_skill_assessments')">
+    <!-- Skill Sets Sub-Tab 2: Team Self-Added Skills Table (For Managers) -->
+    <div class="ts-card" *ngIf="skillSetsSubTab === 2 && hasPermission('skill_matrix_pending_skill_assessments')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Pending Skill Assessments <span class="pm-count-badge">{{ totalTeamSelfAdded }}</span></h3>
@@ -450,13 +471,12 @@
 
       <div *ngIf="loadingMySkills" class="pm-loading">
         <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading your skills...</p>
+        <p>Loading my skills...</p>
       </div>
 
       <div *ngIf="!loadingMySkills" class="pm-table-wrap">
         <table mat-table [dataSource]="filteredMySkills" class="ref-table" style="width:100%;">
-
-          <!-- CATEGORY -->
+          
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef>Category</th>
             <td mat-cell *matCellDef="let s">
@@ -464,48 +484,36 @@
             </td>
           </ng-container>
 
-          <!-- SKILL NAME -->
           <ng-container matColumnDef="skillName">
             <th mat-header-cell *matHeaderCellDef>Skill Name</th>
             <td mat-cell *matCellDef="let s">
-              <div class="pm-cell-title">{{ s.skillName }}</div>
-              <div class="pm-cell-sub" *ngIf="s.notes">{{ s.notes }}</div>
+              <span style="font-weight: 500; color: #1e293b;">{{ s.skillName }}</span>
             </td>
           </ng-container>
 
-          <!-- PROFICIENCY -->
           <ng-container matColumnDef="proficiency">
             <th mat-header-cell *matHeaderCellDef>Proficiency</th>
             <td mat-cell *matCellDef="let s">
-              <div class="cell-proficiency">
-                <div class="prof-bar">
-                  <div class="prof-bar__fill" [style.width.%]="s.proficiencyLevel * 10" [class]="getProfClass(s.proficiencyLevel)"></div>
-                </div>
-                <span class="prof-label" [class]="getProfClass(s.proficiencyLevel)">{{ s.proficiencyLevel }}/10</span>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- ASSESSED BY -->
-          <ng-container matColumnDef="assessedBy">
-            <th mat-header-cell *matHeaderCellDef>Assessed By</th>
-            <td mat-cell *matCellDef="let s">
-              <span *ngIf="s.assessorName" class="cell-assessor">
-                <mat-icon>person_check</mat-icon>{{ s.assessorName }}
+              <span class="pm-proficiency-badge" [class]="getProfClass(s.proficiencyLevel)">
+                {{ s.proficiencyLevel }}/10
               </span>
-              <span *ngIf="!s.assessorName" class="badge badge--pending">Pending</span>
             </td>
           </ng-container>
 
-          <!-- LAST ASSESSED -->
+          <ng-container matColumnDef="assessedBy">
+            <th mat-header-cell *matHeaderCellDef>Assessor</th>
+            <td mat-cell *matCellDef="let s" style="color: #475569;">
+              {{ s.assessorName || 'Self' }}
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="lastAssessed">
             <th mat-header-cell *matHeaderCellDef>Last Assessed</th>
-            <td mat-cell *matCellDef="let s" class="date-cell">
-              {{ s.lastAssessed ? (s.lastAssessed | localizedDate:'dd MMM yyyy') : '—' }}
+            <td mat-cell *matCellDef="let s" style="color: #64748b; font-size: 0.8125rem;">
+              {{ s.lastAssessed | date:'mediumDate' }}
             </td>
           </ng-container>
 
-          <!-- ACTIONS -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Actions</th>
             <td mat-cell *matCellDef="let s">
@@ -514,7 +522,7 @@
               </button>
               <mat-menu #mySkillMenu="matMenu">
                 <button mat-menu-item (click)="editMySkill(s)">
-                  <mat-icon>edit</mat-icon><span>Edit</span>
+                  <mat-icon>edit</mat-icon><span>Edit Proficiency</span>
                 </button>
                 <mat-divider></mat-divider>
                 <button mat-menu-item class="danger-action" (click)="removeMySkill(s)">
@@ -529,525 +537,14 @@
         </table>
 
         <div *ngIf="filteredMySkills.length === 0" class="pm-empty-state">
-          <div class="pm-empty-icon"><mat-icon>school</mat-icon></div>
-          <h3>No Skills Yet</h3>
-          <p>Add your first skill to showcase your competencies.</p>
-          <button *ngIf="hasPermission('ADD_SKILLS_BUTTON')" class="btn-submit" (click)="openAddSkillDialog()">
+          <div class="pm-empty-icon"><mat-icon>person</mat-icon></div>
+          <h3>No Skills Added</h3>
+          <p>You haven't added any skills to your profile yet.</p>
+          <button *ngIf="hasPermission('ADD_SKILLS_BUTTON')" class="btn-submit" (click)="openAddSkillDialog()" style="margin-top:1rem;">
             <mat-icon>add</mat-icon> Add Your First Skill
           </button>
         </div>
       </div>
     </div>
   </div>
-
 </div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- DIALOG: Create Skill                                                   -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<ng-template #createSkillTpl>
-  <div class="dialog-container">
-    <div class="dialog-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <mat-icon>psychology</mat-icon>
-        </div>
-        <div>
-          <h2 class="header-title">Create New Skill</h2>
-          <p class="header-subtitle">Add a new skill to the organization</p>
-        </div>
-      </div>
-      <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-body" [formGroup]="createSkillForm">
-      <div class="assign-section">
-        <div class="assign-section-header">
-          <mat-icon>info</mat-icon>
-          <span>Skill Details</span>
-        </div>
-        <div class="assign-section-body">
-          <div class="assign-dates-grid">
-            <div class="assign-field-group">
-              <label class="field-label">Category <span class="required">*</span></label>
-              <mat-form-field appearance="outline" class="mat-field">
-                <mat-select formControlName="category" (selectionChange)="onCreateCategoryChange($event.value)" placeholder="Select Category">
-                  <mat-option *ngFor="let cat of allCategories" [value]="cat">{{ cat }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            
-            <div class="assign-field-group">
-              <label class="field-label">Skill Name <span class="required">*</span></label>
-              <mat-form-field appearance="outline" class="mat-field">
-                <mat-select formControlName="skillName" [disabled]="!createSkillForm.get('category')?.value" placeholder="Select Skill">
-                  <mat-option *ngFor="let sk of filteredSkillsForCreate" [value]="sk">{{ sk }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <div class="assign-field-group">
-            <label class="field-label">Description</label>
-            <mat-form-field appearance="outline" class="mat-field">
-              <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this skill (optional)"></textarea>
-            </mat-form-field>
-          </div>
-
-          <div class="assign-field-group" style="margin-top: 8px;">
-             <div style="display:flex; align-items:center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <mat-slide-toggle formControlName="isActive" color="primary"></mat-slide-toggle>
-                <div>
-                  <div style="font-size: 14px; font-weight: 600; color: #1e293b;">Active Skill</div>
-                  <div style="font-size: 12px; color: #64748b;">Skill will be available for assignment</div>
-                </div>
-             </div>
-          </div>
-        </div>
-      </div>
-    </mat-dialog-content>
-
-    <div class="dialog-footer">
-      <button mat-stroked-button class="btn-cancel" mat-dialog-close type="button">Cancel</button>
-      <button mat-flat-button class="btn-submit" [disabled]="createSkillForm.invalid || isSubmittingSkill" (click)="submitCreateSkill()">
-        <mat-spinner *ngIf="isSubmittingSkill" diameter="18" style="margin-right:8px;"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingSkill">add_task</mat-icon>
-        <span *ngIf="!isSubmittingSkill">Create Skill</span>
-        <span *ngIf="isSubmittingSkill">Creating...</span>
-      </button>
-    </div>
-  </div>
-</ng-template>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- DIALOG: Add My Skill                                                   -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<ng-template #addMySkillTpl>
-  <div class="dialog-container">
-    <div class="dialog-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <mat-icon>school</mat-icon>
-        </div>
-        <div>
-          <h2 class="header-title">Add Skill</h2>
-          <p class="header-subtitle">Add a skill to your profile</p>
-        </div>
-      </div>
-      <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-body" [formGroup]="addMySkillForm">
-      <div class="assign-section">
-        <div class="assign-section-header">
-          <mat-icon>list_alt</mat-icon>
-          <span>Skill Selection</span>
-        </div>
-        <div class="assign-section-body">
-          <div class="assign-dates-grid">
-            <div class="assign-field-group">
-              <label class="field-label">Category <span class="required">*</span></label>
-              <mat-form-field appearance="outline" class="mat-field">
-                <mat-select formControlName="category" (selectionChange)="onAddSkillCategoryChange($event.value)" placeholder="Select Category">
-                  <mat-option *ngFor="let cat of availableSkillCategories" [value]="cat">{{ cat }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div class="assign-field-group">
-              <label class="field-label">Skill <span class="required">*</span></label>
-              <mat-form-field appearance="outline" class="mat-field">
-                <mat-select formControlName="skillId" [disabled]="!addMySkillForm.get('category')?.value" placeholder="Select Skill">
-                  <mat-option *ngFor="let sk of filteredSkillsForAdd" [value]="sk.skillId" [disabled]="isAlreadyAdded(sk.skillId)">
-                    {{ sk.skillName }}
-                    <span *ngIf="isAlreadyAdded(sk.skillId)" style="color:#9ca3af; font-size:12px;"> — Added</span>
-                  </mat-option>
-                  <mat-option *ngIf="filteredSkillsForAdd.length === 0" disabled>No skills in this category</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="assign-section">
-        <div class="assign-section-header">
-          <mat-icon>military_tech</mat-icon>
-          <span>Proficiency & Notes</span>
-        </div>
-        <div class="assign-section-body">
-          <div class="assign-field-group">
-            <label class="field-label">Proficiency Level <span class="required">*</span></label>
-            <div class="proficiency-picker" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-              <button *ngFor="let n of profLevels" type="button"
-                style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                [style.background]="addMySkillForm.get('proficiencyLevel')?.value === n ? '#eff6ff' : '#fff'"
-                [style.color]="addMySkillForm.get('proficiencyLevel')?.value === n ? '#2563eb' : '#334155'"
-                [style.borderColor]="addMySkillForm.get('proficiencyLevel')?.value === n ? '#2563eb' : '#cbd5e1'"
-                (click)="addMySkillForm.get('proficiencyLevel')?.setValue(n)">
-                {{ n }}
-              </button>
-            </div>
-            <div style="min-height:24px;">
-              <span *ngIf="addMySkillForm.get('proficiencyLevel')?.value as lv" [class]="'prof-label ' + getProfClass(lv)" style="display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600;">
-                {{ getProfLabel(lv) }}
-              </span>
-            </div>
-          </div>
-
-          <div class="assign-field-group">
-            <label class="field-label">Notes</label>
-            <mat-form-field appearance="outline" class="mat-field">
-              <textarea matInput formControlName="notes" rows="3" placeholder="Optional: describe your experience with this skill"></textarea>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
-    </mat-dialog-content>
-
-    <div class="dialog-footer">
-      <button mat-stroked-button class="btn-cancel" mat-dialog-close type="button">Cancel</button>
-      <button mat-flat-button class="btn-submit" [disabled]="addMySkillForm.invalid || isSubmittingMySkill" (click)="submitAddMySkill()">
-        <mat-spinner *ngIf="isSubmittingMySkill" diameter="18" style="margin-right:8px;"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingMySkill">add</mat-icon>
-        <span *ngIf="!isSubmittingMySkill">Add Skill</span>
-        <span *ngIf="isSubmittingMySkill">Adding...</span>
-      </button>
-    </div>
-  </div>
-</ng-template>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- DIALOG: Edit My Skill                                                  -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<ng-template #editMySkillTpl>
-  <div class="dialog-container">
-    <div class="dialog-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <mat-icon>edit</mat-icon>
-        </div>
-        <div>
-          <h2 class="header-title">Edit Skill</h2>
-          <p class="header-subtitle">Update your skill proficiency and notes</p>
-        </div>
-      </div>
-      <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-body" [formGroup]="editMySkillForm">
-      <div class="assign-section">
-        <div class="assign-section-body">
-          <div style="background: #f1f5f9; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-            <span class="badge badge--cat">{{ editingSkill?.skillCategory }}</span>
-            <strong style="color: #0f172a; font-size: 15px;">{{ editingSkill?.skillName }}</strong>
-          </div>
-
-          <div class="assign-field-group">
-            <label class="field-label">Proficiency Level <span class="required">*</span></label>
-            <div class="proficiency-picker" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-              <button *ngFor="let n of profLevels" type="button"
-                style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                [style.background]="editMySkillForm.get('proficiencyLevel')?.value === n ? '#eff6ff' : '#fff'"
-                [style.color]="editMySkillForm.get('proficiencyLevel')?.value === n ? '#2563eb' : '#334155'"
-                [style.borderColor]="editMySkillForm.get('proficiencyLevel')?.value === n ? '#2563eb' : '#cbd5e1'"
-                (click)="editMySkillForm.get('proficiencyLevel')?.setValue(n)">
-                {{ n }}
-              </button>
-            </div>
-            <div style="min-height:24px;">
-              <span *ngIf="editMySkillForm.get('proficiencyLevel')?.value as lv" [class]="'prof-label ' + getProfClass(lv)" style="display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600;">
-                {{ getProfLabel(lv) }}
-              </span>
-            </div>
-          </div>
-
-          <div class="assign-field-group">
-            <label class="field-label">Notes</label>
-            <mat-form-field appearance="outline" class="mat-field">
-              <textarea matInput formControlName="notes" rows="3" placeholder="Optional notes"></textarea>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
-    </mat-dialog-content>
-
-    <div class="dialog-footer">
-      <button mat-stroked-button class="btn-cancel" mat-dialog-close type="button">Cancel</button>
-      <button mat-flat-button class="btn-submit" [disabled]="editMySkillForm.invalid || isSubmittingMySkill" (click)="submitEditMySkill()">
-        <mat-spinner *ngIf="isSubmittingMySkill" diameter="18" style="margin-right:8px;"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingMySkill">save</mat-icon>
-        <span *ngIf="!isSubmittingMySkill">Save Changes</span>
-        <span *ngIf="isSubmittingMySkill">Saving...</span>
-      </button>
-    </div>
-  </div>
-</ng-template>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- DIALOG: View Skill Employees                                           -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<ng-template #viewSkillTpl>
-  <div class="dialog-container" style="width: 820px; max-width: 95vw;">
-    <div class="dialog-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <mat-icon>group</mat-icon>
-        </div>
-        <div>
-          <h2 class="header-title">{{ viewingSkill?.skillName }}</h2>
-          <p class="header-subtitle">Employees with this skill</p>
-        </div>
-      </div>
-      <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-body" style="padding:0;">
-      <div style="padding: 16px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display:flex; align-items:center; gap:16px;">
-        <span class="badge badge--cat">{{ viewingSkill?.category }}</span>
-        <span style="font-size:14px; color:#64748b;">{{ viewingSkill?.description || 'No description provided' }}</span>
-        <div style="margin-left:auto; display:flex; align-items:center; gap:6px; background:#fff; padding:6px 12px; border-radius:20px; border:1px solid #e2e8f0; font-size:13px; font-weight:600; color:#334155;">
-          <mat-icon style="font-size:16px; width:16px; height:16px; color:#6366f1;">group</mat-icon>
-          {{ viewingSkill?.employees?.length || 0 }} employees
-        </div>
-      </div>
-
-      <div *ngIf="loadingViewSkill" class="pm-loading" style="padding:40px 0;">
-        <mat-spinner diameter="36"></mat-spinner>
-      </div>
-
-      <table mat-table [dataSource]="viewingSkill?.employees || []" class="ref-table" *ngIf="!loadingViewSkill" style="width:100%; border:none; box-shadow:none;">
-        <ng-container matColumnDef="employee">
-          <th mat-header-cell *matHeaderCellDef>Employee</th>
-          <td mat-cell *matCellDef="let e">
-            <div class="cell-employee">
-              <div class="cell-employee__avatar">{{ getInitials(e.employeeName) }}</div>
-              <div>
-                <div class="cell-employee__name">{{ e.employeeName }}</div>
-                <div class="cell-employee__email">{{ e.employeeEmail }}</div>
-              </div>
-            </div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="dept">
-          <th mat-header-cell *matHeaderCellDef>Department</th>
-          <td mat-cell *matCellDef="let e"><span class="badge badge--dept">{{ e.department || 'N/A' }}</span></td>
-        </ng-container>
-        <ng-container matColumnDef="proficiency">
-          <th mat-header-cell *matHeaderCellDef>Proficiency</th>
-          <td mat-cell *matCellDef="let e">
-            <div class="cell-proficiency">
-              <div class="prof-bar">
-                <div class="prof-bar__fill" [style.width.%]="e.proficiencyLevel * 10" [class]="getProfClass(e.proficiencyLevel)"></div>
-              </div>
-              <span class="prof-label" [class]="getProfClass(e.proficiencyLevel)">{{ e.proficiencyLevel }}/10</span>
-            </div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="assessor">
-          <th mat-header-cell *matHeaderCellDef>Assessed By</th>
-          <td mat-cell *matCellDef="let e">
-            <span *ngIf="e.assessorName" class="cell-assessor"><mat-icon>person_check</mat-icon>{{ e.assessorName }}</span>
-            <span *ngIf="!e.assessorName" class="badge badge--pending">Pending</span>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="notes">
-          <th mat-header-cell *matHeaderCellDef>Notes</th>
-          <td mat-cell *matCellDef="let e"><span style="color:#64748b; font-size:13px;">{{ e.notes || '—' }}</span></td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="viewSkillColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: viewSkillColumns;"></tr>
-      </table>
-
-      <div *ngIf="!loadingViewSkill && (viewingSkill?.employees?.length || 0) === 0" class="pm-empty-state" style="padding:2rem;">
-        <div class="pm-empty-icon"><mat-icon>person_off</mat-icon></div>
-        <p>No employees have this skill yet.</p>
-      </div>
-    </mat-dialog-content>
-
-    <div class="dialog-footer">
-      <button mat-stroked-button class="btn-cancel" mat-dialog-close type="button">Close</button>
-    </div>
-  </div>
-</ng-template>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- DIALOG: View Employee Skill Detail                                     -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<ng-template #viewEmployeeTpl>
-  <div class="dialog-container" style="width: 680px; max-width: 95vw;">
-    <div class="dialog-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <mat-icon>person</mat-icon>
-        </div>
-        <div>
-          <h2 class="header-title">{{ viewingEmployee?.employeeName }}</h2>
-          <p class="header-subtitle">Employee skills profile</p>
-        </div>
-      </div>
-      <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-body" style="padding: 20px;">
-      <div style="display:flex; align-items:center; gap:16px; background:#f8fafc; padding:16px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;" *ngIf="viewingEmployee">
-        <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;">
-          {{ getInitials(viewingEmployee.employeeName) }}
-        </div>
-        <div>
-          <div style="font-size:15px; font-weight:700; color:#0f172a;">{{ viewingEmployee.employeeName }}</div>
-          <div style="font-size:13px; color:#64748b; margin-bottom:4px;">{{ viewingEmployee.email }}</div>
-          <div style="display:flex; gap:8px;" *ngIf="viewingEmployee.department">
-            <span class="badge badge--dept">{{ viewingEmployee.department }}</span>
-            <span class="badge badge--pos" *ngIf="viewingEmployee.position" style="background:#f1f5f9; color:#475569;">{{ viewingEmployee.position }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="loadingViewEmployee" class="pm-loading" style="padding:40px 0;"><mat-spinner diameter="36"></mat-spinner></div>
-
-      <div *ngIf="!loadingViewEmployee && viewingEmployee?.skills">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-          <h4 style="margin:0; font-size:14px; font-weight:700; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px;">
-            Skills ({{ viewingEmployee!.skills.length }})
-          </h4>
-        </div>
-        <div style="display:grid; gap:12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;" *ngFor="let sk of viewingEmployee!.skills">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div>
-                <span class="badge badge--cat">{{ sk.skillCategory }}</span>
-                <div style="font-size:14px; font-weight:600; color:#0f172a; margin-top:4px;">{{ sk.skillName }}</div>
-              </div>
-              <div class="cell-proficiency" style="flex-direction:column; align-items:flex-end; gap:4px;">
-                <span class="prof-label" [class]="getProfClass(sk.proficiencyLevel)">{{ sk.proficiencyLevel }}/10</span>
-                <div class="prof-bar" style="width:60px;">
-                  <div class="prof-bar__fill" [style.width.%]="sk.proficiencyLevel * 10" [class]="getProfClass(sk.proficiencyLevel)"></div>
-                </div>
-              </div>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; padding-top:8px; border-top:1px dashed #e2e8f0; font-size:12px;">
-              <span *ngIf="sk.assessorName" class="cell-assessor" style="gap:4px;"><mat-icon style="font-size:14px; width:14px; height:14px;">person_check</mat-icon>{{ sk.assessorName }}</span>
-              <span *ngIf="!sk.assessorName" class="badge badge--pending" style="font-size:11px; padding:2px 6px;">Pending</span>
-              <span class="date-cell" *ngIf="sk.lastAssessed">{{ sk.lastAssessed | localizedDate:'dd MMM yyyy' }}</span>
-            </div>
-            
-            <div style="font-size:12px; color:#64748b; background:#f8fafc; padding:6px 8px; border-radius:4px; margin-top:4px;" *ngIf="sk.notes">{{ sk.notes }}</div>
-          </div>
-        </div>
-
-        <div *ngIf="viewingEmployee!.skills.length === 0" class="pm-empty-state" style="padding:2rem;">
-          <div class="pm-empty-icon"><mat-icon>school</mat-icon></div>
-          <p>This employee has no skills added yet.</p>
-        </div>
-      </div>
-    </mat-dialog-content>
-
-    <div class="dialog-footer">
-      <button mat-stroked-button class="btn-cancel" mat-dialog-close type="button">Close</button>
-    </div>
-  </div>
-</ng-template>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- DIALOG: Assess Employee Skills                                         -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<ng-template #assessTpl>
-  <div class="dialog-container" style="width: 620px; max-width: 95vw;">
-    <div class="dialog-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <mat-icon>rate_review</mat-icon>
-        </div>
-        <div>
-          <h2 class="header-title">Assess Skills</h2>
-          <p class="header-subtitle">Evaluate employee competencies</p>
-        </div>
-      </div>
-      <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-body" style="padding:0;">
-      <div style="padding: 16px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display:flex; align-items:center; gap:12px;" *ngIf="assessingEmployee">
-        <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">
-          {{ getInitials(assessingEmployee.employeeName) }}
-        </div>
-        <div>
-          <div style="font-size:14px; font-weight:700; color:#0f172a;">{{ assessingEmployee.employeeName }}</div>
-          <div style="font-size:12px; color:#64748b;">{{ assessingEmployee.email }}</div>
-        </div>
-      </div>
-
-      <div *ngIf="loadingAssessSkills" class="pm-loading" style="padding:40px 0;"><mat-spinner diameter="36"></mat-spinner></div>
-
-      <div *ngIf="!loadingAssessSkills && assessingEmployee" style="padding: 20px;">
-        <div *ngIf="assessEmployeeSkills.length === 0" class="pm-empty-state" style="padding:2rem;">
-          <div class="pm-empty-icon"><mat-icon>school</mat-icon></div>
-          <p>This employee has no skills to assess yet.</p>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px;" *ngFor="let sk of assessEmployeeSkills">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span class="badge badge--cat">{{ sk.skillCategory }}</span>
-                <strong style="font-size:14px; color:#0f172a;">{{ sk.skillName }}</strong>
-              </div>
-              <span *ngIf="sk.assessorName" style="font-size:11px; font-weight:600; color:#10b981; background:#d1fae5; padding:2px 8px; border-radius:12px;">Assessed</span>
-            </div>
-            
-            <div style="margin-bottom:12px;">
-              <label class="field-label" style="display:block; margin-bottom:8px; font-size:12px;">Proficiency Rating <span class="required">*</span></label>
-              <div class="proficiency-picker" style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button *ngFor="let n of profLevels" type="button"
-                  style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-weight: 600; font-size:13px; cursor: pointer; transition: all 0.2s;"
-                  [style.background]="assessRatings[sk.employeeSkillId] === n ? '#2563eb' : '#fff'"
-                  [style.color]="assessRatings[sk.employeeSkillId] === n ? '#fff' : '#334155'"
-                  [style.borderColor]="assessRatings[sk.employeeSkillId] === n ? '#2563eb' : '#cbd5e1'"
-                  (click)="assessRatings[sk.employeeSkillId] = n">
-                  {{ n }}
-                </button>
-              </div>
-            </div>
-            
-            <div>
-              <label class="field-label" style="display:block; margin-bottom:4px; font-size:12px;">Assessment Notes</label>
-              <mat-form-field appearance="outline" class="mat-field" style="width:100%;">
-                <textarea matInput [(ngModel)]="assessNotes[sk.employeeSkillId]" rows="2" placeholder="Provide context for this rating (optional)..."></textarea>
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-dialog-content>
-
-    <div class="dialog-footer">
-      <button mat-stroked-button class="btn-cancel" mat-dialog-close type="button">Cancel</button>
-      <button mat-flat-button class="btn-submit" (click)="submitAssessment()"
-        [disabled]="isSubmittingAssessment || assessEmployeeSkills.length === 0 || !hasAllRatings()">
-        <mat-spinner diameter="18" *ngIf="isSubmittingAssessment" style="margin-right:8px;"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingAssessment">check</mat-icon>
-        <span *ngIf="!isSubmittingAssessment">Save Assessment</span>
-        <span *ngIf="isSubmittingAssessment">Saving...</span>
-      </button>
-    </div>
-  </div>
-</ng-template>

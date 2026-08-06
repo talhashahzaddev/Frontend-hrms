@@ -5,7 +5,7 @@
   <app-page-header matIcon="assessment" title="Appraisal Review" subtitle="Performance / Appraisal Review">
   </app-page-header>
 
-  <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
+  <!-- ═══ OUTER TABS ════════════════════════════════════════════════════ -->
   <div class="perf-tabs">
     <button *ngIf="hasPermission('MANAGER_APPRAISAL_SECTION')"
             class="perf-tab" [class.active]="selectedTab === 0" (click)="selectedTab = 0; onTabChange(0)">
@@ -27,8 +27,26 @@
   <!-- ═══ TAB 0 — MANAGER APPRAISALS ═══════════════════════════════════ -->
   <div *ngIf="selectedTab === 0 && hasPermission('MANAGER_APPRAISAL_SECTION')" class="appraisal-tab-body">
 
-    <!-- Manager Reviews Section -->
-    <div class="ts-card" style="margin-bottom:1.25rem;" *ngIf="hasPermission('appraisal_manager_appraisals_review')">
+    <!-- Inner Sub-Tabs for Manager Appraisals -->
+    <div class="perf-sub-tabs">
+      <button *ngIf="hasPermission('appraisal_manager_appraisals_review')"
+              class="perf-sub-tab" [class.active]="managerSubTab === 0" (click)="managerSubTab = 0">
+        <mat-icon>rate_review</mat-icon>
+        <span>Manager Reviews</span>
+      </button>
+      <button *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')"
+              class="perf-sub-tab" [class.active]="managerSubTab === 1" (click)="managerSubTab = 1">
+        <mat-icon>supervisor_account</mat-icon>
+        <span>All Manager Reviews</span>
+      </button>
+      <button class="perf-sub-tab" [class.active]="managerSubTab === 2" (click)="managerSubTab = 2">
+        <mat-icon>inbox</mat-icon>
+        <span>Reviews Received</span>
+      </button>
+    </div>
+
+    <!-- Manager Sub-Tab 0: Manager Reviews -->
+    <div *ngIf="managerSubTab === 0 && hasPermission('appraisal_manager_appraisals_review')" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Manager Reviews
@@ -127,10 +145,8 @@
       </div>
     </div>
 
-    <div class="pm-section-divider" *ngIf="hasPermission('appraisal_manager_appraisals_review')"></div>
-
-    <!-- All Manager Reviews (HR only) -->
-    <div class="ts-card" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')">
+    <!-- Manager Sub-Tab 1: All Manager Reviews (HR) -->
+    <div *ngIf="managerSubTab === 1 && hasPermission('ALL_MANAGERS_REVIEWS_TABLE')" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">All Manager Reviews
@@ -225,10 +241,8 @@
       </div>
     </div>
 
-    <div class="pm-section-divider" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')"></div>
-
-    <!-- Reviews Received from Managers -->
-    <div class="ts-card">
+    <!-- Manager Sub-Tab 2: Reviews Received from Managers -->
+    <div *ngIf="managerSubTab === 2" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Reviews Received from Managers
@@ -320,8 +334,22 @@
   <!-- ═══ TAB 1 — SELF ASSESSMENT ══════════════════════════════════════ -->
   <div *ngIf="selectedTab === 1 && hasPermission('SELF_ASSESSMENT_SECTION')" class="appraisal-tab-body">
 
-    <!-- Your Self Assessment -->
-    <div class="ts-card" *ngIf="hasPermission('YOUR_SELF_ASSESSMENT_TABLE')" style="margin-bottom:1.25rem;">
+    <!-- Inner Sub-Tabs for Self Assessment -->
+    <div class="perf-sub-tabs">
+      <button *ngIf="hasPermission('YOUR_SELF_ASSESSMENT_TABLE')"
+              class="perf-sub-tab" [class.active]="selfAssessmentSubTab === 0" (click)="selfAssessmentSubTab = 0">
+        <mat-icon>person</mat-icon>
+        <span>Your Self Assessment</span>
+      </button>
+      <button *ngIf="hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')"
+              class="perf-sub-tab" [class.active]="selfAssessmentSubTab === 1" (click)="selfAssessmentSubTab = 1">
+        <mat-icon>group</mat-icon>
+        <span>Team's Assessments</span>
+      </button>
+    </div>
+
+    <!-- Self-Assessment Sub-Tab 0: Your Self Assessment -->
+    <div *ngIf="selfAssessmentSubTab === 0 && hasPermission('YOUR_SELF_ASSESSMENT_TABLE')" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Your Self Assessment</h3>
@@ -440,10 +468,8 @@
       </div>
     </div>
 
-    <div class="pm-section-divider"></div>
-
-    <!-- Team's Self Assessments -->
-    <div class="ts-card" *ngIf="hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')">
+    <!-- Self-Assessment Sub-Tab 1: Team's Self Assessments -->
+    <div *ngIf="selfAssessmentSubTab === 1 && hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Team's Self Assessments</h3>
@@ -574,8 +600,22 @@
   <!-- ═══ TAB 2 — HR REVIEW ════════════════════════════════════════════ -->
   <div *ngIf="selectedTab === 2 && hasPermission('HR_REVIEWS_SECTION')" class="appraisal-tab-body">
 
-    <!-- HR Reviews -->
-    <div class="ts-card" *ngIf="hasPermission('MY_HR_REVIEWS_TABLE')" style="margin-bottom:1.25rem;">
+    <!-- Inner Sub-Tabs for HR Review -->
+    <div class="perf-sub-tabs">
+      <button *ngIf="hasPermission('MY_HR_REVIEWS_TABLE')"
+              class="perf-sub-tab" [class.active]="hrSubTab === 0" (click)="hrSubTab = 0">
+        <mat-icon>verified_user</mat-icon>
+        <span>HR Reviews</span>
+      </button>
+      <button *ngIf="hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')"
+              class="perf-sub-tab" [class.active]="hrSubTab === 1" (click)="hrSubTab = 1">
+        <mat-icon>person_pin</mat-icon>
+        <span>Reviews Given to Me</span>
+      </button>
+    </div>
+
+    <!-- HR Sub-Tab 0: HR Reviews -->
+    <div *ngIf="hrSubTab === 0 && hasPermission('MY_HR_REVIEWS_TABLE')" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">HR Reviews
@@ -629,10 +669,10 @@
                 <button mat-menu-item (click)="openAllTablesViewDetails(review)">
                   <mat-icon>visibility</mat-icon><span>View Details</span>
                 </button>
-                <hr style="margin:4px 0;border:none;border-top:1px solid #f0f1f5;">
+                <!-- <hr style="margin:4px 0;border:none;border-top:1px solid #f0f1f5;">
                 <button mat-menu-item class="danger-action">
                   <mat-icon>delete</mat-icon><span>Delete</span>
-                </button>
+                </button> -->
               </mat-menu>
             </td>
           </ng-container>
@@ -659,10 +699,8 @@
       </div>
     </div>
 
-    <div class="pm-section-divider"></div>
-
-    <!-- HR Reviews Given to Me -->
-    <div class="ts-card" *ngIf="hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')">
+    <!-- HR Sub-Tab 1: HR Reviews Given to Me -->
+    <div *ngIf="hrSubTab === 1 && hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')" class="ts-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">HR Reviews Given to Me
@@ -738,5 +776,6 @@
       </div>
     </div>
   </div>
+
 
 </div>
