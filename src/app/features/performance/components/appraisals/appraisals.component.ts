@@ -438,6 +438,10 @@ isLoadingAllManagerReviews = false;
   }
 
   loadManagerReviews(): void {
+    if (!this.hasPermission('appraisal_manager_appraisals_review')) {
+      return;
+    }
+    
     this.isLoadingManagerReviews = true;
     this.managerReviewPageIndex = 0; // Reset to first page
     this.performanceService.getMyManagerReviews()

@@ -479,7 +479,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   getFilteredMenuItems(): MenuItem[] {
     void this.menuPermissionsVersion;
-    return this.menuItems.filter(item => this.hasPermission(item));
+    return this.menuItems.filter(item => {
+      if (!this.hasPermission(item)) return false;
+      
+      if (item.children && item.children.length > 0) {
+        return this.getFilteredChildren(item.children).length > 0;
+      }
+      
+      return true;
+    });
   }
 
   getFilteredChildren(children: MenuItem[]): MenuItem[] {
