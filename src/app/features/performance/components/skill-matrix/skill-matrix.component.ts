@@ -145,7 +145,18 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
+  skillSetsSubTab = 0;
+
   ngOnInit() {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.setDefaultTabs();
+          this.cdr.detectChanges();
+        }
+      });
+
     this.initForms();
     this.loadSkills();
     this.loadEmployeeSkills();
@@ -156,6 +167,19 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.searchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadSkills());
     this.empSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadEmployeeSkills());
     this.teamSelfAddedSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadTeamSelfAddedSkills());
+  }
+
+  private setDefaultTabs(): void {
+    // Set default Outer Tab
+    if (this.hasPermission('SKILLS_SETS_SECTION')) {
+      this.selectedTab = 0;
+    } else if (this.hasPermission('MY_SKILLS_SECTION')) {
+      this.selectedTab = 1;
+    }
+
+    // Set default Skill Sets Sub-Tab
+    // Available Skills is the default and has no extra permission guard
+    this.skillSetsSubTab = 0;
   }
 
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }

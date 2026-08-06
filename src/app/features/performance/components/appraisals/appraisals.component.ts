@@ -235,6 +235,10 @@ isLoadingAllManagerReviews = false;
   
   // View mode
   selectedTab = 0;
+  // Inner sub-tab indices (per outer tab)
+  managerSubTab = 0;
+  selfAssessmentSubTab = 0;
+  hrSubTab = 0;
   // Paginators for tables
   @ViewChild('managerReviewsPaginator') managerReviewsPaginator?: MatPaginator;
   @ViewChild('allManagerReviewsPaginator') allManagerReviewsPaginator?: MatPaginator;
@@ -333,6 +337,7 @@ isLoadingAllManagerReviews = false;
       .subscribe({
         next: (user) => {
           this.currentUser = user;
+          this.setDefaultTabs();
           // Reinitialize filter form and reload data on user change
           this.initializeFilterForm();
           this.setupFilterFormSubscription();
@@ -341,9 +346,44 @@ isLoadingAllManagerReviews = false;
           this.loadReceivedReviews();
           this.loadEmployeeSelfAssessments();
           // this.loadEmployeeAppraisals();
+          this.cdr.detectChanges();
         },
         error: (err) => console.error('Error while getting current user in Appraise', err)
       });
+  }
+
+  private setDefaultTabs(): void {
+    // Set default Outer Tab
+    if (this.hasPermission('MANAGER_APPRAISAL_SECTION')) {
+      this.selectedTab = 0;
+    } else if (this.hasPermission('SELF_ASSESSMENT_SECTION')) {
+      this.selectedTab = 1;
+    } else if (this.hasPermission('HR_REVIEWS_SECTION')) {
+      this.selectedTab = 2;
+    }
+
+    // Set default Manager Sub-Tab
+    if (this.hasPermission('appraisal_manager_appraisals_review')) {
+      this.managerSubTab = 0;
+    } else if (this.hasPermission('ALL_MANAGERS_REVIEWS_TABLE')) {
+      this.managerSubTab = 1;
+    } else {
+      this.managerSubTab = 2; // Reviews Received has no specific permission
+    }
+
+    // Set default Self Assessment Sub-Tab
+    if (this.hasPermission('YOUR_SELF_ASSESSMENT_TABLE')) {
+      this.selfAssessmentSubTab = 0;
+    } else if (this.hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')) {
+      this.selfAssessmentSubTab = 1;
+    }
+
+    // Set default HR Review Sub-Tab
+    if (this.hasPermission('MY_HR_REVIEWS_TABLE')) {
+      this.hrSubTab = 0;
+    } else if (this.hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')) {
+      this.hrSubTab = 1;
+    }
   }
 
   private initializeFilterForm(): void {
