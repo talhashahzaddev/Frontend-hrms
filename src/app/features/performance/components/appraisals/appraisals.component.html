@@ -349,6 +349,18 @@
               <option *ngFor="let kra of allKras" [value]="kra.kraId">{{ kra.title }}</option>
             </select>
           </div>
+          <button mat-flat-button 
+                  style="height: 38px; background-color: #2563eb; color: #fff;"
+                  [disabled]="!hasManagerSelfAssessmentFiltersApplied()"
+                  (click)="applyManagerSelfAssessmentFilters()">
+            Search
+          </button>
+          <button mat-stroked-button 
+                  style="height: 38px;"
+                  [disabled]="!hasManagerSelfAssessmentFiltersApplied()"
+                  (click)="clearManagerSelfAssessmentFilters()">
+            Clear
+          </button>
         </div>
       </div>
 
@@ -459,6 +471,18 @@
               <option *ngFor="let kra of allKras" [value]="kra.kraId">{{ kra.title }}</option>
             </select>
           </div>
+          <button mat-flat-button 
+                  style="height: 38px; background-color: #2563eb; color: #fff;"
+                  [disabled]="!hasTeamSelfAssessmentFiltersApplied()"
+                  (click)="applyTeamSelfAssessmentFilters()">
+            Search
+          </button>
+          <button mat-stroked-button 
+                  style="height: 38px;"
+                  [disabled]="!hasTeamSelfAssessmentFiltersApplied()"
+                  (click)="clearTeamSelfAssessmentFilters()">
+            Clear
+          </button>
         </div>
       </div>
 

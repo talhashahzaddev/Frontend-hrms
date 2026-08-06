@@ -73,8 +73,8 @@ export class AppraisalCycleFormComponent {
       endDate: [data?.cycle?.endDate ? new Date(data.cycle.endDate) : '', Validators.required],
       reviewStartDate: [data?.cycle?.reviewStartDate ? new Date(data.cycle.reviewStartDate) : ''],
       reviewEndDate: [data?.cycle?.reviewEndDate ? new Date(data.cycle.reviewEndDate) : ''],
-      isSelfAssessmentEnable: [data?.cycle?.selfReviewEnabled || false],
-      managerReview: [data?.cycle?.managerReviewEnabled || false],
+      isSelfAssessmentEnable: [true],
+      managerReview: [true],
       isAppraisalEnable: [data?.cycle?.appraisalEnabled || false]
     });
   }
