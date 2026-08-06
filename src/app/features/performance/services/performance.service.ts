@@ -537,7 +537,7 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
       if (filter.kraId) params = params.set('kraId', filter.kraId);
       if (filter.search) params = params.set('search', filter.search);
     }
-    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/selfassessment/my`, { params });
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-assessments`, { params });
   }
 
 
@@ -549,7 +549,7 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
       if (filter.kraId) params = params.set('kraId', filter.kraId);
       if (filter.search) params = params.set('search', filter.search);
     }
-    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/selfassessment/team`, { params });
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-team-assessments`, { params });
   }
 
   // Manager Review Management
