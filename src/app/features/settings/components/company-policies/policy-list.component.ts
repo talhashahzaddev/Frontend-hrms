@@ -166,7 +166,6 @@ export class PolicyListComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(actionKey: string): boolean {
-    if (this.isSuperAdmin) return true;
     return this.authService.hasMenuPermission('Settings', 'Company Policies', actionKey);
   }
 }
