@@ -61,8 +61,18 @@
 
     </div>
 
+    <!-- ═══ TABS ════════════════════════════════════════════════════════════ -->
+    <div class="perf-sub-tabs" style="margin-top: 1.25rem;">
+      <button class="perf-sub-tab" [class.active]="selectedTab === 0" (click)="selectedTab = 0">
+        <mat-icon>assessment</mat-icon> HR Appraisals
+      </button>
+      <button class="perf-sub-tab" [class.active]="selectedTab === 1" (click)="selectedTab = 1">
+        <mat-icon>rate_review</mat-icon> Manager Reviews
+      </button>
+    </div>
+
     <!-- ═══ HR APPRAISALS TABLE ═══════════════════════════════════════════ -->
-    <div class="ts-card" style="margin-bottom:1.25rem;">
+    <div class="ts-card" *ngIf="selectedTab === 0">
       <div class="pm-sub-section">
         <h3>HR Appraisals Given to Me</h3>
       </div>
@@ -151,7 +161,7 @@
     </div>
 
     <!-- ═══ REVIEWS FROM MANAGERS TABLE ══════════════════════════════════ -->
-    <div class="ts-card">
+    <div class="ts-card" *ngIf="selectedTab === 1">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <div class="pm-sub-section" style="margin:0;">
           <h3 style="margin:0;">Reviews Received from Managers
