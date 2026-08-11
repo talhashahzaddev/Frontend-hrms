@@ -77,6 +77,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 
   // UI State
   isLoading = false;
+  selectedTab = 0;
 
   // User
   currentUser: User | null = null;
