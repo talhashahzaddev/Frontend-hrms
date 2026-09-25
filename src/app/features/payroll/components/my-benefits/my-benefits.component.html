@@ -1,4 +1,7 @@
 <div class="my-benefits-container">
+  @if (!canAccessMyBenefits) {
+  <div class="empty-state">You do not have permission to access My Benefits.</div>
+  } @else {
   @if (isLoading()) {
   <div class="loading-overlay">
     <mat-spinner diameter="40"></mat-spinner>
@@ -17,7 +20,7 @@
   <!-- Summary Stat Cards -->
   <section class="summary-cards">
     <!-- Active Loan -->
-    @if (isModuleActive('Loan')) {
+    @if (canShowBenefitModule('Loan')) {
     <div class="card active-card">
       <div class="card-content">
         <span class="label">Active loan</span>
@@ -35,7 +38,7 @@
     }
 
     <!-- Salary Advance -->
-    @if (isModuleActive('Advance Salary')) {
+    @if (canShowBenefitModule('Advance Salary')) {
     <div class="card active-card">
       <div class="card-content">
         <span class="label">Salary advance</span>
@@ -51,7 +54,7 @@
     }
 
     <!-- PF Balance -->
-    @if (isModuleActive('Provident Fund')) {
+    @if (canShowBenefitModule('Provident Fund')) {
     <div class="card active-card">
       <div class="card-content">
         <span class="label">PF balance</span>
@@ -67,7 +70,7 @@
     }
 
     <!-- Gratuity -->
-    @if (isModuleActive('Gratuity')) {
+    @if (canShowBenefitModule('Gratuity')) {
     <div class="card active-card">
       <div class="card-content">
         <span class="label">Gratuity</span>
@@ -86,7 +89,7 @@
   <!-- Benefit Cards Grid -->
   <section class="benefits-grid">
     <!-- Card 1 (Loan) -->
-    @if (isModuleActive('Loan')) {
+    @if (canShowBenefitModule('Loan')) {
     <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Loan')" (keydown)="onBenefitCardKeydown($event, 'Loan')">
       <div class="card-header">
         <div class="icon-wrapper color-primary">
@@ -104,7 +107,7 @@
     }
 
     <!-- Card 2 (Salary Advance) -->
-    @if (isModuleActive('Advance Salary')) {
+    @if (canShowBenefitModule('Advance Salary')) {
     <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Advance Salary')" (keydown)="onBenefitCardKeydown($event, 'Advance Salary')">
       <div class="card-header">
         <div class="icon-wrapper color-amber">
@@ -122,7 +125,7 @@
     }
 
     <!-- Card 3 (Provident Fund) -->
-    @if (isModuleActive('Provident Fund')) {
+    @if (canShowBenefitModule('Provident Fund')) {
     <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Provident Fund')" (keydown)="onBenefitCardKeydown($event, 'Provident Fund')">
       <div class="card-header">
         <div class="icon-wrapper color-secondary">
@@ -176,7 +179,7 @@
     }
 
     <!-- Card 5 (Gratuity) -->
-    @if (isModuleActive('Gratuity')) {
+    @if (canShowBenefitModule('Gratuity')) {
     <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Gratuity')" (keydown)="onBenefitCardKeydown($event, 'Gratuity')">
       <div class="card-header">
         <div class="icon-wrapper color-purple">
@@ -194,4 +197,5 @@
     }
 
   </section>
+  }
 </div>

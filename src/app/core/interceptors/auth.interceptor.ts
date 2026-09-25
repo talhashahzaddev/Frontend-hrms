@@ -9,13 +9,14 @@ import {
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '@core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
@@ -27,6 +28,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
+        // ✅ Never handle 401s when the user is on a platform-admin route.
+        // Platform-admin has its own auth system (PlatformAdminAuthService).
+        // Intercepting 401s here would incorrectly trigger a logout/redirect.
+        if (this.isPlatformAdminRoute()) {
+          return throwError(() => error);
+        }
+
         // ✅ Only handle 401 if NOT from auth endpoints
         if (error.status === 401 && !this.isAuthUrl(request.url)) {
           return this.handle401Error(request, next);
@@ -85,5 +93,14 @@ export class AuthInterceptor implements HttpInterceptor {
       lowerUrl.includes('/auth/logout') ||
       lowerUrl.includes('/auth/forgot-password')
     );
+  }
+
+  /**
+   * Returns true when the Angular router is currently on a platform-admin route.
+   * In that case the main AuthService is not in use and we must NOT attempt
+   * token refresh or logout, as there is no regular user session.
+   */
+  private isPlatformAdminRoute(): boolean {
+    return window.location.pathname.startsWith('/platform-admin');
   }
 }

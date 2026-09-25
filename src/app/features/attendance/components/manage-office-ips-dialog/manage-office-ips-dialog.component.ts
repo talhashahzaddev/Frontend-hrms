@@ -17,12 +17,16 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { OfficeIP } from '../../../../core/models/attendance.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-manage-office-ips',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -57,6 +61,7 @@ export class ManageOfficeIPsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private attendanceService: AttendanceService,
     private notification: NotificationService
+    , private authService: AuthService
   ) {
     this.ipForm = this.fb.group({
       ipAddressValue: ['', [Validators.required, Validators.pattern(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/)]],
@@ -176,6 +181,10 @@ export class ManageOfficeIPsComponent implements OnInit, OnDestroy {
       return 'Please enter a valid IP address (e.g., 192.168.1.1)';
     }
     return '';
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Settings', 'Manage Ips', actionKey);
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

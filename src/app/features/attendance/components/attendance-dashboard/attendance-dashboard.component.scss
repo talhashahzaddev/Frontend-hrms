@@ -1,22 +1,29 @@
+$primary: #2563eb;
+$slate-50: #f8fafc;
+$slate-100: #f1f5f9;
+$slate-200: #e2e8f0;
+$slate-300: #cbd5e1;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-600: #475569;
+$slate-900: #0f172a;
+
 // My Attendance Dashboard - Modern Redesign (Reference-Based)
 
 .attendance-dashboard-modern {
   min-height: 100vh;
-  background: #f6f6f8;
+  background: $slate-50;
   display: flex;
   flex-direction: column;
+  padding: 2rem;
+  box-sizing: border-box;
 
   .dashboard-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 12px 40px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    align-items: center;
+    margin-bottom: 1.5rem;
+    width: 100%;
 
     .header-left {
       display: flex;
@@ -27,7 +34,7 @@
         width: 40px;
         height: 40px;
         border-radius: 12px;
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(37, 99, 235, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -37,7 +44,7 @@
           font-size: 24px;
           width: 24px;
           height: 24px;
-          color: #6366f1;
+          color: $primary;
         }
       }
 
@@ -46,14 +53,14 @@
           margin: 0;
           font-size: 18px;
           font-weight: 700;
-          color: #1e293b;
+          color: $slate-900;
           letter-spacing: -0.02em;
         }
 
         .header-subtitle {
           margin: 0;
           font-size: 12px;
-          color: #64748b;
+          color: $slate-500;
           font-weight: 500;
         }
       }
@@ -71,7 +78,7 @@
           margin: 0;
           font-size: 14px;
           font-weight: 700;
-          color: #1e293b;
+          color: $slate-900;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           font-family: 'Courier New', monospace;
@@ -81,14 +88,14 @@
           margin: 0;
           font-size: 10px;
           font-weight: 500;
-          color: #64748b;
+          color: $slate-500;
         }
       }
 
       .header-divider {
         width: 1px;
         height: 32px;
-        background: #e2e8f0;
+        background: $slate-200;
       }
 
       .user-profile {
@@ -100,11 +107,11 @@
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          background: linear-gradient(135deg, $primary 0%, #3b82f6 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid rgba(99, 102, 241, 0.2);
+          border: 2px solid rgba(37, 99, 235, 0.2);
           flex-shrink: 0;
 
           mat-icon {
@@ -120,13 +127,13 @@
             margin: 0;
             font-size: 14px;
             font-weight: 700;
-            color: #1e293b;
+            color: $slate-900;
           }
 
           .user-id {
             margin: 0;
             font-size: 12px;
-            color: #64748b;
+            color: $slate-500;
           }
         }
       }
@@ -134,10 +141,7 @@
   }
 
   .dashboard-main {
-    max-width: 1400px;
-    margin: 0 auto;
     width: 100%;
-    padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -149,7 +153,7 @@
 
       .summary-card {
         background: white;
-        border: 1px solid #e2e8f0;
+        border: 1px solid $slate-200;
         border-radius: 10px;
         padding: 14px 18px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -170,7 +174,7 @@
             margin: 0;
             font-size: 12px;
             font-weight: 500;
-            color: #64748b;
+            color: $slate-500;
           }
 
           .card-icon {
@@ -189,7 +193,7 @@
             &.success-icon { background: rgba(34, 197, 94, 0.1); mat-icon { color: #22c55e; } }
             &.danger-icon  { background: rgba(239, 68, 68, 0.1);  mat-icon { color: #ef4444; } }
             &.warning-icon { background: rgba(249, 115, 22, 0.1); mat-icon { color: #f97316; } }
-            &.primary-icon { background: rgba(99, 102, 241, 0.1); mat-icon { color: #6366f1; } }
+            &.primary-icon { background: rgba(37, 99, 235, 0.1); mat-icon { color: $primary; } }
           }
         }
 
@@ -197,7 +201,7 @@
           margin: 0;
           font-size: 22px;
           font-weight: 700;
-          color: #1e293b;
+          color: $slate-900;
           font-family: 'Inter', sans-serif;
         }
       }
@@ -208,7 +212,7 @@
     // ============================================
     .filters-section {
       background: white;
-      border: 1px solid #e2e8f0;
+      border: 1px solid $slate-200;
       border-radius: 12px;
       padding: 16px 24px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -220,7 +224,7 @@
         gap: 16px;
 
         ::ng-deep .date-input {
-          flex: 1;
+          width: 250px;
           // Remove hidden subscript area that shifts the field height
           margin-bottom: 0 !important;
 
@@ -231,7 +235,7 @@
 
           &.mat-mdc-form-field {
             .mat-mdc-text-field-wrapper {
-              background: #f8fafc;
+              background: $slate-50;
               border-radius: 12px;
             }
 
@@ -242,14 +246,14 @@
             .mdc-notched-outline__leading,
             .mdc-notched-outline__notch,
             .mdc-notched-outline__trailing {
-              border-color: #e2e8f0 !important;
+              border-color: $slate-200 !important;
             }
 
             &:hover {
               .mdc-notched-outline__leading,
               .mdc-notched-outline__notch,
               .mdc-notched-outline__trailing {
-                border-color: #6366f1 !important;
+                border-color: $primary !important;
               }
             }
 
@@ -257,19 +261,19 @@
               .mdc-notched-outline__leading,
               .mdc-notched-outline__notch,
               .mdc-notched-outline__trailing {
-                border-color: #6366f1 !important;
+                border-color: $primary !important;
                 border-width: 2px !important;
               }
             }
 
             .mat-mdc-form-field-label {
-              color: #475569;
+              color: $slate-600;
               font-weight: 600;
               font-size: 14px;
             }
 
             input {
-              color: #1e293b;
+              color: $slate-900;
               font-weight: 500;
             }
           }
@@ -281,9 +285,9 @@
           border-radius: 12px !important;
           font-size: 14px !important;
           font-weight: 700 !important;
-          background: #6366f1 !important;
+          background: $primary !important;
           color: white !important;
-          box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3) !important;
+          box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
           transition: all 0.2s ease !important;
           display: flex !important;
           align-items: center !important;
@@ -299,14 +303,14 @@
           }
 
           &:hover:not([disabled]) {
-            background: #4f46e5 !important;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+            background: #1d4ed8 !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
             transform: translateY(-1px);
           }
 
           &[disabled] {
-            background: #e2e8f0 !important;
-            color: #94a3b8 !important;
+            background: $slate-200 !important;
+            color: $slate-400 !important;
             box-shadow: none !important;
           }
         }
@@ -326,7 +330,7 @@
 
       .table-section {
         background: white;
-        border: 1px solid #e2e8f0;
+        border: 1px solid $slate-200;
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         overflow: hidden;
@@ -339,19 +343,19 @@
           align-items: center;
           padding: 20px 24px;
           background: rgba(248, 250, 252, 0.5);
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid $slate-200;
 
           .section-title {
             margin: 0;
             font-size: 16px;
             font-weight: 700;
-            color: #1e293b;
+            color: $slate-900;
             display: flex;
             align-items: center;
             gap: 8px;
 
             mat-icon {
-              color: #6366f1;
+              color: $primary;
               font-size: 20px;
               width: 20px;
               height: 20px;
@@ -363,8 +367,8 @@
             font-weight: 600;
             padding: 4px 12px;
             border-radius: 9999px;
-            background: rgba(99, 102, 241, 0.1);
-            color: #6366f1;
+            background: rgba(37, 99, 235, 0.1);
+            color: $primary;
           }
         }
 
@@ -379,7 +383,7 @@
           p {
             margin: 0;
             font-size: 14px;
-            color: #64748b;
+            color: $slate-500;
             font-weight: 500;
           }
         }
@@ -395,7 +399,7 @@
             thead {
               position: sticky;
               top: 0;
-              background: #f8fafc;
+              background: $slate-50;
               z-index: 10;
 
               tr th {
@@ -403,24 +407,24 @@
                 text-align: left;
                 font-size: 11px;
                 font-weight: 700;
-                color: #64748b;
+                color: $slate-500;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
-                border-bottom: 1px solid #e2e8f0;
+                border-bottom: 1px solid $slate-200;
               }
             }
 
             tbody {
               tr.table-row {
                 transition: background-color 0.2s ease;
-                border-bottom: 1px solid #f1f5f9;
+                border-bottom: 1px solid $slate-100;
 
                 &:hover { background: rgba(248, 250, 252, 0.8); }
 
                 td {
                   padding: 16px 24px;
                   font-size: 14px;
-                  color: #475569;
+                  color: $slate-600;
 
                   .employee-cell {
                     display: flex;
@@ -431,7 +435,7 @@
                       width: 32px;
                       height: 32px;
                       border-radius: 50%;
-                      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                      background: linear-gradient(135deg, $primary 0%, #3b82f6 100%);
                       display: flex;
                       align-items: center;
                       justify-content: center;
@@ -448,20 +452,20 @@
                     .employee-name-text {
                       font-size: 14px;
                       font-weight: 600;
-                      color: #1e293b;
+                      color: $slate-900;
                     }
                   }
 
-                  &.date-cell { color: #475569; font-weight: 500; }
+                  &.date-cell { color: $slate-600; font-weight: 500; }
 
                   &.time-cell {
-                    color: #475569;
+                    color: $slate-600;
                     font-weight: 500;
                     .absent-text { color: #ef4444; font-weight: 600; }
                   }
 
                   &.location-cell {
-                    .no-data { color: #cbd5e1; }
+                    .no-data { color: $slate-300; }
                   }
                 }
               }
@@ -476,17 +480,17 @@
               font-size: 64px;
               width: 64px;
               height: 64px;
-              color: #cbd5e1;
+              color: $slate-300;
               margin-bottom: 16px;
             }
 
-            h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: #1e293b; }
-            p  { margin: 0; font-size: 14px; color: #64748b; }
+            h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: $slate-900; }
+            p  { margin: 0; font-size: 14px; color: $slate-500; }
           }
         }
 
         ::ng-deep mat-paginator {
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid $slate-200;
           background: #fafbfc;
 
           .mat-mdc-paginator-container {
@@ -519,7 +523,7 @@
             height: 100% !important;
             border-radius: 12px !important;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-            border: 1px solid #e2e8f0 !important;
+            border: 1px solid $slate-200 !important;
             box-sizing: border-box !important;
             margin: 0 !important;
           }
@@ -528,7 +532,7 @@
 
       .calendar-section {
         background: white;
-        border: 1px solid #e2e8f0;
+        border: 1px solid $slate-200;
         border-radius: 12px;
         padding: 24px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -544,7 +548,7 @@
             margin: 0;
             font-size: 16px;
             font-weight: 700;
-            color: #1e293b;
+            color: $slate-900;
           }
 
           .calendar-nav-buttons {
@@ -561,12 +565,12 @@
                 font-size: 18px;
                 width: 18px;
                 height: 18px;
-                color: #64748b;
+                color: $slate-500;
               }
 
               &:hover {
-                background: #f8fafc;
-                mat-icon { color: #1e293b; }
+                background: $slate-50;
+                mat-icon { color: $slate-900; }
               }
             }
           }
@@ -582,7 +586,7 @@
               text-align: center;
               font-size: 11px;
               font-weight: 700;
-              color: #94a3b8;
+              color: $slate-400;
               letter-spacing: 0.05em;
             }
           }
@@ -599,7 +603,7 @@
               align-items: center;
               padding: 8px 0;
 
-              &.other-month .day-number { color: #cbd5e1; }
+              &.other-month .day-number { color: $slate-300; }
 
               &.today .today-highlight {
                 width: 40px;
@@ -608,11 +612,11 @@
                 align-items: center;
                 justify-content: center;
                 border-radius: 50%;
-                border: 2px solid #6366f1;
-                background: rgba(99, 102, 241, 0.05);
-                color: #6366f1;
+                border: 2px solid $primary;
+                background: rgba(37, 99, 235, 0.05);
+                color: $primary;
                 font-weight: 700;
-                box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+                box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
               }
 
               .day-content {
@@ -629,11 +633,11 @@
                   justify-content: center;
                   border-radius: 50%;
                   font-size: 14px;
-                  color: #1e293b;
+                  color: $slate-900;
                   cursor: pointer;
                   transition: background-color 0.2s ease;
 
-                  &:hover { background: #f8fafc; }
+                  &:hover { background: $slate-50; }
                 }
 
                 .attendance-indicator {
@@ -647,7 +651,7 @@
                   &.absent   { background: #ef4444; }
                   &.late     { background: #f97316; }
                   &.half-day { background: #3b82f6; }
-                  &.on-leave { background: #8b5cf6; }
+                  &.on-leave { background: #3b82f6; }
                 }
               }
             }
@@ -657,7 +661,7 @@
         .calendar-legend {
           margin-top: 32px;
           padding-top: 24px;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid $slate-200;
           display: flex;
           flex-wrap: wrap;
           gap: 16px;
@@ -668,7 +672,7 @@
             gap: 6px;
             font-size: 12px;
             font-weight: 500;
-            color: #64748b;
+            color: $slate-500;
 
             .legend-dot {
               width: 8px;
@@ -733,5 +737,6 @@
 }
 
 ::ng-deep mat-spinner circle {
-  stroke: #6366f1 !important;
+  stroke: $primary !important;
 }
+

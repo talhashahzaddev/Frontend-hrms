@@ -12,11 +12,11 @@
       </div>
     </div>
     <div class="header-actions">
-      <button *ngIf="selectedTab === 0" class="btn-primary" (click)="openEmployeeOvertime()">
+      <button *ngIf="selectedTab === 0 && hasPermission('EMPLOYEE_OVERTIME_SECTION')" class="btn-primary" (click)="openEmployeeOvertime()">
         <mat-icon>add</mat-icon>
         Employee Overtime Request
       </button>
-      <button *ngIf="selectedTab === 1" class="btn-primary" (click)="openManagerOvertime()">
+      <button *ngIf="selectedTab === 1 && hasPermission('MANAGER_OVERTIME_SECTION')" class="btn-primary" (click)="openManagerOvertime()">
         <mat-icon>add</mat-icon>
         Manager Overtime Request
       </button>
@@ -36,9 +36,9 @@
 
       <div class="table-wrap compact">
         <div class="today-info-row">
-          <div><strong>Date:</strong> {{ todayOvertime.overtimeDate | date:'mediumDate' }}</div>
-          <div><strong>Start:</strong> {{ todayOvertime.overtimeStart }}</div>
-          <div><strong>End:</strong> {{ todayOvertime.overtimeEnd }}</div>
+          <div><strong>Date:</strong> {{ todayOvertime.overtimeDate | localizedDate:'mediumDate' }}</div>
+          <div><strong>Start:</strong> {{ todayOvertime.overtimeStart | localizedTime }}</div>
+          <div><strong>End:</strong> {{ todayOvertime.overtimeEnd | localizedTime }}</div>
           <div><strong>Requested Hours:</strong> {{ todayOvertime.requestedHours }}</div>
         </div>
         <div *ngIf="todayOvertime.reason" class="today-reason">
@@ -63,12 +63,12 @@
     </div>
   </ng-template>
   <div class="page-tabs">
-    <button class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+    <button class="page-tab" *ngIf="hasPermission('EMPLOYEE_OVERTIME_SECTION')" [class.active]="selectedTab === 0" (click)="selectTab(0)">
       <mat-icon>person</mat-icon>
       <span>Employee</span>
       <span class="tab-badge">{{ (employeeCreatedRequests.length + employeeAssignedRequests.length) || 0 }}</span>
     </button>
-    <button class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+    <button class="page-tab" *ngIf="hasPermission('MANAGER_OVERTIME_SECTION')" [class.active]="selectedTab === 1" (click)="selectTab(1)">
       <mat-icon>group</mat-icon>
       <span>Manager</span>
       <span class="tab-badge">{{ pendingRequests.length || 0 }}</span>
@@ -79,7 +79,8 @@
   <div [ngSwitch]="selectedTab" class="tab-content-wrapper">
 
     <!-- ─── EMPLOYEE TAB ─────────────────────────────────────────────── -->
-    <div *ngSwitchCase="0" class="tab-content">
+    <ng-container *ngIf="hasPermission('EMPLOYEE_OVERTIME_SECTION')">
+      <div *ngSwitchCase="0" class="tab-content">
 
       <!-- Employee Created Overtime Requests -->
       <div class="section-card">
@@ -102,20 +103,20 @@
             </thead>
             <tbody>
               <tr *ngFor="let r of employeeCreatedRequests" class="table-row">
-                <td>{{ r.overtimeStart }}</td>
-                <td>{{ r.overtimeEnd }}</td>
-                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.overtimeStart | localizedTime }}</td>
+                <td>{{ r.overtimeEnd | localizedTime }}</td>
+                <td class="date-cell">{{ r.overtimeDate | localizedDate:'mediumDate' }}</td>
                 <td>{{ r.overtimeType }}</td>
                 <td>{{ r.requestedHours }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
                 </td>
-                <td class="date-cell">{{ r.createdAt | date:'short' }}</td>
+                <td class="date-cell">{{ r.createdAt | localizedDate:'short' }}</td>
               </tr>
             </tbody>
           </table>
 
-          <div *ngIf="!employeeCreatedRequests?.length" class="empty-state">
+          <div *ngIf="!employeeCreatedRequests.length" class="empty-state">
             <mat-icon class="empty-icon">schedule</mat-icon>
             <h3>No Overtime Requests</h3>
             <p>You haven't submitted any overtime requests yet.</p>
@@ -126,7 +127,7 @@
       <!-- Employee Assigned Overtime Requests -->
       <div class="section-card">
         <div class="section-header">
-          <h3>Assigned Overtime Requests</h3>
+          <h3>Assigned Overtime Requests By Manager</h3>
         </div>
 
         <div class="table-wrap">
@@ -147,9 +148,9 @@
                 <td>
                   <div class="cell-title">{{ r.requestedByName }}</div>
                 </td>
-                <td>{{ r.overtimeStart }}</td>
-                <td>{{ r.overtimeEnd }}</td>
-                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.overtimeStart | localizedTime }}</td>
+                <td>{{ r.overtimeEnd | localizedTime }}</td>
+                <td class="date-cell">{{ r.overtimeDate | localizedDate:'mediumDate' }}</td>
                 <td>{{ r.overtimeType }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
@@ -173,7 +174,7 @@
             </tbody>
           </table>
 
-          <div *ngIf="!employeeAssignedRequests?.length" class="empty-state">
+          <div *ngIf="!employeeAssignedRequests.length" class="empty-state">
             <mat-icon class="empty-icon">assignment</mat-icon>
             <h3>No Assigned Requests</h3>
             <p>No overtime requests have been assigned to you.</p>
@@ -181,10 +182,12 @@
         </div>
       </div>
 
-    </div>
+      </div>
+    </ng-container>
 
     <!-- ─── MANAGER TAB ──────────────────────────────────────────────── -->
-    <div *ngSwitchCase="1" class="tab-content">
+    <ng-container *ngIf="hasPermission('MANAGER_OVERTIME_SECTION')">
+      <div *ngSwitchCase="1" class="tab-content">
 
       <div class="section-card">
         <div class="section-header">
@@ -211,12 +214,12 @@
                   <div class="cell-title">{{ r.requestedByName }}</div>
                 </td>
                 <td>{{ r.overtimeType }}</td>
-                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td class="date-cell">{{ r.overtimeDate | localizedDate:'mediumDate' }}</td>
                 <td>{{ r.requestedHours }}</td>
                 <td>
                   <span class="cell-sub">{{ r.reason }}</span>
                 </td>
-                <td class="date-cell">{{ r.createdAt | date:'short' }}</td>
+                <td class="date-cell">{{ r.createdAt | localizedDate:'short' }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
                 </td>
@@ -239,7 +242,7 @@
             </tbody>
           </table>
 
-          <div *ngIf="!pendingRequests?.length" class="empty-state">
+          <div *ngIf="!pendingRequests.length" class="empty-state">
             <mat-icon class="empty-icon">group</mat-icon>
             <h3>No Pending Requests</h3>
             <p>There are no team overtime requests awaiting your review.</p>
@@ -247,7 +250,8 @@
         </div>
       </div>
 
-    </div>
+      </div>
+    </ng-container>
 
   </div>
 

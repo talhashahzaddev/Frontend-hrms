@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
 
 import {
   CreateSocialSecurityEnrollmentRequestPayload,
@@ -10,9 +11,20 @@ import {
   SocialSecurityEnrollment,
   SocialSecurityRequestDocumentInput
 } from '../../../services/payroll.service';
+import { SettingsService } from '../../../../settings/services/settings.service';
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+export interface RequestSocialSecurityRuleOption {
+  ruleId: string;
+  ruleName: string;
+  schemeName?: string | null;
+  employeeDefaultPct?: number | null;
+  employerDefaultPct?: number | null;
+}
 
 interface RequestSocialSecurityChangeDialogData {
   currentEnrollment: SocialSecurityEnrollment | null;
+  rules?: RequestSocialSecurityRuleOption[];
 }
 
 interface UploadedDoc extends SocialSecurityRequestDocumentInput {
@@ -20,21 +32,27 @@ interface UploadedDoc extends SocialSecurityRequestDocumentInput {
   error: boolean;
 }
 
+
 @Component({
   selector: 'app-request-social-security-change-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './request-social-security-change-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })
 export class RequestSocialSecurityChangeDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly payrollService = inject(PayrollService);
+  private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<RequestSocialSecurityChangeDialogComponent, CreateSocialSecurityEnrollmentRequestPayload | undefined>);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly hasCurrentEnrollment: boolean;
   readonly defaultRequestType: string;
+  readonly rules: RequestSocialSecurityRuleOption[];
 
   documents: UploadedDoc[] = [];
   isSubmitting = false;
@@ -42,6 +60,7 @@ export class RequestSocialSecurityChangeDialogComponent {
 
   readonly form = this.fb.group({
     requestType: ['enrollment', Validators.required],
+    ruleId: [''],
     reason: ['', [Validators.required, Validators.maxLength(1000)]],
     requestedEmployeePct: [null as number | null],
     requestedEmployerPct: [null as number | null],
@@ -52,7 +71,36 @@ export class RequestSocialSecurityChangeDialogComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: RequestSocialSecurityChangeDialogData) {
     this.hasCurrentEnrollment = !!data?.currentEnrollment;
     this.defaultRequestType = this.hasCurrentEnrollment ? 'update' : 'enrollment';
+    this.rules = data?.rules ?? [];
     this.form.patchValue({ requestType: this.defaultRequestType });
+
+    // Pre-select the employee's current rule for change-type requests.
+    if (this.hasCurrentEnrollment && data?.currentEnrollment?.ruleId) {
+      this.form.patchValue({ ruleId: data.currentEnrollment.ruleId });
+    }
+
+    this.applyRuleValidator(this.defaultRequestType);
+    this.form.get('requestType')?.valueChanges.subscribe((t) => this.applyRuleValidator(String(t ?? '')));
+
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
+  }
+
+  get isRuleRequired(): boolean {
+    const t = String(this.form.get('requestType')?.value ?? '');
+    return t === 'enrollment' || t === 'update' || t === 'reactivation';
+  }
+
+  private applyRuleValidator(requestType: string): void {
+    const ruleCtrl = this.form.get('ruleId');
+    if (!ruleCtrl) return;
+    const ruleDriven = requestType === 'enrollment' || requestType === 'update' || requestType === 'reactivation';
+    ruleCtrl.setValidators(ruleDriven ? [Validators.required] : []);
+    ruleCtrl.updateValueAndValidity({ emitEvent: false });
   }
 
   get dialogTitle(): string {
@@ -148,6 +196,7 @@ export class RequestSocialSecurityChangeDialogComponent {
     const raw = this.form.getRawValue();
     const payload: CreateSocialSecurityEnrollmentRequestPayload = {
       requestType: String(raw.requestType ?? 'enrollment'),
+      ruleId: raw.ruleId ? String(raw.ruleId) : null,
       reason: String(raw.reason ?? '').trim() || null,
       requestedEmployeePct: this.toNullableNumber(raw.requestedEmployeePct),
       requestedEmployerPct: this.toNullableNumber(raw.requestedEmployerPct),

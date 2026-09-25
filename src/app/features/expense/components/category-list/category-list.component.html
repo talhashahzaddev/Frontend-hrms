@@ -53,7 +53,7 @@
             @for (cat of filteredCategories; track cat.categoryId) {
               <tr class="table-row">
                 <td class="font-semibold">{{ cat.name }}</td>
-                <td>{{ cat.createdAt | date:'MMM d, y' }}</td>
+                <td>{{ cat.createdAt | localizedDate:'MMM d, y' }}</td>
                 <td class="action-cell">
                   <button class="action-btn hover-primary" *ngIf="hasPermission('expense_category_edit')" (click)="editCategory(cat)">
                     <mat-icon>edit</mat-icon>

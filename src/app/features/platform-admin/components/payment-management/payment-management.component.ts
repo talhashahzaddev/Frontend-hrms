@@ -33,10 +33,13 @@ import {
 import { TransactionDetailDialogComponent } from '../transaction-detail-dialog/transaction-detail-dialog.component';
 import { RefundDialogComponent } from '../refund-dialog/refund-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-payment-management',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatCardModule,

@@ -19,10 +19,14 @@ import { Employee, Department, Position, CreateEmployeeRequest, UpdateEmployeeRe
 import { PaymentService } from '../../../../core/services/payment.service';
 import { PayrollService } from 'src/app/features/payroll/services/payroll.service';
 import { TaxCategoryDto } from 'src/app/features/payroll/services/payroll.service';
+import { CountryCode } from 'src/app/core/models/countyphonecode.models';
+import { AuthService } from '../../../../core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-form',
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -52,7 +56,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   positions: Position[] = [];
   managers: Employee[] = [];
   taxCategories: TaxCategoryDto[] = [];
-  countries: { name: string; code: string; flag?: string; cca2?: string }[] = [];
+  countries: CountryCode[] = [];
   countryFilter = '';
   organizationCurrency: string = 'USD';
   currencySymbol: string = '$';
@@ -81,6 +85,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
     private payrollService: PayrollService
   ) {
     this.initializeForm();
@@ -96,36 +101,43 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     this.isEditMode = !!this.employeeId;
     this.loadInitialData();
 
-    // Watch for changes in departmentId to filter positions and clear position if needed
+    // Watch for changes in departmentId to filter positions and load department managers
     this.employeeForm.get('departmentId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((departmentId) => {
         const positionControl = this.employeeForm.get('positionId');
         const currentPositionId = positionControl?.value;
-        
+
         // If department changes, check if current position belongs to new department
         if (departmentId && currentPositionId) {
           const currentPosition = this.positions.find(p => p.positionId === currentPositionId);
           if (currentPosition && currentPosition.departmentId !== departmentId) {
-            // Clear position if it doesn't belong to the selected department
             positionControl?.setValue('', { emitEvent: false });
           }
         } else if (!departmentId) {
-          // Clear position if no department is selected
           positionControl?.setValue('', { emitEvent: false });
         }
+
+        // Load managers for the selected department (plus Super Admins)
+        if (departmentId) {
+          this.employeeService.getManagers(String(departmentId))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (result) => {
+                this.managers = result;
+                // If current manager is no longer in the list, clear the selection
+                const currentManagerId = this.employeeForm.get('reportingManagerId')?.value;
+                if (currentManagerId && !result.find(m => m.employeeId === currentManagerId)) {
+                  this.employeeForm.get('reportingManagerId')?.setValue('', { emitEvent: false });
+                }
+              },
+              error: () => this.managers = []
+            });
+        } else {
+          this.managers = [];
+          this.employeeForm.get('reportingManagerId')?.setValue('', { emitEvent: false });
+        }
       });
-
-    // Debug: Watch for changes in reportingManagerId
-    this.employeeForm.get('reportingManagerId')?.valueChanges.subscribe(value => {
-      console.log('Reporting Manager ID changed to:', value);
-    });
-
-    // Debug: Check if the form control exists
-    const reportingManagerControl = this.employeeForm.get('reportingManagerId');
-    console.log('Reporting Manager control exists:', !!reportingManagerControl);
-    console.log('Reporting Manager control value:', reportingManagerControl?.value);
-    console.log('Reporting Manager control status:', reportingManagerControl?.status);
   }
 
   private checkSubscription(): void {
@@ -208,7 +220,6 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     const requests: any[] = [
       this.employeeService.getDepartments(),
       this.employeeService.getPositions(),
-      this.employeeService.getManagers(),
       this.payrollService.getActiveTaxCategories()
     ];
 
@@ -220,27 +231,24 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results: any[]) => {
-          this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === results[4]?.employmentDetails?.departmentId));
-          this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === results[4]?.employmentDetails?.positionId));
+          const employeeData = this.isEditMode ? results[3] : null;
+          this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === employeeData?.employmentDetails?.departmentId));
+          this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === employeeData?.employmentDetails?.positionId));
 
-          this.managers = results[2];
-          this.taxCategories = results[3] as TaxCategoryDto[] || [];
+          this.taxCategories = results[2] as TaxCategoryDto[] || [];
 
-          // Debug logging for managers
-          console.log('Managers loaded:', this.managers);
-          if (this.managers.length > 0) {
-            console.log('First manager:', this.managers[0]);
-            console.log('First manager employeeId:', this.managers[0].employeeId);
-            console.log('First manager employeeId type:', typeof this.managers[0].employeeId);
-          }
-
-          // Debug: Check form control after managers are loaded
-          const reportingManagerControl = this.employeeForm.get('reportingManagerId');
-          console.log('After managers loaded - Reporting Manager control:', reportingManagerControl);
-          console.log('After managers loaded - Control value:', reportingManagerControl?.value);
-
-          if (this.isEditMode && results[4]) {
-            this.populateForm(results[4]);
+          if (this.isEditMode && employeeData) {
+            this.populateForm(employeeData);
+            // Load managers for the existing department (edit mode: valueChanges won't fire for initial value)
+            const existingDeptId = employeeData?.employmentDetails?.departmentId;
+            if (existingDeptId) {
+              this.employeeService.getManagers(String(existingDeptId))
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                  next: (result) => this.managers = result,
+                  error: () => this.managers = []
+                });
+            }
           }
 
           this.isLoading = false;
@@ -482,6 +490,11 @@ onCountryPanelOpen(isOpen: boolean) {
       control.setValue(digits);
     }
   }
+
+    hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Employee Management', 'Add Employee', actionKey);
+  }
+
 
 
 

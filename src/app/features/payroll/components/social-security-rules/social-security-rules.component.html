@@ -1,95 +1,110 @@
-<div class="social-security-rules-container">
-  <div class="page-header-wrapper">
-    <div class="page-header">
-      <div class="title-section">
-        <button class="icon-button back-btn" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="title-text-group">
-          <h1 class="title">Social Security Rules</h1>
-          <p class="subtitle">Define and manage social security contribution rules.</p>
+@if (!hasPermission('social_security_rule_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view social security rules. Please contact your system administrator.</p>
+    <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
+  </div>
+} @else {
+  <div class="ss-rules-container">
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="title-section">
+          <button class="icon-button back-btn" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-text-group">
+            <h1 class="title">Social Security</h1>
+            <p class="subtitle">Define and manage social security contribution rules and rates.</p>
+          </div>
         </div>
+        @if (hasPermission('social_security_rule_add')) {
+          <button class="create-rule-btn" (click)="openRuleDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Add Social Security Rule</span>
+          </button>
+        }
       </div>
-      <button class="create-rule-btn" (click)="openRuleDialog()">
-        <mat-icon>add</mat-icon>
-        <span>Add Social Security Rule</span>
+    </div>
+
+    <div class="tab-navigation">
+      @for (tab of ssTabs; track tab.key) {
+      <button class="tab" [class.active]="tab.key === 'rules'" (click)="navigateToTab(tab.route)">
+        {{ tab.label }}
       </button>
+      }
     </div>
-  </div>
 
-  <div class="content-card">
-    <div class="table-responsive">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th class="text-left">Rule Name</th>
-            <th class="text-right">Scheme</th>
-            <th class="text-right">Employee %</th>
-            <th class="text-right">Employer %</th>
-            <th class="text-center">Status</th>
-            <th class="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading()) {
-            <tr>
-              <td colspan="8" class="text-center" style="padding: 3rem;">
-                <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
-              </td>
-            </tr>
-          } @else if (rules().length === 0) {
-            <tr>
-              <td colspan="8" class="text-center" style="padding: 4rem;">
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                  <h3 style="color: #64748b; font-weight: 500; margin: 0;">No social security rules configured yet.</h3>
-                  <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
-                    <mat-icon>add</mat-icon>
-                    <span>Create rule</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          } @else {
-            @for (rule of rules(); track rule.ruleId) {
-              <tr class="table-row" [class.inactive-row]="!(rule.isActive ?? true)">
-                <td class="text-left">
-                  <div class="rule-name-with-icon">
-                    <div class="rule-icon-box">
-                      <mat-icon>policy</mat-icon>
-                    </div>
-                    <span class="font-semibold">{{ rule.ruleName }}</span>
-                  </div>
-                </td>
-                <td class="text-right">{{ (rule.employeeDefaultPct ?? 0) | number:'1.2-2' }}%</td>
-                <td class="text-right">{{ (rule.employerDefaultPct ?? 0) | number:'1.2-2' }}%</td>
-                <td class="text-right">{{ getSchemeName(rule.schemeId) }}</td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="(rule.isActive ?? true) ? 'status-active' : 'status-inactive'">
-                    {{ (rule.isActive ?? true) ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-                <td class="text-right action-cell">
-                  <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule" (click)="editRule(rule)" [disabled]="!isRuleActive(rule)">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button class="action-btn text-muted hover-primary"
-                    [title]="(rule.isActive ?? true) ? 'Deactivate' : 'Activate'"
-                    (click)="onToggleStatus(rule)">
-                    <mat-icon>{{ (rule.isActive ?? true) ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-                  </button>
-                  <button mat-icon-button class="action-btn text-muted hover-danger" title="Delete Rule" (click)="onDelete(rule)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </tr>
+    <div class="content-card">
+      @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="34"></mat-spinner>
+      </div>
+      } @else if (rules().length === 0) {
+      <div class="empty-state">
+        <h3>No social security rules configured yet.</h3>
+        @if (hasPermission('social_security_rule_add')) {
+          <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+            <mat-icon>add</mat-icon>
+            <span>Create rule</span>
+          </button>
+        }
+      </div>
+      } @else {
+      <div class="rules-grid">
+        @for (rule of rules(); track rule.ruleId) {
+        <article class="rule-card" [class.inactive-card]="!(rule.isActive ?? true)">
+          <div class="card-head">
+            <div class="rule-name-with-icon">
+              <div class="rule-icon-box">
+                <mat-icon>policy</mat-icon>
+              </div>
+              <div class="card-title-wrap">
+                <h3>{{ rule.ruleName || '-' }}</h3>
+                <p>{{ getSchemeName(rule.schemeId) }}</p>
+              </div>
+            </div>
+            <span class="badge" [ngClass]="(rule.isActive ?? true) ? 'status-active' : 'status-inactive'">
+              {{ (rule.isActive ?? true) ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <div class="meta-item">
+              <span class="meta-label">Employee %</span>
+              <span class="meta-value">{{ (rule.employeeDefaultPct ?? 0) | number:'1.2-2' }}%</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Employer %</span>
+              <span class="meta-value">{{ (rule.employerDefaultPct ?? 0) | number:'1.2-2' }}%</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            @if (hasPermission('social_security_rule_edit')) {
+              <button mat-icon-button class="action-btn hover-primary" title="Edit Rule" (click)="editRule(rule)" [disabled]="!isRuleActive(rule)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn hover-primary"
+                [title]="(rule.isActive ?? true) ? 'Deactivate' : 'Activate'"
+                (click)="onToggleStatus(rule)">
+                <mat-icon>{{ (rule.isActive ?? true) ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
             }
-          }
-        </tbody>
-      </table>
-    </div>
+            @if (hasPermission('social_security_rule_delete')) {
+              <button mat-icon-button class="action-btn hover-danger" title="Delete Rule" (click)="onDelete(rule)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </article>
+        }
+      </div>
+      }
 
-    <div class="table-footer">
-      <p>Showing {{ rules().length }} of {{ rules().length }} policies</p>
+      <div class="table-footer">
+        <p>Showing {{ rules().length }} of {{ rules().length }} social security rules</p>
+      </div>
     </div>
   </div>
-</div>
+}

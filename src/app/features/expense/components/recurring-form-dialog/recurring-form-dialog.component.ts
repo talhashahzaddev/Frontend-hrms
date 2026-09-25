@@ -19,6 +19,7 @@ import {
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RecurringFormDialogData {
   mode: 'create' | 'edit';
   recurring?: RecurringExpenseDto;
@@ -33,10 +34,12 @@ const ROTATION_OPTIONS = [
   { value: 'Yearly', label: 'Yearly' }
 ];
 
+
 @Component({
   selector: 'app-recurring-form-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

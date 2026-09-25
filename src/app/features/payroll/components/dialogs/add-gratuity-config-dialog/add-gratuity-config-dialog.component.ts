@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type GratuityConfigStatus = 'active' | 'inactive';
 export type GratuityCalculationType = 'perYear' | 'fixed' | 'percentage';
 
@@ -20,11 +21,13 @@ interface GratuityConfigDialogData {
   initialValue?: Partial<GratuityConfigDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-gratuity-config-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-gratuity-config-dialog.component.html',
   styleUrl: './add-gratuity-config-dialog.component.scss'
 })

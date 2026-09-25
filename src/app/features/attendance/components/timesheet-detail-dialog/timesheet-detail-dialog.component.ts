@@ -43,6 +43,7 @@ import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 import { AuthService } from '../../../../core/services/auth.service';
+import { DateTimeFormatService } from '../../../../core/services/date-time-format.service';
 
 import { EmployeeTimesheetDto } from '../../../../core/models/attendance.models';
 
@@ -53,6 +54,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
 
 
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface TimesheetDialogData {
   timesheetId: string;
   timesheetName: string;
@@ -66,13 +68,14 @@ export interface TimesheetDialogData {
 
 
 
-@Component({
 
+@Component({
   selector: 'app-timesheet-detail-dialog',
 
   standalone: true,
 
   imports: [
+    SharedCommonModule,
 
     CommonModule,
 
@@ -321,7 +324,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     private authService: AuthService,
 
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private dateTimeFormat: DateTimeFormatService
 
   ) {}
 
@@ -394,7 +398,12 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
       this.selectedEmployee && typeof this.selectedEmployee.employeeName === 'string' && this.selectedEmployee.employeeName.toLowerCase().includes('super admin'));
 
-    return isDirectMatch || isSuperAdminBypass;
+    // An employee only ever sees their OWN timesheet here — the API scopes timesheet
+    // details to the current employee for non-admin/HR roles, so every row they see is
+    // theirs. The id-match above fails when the session carries no employeeId (the login
+    // token doesn't include one), which previously hid the "Request correction" action for
+    // all employees. Treat the employee role as always viewing their own timesheet.
+    return this.isEmployee() || isDirectMatch || isSuperAdminBypass;
 
   }
 
@@ -753,7 +762,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
       },
 
-      panelClass: 'attendance-request-dialog-panel'
+      panelClass: ['attendance-dialog-panel', 'attendance-request-dialog-panel']
 
     });
 
@@ -817,6 +826,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Finalize Employee Records',
         message: `Are you sure you want to finalize all records for ${employee.employeeName}? This will lock them for payroll.`,
@@ -930,6 +940,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef2 = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Submit All Draft Edits',
         message: `Are you sure you want to submit all ${draftCount} draft edit${draftCount > 1 ? 's' : ''} for approval? They will be sent to your manager.`,
@@ -1263,6 +1274,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(ManagerOverrideDialogComponent, {
       width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel',
       disableClose: true,
       data: {
         record:       reviewRecord,
@@ -1363,39 +1376,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (!timeStr) return '-';
 
-    // ISO timestamp (with or without offset / Z): parse as a moment and render in
-    // the viewer's local timezone. The DB stores timestamptz so the wire value
-    // pinpoints the same instant regardless of representation; toLocaleTimeString
-    // normalizes that instant to "what the clock said in the viewer's timezone".
-    if (typeof timeStr === 'string' && timeStr.includes('T')) {
-      const d = new Date(timeStr);
-      if (!isNaN(d.getTime())) {
-        return d.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
-      }
-    }
-
-    // Bare "HH:MM" string (no date) — handle directly without date parsing.
-    if (typeof timeStr === 'string' && /^\d{2}:\d{2}$/.test(timeStr)) {
-
-      let [hour, minute] = timeStr.split(':');
-
-      let hourNum = parseInt(hour, 10);
-
-      const ampm = hourNum >= 12 ? 'PM' : 'AM';
-
-      hourNum = hourNum % 12;
-
-      if (hourNum === 0) hourNum = 12;
-
-      return `${hourNum}:${minute} ${ampm}`;
-
-    }
-
-    return timeStr;
+    return this.dateTimeFormat.formatTime(timeStr, { fallback: timeStr });
 
   }
 
@@ -1647,6 +1628,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef3 = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Approve All Pending Corrections',
         message: `Are you sure you want to approve all ${pendingCount} pending corrections for ${scope} in this period?`,
@@ -1704,6 +1686,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef4 = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Finalize Monthly Timesheet',
         message: 'Are you sure you want to finalize the entire monthly timesheet? This will lock all records for payroll and prevent further changes.',

@@ -57,7 +57,7 @@
 
     <div class="dialog-actions">
       <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
-      <button type="submit" class="submit-btn" [disabled]="form.invalid">Enroll employee</button>
+      <button type="submit" class="submit-btn" [disabled]="!canSubmit || form.invalid">Enroll employee</button>
     </div>
   </form>
 </div>

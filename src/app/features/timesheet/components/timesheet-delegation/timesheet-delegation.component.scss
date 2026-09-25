@@ -1,0 +1,25 @@
+@use '../../styles/timesheet-shared';
+
+/* Delegation uses shared form + card styles from global tokens */
+
+.ts-delegation-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ts-detail-row {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  align-items: baseline;
+
+  .ts-label {
+    min-width: 4.5rem;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8125rem;
+  }
+
+  .ts-body { color: #0f172a; }
+}

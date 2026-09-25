@@ -10,6 +10,9 @@ import { PaymentService, SubscriptionPlanDto } from '@core/services/payment.serv
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+
 interface PricingPlan {
   id: string;
   name: string;
@@ -25,10 +28,13 @@ interface PricingPlan {
   isExpired?: boolean;
 }
 
+
 @Component({
   selector: 'app-subscription',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     MatCardModule,
     MatButtonModule,

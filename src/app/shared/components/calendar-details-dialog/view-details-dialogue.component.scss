@@ -1,394 +1,418 @@
+// ─── Design Tokens (mirrors attendance-dialog system) ─────────────────────────
+$ad-primary:        #2563eb;
+$ad-primary-light:  #eff6ff;
+$ad-primary-dark:   #1d4ed8;
+$ad-text-primary:   #0f172a;
+$ad-text-secondary: #64748b;
+$ad-text-label:     #475569;
+$ad-text-muted:     #94a3b8;
+$ad-border:         #e2e8f0;
+$ad-surface:        #f8fafc;
+$ad-white:          #ffffff;
+$ad-danger:         #dc2626;
+$ad-danger-bg:      #fef2f2;
+$ad-success:        #16a34a;
+$ad-success-bg:     #dcfce7;
+$ad-warning:        #d97706;
+$ad-warning-bg:     #fef3c7;
+$ad-font:           'Inter', sans-serif;
+
+// ─── Dialog Container Shell ───────────────────────────────────────────────────
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 16px !important;
+  border-radius: 0.875rem !important;
   padding: 0 !important;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-  max-width: 600px !important;
-  width: 95vw !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
 }
 
+::ng-deep .mdc-dialog__surface {
+  border-radius: 0.875rem !important;
+  overflow: hidden !important;
+}
+
+// ─── Dialog Header ────────────────────────────────────────────────────────────
 .dialog-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid $ad-border;
+  flex-shrink: 0;
+  background: $ad-white;
+  backdrop-filter: blur(10px);
+  gap: 1rem;
+  font-family: $ad-font;
 
   .header-content {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    gap: 0.875rem;
+    flex: 1;
+    min-width: 0;
+  }
 
-    h2 {
-      margin: 0;
-      color: white;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
+  .header-icon-wrap {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    background: $ad-primary-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 
-    .date-badge {
-      font-size: 14px;
-      opacity: 0.9;
-      font-weight: 500;
+    mat-icon {
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      color: $ad-primary;
     }
   }
 
-  button mat-icon {
-    color: white;
+  .header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $ad-text-primary;
+    line-height: 1.3;
+    font-family: $ad-font;
+  }
+
+  .date-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $ad-text-secondary;
+    line-height: 1.2;
+  }
+
+  .close-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+      color: $ad-text-muted;
+    }
+
+    &:hover mat-icon { color: $ad-text-primary; }
   }
 }
 
+// ─── Dialog Content ───────────────────────────────────────────────────────────
 .dialog-content {
-  padding: 24px 28px !important;
+  padding: 1.5rem !important;
   max-height: 70vh;
   overflow-y: auto;
+  background: $ad-surface;
+  font-family: $ad-font;
   position: relative;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: $ad-border; border-radius: 4px; }
 }
 
-/* Loading Overlay */
+// ─── Loading Overlay ─────────────────────────────────────────────────────────
 .loading-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.8);
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10;
+  border-radius: 0.5rem;
 }
 
-/* Daily Update Card */
-.daily-update-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  border-left: 4px solid #8b5cf6; // Purple accent
-
-  .update-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #8b5cf6;
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    span {
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  .update-text {
-    margin: 0;
-    color: #374151;
-    font-size: 14px;
-    line-height: 1.6;
-    white-space: pre-wrap; // Preserve newlines
-  }
-}
-
-/* Section Containers */
+// ─── Section Container ────────────────────────────────────────────────────────
 .section-container {
-  margin-bottom: 24px;
+  background: $ad-white;
+  border: 1px solid $ad-border;
+  border-radius: 0.75rem;
+  padding: 1.125rem 1.25rem;
+  margin-bottom: 1rem;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
+  &:last-child { margin-bottom: 0; }
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
 
   .section-icon {
-    color: #667eea;
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: $ad-primary;
   }
 
   h3 {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $ad-text-primary;
     flex: 1;
-  }
-
-  .status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
     text-transform: uppercase;
-
-    &.present {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    &.absent {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    &.half-day {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-
-    &.late {
-      background: #fef9c3;
-      color: #854d0e;
-    }
+    letter-spacing: 0.04em;
+    font-family: $ad-font;
   }
 }
 
-/* Leave Details */
+// ─── Status Badges ────────────────────────────────────────────────────────────
+.status-badge {
+  padding: 0.2rem 0.625rem;
+  border-radius: 2rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &.present  { background: $ad-success-bg; color: $ad-success; }
+  &.absent   { background: $ad-danger-bg;  color: $ad-danger; }
+  &.half-day { background: #dbeafe;        color: #1d4ed8; }
+  &.late     { background: $ad-warning-bg; color: $ad-warning; }
+}
+
+// ─── Leave Section ────────────────────────────────────────────────────────────
 .leave-section {
   .status-chip {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
+    gap: 4px;
+    padding: 0.2rem 0.625rem;
+    border-radius: 2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
 
-    &.status-present {
-      background: #dcfce7;
-      color: #166534;
-    }
+    &.status-present { background: $ad-success-bg; color: $ad-success; }
+    &.status-absent  { background: $ad-danger-bg;  color: $ad-danger; }
+    &.status-late    { background: $ad-warning-bg; color: $ad-warning; }
 
-    // Approved
-    &.status-absent {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    // Rejected
-    &.status-late {
-      background: #fef9c3;
-      color: #854d0e;
-    }
-
-    // Pending
-
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
+    mat-icon { font-size: 0.875rem; width: 0.875rem; height: 0.875rem; }
   }
 
   .details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    background: #f9fafb;
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 16px;
+    gap: 0.875rem;
+    background: $ad-surface;
+    padding: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid $ad-border;
+    margin-bottom: 0.875rem;
   }
 }
 
-/* Shift Details */
+// ─── Shift Details ────────────────────────────────────────────────────────────
 .shift-details {
-  background: #f8fafc;
-  padding: 16px;
-  border-radius: 12px;
+  background: $ad-surface;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 16px;
+  border: 1px solid $ad-border;
+  margin-bottom: 0.875rem;
 
   .time-range {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
     font-weight: 600;
-    color: #1e293b;
+    font-size: 0.875rem;
+    color: $ad-text-primary;
 
-    .arrow-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      color: #94a3b8;
-    }
+    .time { color: $ad-primary; font-weight: 700; }
+    .arrow-icon { font-size: 1rem; width: 1rem; height: 1rem; color: $ad-text-muted; }
   }
 
-  .highlight {
-    color: #6366f1;
-    font-weight: 600;
-  }
+  .highlight { color: $ad-primary; font-weight: 700; }
 }
 
-/* Attendance Stats Cards */
+// ─── Attendance Stats Cards ───────────────────────────────────────────────────
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  transition: all 0.2s;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: $ad-white;
+  border: 1px solid $ad-border;
+  border-radius: 0.625rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
 
   &:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: $ad-primary;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
   }
 
   mat-icon {
-    padding: 8px;
-    border-radius: 8px;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
 
-    &.check-in {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    &.check-out {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    &.hours {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-
-    &.overtime {
-      background: #fef9c3;
-      color: #854d0e;
-    }
+    &.check-in  { background: $ad-success-bg; color: $ad-success; }
+    &.check-out { background: $ad-danger-bg;  color: $ad-danger; }
+    &.hours     { background: #dbeafe;        color: #1d4ed8; }
+    &.overtime  { background: $ad-warning-bg; color: $ad-warning; }
   }
 
   .stat-info {
     display: flex;
     flex-direction: column;
+    gap: 0.125rem;
 
     .label {
-      font-size: 11px;
+      font-size: 0.6875rem;
       text-transform: uppercase;
-      color: #6b7280;
+      letter-spacing: 0.05em;
+      color: $ad-text-muted;
       font-weight: 600;
     }
 
     .value {
-      font-size: 15px;
+      font-size: 0.9375rem;
       font-weight: 700;
-      color: #1f2937;
+      color: $ad-text-primary;
     }
   }
 }
 
-/* Sessions List */
+// ─── Daily Update Card ────────────────────────────────────────────────────────
+.daily-update-card {
+  background: $ad-white;
+  border: 1px solid $ad-border;
+  border-left: 3px solid $ad-primary;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+
+  .update-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: $ad-primary;
+
+    mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
+    span {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+  }
+
+  .update-text {
+    margin: 0;
+    color: $ad-text-label;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+}
+
+// ─── Sessions List ────────────────────────────────────────────────────────────
 .sessions-list {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 16px;
+  background: $ad-surface;
+  border: 1px solid $ad-border;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
 
   h4 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: #6b7280;
+    margin: 0 0 0.625rem;
+    font-size: 0.6875rem;
+    color: $ad-text-muted;
     text-transform: uppercase;
-    font-weight: 600;
+    letter-spacing: 0.06em;
+    font-weight: 700;
   }
 
   .session-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid $ad-border;
 
-    &:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
+    &:last-child { border-bottom: none; padding-bottom: 0; }
 
     .session-time {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 500;
-      color: #374151;
+      gap: 0.375rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: $ad-text-primary;
 
-      .separator {
-        color: #9ca3af;
-      }
+      .separator { color: $ad-text-muted; }
     }
 
     .session-duration {
       display: flex;
       align-items: center;
-      gap: 6px;
-      color: #6b7280;
-      font-size: 13px;
+      gap: 0.25rem;
+      color: $ad-text-secondary;
+      font-size: 0.8125rem;
+      font-weight: 500;
 
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-      }
+      mat-icon { font-size: 0.9375rem; width: 0.9375rem; height: 0.9375rem; }
     }
   }
 }
 
-/* Common Detail Item */
+// ─── Common Detail Item ───────────────────────────────────────────────────────
 .detail-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 
-  &.full-width {
-    grid-column: span 2;
-  }
+  &.full-width { grid-column: span 2; }
 
   .label {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 500;
+    font-size: 0.6875rem;
+    color: $ad-text-muted;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .value {
-    font-size: 14px;
-    color: #1f2937;
-    font-weight: 500;
+    font-size: 0.875rem;
+    color: $ad-text-primary;
+    font-weight: 600;
 
-    &.reason-text {
-      line-height: 1.5;
-    }
+    &.reason-text { line-height: 1.55; font-weight: 400; color: $ad-text-label; }
   }
 }
 
+// ─── Misc ─────────────────────────────────────────────────────────────────────
 .no-data-text {
-  color: #9ca3af;
+  color: $ad-text-muted;
   font-style: italic;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
 }
 
@@ -396,39 +420,51 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 40px 0;
-  color: #9ca3af;
+  gap: 0.75rem;
+  padding: 2.5rem 0;
+  color: $ad-text-muted;
 
   mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    opacity: 0.5;
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    opacity: 0.4;
   }
 
-  p {
-    margin: 0;
-    font-size: 16px;
+  p { margin: 0; font-size: 0.9375rem; }
+}
+
+// ─── Dialog Actions Footer ────────────────────────────────────────────────────
+::ng-deep .mat-mdc-dialog-actions {
+  padding: 0.875rem 1.5rem !important;
+  border-top: 1px solid $ad-border !important;
+  background: $ad-white !important;
+  justify-content: flex-end !important;
+  margin: 0 !important;
+  gap: 0.5rem;
+
+  button {
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: $ad-font;
+    padding: 0 1rem;
   }
 }
 
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 600px) {
-  .stats-cards {
-    grid-template-columns: 1fr;
-  }
+  .stats-cards { grid-template-columns: 1fr; }
 
   .leave-section .details-grid {
     grid-template-columns: 1fr;
-
-    .detail-item.full-width {
-      grid-column: span 1;
-    }
+    .detail-item.full-width { grid-column: span 1; }
   }
 
   .shift-details {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 0.75rem;
   }
 }

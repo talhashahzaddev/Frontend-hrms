@@ -133,6 +133,44 @@ export class AttendanceService {
       );
   }
 
+  /**
+   * Fetch team attendance using the dedicated team-attendance endpoint.
+   * Uses the same query parameters as getAttendances.
+   */
+  getTeamAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
+    let params = new HttpParams();
+    if(searchRequest.SearchTerm) params=params.set('searchTerm', searchRequest.SearchTerm);
+    if (searchRequest.employeeId) params = params.set('employeeId', searchRequest.employeeId);
+    if (searchRequest.departmentId) params = params.set('departmentId', searchRequest.departmentId);
+    if (searchRequest.status) params = params.set('status', searchRequest.status);
+    if (searchRequest.sortBy) params = params.set('sortBy', searchRequest.sortBy);
+    if (searchRequest.sortDirection) params = params.set('sortDirection', searchRequest.sortDirection);
+
+    params = params.set('startDate', searchRequest.startDate);
+    params = params.set('endDate', searchRequest.endDate);
+    params = params.set('page', searchRequest.page.toString());
+    params = params.set('pageSize', searchRequest.pageSize.toString());
+
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/team-attendance`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch team attendance records');
+          }
+          const data = response.data!;
+          return {
+            attendances: data.data,
+            totalCount: data.totalCount,
+            page: data.page,
+            pageSize: data.pageSize,
+            totalPages: data.totalPages,
+            hasNextPage: data.hasNextPage,
+            hasPreviousPage: data.hasPreviousPage
+          };
+        })
+      );
+  }
+
   getAttendance(attendanceId: string): Observable<Attendance> {
     return this.http.get<ApiResponse<Attendance>>(`${this.apiUrl}/${attendanceId}`)
       .pipe(

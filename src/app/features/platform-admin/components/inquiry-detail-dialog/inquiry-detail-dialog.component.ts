@@ -15,10 +15,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DemoInquiryService } from '../../services/demo-inquiry.service';
 import { DemoInquiry } from '../../models/super-admin.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-inquiry-detail-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatDialogModule,

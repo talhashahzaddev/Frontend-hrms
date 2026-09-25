@@ -25,18 +25,20 @@ import {
   TimeTrackingSession,
   Attendance,
   AttendanceSessionDto,
-  ClockInOutRequest
 } from '../../../../core/models/attendance.models';
 import { User } from '../../../../core/models/auth.models';
 import { GeoFenceService, ShiftGeoFenceDto, GeoClockInRequest } from '../../services/geofence.service';
 import { environment } from '../../../../../environments/environment';
+import { SharedCommonModule } from '@shared/shared-common.module';
 declare const faceapi: any;
 type StepState = 'idle' | 'loading' | 'success' | 'error';
+
 
 @Component({
   selector: 'app-time-tracker',
   standalone: true,
   imports: [
+    SharedCommonModule,
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
@@ -158,7 +160,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   }
 
   // ── role helpers ──────────────────────────────────────────────────────────
-  get isAdminOrHR(): boolean { return this.authService.hasAnyRole(['Super Admin', 'HR Manager']); }
+  // get isAdminOrHR(): boolean { return this.authService.hasAnyRole(['Super Admin', 'HR Manager']); }
   hasPermission(actionKey: string): boolean {
     return this.authService.hasMenuPermission('Attendance', 'TimeTracker', actionKey);
   }
@@ -400,44 +402,69 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   }
   // ── Standard (non-geo) clock methods ─────────────────────────────────────
   private doStandardClockIn(): void {
-    this.isClockActionLoading = true;
-    const request: ClockInOutRequest = {
-      action: 'in',
-      shiftId: this.currentShiftId,
-      location: { source: 'web_app', timestamp: new Date().toISOString() }
-    };
-    this.attendanceService.checkIn(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          this.notification.showSuccess(response?.data?.message || 'Clocked in successfully!');
-          this.refreshAfterClock();
-          this.isClockActionLoading = false;
-        },
-        error: (e) => { this.notification.showError(e?.error?.message || 'Failed to clock in.'); this.isClockActionLoading = false; }
-      });
+    void this.clockViaGeoEndpoint('in');
   }
   private doStandardClockOut(): void {
     const dialogRef = this.dialog.open(CommentDialogComponent, {
       width: '400px',
+      panelClass: 'attendance-dialog-panel',
       data: { title: 'Clock Out', label: 'Day Updates / Comments', placeholder: 'E.g., completed API integration...', required: false }
     });
     dialogRef.afterClosed().subscribe(comment => {
       if (comment === undefined) return;
-      this.isClockActionLoading = true;
-      const request: ClockInOutRequest = {
-        action: 'out', shiftId: this.currentShiftId,
-        location: { source: 'web_app', timestamp: new Date().toISOString() }, notes: comment
+
+      void this.clockViaGeoEndpoint('out', comment);
+    });
+  }
+
+  private getBrowserLocation(): Promise<{ latitude?: number; longitude?: number }> {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({});
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        () => resolve({}),
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      );
+    });
+  }
+
+  private clockViaGeoEndpoint(action: 'in' | 'out', notes?: string): void {
+    this.isClockActionLoading = true;
+
+    this.getBrowserLocation().then(location => {
+      const request: GeoClockInRequest = {
+        action,
+        ...location,
+        notes,
+        matchResult: 'match',
+        deviceInfo: JSON.stringify({
+          userAgent: navigator.userAgent.substring(0, 200),
+          platform: navigator.platform,
+          timestamp: new Date().toISOString()
+        })
       };
-      this.attendanceService.checkOut(request)
+
+      this.geoFenceService.geoClock(request)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (response: any) => {
-            this.notification.showSuccess(response?.data?.message || 'Clocked out successfully!');
+          next: (response) => {
+            this.notification.showSuccess(response.message || `Clocked ${action === 'in' ? 'in' : 'out'} successfully!`);
             this.refreshAfterClock();
             this.isClockActionLoading = false;
           },
-          error: (e) => { this.notification.showError(e?.error?.message || 'Failed to clock out.'); this.isClockActionLoading = false; }
+          error: (e) => {
+            this.notification.showError(e?.error?.message || `Failed to clock ${action === 'in' ? 'in' : 'out'}.`);
+            this.isClockActionLoading = false;
+          }
         });
     });
   }

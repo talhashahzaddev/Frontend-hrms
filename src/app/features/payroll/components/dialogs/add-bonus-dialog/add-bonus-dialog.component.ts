@@ -9,17 +9,21 @@ import { PayrollService } from '../../../services/payroll.service';
 import { EmployeeService } from '../../../../employee/services/employee.service';
 import { SettingsService } from '../../../../settings/services/settings.service';
 import { take } from 'rxjs';
+import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface BonusDialogData {
   mode?: 'create' | 'edit';
   initialValue?: any;
 }
 
+
 @Component({
   selector: 'app-add-bonus-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './add-bonus-dialog.component.html',
   styleUrl: './add-bonus-dialog.component.scss'
 })
@@ -29,6 +33,7 @@ export class AddBonusDialogComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<AddBonusDialogComponent>);
+  private readonly authService = inject(AuthService);
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
 
@@ -109,11 +114,21 @@ export class AddBonusDialogComponent implements OnInit {
     return this.mode === 'edit' ? 'Update record' : 'Save record';
   }
 
+  get canSubmit(): boolean {
+    if (this.mode === 'edit') {
+      return this.authService.hasPermissionByActionKey('bonus_entry_edit');
+    }
+    return this.authService.hasPermissionByActionKey('bonus_entry_add');
+  }
+
   close(): void {
     this.dialogRef.close();
   }
 
   save(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

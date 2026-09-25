@@ -13,11 +13,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PaymentService } from '@core/services/payment.service';
 import { TransactionDto, InvoiceDto, PagedResult } from '@core/models/payment-management.models';
+import { AuthService } from '@core/services/auth.service';
 
+
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-billing-history',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -56,7 +63,8 @@ export class BillingHistoryComponent implements OnInit, OnDestroy {
 
   constructor(
     private paymentService: PaymentService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -148,6 +156,10 @@ export class BillingHistoryComponent implements OnInit, OnDestroy {
       default: return 'payment';
     }
   }
+    hasPermission(actionKey: string): boolean {
+        // Menu and subMenu naming: use 'Billings' for both
+        return this.authService.hasMenuPermission('Billings', 'Billings', actionKey);
+    }
 
   goBack(): void {
     this.router.navigate(['/subscription']);

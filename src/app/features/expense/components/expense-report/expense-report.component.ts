@@ -26,6 +26,7 @@ import {
 } from '../../../../core/models/expense.models';
 import { SettingsService } from '../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type DatePreset = '' | 'this_week' | 'this_month' | '3_month' | '6_month' | 'this_year';
 
 const CATEGORY_COLORS = [
@@ -33,10 +34,12 @@ const CATEGORY_COLORS = [
   '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
 ];
 
+
 @Component({
   selector: 'app-expense-report',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

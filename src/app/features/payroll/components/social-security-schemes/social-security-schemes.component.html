@@ -1,0 +1,110 @@
+@if (!hasPermission('social_security_rule_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view social security schemes. Please contact your system administrator.</p>
+    <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
+  </div>
+} @else {
+  <div class="ss-page-container">
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="title-section">
+          <button class="icon-button back-btn" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-text-group">
+            <h1 class="title">Social Security</h1>
+            <p class="subtitle">Define and manage social security contribution rules and rates.</p>
+          </div>
+        </div>
+        @if (hasPermission('social_security_rule_add')) {
+          <button class="create-rule-btn" (click)="openCreateDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Add Scheme</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="tab-navigation">
+      @for (tab of ssTabs; track tab.key) {
+      <button class="tab" [class.active]="tab.key === 'schemes'" (click)="navigateToTab(tab.route)">
+        {{ tab.label }}
+      </button>
+      }
+    </div>
+
+    <div class="content-card">
+      @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="34"></mat-spinner>
+      </div>
+      } @else if (schemes().length === 0) {
+      <div class="empty-state">
+        <h3>No social security schemes configured yet.</h3>
+        @if (hasPermission('social_security_rule_add')) {
+          <button class="create-rule-btn" (click)="openCreateDialog()" style="width: auto;">
+            <mat-icon>add</mat-icon>
+            <span>Create scheme</span>
+          </button>
+        }
+      </div>
+      } @else {
+      <div class="scheme-grid">
+        @for (scheme of schemes(); track scheme.schemeId) {
+        <article class="scheme-card">
+          <div class="card-head">
+            <div class="rule-name-with-icon">
+              <div class="rule-icon-box">
+                <mat-icon>verified_user</mat-icon>
+              </div>
+              <div class="card-title-wrap">
+                <h3>{{ scheme.schemeName || '-' }}</h3>
+                <p>{{ scheme.schemeCode || '-' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="meta-item">
+              <span class="meta-label">Type</span>
+              <span class="meta-value">{{ scheme.schemeType || '-' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Jurisdiction</span>
+              <span class="meta-value">{{ getJurisdictionName(scheme.jurisdictionId) }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Authority</span>
+              <span class="meta-value">{{ getAuthorityName(scheme.authorityId) }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Mandatory Mode</span>
+              <span class="meta-value">{{ scheme.mandatoryMode || '-' }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            @if (hasPermission('social_security_rule_edit')) {
+              <button mat-icon-button class="action-btn hover-primary" title="Edit Scheme" (click)="editScheme(scheme)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            @if (hasPermission('social_security_rule_delete')) {
+              <button mat-icon-button class="action-btn hover-danger" title="Delete Scheme" (click)="deleteScheme(scheme)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </article>
+        }
+      </div>
+      }
+
+      <div class="table-footer">
+        <p>Showing {{ schemes().length }} of {{ schemes().length }} social security schemes</p>
+      </div>
+    </div>
+  </div>
+}

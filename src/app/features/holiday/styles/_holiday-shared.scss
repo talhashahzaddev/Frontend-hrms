@@ -1,0 +1,390 @@
+// Holiday Module — aligned with Leave / Attendance / Timesheet (slate + blue #2563eb)
+@use '../../leave/styles/leave-shared';
+
+$hv-primary: #2563eb;
+$hv-border: #e2e8f0;
+$hv-surface: #f8fafc;
+$hv-text-secondary: #64748b;
+
+/* ═══ Summary grid — flexible columns for 4–5 cards ═══════════════════════ */
+.ts-page-layout .statistics-cards {
+  grid-template-columns: repeat(auto-fit, minmax(11.25rem, 1fr));
+}
+
+/* ═══ Summary stat icon colors ═══════════════════════════════════════════════ */
+.ts-page-layout .stat-card-holiday-total .stat-icon-wrapper { background: $hv-primary; }
+.ts-page-layout .stat-card-holiday-mandatory .stat-icon-wrapper { background: #16a34a; }
+.ts-page-layout .stat-card-holiday-restricted .stat-icon-wrapper { background: #d97706; }
+.ts-page-layout .stat-card-holiday-optional .stat-icon-wrapper { background: #7c3aed; }
+.ts-page-layout .stat-card-holiday-upcoming .stat-icon-wrapper { background: #2563eb; }
+
+.ts-page-layout .stat-card-holiday-upcoming .stat-value {
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+
+/* ═══ View toggle (table / timeline) ═════════════════════════════════════════ */
+.ts-page-layout .view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  border: 1px solid $hv-border;
+  border-radius: 0.5rem;
+  padding: 0.125rem;
+  background: #ffffff;
+  flex-shrink: 0;
+
+  button {
+    border-radius: 0.375rem;
+    color: $hv-text-secondary;
+
+    &.active {
+      background: rgba(37, 99, 235, 0.1);
+      color: $hv-primary;
+    }
+  }
+}
+
+/* ═══ Table cell helpers ═════════════════════════════════════════════════════ */
+.ts-page-layout .date-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .date-day {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $hv-primary;
+    min-width: 2rem;
+    text-align: center;
+  }
+
+  .date-details {
+    display: flex;
+    flex-direction: column;
+
+    .date-month {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    .date-weekday {
+      font-size: 0.6875rem;
+      color: $hv-text-secondary;
+    }
+  }
+}
+
+.ts-page-layout .name-cell {
+  display: flex;
+  flex-direction: column;
+
+  .holiday-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #0f172a;
+  }
+
+  .holiday-desc {
+    font-size: 0.75rem;
+    color: $hv-text-secondary;
+    max-width: 17.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ts-page-layout .type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  &.type-mandatory {
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+  }
+
+  &.type-restricted {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+  }
+
+  &.type-optional {
+    background: #ede9fe;
+    color: #7c3aed;
+    border: 1px solid #ddd6fe;
+  }
+}
+
+.ts-page-layout .applicable-badge {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.ts-page-layout .half-day-icon {
+  color: #d97706;
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.ts-page-layout .status-badge {
+  display: inline-block;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+
+  &.upcoming {
+    background: #eff6ff;
+    color: $hv-primary;
+    border: 1px solid rgba(37, 99, 235, 0.15);
+  }
+
+  &.past {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 1px solid $hv-border;
+  }
+}
+
+.ts-page-layout .delete-action {
+  color: #dc2626 !important;
+}
+
+/* ═══ Timeline view card ═════════════════════════════════════════════════════ */
+.ts-page-layout .timeline-card {
+  background: #ffffff;
+  border: 1px solid $hv-border;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 1.25rem 1.5rem;
+}
+
+.ts-page-layout .timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.ts-page-layout .timeline-month {
+  .month-header {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid $hv-border;
+  }
+}
+
+.ts-page-layout .timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 1.5rem;
+  border-left: 2px solid $hv-border;
+}
+
+.ts-page-layout .timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+
+  &.past { opacity: 0.55; }
+
+  .timeline-dot {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px $hv-border;
+    position: absolute;
+    left: -1.9375rem;
+
+    &.type-mandatory { background: #16a34a; }
+    &.type-restricted { background: #d97706; }
+    &.type-optional { background: #7c3aed; }
+  }
+
+  .timeline-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    background: $hv-surface;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid $hv-border;
+    transition: box-shadow 0.2s, border-color 0.2s;
+
+    &:hover {
+      border-color: rgba(37, 99, 235, 0.25);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    }
+  }
+
+  .timeline-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 3rem;
+
+    .day {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: $hv-primary;
+    }
+
+    .weekday {
+      font-size: 0.6875rem;
+      color: $hv-text-secondary;
+      text-transform: uppercase;
+    }
+  }
+
+  .timeline-details {
+    flex: 1;
+
+    .timeline-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+    }
+
+    .timeline-meta {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .half-day-tag {
+      font-size: 0.6875rem;
+      color: #d97706;
+      font-weight: 600;
+    }
+  }
+
+  .timeline-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &:hover .timeline-actions { opacity: 1; }
+}
+
+/* ═══ Holiday form dialog — employee picker ══════════════════════════════════ */
+.employee-picker {
+  .selected-employees-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+
+    .employee-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: #eff6ff;
+      color: $hv-primary;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+
+      .chip-remove {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+        cursor: pointer;
+        opacity: 0.7;
+
+        &:hover { opacity: 1; }
+      }
+    }
+  }
+
+  .employee-list {
+    max-height: 12.5rem;
+    overflow-y: auto;
+    border: 1px solid $hv-border;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: #ffffff;
+
+    .employee-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:hover { background: $hv-surface; }
+
+      &.selected { background: #eff6ff; }
+
+      .check-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: $hv-primary;
+      }
+
+      .emp-info {
+        display: flex;
+        flex-direction: column;
+
+        .emp-name {
+          font-size: 0.8125rem;
+          font-weight: 500;
+          color: #0f172a;
+        }
+
+        .emp-dept {
+          font-size: 0.6875rem;
+          color: $hv-text-secondary;
+        }
+      }
+    }
+
+    .no-employees {
+      padding: 1rem;
+      text-align: center;
+      color: $hv-text-secondary;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .selection-count {
+    font-size: 0.75rem;
+    color: $hv-text-secondary;
+    text-align: right;
+  }
+}
+
+@media (max-width: 768px) {
+  .ts-page-layout .timeline-item .timeline-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ts-page-layout .timeline-item .timeline-actions {
+    opacity: 1;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

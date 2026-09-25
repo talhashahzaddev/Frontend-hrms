@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type SalaryAdvanceDialogStatus =
   | 'pending'
   | 'approved'
@@ -44,13 +45,16 @@ interface SalaryAdvanceDialogData {
   employees?: SalaryAdvanceEmployeeOption[];
   periods?: SalaryAdvancePeriodOption[];
   initialValue?: Partial<SalaryAdvanceDialogPayload>;
+  canSubmit?: boolean;
 }
+
 
 @Component({
   selector: 'app-add-salary-advance-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-salary-advance-dialog.component.html',
   styleUrl: './add-salary-advance-dialog.component.scss'
 })
@@ -115,6 +119,10 @@ export class AddSalaryAdvanceDialogComponent {
     return this.mode === 'edit';
   }
 
+  get canSubmit(): boolean {
+    return this.data?.canSubmit !== false;
+  }
+
   get showRejectedReasonError(): boolean {
     const status = this.form.get('status')?.value;
     const control = this.form.get('rejectionReason');
@@ -136,6 +144,9 @@ export class AddSalaryAdvanceDialogComponent {
   }
 
   save(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

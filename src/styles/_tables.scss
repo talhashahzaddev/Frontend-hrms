@@ -1,0 +1,66 @@
+// ═══ Table Overrides ══════════════════════════════════════════════════════════
+// Scoped to .attendance-table-container so these only apply to timesheet tables,
+// not globally to every PrimeNG table in the app.
+.attendance-table-container .p-datatable {
+  .p-datatable-thead > tr > th {
+    background: #F8FAFC;
+    color: #64748B;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #E5E7EB;
+    padding: 12px 16px;
+  }
+
+  .p-datatable-tbody > tr {
+    transition: background 0.15s ease;
+
+    > td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 14px;
+      color: #374151;
+      background: #FFFFFF;
+    }
+
+    &:hover > td {
+      background: #EBF5FF !important;
+    }
+
+    &.p-highlight > td {
+      background: var(--ts-primary-bg) !important;
+    }
+  }
+
+  .p-datatable-tfoot > tr > td {
+    background: #F8FAFC;
+    padding: 12px 16px;
+    font-weight: 600;
+    border-top: 2px solid #E5E7EB;
+  }
+
+  // Row status colors
+  &.ts-row-submitted .p-datatable-tbody > tr {
+    background: #EFF6FF;
+  }
+
+  &.ts-row-approved .p-datatable-tbody > tr {
+    background: #F0FDF4;
+  }
+
+  &.ts-row-rejected .p-datatable-tbody > tr {
+    background: #FFF5F5;
+  }
+}
+
+// Frozen column styling
+.p-datatable .p-frozen-column {
+  background: var(--ts-card);
+  font-weight: 500;
+}
+
+// Striped modifier
+.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) > td {
+  background: #FAFBFC;
+}

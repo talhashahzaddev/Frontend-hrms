@@ -9,10 +9,13 @@ import { Subject, interval, takeUntil } from 'rxjs';
 import { GeoFenceService, TeamLiveStreamDto, SystemHealthDto } from '../../services/geofence.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-team-monitoring',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatIconModule,

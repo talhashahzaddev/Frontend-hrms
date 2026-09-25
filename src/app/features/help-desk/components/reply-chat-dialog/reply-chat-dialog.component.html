@@ -1,88 +1,76 @@
-<div class="reply-dialog">
-
-  <!-- Header -->
-  <div class="reply-dialog-header">
-    <h2 class="reply-dialog-title">Reply to Ticket</h2>
-    <button class="reply-dialog-close" type="button" (click)="closeDialog()">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>reply</mat-icon>
+      </div>
+      <div>
+        <h2 class="header-title">Reply to Ticket</h2>
+        <p class="header-subtitle">Send a message to involved users</p>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-btn" type="button" (click)="closeDialog()">
+      <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <!-- Form -->
-  <form [formGroup]="replyForm" (ngSubmit)="sendReply()">
-    <div class="reply-dialog-body">
+  <mat-dialog-content class="dialog-body">
+    <form [formGroup]="replyForm" (ngSubmit)="sendReply()">
+      <div class="assign-section">
+        <div class="assign-section-header">
+          <mat-icon>email</mat-icon>
+          <span>Message Details</span>
+        </div>
+        <div class="assign-section-body">
 
-      <!-- From -->
-      <div class="detail-field">
-        <label class="field-label">From</label>
-        <input
-          class="field-input"
-          formControlName="senderEmail"
-          readonly
-          type="email"
-        />
+          <!-- From -->
+          <div class="assign-field-group">
+            <label class="field-label">From</label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <input matInput formControlName="senderEmail" readonly type="email" style="background:#f8fafc; color:#64748b;">
+            </mat-form-field>
+          </div>
+
+          <!-- To -->
+          <div class="assign-field-group">
+            <label class="field-label">To</label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <input matInput [value]="recipientEmails.join(', ')" readonly type="text" style="background:#f8fafc; color:#64748b;">
+            </mat-form-field>
+          </div>
+
+          <!-- Subject -->
+          <div class="assign-field-group">
+            <label class="field-label">Subject</label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <input matInput formControlName="subject" placeholder="Enter subject (optional)" type="text">
+            </mat-form-field>
+          </div>
+
+          <!-- Message -->
+          <div class="assign-field-group">
+            <label class="field-label">Message <span class="required">*</span></label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <textarea matInput formControlName="message" placeholder="Type your message..." style="min-height: 120px;"></textarea>
+              <mat-error *ngIf="replyForm.controls['message'].hasError('required')">Message is required</mat-error>
+            </mat-form-field>
+          </div>
+
+        </div>
       </div>
+    </form>
+  </mat-dialog-content>
 
-      <!-- To -->
-      <div class="detail-field">
-        <label class="field-label">To</label>
-        <input
-          class="field-input"
-          [value]="recipientEmails.join(', ')"
-          readonly
-          type="text"
-        />
-      </div>
-
-      <!-- Subject -->
-      <div class="detail-field">
-        <label class="field-label">Subject</label>
-        <input
-          class="field-input"
-          formControlName="subject"
-          placeholder="Enter subject (optional)"
-          type="text"
-        />
-      </div>
-
-      <!-- Message -->
-      <div class="detail-field">
-        <label class="field-label">Message <span class="field-required">*</span></label>
-        <textarea
-          class="reply-textarea reply-textarea--tall"
-          formControlName="message"
-          placeholder="Type your message..."
-        ></textarea>
-        <span
-          class="field-error"
-          *ngIf="replyForm.controls['message'].hasError('required') && replyForm.controls['message'].touched"
-        >
-          Message is required
-        </span>
-      </div>
-
-    </div>
-
-    <!-- Footer Actions -->
-    <div class="reply-dialog-footer">
-      <button
-        class="btn btn-secondary"
-        type="button"
-        (click)="closeDialog()"
-        [disabled]="sending"
-      >
-        Cancel
-      </button>
-      <button
-        class="btn btn-primary"
-        type="submit"
-        [disabled]="sending || replyForm.invalid"
-      >
-        {{ sending ? 'Sending...' : 'Send' }}
-      </button>
-    </div>
-
-  </form>
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button mat-stroked-button class="btn-cancel" type="button" (click)="closeDialog()" [disabled]="sending">
+      Cancel
+    </button>
+    <button mat-flat-button class="btn-submit" type="button" (click)="sendReply()" [disabled]="sending || replyForm.invalid">
+      <mat-icon *ngIf="!sending">send</mat-icon>
+      <mat-spinner diameter="16" *ngIf="sending" style="margin-right:8px;"></mat-spinner>
+      <span *ngIf="!sending">Send Reply</span>
+      <span *ngIf="sending">Sending...</span>
+    </button>
+  </div>
 </div>

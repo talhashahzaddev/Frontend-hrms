@@ -4,7 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
-export type ReissueHistoryStatus = 'draft' | 'generated' | 'sent' | 'viewed';
+import { SharedCommonModule } from '@shared/shared-common.module';
+export type ReissueHistoryStatus = 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 
 export interface ReissueVersionHistoryItem {
   versionNo: number;
@@ -27,11 +28,13 @@ export interface ReissuePayslipDialogPayload {
   nextVersionNo: number;
 }
 
+
 @Component({
   selector: 'app-reissue-payslip-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './reissue-payslip-dialog.component.html',
   styleUrl: './reissue-payslip-dialog.component.scss'
 })

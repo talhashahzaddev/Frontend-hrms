@@ -22,6 +22,7 @@ export interface RefreshTokenRequest {
 
 export interface User {
   userId: string;
+  employeeId?: string;
   email: string;
   firstName: string;
   lastName: string;

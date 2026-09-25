@@ -1,93 +1,139 @@
-export interface DashboardSummary {
-  totalEmployees: number;
-  presentToday: number;
-  onLeaveToday: number;
-  pendingApprovals: number;
-  newHiresThisMonth: number;
-  attendanceRate: number;
-  employeeSatisfaction: number;
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard Models — mapped from C# DashboardDTOs.cs
+// ─────────────────────────────────────────────────────────────────────────────
+
+// 1. Employee Overview (GET /api/dashboard/my-overview)
+export interface EmployeeOverview {
+  leaveBalances: LeaveBalanceSummary;
+  financialSnapshot: FinancialSnapshot;
+  activeLoansAndAdvances: ActiveLoansAdvances;
+  pendingRequests: PendingRequestSummary[];
 }
 
-export interface AttendanceStats {
-  dates: string[];
-  presentCounts: number[];
-  absentCounts: number[];
-  attendanceRate: number;
-  totalWorkingDays: number;
-  totalPresentDays: number;
+export interface LeaveBalanceSummary {
+  totalRemainingDays: number;
+  byType: LeaveTypeBalanceSummary[];
 }
 
-export interface LeaveStats {
-  totalLeaveRequests: number;
-  approvedRequests: number;
-  pendingRequests: number;
-  rejectedRequests: number;
-  averageLeaveDays: number;
-  leaveTypeUsage: LeaveTypeUsage[];
-}
-
-export interface LeaveTypeUsage {
+export interface LeaveTypeBalanceSummary {
   leaveTypeName: string;
-  requestCount: number;
+  color: string;
   totalDays: number;
+  usedDays: number;
+  remainingDays: number;
+  carryForwardDays: number;
 }
 
-export interface TopPerformer {
-  employeeId: number;   // or whatever ID your backend uses
-  name: string;         // employee name
-  rating: number;       // rating score
-}
-export interface PerformanceStats {
-  averageRating: number;
-  completedReviews: number;
-  pendingReviews: number;
-  topPerformers: TopPerformer[];
-  totalAppraisals?: number; // we’ll compute this
+export interface FinancialSnapshot {
+  lastNetSalary?: number | null;
+  lastPayPeriodName?: string | null;
+  payslipUploadUrl?: string | null;
+  isPayslipAvailable: boolean;
 }
 
-export interface PerformanceRatingDistribution {
-  rating: string;
-  count: number;
-  percentage: number;
+export interface ActiveLoansAdvances {
+  totalRemainingLoanAmount: number;
+  totalRemainingAdvanceAmount: number;
+  activeLoans: ActiveLoanSummary[];
+  activeAdvances: ActiveAdvanceSummary[];
 }
 
-export interface RecentActivity {
-  activityId: string;
-  activity: string;
+export interface ActiveLoanSummary {
+  loanId: string;
+  referenceId: string;
+  remainingAmount: number;
+  totalAmount: number;
+  remainingInstallments: number;
+  completedPercentage: number;
+}
+
+export interface ActiveAdvanceSummary {
+  advanceId: string;
+  amount: number;
+  advanceStatus: string;
+  approvedAt?: string | null;
+}
+
+export interface PendingRequestSummary {
+  requestId: string;
+  requestType: string;
   description: string;
-  userName: string;
-  timestamp: string;
-  activityType: string;
+  submittedAt: string;
 }
 
-export interface EmployeeGrowth {
-  months: string[];
-  counts: number[];
-  growthRate: number;
-  cumulativeEmployees: number[];
-  newEmployees: number[];
+// 2. Manager Overview (GET /api/dashboard/manager-overview)
+export interface ManagerOverview {
+  teamAttendanceSnapshot: TeamAttendanceSnapshot;
+  teamOvertimeCountToday: number;
+  pendingActions: PendingManagerActions;
 }
 
-export interface DepartmentStats {
-  departmentId: string;
-  departmentName: string;
-  employeeCount: number;
-  averageSalary: number;
-  managerName?: string;
+export interface TeamAttendanceSnapshot {
+  presentCount: number;
+  absentCount: number;
+  lateCount: number;
+  onLeaveCount: number;
 }
 
-export interface UpcomingEvents {
-  eventId: string;
-  title: string;
-  description: string;
-  date: string;
-  eventType: string;
-  priority: string;
+export interface PendingManagerActions {
+  pendingLeaveRequests: number;
+  pendingTimesheetCorrections: number;
+  pendingShiftSwaps: number;
 }
 
-export interface OnboardingStatus {
-  signUp: boolean;
-  createTeam: boolean;
-  defineLeaveTypes: boolean;
-  markAttendance: boolean;
+// 3. HR/Finance Overview (GET /api/dashboard/hr-overview)
+export interface HrOverview {
+  latestPayrollRun: PayrollRunStatus;
+  totalPayrollOutflow: number;
+  workforceMetrics: WorkforceMetrics;
 }
+
+export interface PayrollRunStatus {
+  periodName: string;
+  totalEmployeesProcessed: number;
+  payslipsGenerated: number;
+  payslipsUploaded: number;
+  emailsSent: number;
+  isFullyCompleted: boolean;
+}
+
+export interface WorkforceMetrics {
+  totalActiveEmployees: number;
+  totalOpenPositions: number;
+}
+
+// 4. HR Stats (GET /api/dashboard/hr-stats)
+export interface HrStats {
+  demographics: WorkforceDemographics;
+  payrollOutflow: PayrollOutflow[];
+  monthlyExpenses: MonthlyExpense[];
+}
+
+export interface WorkforceDemographics {
+  malePercentage: number;
+  femalePercentage: number;
+  ageGroupPercentages: { [key: string]: number };
+  largestDepartmentName: string;
+  largestDepartmentPercentage: number;
+}
+
+export interface PayrollOutflow {
+  periodName: string;
+  basicSalarySum: number;
+  totalDeductionsSum: number;
+  totalBonusesSum: number;
+}
+
+export interface MonthlyExpense {
+  month: string;
+  totalExpense: number;
+}
+export interface LatestHiredEmployee {
+  jobApplyId: string;
+  jobId: string;
+  candidateName: string;
+  status: string;
+  jobRoleName: string;
+  interviewers: string;
+}
+

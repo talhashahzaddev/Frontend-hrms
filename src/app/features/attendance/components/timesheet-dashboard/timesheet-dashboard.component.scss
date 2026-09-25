@@ -12,7 +12,7 @@
 
   ::ng-deep mat-card-header {
     padding: 20px 24px 16px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
     border-bottom: 1px solid #e5e7eb;
 
     mat-card-title {
@@ -64,13 +64,13 @@
           }
 
           &[color="primary"] {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
             color: white !important;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
 
             &:hover:not(:disabled) {
               transform: translateY(-2px);
-              box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+              box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
             }
           }
 
@@ -118,91 +118,72 @@
   }
 }
 .timesheet-dashboard-container {
-  padding: 16px 20px;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  background: #f8f9fa;
+  background: #f8fafc;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 
-  // Page Header
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 14px 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    margin-bottom: 1.5rem;
 
-    /* Ensure header-content (icon + text) is inline and aligns correctly */
-    .header-content {
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex: 1 1 auto;
-      min-width: 0;
-    }
+      gap: 1rem;
 
-    .header-icon {
-      font-size: 16px;
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      background: linear-gradient(135deg, var(--primary-600, #667eea) 0%, var(--purple-600, #764ba2) 100%);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(102,126,234,0.15);
-      flex: 0 0 auto;
-    }
+      .icon-box {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+        background-color: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-    .header-text {
-      min-width: 0;
-
-      h1 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: #0f172a;
-        line-height: 1.2;
+        mat-icon { font-size: 28px; width: 28px; height: 28px; }
       }
 
-      p {
-        margin: 2px 0 0;
-        color: #6b7280;
-        font-size: 12.5px;
+      .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.25;
+        color: #0f172a;
+      }
+
+      .page-subtitle {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin: 0;
       }
     }
 
     .header-actions {
-      button {
-        height: 36px;
-        padding: 0 16px !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25) !important;
-        transition: all 0.2s ease !important;
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: #2563eb;
+        color: white;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 
-        mat-icon {
-          margin-right: 6px;
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-        }
+        &:hover:not(:disabled) { background-color: #1d4ed8; }
+        &:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        &:hover:not(:disabled) {
-          box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35) !important;
-        }
-
-        &:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
+        mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
     }
   }
@@ -263,7 +244,7 @@
       max-width: 500px;
 
       strong {
-        color: #667eea;
+        color: #2563eb;
         font-weight: 600;
       }
     }
@@ -308,12 +289,12 @@
       &:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-        border-color: #667eea !important;
+        border-color: #2563eb !important;
       }
 
       ::ng-deep mat-card-header {
         padding: 16px 20px !important;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
         border-bottom: 1px solid #e5e7eb;
 
         .snapshot-header-content {
@@ -401,7 +382,7 @@
               color: #6b7280;
 
               &.attendance {
-                color: #667eea;
+                color: #2563eb;
               }
 
               &.present {
@@ -461,7 +442,7 @@
 
           &[color="primary"] {
             &:hover {
-              background: rgba(102, 126, 234, 0.1) !important;
+              background: rgba(37, 99, 235, 0.1) !important;
             }
           }
 
@@ -643,7 +624,7 @@
         font-size: 19px;
         width: 19px;
         height: 19px;
-        color: #6366f1;
+        color: #2563eb;
       }
     }
 

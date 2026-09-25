@@ -16,11 +16,16 @@ dist/
 *.sln
 *.sw?
 
-# Environment
-environment.ts
-environment.prod.ts
-/src/environments/*.ts
+# Environment (local overrides only — committed: environment.ts, environment.development.ts, environment.production.ts)
+/src/environments/*.local.ts
 .angular/cache/
 dist/
 node_modules/
 
+SOCIAL_SECURITY_TEST_SCENARIOS.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

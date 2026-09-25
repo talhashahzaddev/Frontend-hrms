@@ -5,9 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
     selector: 'app-forbidden',
     imports: [
+    SharedCommonModule,
         CommonModule,
         RouterModule,
         MatCardModule,

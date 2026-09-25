@@ -1,0 +1,14 @@
+@use '../../styles/holiday-dialog';
+@use '../../styles/holiday-shared';
+
+// TemplateRef dialog (opened from holiday-management) — ensure shell styles apply
+::ng-deep .attendance-dialog-panel .dialog-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 90vh;
+  overflow: hidden;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+}

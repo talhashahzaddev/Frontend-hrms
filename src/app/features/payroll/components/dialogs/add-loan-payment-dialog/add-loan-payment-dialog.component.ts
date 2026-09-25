@@ -4,7 +4,9 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { PayrollService } from '../../../services/payroll.service';
+import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type LoanPaymentRepaymentMethod = 'cash' | 'bank transfer';
 export type LoanPaymentRepaymentType = 'installment' | 'full';
 
@@ -45,17 +47,20 @@ interface LoanPaymentDialogData {
   currencySymbol?: string;
 }
 
+
 @Component({
   selector: 'app-add-loan-payment-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-loan-payment-dialog.component.html',
   styleUrl: './add-loan-payment-dialog.component.scss'
 })
 export class AddLoanPaymentDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly payrollService = inject(PayrollService);
+  private readonly authService = inject(AuthService);
   private readonly dialogRef = inject(MatDialogRef<AddLoanPaymentDialogComponent, LoanPaymentDialogPayload | undefined>);
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
@@ -277,11 +282,21 @@ export class AddLoanPaymentDialogComponent {
     );
   }
 
+  get canSubmit(): boolean {
+    if (this.mode === 'edit') {
+      return this.authService.hasPermissionByActionKey('loan_admin_edit');
+    }
+    return this.authService.hasPermissionByActionKey('loan_admin_add');
+  }
+
   close(): void {
     this.dialogRef.close();
   }
 
   save(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

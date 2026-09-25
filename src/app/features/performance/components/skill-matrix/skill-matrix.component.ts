@@ -1,3 +1,4 @@
+import { SharedCommonModule } from '@shared/shared-common.module';
 // skill-matrix.component.ts
 import {
   Component, OnInit, OnDestroy, ChangeDetectorRef,
@@ -18,6 +19,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
 import { PerformanceService } from '../../services/performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -27,10 +29,13 @@ import {
   EmployeeSkillFullDetail, SKILL_CATEGORIES
 } from 'src/app/core/models/performance.models';
 
+
 @Component({
   selector: 'app-skill-matrix',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    PageHeaderComponent,
     CommonModule, FormsModule, ReactiveFormsModule,
     MatTableModule, MatIconModule, MatButtonModule, MatMenuModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule,
@@ -43,6 +48,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject$ = new Subject<void>();
   private empSearchSubject$ = new Subject<void>();
+  private teamSelfAddedSearchSubject$ = new Subject<void>();
 
   // Templates
   @ViewChild('createSkillTpl') createSkillTpl!: TemplateRef<any>;
@@ -75,6 +81,16 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   get empSkillsTotalPages() { return Math.max(1, Math.ceil(this.totalEmployeeSkills / this.empSkillsPageSize)); }
   empSkillColumns = ['employee', 'department', 'skills', 'avgProficiency', 'actions'];
   empSkillsFilter = { search: '' };
+
+  // ─── Team Self-Added Skills (For Managers) ──────────────────────────
+  teamSelfAddedSkills: EmployeeSkill[] = [];
+  totalTeamSelfAdded = 0;
+  loadingTeamSelfAdded = false;
+  teamSelfAddedPageIndex = 0;
+  teamSelfAddedPageSize = 10;
+  get teamSelfAddedTotalPages() { return Math.max(1, Math.ceil(this.totalTeamSelfAdded / this.teamSelfAddedPageSize)); }
+  teamSelfAddedColumns = ['employee', 'skillName', 'category', 'proficiency', 'addedOn', 'actions'];
+  teamSelfAddedFilter = { search: '' };
 
   // ─── Tab 2: My Skills ────────────────────────────────────────────────
   mySkills: EmployeeSkill[] = [];
@@ -129,17 +145,41 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
+  skillSetsSubTab = 0;
+
   ngOnInit() {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.setDefaultTabs();
+          this.cdr.detectChanges();
+        }
+      });
+
     this.initForms();
     this.loadSkills();
-    if (this.hasHRRole() || this.hasManagerRole()) {
-      this.loadEmployeeSkills();
-    }
+    this.loadEmployeeSkills();
+    this.loadTeamSelfAddedSkills();
     this.loadMySkills();
 
     // Debounced search
     this.searchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadSkills());
     this.empSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadEmployeeSkills());
+    this.teamSelfAddedSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadTeamSelfAddedSkills());
+  }
+
+  private setDefaultTabs(): void {
+    // Set default Outer Tab
+    if (this.hasPermission('SKILLS_SETS_SECTION')) {
+      this.selectedTab = 0;
+    } else if (this.hasPermission('MY_SKILLS_SECTION')) {
+      this.selectedTab = 1;
+    }
+
+    // Set default Skill Sets Sub-Tab
+    // Available Skills is the default and has no extra permission guard
+    this.skillSetsSubTab = 0;
   }
 
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
@@ -216,6 +256,9 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   // ─── Employee Skills Loading ──────────────────────────────────────────
   loadEmployeeSkills() {
+    if (!this.hasPermission('skill_matrix_all_employees_skills')) {
+      return;
+    }
     this.loadingEmpSkills = true;
     this.performanceService.getAllEmployeeSkills({
       search: this.empSkillsFilter.search || undefined,
@@ -237,6 +280,40 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  // ─── Team Self-Added Skills Loading ─────────────────────────────────
+  loadTeamSelfAddedSkills() {
+    if (!this.hasPermission('skill_matrix_pending_skill_assessments')) {
+      return;
+    }
+    this.loadingTeamSelfAdded = true;
+    this.performanceService.getTeamSelfAddedSkills({
+      search: this.teamSelfAddedFilter.search || undefined,
+      page: this.teamSelfAddedPageIndex + 1,
+      limit: this.teamSelfAddedPageSize
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.teamSelfAddedSkills = res.data.data;
+          this.totalTeamSelfAdded = res.data.totalCount;
+        }
+        this.loadingTeamSelfAdded = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load team self-added skills');
+        this.loadingTeamSelfAdded = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onTeamSelfAddedSearchChange() { this.teamSelfAddedSearchSubject$.next(); }
+  goToFirstTeamSelfAddedPage() { this.teamSelfAddedPageIndex = 0; this.loadTeamSelfAddedSkills(); }
+  prevTeamSelfAddedPage() { if (this.teamSelfAddedPageIndex > 0) { this.teamSelfAddedPageIndex--; this.loadTeamSelfAddedSkills(); } }
+  nextTeamSelfAddedPage() { if (this.teamSelfAddedPageIndex < this.teamSelfAddedTotalPages - 1) { this.teamSelfAddedPageIndex++; this.loadTeamSelfAddedSkills(); } }
+  goToLastTeamSelfAddedPage() { this.teamSelfAddedPageIndex = this.teamSelfAddedTotalPages - 1; this.loadTeamSelfAddedSkills(); }
+
 
   // ─── My Skills ───────────────────────────────────────────────────────
   loadMySkills() {
@@ -272,7 +349,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   openCreateSkillDialog() {
     this.createSkillForm.reset({ isActive: true });
     this.filteredSkillsForCreate = [];
-    this.dialog.open(this.createSkillTpl, { width: '520px', disableClose: false });
+    this.dialog.open(this.createSkillTpl, { width: '540px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel', disableClose: false });
   }
 
   onCreateCategoryChange(cat: string) {
@@ -331,7 +408,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   viewSkillEmployees(skill: SkillSet) {
     this.viewingSkill = { ...skill, employees: [] };
     this.loadingViewSkill = true;
-    this.dialog.open(this.viewSkillTpl, { width: '820px', maxWidth: '95vw' });
+    this.dialog.open(this.viewSkillTpl, { width: '820px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel' });
     this.performanceService.getSkillWithEmployees(skill.skillId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         if (res.success && res.data) this.viewingSkill = res.data;
@@ -346,7 +423,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   viewEmployeeSkillDetail(emp: EmployeeSkillSummary) {
     this.viewingEmployee = null;
     this.loadingViewEmployee = true;
-    this.dialog.open(this.viewEmployeeTpl, { width: '680px', maxWidth: '95vw' });
+    this.dialog.open(this.viewEmployeeTpl, { width: '680px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel' });
     this.performanceService.getEmployeeSkillDetail(emp.employeeId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         if (res.success && res.data) this.viewingEmployee = res.data;
@@ -364,7 +441,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.assessRatings = {};
     this.assessNotes = {};
     this.loadingAssessSkills = true;
-    this.dialog.open(this.assessTpl, { width: '620px', maxWidth: '95vw' });
+    this.dialog.open(this.assessTpl, { width: '620px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel' });
 
     this.performanceService.getEmployeeSkillDetail(emp.employeeId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
@@ -385,6 +462,16 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   hasAllRatings(): boolean {
     return this.assessEmployeeSkills.every(sk => !!this.assessRatings[sk.employeeSkillId]);
+  }
+
+  openAssessSingleSkillDialog(skill: EmployeeSkill) {
+    const mockSummary: any = {
+      employeeId: skill.employeeId,
+      employeeName: skill.employeeName,
+      email: skill.employeeEmail,
+      department: ''
+    };
+    this.openAssessDialog(mockSummary);
   }
 
   submitAssessment() {
@@ -432,7 +519,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.filteredSkillsForAdd = [];
     // Build categories from existing org skills
     this.availableSkillCategories = [...new Set(this.skills.map(s => s.category).filter(Boolean))] as string[];
-    this.dialog.open(this.addMySkillTpl, { width: '520px', disableClose: false });
+    this.dialog.open(this.addMySkillTpl, { width: '540px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel', disableClose: false });
   }
 
   onAddSkillCategoryChange(cat: string) {
@@ -479,7 +566,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   editMySkill(skill: EmployeeSkill) {
     this.editingSkill = skill;
     this.editMySkillForm.setValue({ proficiencyLevel: skill.proficiencyLevel, notes: skill.notes || '' });
-    this.dialog.open(this.editMySkillTpl, { width: '480px', disableClose: false });
+    this.dialog.open(this.editMySkillTpl, { width: '500px', maxWidth: '95vw', panelClass: 'attendance-dialog-panel', disableClose: false });
   }
 
   submitEditMySkill() {
@@ -536,6 +623,11 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   getAssessedCount(): number {
     return this.mySkills.filter(s => s.assessorName).length;
+  }
+
+
+    hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Performance', 'Skill Matrix', actionKey);
   }
 
   // ─── Pagination helpers ───────────────────────────────────────────────

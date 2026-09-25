@@ -10,14 +10,17 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { SettingsService } from '../../../settings/services/settings.service';
 import { Subject, takeUntil } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ClaimDetailsDialogData {
   expenseId: string;
 }
+
 
 @Component({
   selector: 'app-claim-details-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatIconModule,
     MatProgressSpinnerModule

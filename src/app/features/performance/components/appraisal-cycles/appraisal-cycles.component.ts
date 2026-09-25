@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -30,10 +31,14 @@ import {
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-appraisal-cycles',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -147,7 +152,9 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '600px',
+      width: '700px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       disableClose: true,
       data: {}
     });
@@ -162,7 +169,9 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
 
   openEditDialog(cycle: AppraisalCycle): void {
     const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '600px',
+      width: '700px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       disableClose: true,
       data: { cycle: cycle }
     });
@@ -228,9 +237,9 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
     this.loadAppraisalCycles();
   }
 
-  // hasHRRole(): boolean {
-  //   return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
-  // }
+ hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Performance', 'Appraisal Cycles', actionKey);
+  }
 
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;

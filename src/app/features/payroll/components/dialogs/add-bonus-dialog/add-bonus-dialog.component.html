@@ -52,6 +52,6 @@
   <!-- Footer -->
   <div class="dialog-footer">
     <button class="cancel-btn" (click)="close()">Cancel</button>
-    <button class="save-btn" (click)="save()">{{ submitLabel }}</button>
+    <button class="save-btn" type="button" [disabled]="!canSubmit" (click)="save()">{{ submitLabel }}</button>
   </div>
 </div>

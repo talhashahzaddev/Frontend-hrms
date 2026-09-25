@@ -15,6 +15,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { ManagerOverrideDto, DailyReviewRecord } from '../../../../core/models/attendance.models';
 import { LeaveType } from '../../../../core/models/leave.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ManagerOverrideDialogData {
   record: DailyReviewRecord;
   timesheetId: string;
@@ -22,10 +23,12 @@ export interface ManagerOverrideDialogData {
   employeeName: string;
 }
 
+
 @Component({
   selector: 'app-manager-override-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

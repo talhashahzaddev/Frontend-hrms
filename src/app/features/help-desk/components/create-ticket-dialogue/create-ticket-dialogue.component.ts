@@ -1,3 +1,4 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -12,6 +13,7 @@ import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { TicketGroup } from '@/app/core/models/helpdesk.models';
 import { NotificationService } from '@/app/core/services/notification.service';
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface Category {
   categoryId: string;
   departmentId: string;
@@ -21,10 +23,13 @@ interface Category {
   createdAt: string;
 }
 
+
 @Component({
   selector: 'app-create-ticket-dialogue',
   standalone: true,
   imports: [
+    MatProgressSpinnerModule,
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -264,3 +269,4 @@ export class CreateTicketDialogueComponent implements OnInit, OnDestroy {
     this.dialogRef.close(false);
   }
 }
+

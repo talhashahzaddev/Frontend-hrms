@@ -29,12 +29,15 @@ import {
   ConfirmDeleteData
 } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type ClaimListView = 'my-claims' | 'all-claims';
+
 
 @Component({
   selector: 'app-claim-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

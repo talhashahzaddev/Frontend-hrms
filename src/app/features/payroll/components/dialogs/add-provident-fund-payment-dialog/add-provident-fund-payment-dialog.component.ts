@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type ProvidentFundPaymentRepaymentMethod = 'cash' | 'bank transfer' | 'payroll deduction';
 export type ProvidentFundPaymentRepaymentType = 'installment' | 'full';
 
@@ -44,11 +45,13 @@ interface ProvidentFundPaymentDialogData {
   currencySymbol?: string;
 }
 
+
 @Component({
   selector: 'app-add-provident-fund-payment-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-provident-fund-payment-dialog.component.html',
   styleUrl: './add-provident-fund-payment-dialog.component.scss'
 })

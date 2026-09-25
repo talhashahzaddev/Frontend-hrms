@@ -104,7 +104,7 @@
       </div>
 
       <!-- SECTION 2: Move to Stage -->
-      <div class="add-stage-box">
+      <div class="add-stage-box" *ngIf="hasPermission('app_stage_create')">
         <h4>Add stage</h4>
         <div class="add-stage-controls">
           <mat-form-field appearance="outline" class="stage-dropdown" subscriptSizing="dynamic">
@@ -171,11 +171,11 @@
             </tbody>
           </table>
           <mat-menu #actionMenu="matMenu">
-            <button mat-menu-item (click)="selectedStage && editStage(selectedStage)">
+            <button *ngIf="hasPermission('app_stage_edit')" mat-menu-item (click)="selectedStage && editStage(selectedStage)">
               <mat-icon>edit</mat-icon>
               <span>Edit</span>
             </button>
-            <button mat-menu-item (click)="selectedStage && deleteStage(selectedStage)">
+            <button *ngIf="hasPermission('app_stage_delete')" mat-menu-item (click)="selectedStage && deleteStage(selectedStage)">
               <mat-icon class="error-color">delete</mat-icon>
               <span class="error-color">Delete</span>
             </button>

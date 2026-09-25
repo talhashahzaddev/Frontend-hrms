@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node scripts/write-production-environment.mjs && npm run build",
+  "outputDirectory": "dist/hrms-frontend",
+  "framework": null,
+  "installCommand": "npm install --legacy-peer-deps"
+}

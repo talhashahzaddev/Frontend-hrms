@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
 
+import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import {
@@ -24,6 +25,7 @@ import {
   SocialSecurityClaimDialogComponent
 } from '../dialogs/social-security-claim-dialog/social-security-claim-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface MySocialTransactionRow {
   id: string;
   periodId: string;
@@ -45,16 +47,19 @@ interface PeriodOption {
 
 type MySocialTab = 'transactions' | 'requests' | 'claims';
 
+
 @Component({
   selector: 'app-my-social-security',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './my-social-security.component.html',
   styleUrl: './my-social-security.component.scss'
 })
 export class MySocialSecurityComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
@@ -62,7 +67,7 @@ export class MySocialSecurityComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
-  currentTab: MySocialTab = 'transactions';
+  currentTab: MySocialTab = 'requests';
 
   // Transactions
   transactions: MySocialTransactionRow[] = [];
@@ -74,6 +79,9 @@ export class MySocialSecurityComponent implements OnInit {
   // Enrollment
   enrollment: SocialSecurityEnrollment | null = null;
   enrollmentLoading = false;
+
+  // Active rules the employee can request enrollment under
+  ruleOptions: { ruleId: string; ruleName: string; schemeName?: string | null; employeeDefaultPct?: number | null; employerDefaultPct?: number | null }[] = [];
 
   // Requests
   requests: SocialSecurityEnrollmentRequest[] = [];
@@ -92,9 +100,30 @@ export class MySocialSecurityComponent implements OnInit {
       });
 
     this.loadEnrollment();
+    this.loadRuleOptions();
     this.loadMySocialSecurityTransactions();
     this.loadMyRequests();
     this.loadMyClaims();
+  }
+
+  private loadRuleOptions(): void {
+    this.payrollService.getSocialSecurityRules().pipe(take(1)).subscribe({
+      next: (rules: any[]) => {
+        this.ruleOptions = (rules ?? [])
+          .filter((r) => r?.isActive ?? true)
+          .map((r) => ({
+            ruleId: String(r.ruleId ?? ''),
+            ruleName: String(r.ruleName ?? 'Rule'),
+            schemeName: r.schemeName ?? null,
+            employeeDefaultPct: r.employeeDefaultPct ?? null,
+            employerDefaultPct: r.employerDefaultPct ?? null
+          }))
+          .filter((r) => !!r.ruleId);
+      },
+      error: () => {
+        this.ruleOptions = [];
+      }
+    });
   }
 
   setTab(tab: MySocialTab): void {
@@ -102,7 +131,12 @@ export class MySocialSecurityComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/payroll/my-benefits']);
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits']);
+      return;
+    }
+
+    void this.router.navigate(['/dashboard']);
   }
 
   // ── Enrollment status ─────────────────────────────────────────────────────
@@ -174,7 +208,7 @@ export class MySocialSecurityComponent implements OnInit {
       panelClass: 'social-security-transaction-dialog-panel',
       autoFocus: false,
       restoreFocus: false,
-      data: { currentEnrollment: this.enrollment }
+      data: { currentEnrollment: this.enrollment, rules: this.ruleOptions }
     });
 
     dialogRef.afterClosed().subscribe((payload: CreateSocialSecurityEnrollmentRequestPayload | undefined) => {

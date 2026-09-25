@@ -1,16 +1,18 @@
 <div class="timesheet-dashboard-container">
   <!-- Page Header -->
   <div class="page-header">
-    <div class="header-content">
-      <mat-icon class="header-icon">date_range</mat-icon>
-      <div class="header-text">
-        <h1>Timesheet Periods</h1>
-        <p>Create, manage, and finalize attendance periods for payroll processing</p>
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>date_range</mat-icon>
+      </div>
+      <div>
+        <h2 class="page-title">Timesheet Periods</h2>
+        <p class="page-subtitle">Create, manage, and finalize attendance periods for payroll processing</p>
       </div>
     </div>
     <div class="header-actions">
       @if (hasPermission('timesheet_create_new_snapshot')) {
-        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" [disabled]="isLoading">
+        <button class="btn-primary" (click)="openCreateSnapshotDialog()" [disabled]="isLoading">
           <mat-icon>add_circle</mat-icon>
           Create New Snapshot
         </button>
@@ -33,7 +35,7 @@
       <h3>No Timesheet Snapshots</h3>
       <p>You haven't created any monthly timesheet snapshots yet.</p>
       <p class="hint-text">Click <strong>Create New Snapshot</strong> to get started.</p>
-      <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" *ngIf="hasPermission('timesheet_create_new_snapshot')">
+      <button class="btn-primary" (click)="openCreateSnapshotDialog()" *ngIf="hasPermission('timesheet_create_new_snapshot')">
         <mat-icon>add_circle</mat-icon>
         Create First Snapshot
       </button>

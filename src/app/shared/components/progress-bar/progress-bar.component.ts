@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { ProgressBarService } from '@core/services/progress-bar.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-progress-bar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    SharedCommonModule,CommonModule],
   template: `
     <div class="progress-bar-container" *ngIf="isVisible">
       <div class="progress-bar" [style.width.%]="progress"></div>

@@ -80,7 +80,7 @@
             [style.color]="getStatusColor(inquiry.status)">
         {{ formatStatus(inquiry.status) }}
       </span>
-      <span class="meta-date">Submitted {{ inquiry.createdAt | date:'medium' }}</span>
+      <span class="meta-date">Submitted {{ inquiry.createdAt | localizedDate:'medium' }}</span>
     </div>
   </div>
 

@@ -19,21 +19,27 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { HolidayService } from '../../services/holiday.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CompanyHoliday, HolidaySummary, CreateCompanyHoliday, UpdateCompanyHoliday } from '../../../../core/models/holiday.models';
 import { HolidayCatalogPickerComponent } from '../holiday-catalog-picker/holiday-catalog-picker.component';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { MatCardModule } from '@angular/material/card';
 interface TimelineMonth {
   key: string;
   label: string;
   holidays: CompanyHoliday[];
 }
 
+
 @Component({
   selector: 'app-holiday-management',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -54,9 +60,11 @@ interface TimelineMonth {
     MatSnackBarModule,
     MatChipsModule,
     MatAutocompleteModule,
+    MatCardModule,
+    PageHeaderComponent,
   ],
   templateUrl: './holiday-management.component.html',
-  styleUrl: './holiday-management.component.scss'
+  styleUrls: ['./holiday-management.component.scss', './holiday-form-dialog.scss']
 })
 export class HolidayManagementComponent implements OnInit {
   @ViewChild('holidayFormDialog') holidayFormDialog!: TemplateRef<any>;
@@ -90,7 +98,8 @@ export class HolidayManagementComponent implements OnInit {
     private employeeService: EmployeeService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {
     const currentYear = new Date().getFullYear();
     this.availableYears = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
@@ -188,22 +197,37 @@ export class HolidayManagementComponent implements OnInit {
 
   loadData(): void {
     this.loading = true;
-    this.holidayService.getCompanyHolidays(this.selectedYear).subscribe({
-      next: (holidays) => {
-        this.holidays = holidays;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.snackBar.open('Failed to load holidays', 'Close', { duration: 3000 });
-        this.loading = false;
-      }
-    });
 
-    this.holidayService.getHolidaySummary(this.selectedYear).subscribe({
-      next: (summary) => this.summary = summary,
-      error: () => {}
-    });
+    // Only load holiday list if user has the table/list permission
+    if (this.hasPermission('Holiday_Table')) {
+      this.holidayService.getCompanyHolidays(this.selectedYear).subscribe({
+        next: (holidays) => {
+          this.holidays = holidays;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (err: any) => {
+          this.snackBar.open('Failed to load holidays', 'Close', { duration: 3000 });
+          this.loading = false;
+        }
+      });
+    } else {
+      // If user is not allowed to view the holiday list, clear data and stop loading
+      this.holidays = [];
+      this.filteredHolidays = [];
+      this.loading = false;
+    }
+
+    // Only fetch summary if user has permission to view it
+    // NOTE: fix typo in permission key to match template usage
+    if (this.hasPermission('Holiday_Summary')) {
+      this.holidayService.getHolidaySummary(this.selectedYear).subscribe({
+        next: (summary) => this.summary = summary,
+        error: () => {}
+      });
+    } else {
+      this.summary = null;
+    }
   }
 
   onYearChange(): void {
@@ -253,6 +277,10 @@ export class HolidayManagementComponent implements OnInit {
     return new Date(dateStr) < new Date(new Date().toDateString());
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Holidays', 'Holiday Management', actionKey);
+  }
+
   // ========================
   // Timeline helpers
   // ========================
@@ -282,6 +310,8 @@ export class HolidayManagementComponent implements OnInit {
   // ========================
 
   openAddHolidayDialog(): void {
+    if (!this.hasPermission('add_holidays')) return;
+
     this.editingHoliday = null;
     this.selectedEmployeeIds = [];
     this.employeeSearchText = '';
@@ -291,10 +321,16 @@ export class HolidayManagementComponent implements OnInit {
       applicableTo: 'all',
       applicableValue: ''
     });
-    this.dialog.open(this.holidayFormDialog, { width: '500px' });
+    this.dialog.open(this.holidayFormDialog, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
+    });
   }
 
   openEditHolidayDialog(holiday: CompanyHoliday): void {
+    if (!this.hasPermission('edit_holidays_details')) return;
+
     this.editingHoliday = holiday;
     this.selectedEmployeeIds = holiday.employeeIds ? [...holiday.employeeIds] : [];
     this.employeeSearchText = '';
@@ -307,7 +343,11 @@ export class HolidayManagementComponent implements OnInit {
       applicableTo: holiday.applicableTo,
       applicableValue: holiday.applicableValue || '',
     });
-    this.dialog.open(this.holidayFormDialog, { width: '500px' });
+    this.dialog.open(this.holidayFormDialog, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
+    });
   }
 
   saveHoliday(): void {
@@ -324,6 +364,7 @@ export class HolidayManagementComponent implements OnInit {
     const date = formVal.holidayDate instanceof Date ? formVal.holidayDate : new Date(formVal.holidayDate);
 
     if (this.editingHoliday) {
+      if (!this.hasPermission('edit_holidays_details')) return;
       const dto: UpdateCompanyHoliday = {
         holidayName: formVal.holidayName,
         holidayDate: date.toISOString(),
@@ -349,6 +390,7 @@ export class HolidayManagementComponent implements OnInit {
         }
       });
     } else {
+      if (!this.hasPermission('add_holidays')) return;
       const dto: CreateCompanyHoliday = {
         holidayName: formVal.holidayName,
         holidayDate: date.toISOString(),
@@ -376,6 +418,8 @@ export class HolidayManagementComponent implements OnInit {
   }
 
   confirmDelete(holiday: CompanyHoliday): void {
+    if (!this.hasPermission('delete_holidays_details')) return;
+
     if (confirm(`Are you sure you want to delete "${holiday.holidayName}"?`)) {
       this.holidayService.deleteCompanyHoliday(holiday.holidayId).subscribe({
         next: () => {
@@ -394,9 +438,13 @@ export class HolidayManagementComponent implements OnInit {
   // ========================
 
   openImportDialog(): void {
+    if (!this.hasPermission('import_holidays_from_catalog')) return;
+
     const dialogRef = this.dialog.open(HolidayCatalogPickerComponent, {
       width: '800px',
+      maxWidth: '95vw',
       maxHeight: '85vh',
+      panelClass: 'attendance-dialog-panel',
       data: { year: this.selectedYear }
     });
 

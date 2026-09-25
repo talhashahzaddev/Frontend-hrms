@@ -1,10 +1,18 @@
+@use '../../styles/attendance-dialog' as ad;
+
+:host {
+  @include ad.ad-scroll-host;
+}
+
+@include ad.ad-panel-shell;
+
 .daily-card.is-requested {
-  border: 1.5px dashed #4f46e5;
-  box-shadow: 0 0 6px 0 rgba(79, 70, 229, 0.08);
+  border: 1.5px dashed #2563eb;
+  box-shadow: 0 0 6px 0 rgba(37, 99, 235, 0.08);
   position: relative;
 
   .requested-icon {
-    color: #4f46e5;
+    color: #2563eb;
     font-size: 14px;
     vertical-align: middle;
     margin-left: 4px;
@@ -14,8 +22,8 @@
     position: absolute;
     top: 8px;
     right: 10px;
-    background: #eef2ff;
-    color: #4f46e5;
+    background: #eff6ff;
+    color: #2563eb;
     font-size: 11px;
     padding: 2px 6px;
     border-radius: 10px;
@@ -25,78 +33,15 @@
     gap: 6px;
   }
 }
-// Attendance Request Dialog - Styled to match Manager Override Dialog
+
 .attendance-request-dialog {
   min-width: 500px;
 
-  // ── Dialog Header ────────────────────────────────────────────────
-  .request-dialog-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 22px 28px 18px;
-    border-bottom: 1px solid #ebebeb;
-    background: #ffffff;
-
-    .header-icon-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: #f5f3ff;
-      border: 1px solid #ede9fe;
-      flex-shrink: 0;
-
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-    }
-
-    .header-text {
-      flex: 1;
-
-      .dialog-title {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 700;
-        color: #111827;
-        line-height: 1.3;
-      }
-
-      .record-date {
-        font-size: 13px;
-        color: #6b7280;
-        font-weight: 400;
-      }
-    }
-
-    .close-btn {
-      color: #9ca3af;
-
-      &:hover {
-        background: #f9fafb !important;
-        color: #374151;
-      }
-    }
-  }
-
-  // ── Content ──────────────────────────────────────────────────
   .request-content {
-    padding: 0 !important;
+    padding-top: 0 !important;
     max-height: 70vh;
-    overflow-y: auto;
-    background: #f7f8fa;
   }
 
-  // ── Create Mode Banner ────────────────────────────────────────
   .create-mode-banner {
     display: flex;
     align-items: flex-start;
@@ -125,11 +70,10 @@
     }
   }
 
-  // ── Before Panel ──────────────────────────────────────────────
   .before-panel {
     margin: 20px 24px 0;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    background: ad.$ad-input-bg;
+    border: 1px solid ad.$ad-border;
     border-left: 4px solid #9ca3af;
     border-radius: 8px;
     padding: 14px 16px;
@@ -142,7 +86,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      color: #6b7280;
+      color: ad.$ad-text-secondary;
       margin-bottom: 12px;
 
       mat-icon {
@@ -165,7 +109,7 @@
 
         .bi-label {
           font-size: 11px;
-          color: #6b7280;
+          color: ad.$ad-text-secondary;
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.4px;
@@ -174,7 +118,7 @@
         .bi-value {
           font-size: 15px;
           font-weight: 700;
-          color: #374151;
+          color: ad.$ad-text-primary;
 
           &.status-chip {
             display: inline-block;
@@ -188,14 +132,12 @@
     }
   }
 
-  // ── Form Section ──────────────────────────────────────────────
   .request-form {
     padding: 20px 24px 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
 
-    // Time conflict warning
     .time-warning {
       display: flex;
       align-items: center;
@@ -223,95 +165,52 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      color: #4f46e5;
+      color: ad.$ad-primary;
       margin-bottom: 16px;
 
       mat-icon {
         font-size: 15px;
         width: 15px;
         height: 15px;
-        color: #6366f1;
+        color: ad.$ad-primary;
       }
     }
 
-    .reason-field textarea {
-      resize: vertical;
-    }
+    .reason-field textarea { resize: vertical; }
 
     .time-row {
       display: flex;
       gap: 16px;
 
-      .time-field {
-        flex: 1;
-      }
+      .time-field { flex: 1; }
     }
 
-    .full-width {
-      width: 100%;
-    }
+    .full-width { width: 100%; }
 
-    mat-form-field {
-      mat-icon[matPrefix] {
-        margin-right: 8px;
-        color: #667eea;
-      }
+    mat-form-field mat-icon[matPrefix] {
+      margin-right: 8px;
+      color: ad.$ad-primary;
     }
   }
 
-  // ── Dialog Actions ──────────────────────────────────────────────
-  .request-actions {
-    padding: 14px 24px;
-    margin-top: 0;
-    border-top: 1px solid #ebebeb;
-    background: #ffffff;
-    gap: 10px;
+  .request-actions .submit-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
-    .submit-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #111827;
-      color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-
-      &:hover:not([disabled]) {
-        background: #1f2937;
-      }
-
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
-
-      .button-spinner {
-        margin-right: 6px;
-        display: inline-block;
-        vertical-align: middle;
-
-        ::ng-deep circle {
-          stroke: white !important;
-        }
-      }
-
-      &.mat-mdc-button-disabled {
-        background: #f3f4f6 !important;
-        color: #9ca3af !important;
-        border: 1px solid #e5e7eb;
-        box-shadow: none !important;
-      }
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
-  }
-}
 
-// Global Dialog Panel Class
-::ng-deep .attendance-request-dialog-panel {
-  .mat-mdc-dialog-container {
-    padding: 0;
-    border-radius: 12px;
-    overflow: hidden;
+    .button-spinner {
+      margin-right: 6px;
+      display: inline-block;
+      vertical-align: middle;
+
+      ::ng-deep circle { stroke: white !important; }
+    }
   }
 }
 
@@ -320,14 +219,7 @@
     min-width: auto;
     width: 100%;
 
-    .before-panel .before-grid {
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .request-form .time-row {
-      flex-direction: column;
-      gap: 0;
-    }
+    .before-panel .before-grid { flex-direction: column; gap: 12px; }
+    .request-form .time-row { flex-direction: column; gap: 0; }
   }
 }

@@ -12,6 +12,9 @@ import { FormsModule } from '@angular/forms';
 import { PaymentService } from '@core/services/payment.service';
 import { NotificationService } from '@core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+
 interface PaymentGateway {
   id: 'stripe' | 'razorpay' | 'manual';
   name: string;
@@ -20,10 +23,13 @@ interface PaymentGateway {
   enabled: boolean;
 }
 
+
 @Component({
   selector: 'app-payment-checkout',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     FormsModule,
     MatCardModule,

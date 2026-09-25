@@ -1,87 +1,86 @@
 <div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>work</mat-icon>
-    {{ data.mode === 'create' ? 'Create New Position' : 'Edit Position' }}
-  </h2>
+  <div class="title-section">
+    <div class="icon-wrapper">
+      <mat-icon>work</mat-icon>
+    </div>
+    <div>
+      <h2 class="title">{{ data.mode === 'create' ? 'Create New Position' : 'Edit Position' }}</h2>
+      <p class="subtitle">{{ data.mode === 'create' ? 'Fill in the details to create a new position' : 'Update the position information below' }}</p>
+    </div>
+  </div>
 </div>
 
-<mat-dialog-content class="dialog-content">
+<div class="dialog-content">
   <form [formGroup]="positionForm" class="position-form">
-    
+
     <!-- Position Title -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Position Title *</mat-label>
-      <input matInput 
-             formControlName="positionTitle" 
+    <div class="form-group">
+      <label for="positionTitle">Position Title <span class="required">*</span></label>
+      <input id="positionTitle"
+             type="text"
+             formControlName="positionTitle"
              placeholder="Enter position title"
-             maxlength="100">
-      <mat-hint>Required field</mat-hint>
-      <mat-error *ngIf="positionForm.get('positionTitle')?.hasError('required')">
+             maxlength="100" />
+      <div class="error-msg" *ngIf="positionForm.get('positionTitle')?.touched && positionForm.get('positionTitle')?.hasError('required')">
         Position title is required
-      </mat-error>
-      <mat-error *ngIf="positionForm.get('positionTitle')?.hasError('maxlength')">
+      </div>
+      <div class="error-msg" *ngIf="positionForm.get('positionTitle')?.touched && positionForm.get('positionTitle')?.hasError('maxlength')">
         Position title cannot exceed 100 characters
-      </mat-error>
-    </mat-form-field>
+      </div>
+    </div>
 
     <!-- Department -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Department</mat-label>
-      <mat-select formControlName="departmentId" placeholder="Select a department (optional)">
-        <mat-option value="">No Department</mat-option>
-        <mat-option *ngFor="let department of data.departments" [value]="department.departmentId">
-          {{ department.departmentName }}
-        </mat-option>
-      </mat-select>
-      <mat-hint>Optional - Select the department for this position</mat-hint>
-    </mat-form-field>
+    <div class="form-group">
+      <label for="departmentId">Department</label>
+      <div class="select-wrapper">
+        <select id="departmentId" formControlName="departmentId">
+          <option value="">No Department</option>
+          <option *ngFor="let department of data.departments" [value]="department.departmentId">
+            {{ department.departmentName }}
+          </option>
+        </select>
+        <mat-icon class="select-icon">expand_more</mat-icon>
+      </div>
+    </div>
 
     <!-- Role -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Role *</mat-label>
-      <mat-select formControlName="roleId" placeholder="Select a role">
-        <mat-option *ngFor="let role of data.roles" [value]="role.roleId">
-          {{ role.roleName }}
-        </mat-option>
-      </mat-select>
-      <mat-hint>Required - Select the role for this position</mat-hint>
-      <mat-error *ngIf="positionForm.get('roleId')?.hasError('required')">
+    <div class="form-group">
+      <label for="roleId">Role <span class="required">*</span></label>
+      <div class="select-wrapper">
+        <select id="roleId" formControlName="roleId">
+          <option value="" disabled>Select a role</option>
+          <option *ngFor="let role of data.roles" [value]="role.roleId">
+            {{ role.roleName }}
+          </option>
+        </select>
+        <mat-icon class="select-icon">expand_more</mat-icon>
+      </div>
+      <div class="error-msg" *ngIf="positionForm.get('roleId')?.touched && positionForm.get('roleId')?.hasError('required')">
         Role is required
-      </mat-error>
-    </mat-form-field>
+      </div>
+    </div>
 
     <!-- Description -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Description</mat-label>
-      <textarea matInput 
-                formControlName="description" 
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description"
+                formControlName="description"
                 placeholder="Enter position description (optional)"
                 rows="4"
                 maxlength="1000"></textarea>
-      <mat-hint>Optional - Brief description of the position responsibilities</mat-hint>
-      <mat-error *ngIf="positionForm.get('description')?.hasError('maxlength')">
+      <div class="error-msg" *ngIf="positionForm.get('description')?.touched && positionForm.get('description')?.hasError('maxlength')">
         Description cannot exceed 1000 characters
-      </mat-error>
-    </mat-form-field>
+      </div>
+    </div>
 
   </form>
-</mat-dialog-content>
+</div>
 
-<mat-dialog-actions class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close type="button">
-    Cancel
-  </button>
-  <button mat-flat-button 
-          [disabled]="positionForm.invalid || isSubmitting"
-          (click)="onSubmit()"
-          class="submit-button">
+<div class="dialog-footer">
+  <button class="cancel-btn" mat-dialog-close>Cancel</button>
+  <button class="submit-btn" [disabled]="positionForm.invalid || isSubmitting" (click)="onSubmit()">
     <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-    <span *ngIf="!isSubmitting">
-      {{ data.mode === 'create' ? 'Create Position' : 'Update Position' }}
-    </span>
-    <span *ngIf="isSubmitting">
-      {{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}
-    </span>
+    <mat-icon *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'add' : 'check' }}</mat-icon>
+    <span>{{ isSubmitting ? (data.mode === 'create' ? 'Creating...' : 'Updating...') : (data.mode === 'create' ? 'Create Position' : 'Update Position') }}</span>
   </button>
-</mat-dialog-actions>
-
+</div>

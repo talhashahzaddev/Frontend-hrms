@@ -1,3 +1,8 @@
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -14,6 +19,7 @@ import { ReplyChatDialogComponent } from '../reply-chat-dialog/reply-chat-dialog
 import { AuthService } from '@/app/core/services/auth.service';
 import { NotificationService } from '@/app/core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface CategoryDto {
   categoryId: string;
   organizationId: string;
@@ -24,14 +30,17 @@ interface CategoryDto {
   createdAt: string;
 }
 
+
 @Component({
   selector: 'app-view-ticket-details',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatDialogModule,
     MatButtonModule,
+    MatProgressSpinnerModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule
   ],
   templateUrl: './view-ticket-details.component.html',
   styleUrls: ['./view-ticket-details.component.scss'],
@@ -697,3 +706,6 @@ sendReply(): void {
   }
 
 }
+
+
+

@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface DepartmentEmployee {
   employeeId: string;
   employeeCode: string;
@@ -26,10 +27,12 @@ export interface DepartmentEmployeesViewData {
   employees: DepartmentEmployee[];
 }
 
+
 @Component({
   selector: 'app-department-employee-view',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,
@@ -132,7 +135,7 @@ export interface DepartmentEmployeesViewData {
 
         <!-- Hire Date -->
         <span class="col-date">
-          <span class="cell-value">{{ emp.hireDate ? (emp.hireDate | date:'MMM d, y') : '—' }}</span>
+          <span class="cell-value">{{ emp.hireDate ? (emp.hireDate | localizedDate:'MMM d, y') : '—' }}</span>
         </span>
 
       </div>

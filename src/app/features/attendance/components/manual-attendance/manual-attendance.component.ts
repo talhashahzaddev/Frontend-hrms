@@ -19,12 +19,15 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-manual-attendance',
   templateUrl: './manual-attendance.component.html',
   styleUrls: ['./manual-attendance.component.scss'],
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

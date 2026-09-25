@@ -1,3 +1,4 @@
+import { SharedCommonModule } from '@shared/shared-common.module';
 // import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 // import { CommonModule } from '@angular/common';
 // import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
@@ -31,6 +32,7 @@
 //   selector: 'app-self-assessment',
 //   standalone: true,
 //   imports: [
+//     SharedCommonModule,
 //     CommonModule,
 //     ReactiveFormsModule,
 //     MatCardModule,

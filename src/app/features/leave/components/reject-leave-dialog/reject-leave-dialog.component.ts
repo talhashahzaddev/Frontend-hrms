@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RejectLeaveDialogData {
   employeeName: string;
   leaveTypeName: string;
@@ -17,10 +18,12 @@ export interface RejectLeaveDialogData {
   daysRequested: number;
 }
 
+
 @Component({
   selector: 'app-reject-leave-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

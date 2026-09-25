@@ -15,8 +15,8 @@
     
     <div class="header-right">
       <div class="current-time-display">
-        <p class="time-text">{{ currentTime | date:'HH:mm:ss' }}</p>
-        <p class="date-text">{{ currentTime | date:'dd-MM-yyyy' }}</p>
+        <p class="time-text">{{ currentTime | localizedDate:'HH:mm:ss' }}</p>
+        <p class="date-text">{{ currentTime | localizedDate:'dd-MM-yyyy' }}</p>
       </div>
       <div class="header-divider"></div>
       <div class="user-profile" *ngIf="currentUser">
@@ -35,7 +35,7 @@
   <main class="dashboard-main">
     
     <!-- Summary Cards Row -->
-    <div class="summary-cards-grid">
+    <div class="summary-cards-grid" *ngIf="hasPermission('my_attendance_summary')">
       <div class="summary-card">
         <div class="card-header-row">
           <p class="card-label">Present Days</p>
@@ -100,10 +100,10 @@
           <mat-datepicker #endPicker></mat-datepicker>
         </mat-form-field>
 
-        <button mat-flat-button 
-                class="load-data-btn" 
-                (click)="loadEmployeeAttendance()"
-                [disabled]="isLoadingList">
+        <button *ngIf="hasPermission('Load_Summary_Data_Buttom')" mat-flat-button 
+          class="load-data-btn" 
+          (click)="loadEmployeeAttendance(); loadAttendanceSummary()"
+          [disabled]="isLoadingList">
           <mat-icon>refresh</mat-icon>
           <span>Load Data</span>
         </button>
@@ -114,7 +114,7 @@
     <div class="content-grid">
       
       <!-- Left: Attendance Records Table (60%) -->
-      <div class="table-section">
+      <div *ngIf="hasPermission('ATTENDANCE_RECORD_TABLE')" class="table-section">
         <div class="section-header">
           <h3 class="section-title">
             <mat-icon>list_alt</mat-icon>
@@ -151,10 +151,10 @@
                     <span class="employee-name-text">{{ session.employeeName }}</span>
                   </div>
                 </td>
-                <td class="date-cell">{{ session.workDate | date:'dd-MM-yyyy' }}</td>
+                <td class="date-cell">{{ session.workDate | localizedDate:'dd-MM-yyyy' }}</td>
                 <td class="time-cell">
                   <ng-container *ngIf="session.checkInTime; else absent">
-                    {{ session.checkInTime | date:'HH:mm' }}
+                    {{ session.checkInTime | localizedDate:'HH:mm' }}
                   </ng-container>
                   <ng-template #absent>
                     <span class="absent-text">--:--</span>
@@ -162,7 +162,7 @@
                 </td>
                 <td class="time-cell">
                   <ng-container *ngIf="session.checkOutTime; else absentOut">
-                    {{ session.checkOutTime | date:'HH:mm' }}
+                    {{ session.checkOutTime | localizedDate:'HH:mm' }}
                   </ng-container>
                   <ng-template #absentOut>
                     <span class="absent-text">--:--</span>
@@ -201,7 +201,9 @@
       </div>
 
       <!-- Right: Calendar (40%) -->
-      <app-attendance-calendar></app-attendance-calendar>
+      <ng-container *ngIf="hasPermission('Attendance_Calendar')">
+        <app-attendance-calendar></app-attendance-calendar>
+      </ng-container>
 
     </div>
 

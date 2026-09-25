@@ -21,7 +21,7 @@
         <label class="field amount-field">
           <span>Amount {{ currencySymbol }}</span>
           <div class="prefix-input">
-            <strong>Rs.</strong>
+            <strong>{{ currencySymbol }}</strong>
             <input type="number" formControlName="totalAmount" min="1" placeholder="0.00" />
           </div>
         </label>
@@ -39,7 +39,7 @@
       @if (hasActiveRules && selectedRule) {
         <p class="rule-hint">
           Selected rule: <strong>{{ selectedRule.maxPercentage }}%</strong> of available limit.
-          Max request amount: <strong>Rs. {{ selectedRuleMaxAmount | number:'1.0-2' }}</strong>.
+          Max request amount: <strong>{{ currencySymbol }} {{ selectedRuleMaxAmount | number:'1.0-2' }}</strong>.
         </p>
       }
 

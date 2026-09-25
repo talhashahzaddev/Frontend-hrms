@@ -1,0 +1,141 @@
+// Timesheet buttons — matches Attendance (42px page CTAs, 40px dialog footer)
+
+.ts-page-layout,
+.period-detail-layout {
+  .p-button {
+    padding: unset !important;
+    border-radius: unset !important;
+    height: 42px !important;
+    padding: 0 1.25rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    transition: background 0.15s, box-shadow 0.15s, border-color 0.15s !important;
+    letter-spacing: 0 !important;
+
+    .p-button-icon {
+      font-size: 0.875rem !important;
+      width: 0.875rem !important;
+      height: 0.875rem !important;
+      margin: 0 !important;
+    }
+
+    .p-button-label {
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
+      flex: 0 0 auto !important;
+    }
+
+    &:focus { box-shadow: none !important; }
+  }
+
+  // Primary filled
+  .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-danger):not(.p-button-success):not(.p-button-warning):not([styleClass*="danger"]):not([styleClass*="success"]):not([styleClass*="warning"]) {
+    background: #2563eb !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+
+    &:hover:not(:disabled) {
+      background: #1d4ed8 !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  // Outlined
+  .p-button.p-button-outlined {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+    box-shadow: none !important;
+
+    &:hover:not(:disabled) {
+      background: #f8fafc !important;
+      border-color: #2563eb !important;
+      color: #2563eb !important;
+    }
+  }
+
+  // Text / ghost
+  .p-button.p-button-text {
+    height: 42px !important;
+    padding: 0 0.75rem !important;
+    background: transparent !important;
+    border: none !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+
+    &:hover:not(:disabled) {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+  }
+
+  .p-button.p-button-info.p-button-text {
+    color: #2563eb !important;
+    &:hover:not(:disabled) { background: #eff6ff !important; }
+  }
+
+  // Danger
+  .p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined) {
+    background: #dc2626 !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
+    &:hover:not(:disabled) { background: #b91c1c !important; }
+  }
+
+  .p-button.p-button-danger.p-button-text {
+    color: #dc2626 !important;
+    &:hover:not(:disabled) { background: #fef2f2 !important; }
+  }
+
+  // Success
+  .p-button.p-button-success:not(.p-button-text) {
+    background: #16a34a !important;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
+    &:hover:not(:disabled) { background: #15803d !important; }
+  }
+
+  // Small
+  .p-button.p-button-sm {
+    height: 36px !important;
+    padding: 0 1rem !important;
+    font-size: 0.8125rem !important;
+    border-radius: 0.5rem !important;
+
+    .p-button-icon,
+    .p-button-label { font-size: 0.8125rem !important; }
+  }
+
+  // Native attendance-style buttons
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 42px;
+    padding: 0 1.25rem;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: background 0.15s, box-shadow 0.15s;
+
+    &:hover:not(:disabled) {
+      background: #1d4ed8;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}

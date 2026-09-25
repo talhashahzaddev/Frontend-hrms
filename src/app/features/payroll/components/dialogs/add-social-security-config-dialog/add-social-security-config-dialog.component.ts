@@ -1,9 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
 
+import { SettingsService } from '../../../../settings/services/settings.service';
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type SocialSecurityConfigStatus = 'active' | 'inactive';
 
 export interface SocialSecurityConfigDialogPayload {
@@ -74,17 +78,22 @@ interface SocialSecurityConfigDialogData {
   rules?: SocialSecurityConfigDialogRuleOption[];
 }
 
+
 @Component({
   selector: 'app-add-social-security-config-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-config-dialog.component.html',
   styleUrl: './add-social-security-config-dialog.component.scss'
 })
 export class AddSocialSecurityConfigDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AddSocialSecurityConfigDialogComponent, SocialSecurityConfigDialogPayload | undefined>);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   readonly jurisdictions = this.data?.jurisdictions ?? [];
@@ -119,6 +128,13 @@ export class AddSocialSecurityConfigDialogComponent {
   );
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityConfigDialogData) {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
+
     if (this.data?.initialValue) {
       this.form.patchValue({
         configName: this.data.initialValue.configName ?? '',

@@ -1,0 +1,121 @@
+@use '../../../attendance/styles/attendance-dialog';
+
+:host {
+  @include attendance-dialog.ad-scroll-host;
+}
+
+@include attendance-dialog.ad-panel-shell;
+
+.srd-message {
+  margin: 0 0 1rem;
+}
+
+/* Correction-specific */
+.section-divider {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: attendance-dialog.$ad-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid attendance-dialog.$ad-border;
+}
+
+.rejection-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  color: #991b1b;
+}
+
+.rejection-icon { color: #dc2626; font-size: 18px; width: 18px; height: 18px; margin-top: 2px; }
+.rejection-text { display: flex; flex-direction: column; gap: 2px; }
+.rejection-text strong { font-size: 0.8125rem; color: #991b1b; }
+.rejection-text span { font-size: 0.8125rem; color: #7f1d1d; line-height: 1.4; }
+
+.state-card {
+  background: attendance-dialog.$ad-input-bg;
+  border: 1px solid attendance-dialog.$ad-border;
+  border-radius: 0.75rem;
+  padding: 16px;
+  margin-bottom: 1rem;
+}
+
+.state-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: attendance-dialog.$ad-text-label;
+}
+
+.state-icon { font-size: 14px; width: 14px; height: 14px; color: attendance-dialog.$ad-primary; }
+
+.state-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+}
+
+.state-item { display: flex; flex-direction: column; }
+.state-label { font-size: 0.6875rem; color: attendance-dialog.$ad-text-secondary; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+.state-value { font-size: 0.875rem; font-weight: 600; color: attendance-dialog.$ad-text-primary; }
+
+.error-text { color: #dc2626; font-size: 0.8125rem; margin-top: 8px; }
+
+.form-row-grid {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+
+  .form-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+}
+
+.stepper-wrapper {
+  display: flex;
+  align-items: center;
+  background: attendance-dialog.$ad-input-bg;
+  border: 1px solid attendance-dialog.$ad-border;
+  border-radius: 0.5rem;
+  height: 40px;
+  overflow: hidden;
+
+  .stepper-btn {
+    width: 38px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: attendance-dialog.$ad-text-secondary;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover { color: attendance-dialog.$ad-primary; background: #eff6ff; }
+    mat-icon { font-size: 1.125rem; }
+  }
+
+  .stepper-input {
+    flex: 1;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    background: attendance-dialog.$ad-input-bg;
+    color: attendance-dialog.$ad-text-primary;
+    width: 100%;
+    outline: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-row-grid { flex-direction: column; }
+}

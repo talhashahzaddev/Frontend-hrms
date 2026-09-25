@@ -1,3 +1,5 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -16,11 +18,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '@/app/core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-ticket-involvement',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -30,6 +36,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatMenuModule,
     MatButtonModule,
     MatIconModule
+    ,PageHeaderComponent, MatProgressSpinnerModule
   ],
   templateUrl: './ticket-involvement.component.html',
   styleUrl: './ticket-involvement.component.scss',
@@ -58,6 +65,7 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
     private router: Router
+    , private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -127,7 +135,11 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
   // ✅ Actions
   viewTicket(ticket: Ticket): void {
     console.log('CLICK WORKING', ticket.ticketid);
-    this.router.navigate(['help-desk/tickets/view', ticket.ticketid]);
+    this.router.navigate(['help-desk/tickets/invlove-View', ticket.ticketid]);
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Ticket Involvement', actionKey);
   }
 
   deleteTicket(ticket: Ticket): void {
@@ -137,3 +149,5 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
   }
   
 }
+
+

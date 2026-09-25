@@ -13,15 +13,18 @@ import { StageMasterDto, CreateStageMasterRequest, UpdateStageMasterRequest } fr
 import { JobsService } from '../../services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface StageFormDialogData {
   mode: 'create' | 'edit';
   stage?: StageMasterDto;
 }
 
+
 @Component({
   selector: 'app-stage-form-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

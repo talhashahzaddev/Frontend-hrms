@@ -29,10 +29,14 @@ import {
   TeamRemainingLeaves
 } from '../../../../core/models/leave.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-team-requests',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -45,6 +49,7 @@ import {
     MatFormFieldModule,
     MatInputModule,
     MatPaginatorModule,
+    PageHeaderComponent,
   ],
   templateUrl: './team-requests.component.html',
   styleUrls: ['./team-requests.component.scss'],
@@ -53,7 +58,6 @@ import {
 export class TeamRequestsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
-  private backendBaseUrl = 'https://localhost:60485';
 
   activeTab: 'pending' | 'balance' = 'pending';
 
@@ -120,15 +124,11 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
           this.pendingApprovals = Array.isArray(data.pendingApprovals)
             ? data.pendingApprovals.map((req: any) => {
-                req.leaveTypeName = req.leaveTypeName || req.typename || req.TypeName || '';
-                if (req.profilePictureUrl) {
-                  req.profilePreviewUrl = req.profilePictureUrl.startsWith('http')
-                    ? req.profilePictureUrl
-                    : `${this.backendBaseUrl}${req.profilePictureUrl}`;
-                } else {
-                  req.profilePreviewUrl = null;
-                }
-                return req;
+                return {
+                ...req,
+                employeeName: req.employeeName,
+                profilePreviewUrl: this.authService.resolveProfilePictureUrl(req.profilePictureUrl)
+              };
               })
             : [];
 
@@ -215,7 +215,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   // ✅ Opens ApproveLeaveDialogComponent — API is called only after confirmation
   approveRequest(request: LeaveRequest): void {
     const dialogRef = this.dialog.open(ApproveLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
@@ -248,7 +250,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
   rejectRequest(request: LeaveRequest): void {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
@@ -278,7 +282,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
   viewRequestDetails(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:    request.employeeName,
         leaveTypeName:   request.leaveTypeName,
@@ -299,7 +305,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   // ✅ View Details — always available regardless of status
   openDetailsDialog(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:    request.employeeName,
         leaveTypeName:   request.leaveTypeName,

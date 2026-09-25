@@ -1,0 +1,298 @@
+// Policy Dialog — Blue Slate design system (aligned with global _dialogs.scss)
+
+$primary:         #2563eb;
+$primary-light:   #eff6ff;
+$primary-hover:   #1d4ed8;
+$success:         #16a34a;
+$success-light:   #dcfce7;
+$warning:         #f59e0b;
+$danger:          #dc2626;
+$text-primary:    #0f172a;
+$text-secondary:  #64748b;
+$text-muted:      #94a3b8;
+$border:          #e2e8f0;
+$surface:         #f8fafc;
+$white:           #ffffff;
+
+// ── Dialog header override ───────────────────────────────────────────────────
+.dialog-header {
+  padding: 16px 20px !important;
+  gap: 12px !important;
+
+  .header-left { gap: 12px !important; }
+  .dialog-icon { width: 36px !important; height: 36px !important; }
+
+  .dialog-title { margin: 0 0 2px !important; font-size: 1.0625rem !important; font-weight: 700 !important; color: #0f172a !important; line-height: 1.3 !important; }
+  .dialog-subtitle { margin: 0 !important; font-size: 0.8125rem !important; color: #64748b !important; }
+}
+
+// ── Form Layout ──────────────────────────────────────────────────────────────
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  > * { flex: 1; min-width: 0; }
+}
+
+// ── Dialog icon override ─────────────────────────────────────────────────────
+.dialog-icon {
+  background: $primary-light !important;
+  mat-icon { color: $primary !important; }
+  &.warn { background: #fef2f2 !important; mat-icon { color: $danger !important; } }
+}
+
+// ── Status badges in header ──────────────────────────────────────────────────
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+
+  &.published { background: $success-light; color: $success; }
+  &.draft     { background: $surface; color: $text-secondary; border: 1px solid $border; }
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+// ── Full-width form field ─────────────────────────────────────────────────────
+.full-width {
+  width: 100%;
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper { background: $white !important; border-radius: 8px !important; }
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { border-color: $border !important; }
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing { border-color: $primary !important; border-width: 1.5px !important; }
+    }
+    .mat-mdc-form-field-infix { padding: 10px 0 !important; min-height: unset; }
+    input, textarea, .mat-mdc-select-value-text { font-size: 0.875rem; color: $text-primary; }
+  }
+}
+
+.req-star { color: #ef4444; margin-left: 2px; }
+
+// ── Content section (Quill) ──────────────────────────────────────────────────
+.content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.content-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.content-error {
+  font-size: 0.75rem;
+  color: $danger;
+  margin-top: 4px;
+}
+
+.quill-field {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid $border;
+  background: $white;
+
+  ::ng-deep {
+    .ql-toolbar { border-bottom: 1px solid $border; background: $surface; border-radius: 8px 8px 0 0; }
+    .ql-container { border: none; min-height: 140px; font-size: 0.875rem; }
+    .ql-editor { min-height: 140px; }
+  }
+}
+
+// ── Attachment section ────────────────────────────────────────────────────────
+.attachment-section { display: flex; flex-direction: column; gap: 10px; }
+
+// Existing file row
+.existing-file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 8px;
+
+  .existing-file-info { display: flex; align-items: center; gap: 10px; }
+
+  .file-type-icon { color: $primary; font-size: 22px; width: 22px; height: 22px; }
+  .file-name-text { margin: 0; font-size: 0.875rem; font-weight: 600; color: $text-primary; }
+  .file-meta { margin: 2px 0 0; font-size: 0.75rem; color: $text-muted; }
+
+  .existing-file-actions { display: flex; gap: 4px; }
+
+  .file-action-btn {
+    width: 32px !important; height: 32px !important; border-radius: 7px !important;
+    &.view-btn mat-icon { color: $primary; }
+    &.remove-btn mat-icon { color: $danger; }
+    &:hover { background: $surface; }
+  }
+}
+
+// Upload zone
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 24px;
+  border: 2px dashed $border;
+  border-radius: 10px;
+  background: $surface;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: center;
+
+  &:hover:not(.is-uploading) { border-color: $primary; background: $primary-light; }
+
+  &.has-file { border-color: $success; background: $success-light; }
+  &.is-uploading { cursor: not-allowed; opacity: 0.8; }
+  &.required-zone { border-color: #fca5a5; background: #fef2f2; }
+
+  .upload-icon { font-size: 32px; width: 32px; height: 32px; color: $text-muted; }
+  .selected-icon { color: $success; }
+  .upload-spinner { margin: 0 auto; }
+
+  .upload-primary { margin: 0; font-size: 0.9375rem; font-weight: 600; color: $text-primary; }
+  .file-selected-name { color: $success; }
+  .upload-secondary { margin: 0; font-size: 0.8125rem; color: $text-muted; }
+}
+
+// Error row
+.file-error-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: $danger;
+
+  .err-icon { font-size: 17px; width: 17px; height: 17px; }
+}
+
+// File actions
+.file-actions-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.view-file-btn {
+  border-color: $primary !important;
+  color: $primary !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+.clear-file-btn {
+  border-color: $border !important;
+  color: $text-secondary !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+// View file card
+.view-file-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+
+  .file-type-icon { font-size: 24px; width: 24px; height: 24px; color: $primary; }
+  .file-card-info { flex: 1; }
+  .file-name-text { margin: 0; font-size: 0.875rem; font-weight: 600; color: $text-primary; }
+  .file-meta { margin: 2px 0 0; font-size: 0.75rem; color: $text-muted; }
+
+  .view-flat-btn {
+    background: $primary !important;
+    color: white !important;
+    border-radius: 8px !important;
+    font-size: 0.875rem !important;
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+}
+
+// ── Publish toggle ────────────────────────────────────────────────────────────
+.publish-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+
+  .publish-info { display: flex; flex-direction: column; gap: 2px; }
+  .publish-label { font-size: 0.9375rem; font-weight: 700; color: $text-primary; }
+  .publish-hint { font-size: 0.8125rem; color: $text-secondary; }
+}
+
+// ── View meta ─────────────────────────────────────────────────────────────────
+.view-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .meta-key { font-size: 0.8125rem; font-weight: 600; color: $text-secondary; }
+    .meta-val { font-size: 0.875rem; color: $text-primary; }
+    .category-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: $primary-light;
+      color: $primary;
+      font-size: 12px;
+      font-weight: 700;
+    }
+  }
+}
+
+// ── Footer overrides ──────────────────────────────────────────────────────────
+.dialog-footer {
+  .cancel-btn {
+    border-color: $border !important;
+    color: #475569 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    &:hover { background: $surface !important; }
+  }
+
+  .submit-btn {
+    background: $primary !important;
+    color: white !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    &:hover:not(:disabled) { background: $primary-hover !important; }
+    &:disabled { opacity: 0.55; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .btn-spinner { flex-shrink: 0; }
+  }
+}

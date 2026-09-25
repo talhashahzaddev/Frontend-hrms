@@ -12,10 +12,13 @@ import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     ReactiveFormsModule,

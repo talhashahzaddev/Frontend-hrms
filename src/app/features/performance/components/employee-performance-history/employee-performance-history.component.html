@@ -96,7 +96,7 @@
                 <ng-container matColumnDef="date">
                   <th mat-header-cell *matHeaderCellDef>Completed Date</th>
                   <td mat-cell *matCellDef="let appraisal">
-                    {{ appraisal.reviewedAt ? (appraisal.reviewedAt | date:'mediumDate') : 'N/A' }}
+                    {{ appraisal.reviewedAt ? (appraisal.reviewedAt | localizedDate:'mediumDate') : 'N/A' }}
                   </td>
                 </ng-container>
 

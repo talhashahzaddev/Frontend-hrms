@@ -1,101 +1,116 @@
-<div class="overtime-rules-container">
-  <!-- Page Header -->
-  <div class="page-header-wrapper">
-    <div class="page-header">
-      <div class="title-section">
-        <button class="icon-button back-btn" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="title-text-group">
-          <h1 class="title">Overtime rules</h1>
-          <p class="subtitle">Rates for regular, holiday and weekend OT</p>
+@if (!hasPermission('overtime_rule_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view overtime rules. Please contact your system administrator.</p>
+    <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
+  </div>
+} @else {
+  <div class="overtime-rules-container">
+    <!-- Page Header -->
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="title-section">
+          <button class="icon-button back-btn" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-text-group">
+            <h1 class="title">Overtime rules</h1>
+            <p class="subtitle">Rates for regular, holiday and weekend OT</p>
+          </div>
+        </div>
+        @if (hasPermission('overtime_rule_add')) {
+          <button class="create-rule-btn" (click)="openRuleDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Create rule</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Content Card -->
+    <div class="content-card">
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th class="text-left">Rule name</th>
+              <th class="text-left">Overtime type</th>
+              <th class="text-right">Fixed amount</th>
+              <th class="text-right">Percentage</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+            <tr>
+              <td colspan="6" class="text-center" style="padding: 3rem;">
+                <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
+              </td>
+            </tr>
+            } @else if (overtimeRules().length === 0) {
+            <tr>
+              <td colspan="6" class="text-center" style="padding: 4rem;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                  <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure rules for overtime management.</h3>
+                  @if (hasPermission('overtime_rule_add')) {
+                    <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+                      <mat-icon>add</mat-icon>
+                      <span>Create rule</span>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+            } @else {
+            @for (rule of overtimeRules(); track rule.ruleId) {
+            <tr class="table-row" [class.inactive-row]="!rule.isActive">
+              <td class="text-left font-semibold">{{ rule.ruleName }}</td>
+              <td class="text-left">
+                <span class="badge" [ngClass]="'type-' + rule.overtimeType.toLowerCase()">{{ rule.overtimeType }}</span>
+              </td>
+              <td class="text-right">{{ rule.fixedAmount !== null ? (currencySymbol() + ' ' + rule.fixedAmount) : '—' }}</td>
+              <td class="text-right">
+                <span class="highlight-val">{{ rule.percentage !== null ? rule.percentage + '%' : '—' }}</span>
+              </td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
+                  {{ rule.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="text-right action-cell">
+                @if (hasPermission('overtime_rule_edit')) {
+                  <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
+                    (click)="editRule(rule)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule.ruleId)"
+                    [title]="rule.isActive ? 'Deactivate' : 'Activate'">
+                    <mat-icon>{{ rule.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                  </button>
+                }
+                @if (hasPermission('overtime_rule_delete')) {
+                  <button mat-icon-button class="action-btn text-muted hover-danger"
+                    (click)="onDelete(rule.ruleId, rule.ruleName)" title="Delete Rule">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer Details -->
+      <div class="table-footer">
+        <p>Showing {{ overtimeRules().length }} of {{ overtimeRules().length }} overtime rules</p>
+        <div class="footer-actions">
+          <div class="divider"></div>
         </div>
       </div>
-      <button class="create-rule-btn" (click)="openRuleDialog()">
-        <mat-icon>add</mat-icon>
-        <span>Create rule</span>
-      </button>
     </div>
   </div>
-
-  <!-- Content Card -->
-  <div class="content-card">
-    <div class="table-responsive">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th class="text-left">Rule name</th>
-            <th class="text-left">Overtime type</th>
-            <th class="text-right">Fixed amount</th>
-            <th class="text-right">Percentage</th>
-            <th class="text-center">Status</th>
-            <th class="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading()) {
-          <tr>
-            <td colspan="6" class="text-center" style="padding: 3rem;">
-              <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
-            </td>
-          </tr>
-          } @else if (overtimeRules().length === 0) {
-          <tr>
-            <td colspan="6" class="text-center" style="padding: 4rem;">
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure rules for overtime management.</h3>
-                <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
-                  <mat-icon>add</mat-icon>
-                  <span>Create rule</span>
-                </button>
-              </div>
-            </td>
-          </tr>
-          } @else {
-          @for (rule of overtimeRules(); track rule.ruleId) {
-          <tr class="table-row" [class.inactive-row]="!rule.isActive">
-            <td class="text-left font-semibold">{{ rule.ruleName }}</td>
-            <td class="text-left">
-              <span class="badge" [ngClass]="'type-' + rule.overtimeType.toLowerCase()">{{ rule.overtimeType }}</span>
-            </td>
-            <td class="text-right">{{ rule.fixedAmount !== null ? (currencySymbol() + ' ' + rule.fixedAmount) : '—' }}</td>
-            <td class="text-right">
-              <span class="highlight-val">{{ rule.percentage !== null ? rule.percentage + '%' : '—' }}</span>
-            </td>
-            <td class="text-center">
-              <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
-                {{ rule.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="text-right action-cell">
-              <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
-                (click)="editRule(rule)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule.ruleId)"
-                [title]="rule.isActive ? 'Deactivate' : 'Activate'">
-                <mat-icon>{{ rule.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn text-muted hover-danger"
-                (click)="onDelete(rule.ruleId, rule.ruleName)" title="Delete Rule">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </tr>
-          }
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Footer Details -->
-    <div class="table-footer">
-      <p>Showing {{ overtimeRules().length }} of {{ overtimeRules().length }} overtime rules</p>
-      <div class="footer-actions">
-        <!-- <button class="link-btn text-primary">View archive</button> -->
-        <div class="divider"></div>
-        <!-- <button class="link-btn text-muted">Export Ledger (.csv)</button> -->
-      </div>
-    </div>
-  </div>
-</div>
+}

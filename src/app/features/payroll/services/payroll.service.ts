@@ -130,6 +130,28 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
+export interface CalculatePayrollPayload {
+  periodId: string;
+  departmentId?: string | null;
+  cycleId?: string | null;
+  bonusRuleId?: string | null;
+  attendanceRuleId?: string | null;
+  lateAttendanceRuleId?: string | null;
+  leaveRuleId?: string | null;
+  applyAttendanceRule?: boolean;
+  applyLateAttendanceRule?: boolean;
+  applyLeaveRule?: boolean;
+  applyOvertime?: boolean;
+  applyPerformanceBonus?: boolean;
+  applyGeneralBonus?: boolean;
+  applyGratuity?: boolean;
+  applyProvidentFund?: boolean;
+  applySocialSecurity?: boolean;
+  applyTax?: boolean;
+  applyLoanDeductions?: boolean;
+  applySalaryAdvanceDeductions?: boolean;
+}
+
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;
@@ -2373,6 +2395,18 @@ export class PayrollService {
         );
     }
 
+    getMySalaryAdvanceSummary(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/summary`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     getMySalaryAdvanceById(id: string): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/my-requests/${id}`)
         .pipe(
@@ -2548,6 +2582,129 @@ export class PayrollService {
     }
 
     // Payslips
+    // Compliance payslips (payroll results + PDF)
+    getCompliancePayslips(params: {
+      page?: number;
+      pageSize?: number;
+      payrollPeriodId?: string;
+      departmentId?: string;
+      searchTerm?: string;
+      status?: string;
+    }): Observable<any> {
+      let httpParams = new HttpParams();
+      if (params.page != null) {
+        httpParams = httpParams.set('page', String(params.page));
+      }
+      if (params.pageSize != null) {
+        httpParams = httpParams.set('pageSize', String(params.pageSize));
+      }
+      if (params.payrollPeriodId) {
+        httpParams = httpParams.set('payrollPeriodId', params.payrollPeriodId);
+      }
+      if (params.departmentId) {
+        httpParams = httpParams.set('departmentId', params.departmentId);
+      }
+      if (params.searchTerm?.trim()) {
+        httpParams = httpParams.set('searchTerm', params.searchTerm.trim());
+      }
+      if (params.status) {
+        httpParams = httpParams.set('status', params.status);
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips`, { params: httpParams })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyPayslips(params?: MyPayslipFilterDto): Observable<ApiResponse<{ data: MyPayslipDto[]; totalCount: number }>> {
+      let httpParams = new HttpParams();
+      if (params) {
+        if (params.page != null) {
+          httpParams = httpParams.set('page', String(params.page));
+        }
+        if (params.pageSize != null) {
+          httpParams = httpParams.set('pageSize', String(params.pageSize));
+        }
+        if (params.periodId) {
+          httpParams = httpParams.set('periodId', params.periodId);
+        }
+      }
+      return this.http.get<ApiResponse<{ data: MyPayslipDto[]; totalCount: number }>>(`${this.apiUrl}/my-payslips`, { params: httpParams });
+    }
+
+    getCompliancePayslipStats(params: {
+      payrollPeriodId?: string;
+      departmentId?: string;
+      searchTerm?: string;
+      status?: string;
+    }): Observable<any> {
+      let httpParams = new HttpParams();
+      if (params.payrollPeriodId) {
+        httpParams = httpParams.set('payrollPeriodId', params.payrollPeriodId);
+      }
+      if (params.departmentId) {
+        httpParams = httpParams.set('departmentId', params.departmentId);
+      }
+      if (params.searchTerm?.trim()) {
+        httpParams = httpParams.set('searchTerm', params.searchTerm.trim());
+      }
+      if (params.status) {
+        httpParams = httpParams.set('status', params.status);
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips/stats`, { params: httpParams })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getCompliancePayslipPdfBlob(resultId: string): Observable<Blob> {
+      return this.http.get(`${this.apiUrl}/compliance-payslips/${resultId}/pdf`, {
+        responseType: 'blob'
+      });
+    }
+
+    getCompliancePayslipSource(resultId: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips/${resultId}/source`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    bulkGenerateCompliancePayslipPdfs(data: {
+      payrollPeriodId: string;
+      employeeIds: string[];
+      overwriteExisting: boolean;
+    }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips/bulk-generate-pdfs`, {
+        payrollPeriodId: data.payrollPeriodId,
+        employeeIds: data.employeeIds,
+        overwriteExisting: data.overwriteExisting ?? false
+      })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     getPayslips(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payslips`, { params })
         .pipe(
@@ -2616,6 +2773,34 @@ export class PayrollService {
               throw new Error(response.message);
             }
             return response.data;
+          })
+        );
+    }
+
+    uploadSendPayslips(data: {
+      payrollPeriodId: string;
+      employeeIds: string[];
+      subject?: string;
+      message?: string;
+      connectionId?: string;
+    }): Observable<{ jobId: string; message: string }> {
+      return this.http
+        .post<ApiResponse<{ jobId: string; message: string }>>(
+          `${environment.apiUrl}/payroll/upload-send-payslips`,
+          {
+            payrollPeriodId: data.payrollPeriodId,
+            employeeIds: data.employeeIds,
+            subject: data.subject ?? null,
+            message: data.message ?? null,
+            connectionId: data.connectionId ?? null
+          }
+        )
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data ?? { jobId: '', message: response.message ?? '' };
           })
         );
     }
@@ -2936,6 +3121,15 @@ export class PayrollService {
       );
     }
 
+    calculatePayroll(payload: CalculatePayrollPayload): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/calculate-payroll`, payload).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
     // ────────────────────────────────────────────────────────────────────────────
     //  Social Security — Employee lifecycle (enrollments, requests, claims, docs)
     // ────────────────────────────────────────────────────────────────────────────
@@ -2969,6 +3163,15 @@ export class PayrollService {
 
     getSocialSecurityEnrollmentRequests(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/enrollment-requests`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    getSocialSecurityEnrollments(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/enrollments`, { params }).pipe(
         map((response: any) => {
           if (!response.success && response.message) throw new Error(response.message);
           return response.data;
@@ -3057,6 +3260,18 @@ export class PayrollService {
       );
     }
 
+    verifySocialSecurityRequestDocument(documentId: string, verifiedStatus: string): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(
+        `${this.apiUrl}/social-security/documents/${documentId}/verify`,
+        { verifiedStatus }
+      ).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to update document verification');
+          return response.data ?? true;
+        })
+      );
+    }
+
     uploadSocialSecurityFile(file: File): Observable<string> {
       const formData = new FormData();
       formData.append('file', file);
@@ -3095,6 +3310,31 @@ export interface SocialSecurityEnrollment {
   ruleEmployeeDefaultPct?: number | null;
   ruleEmployerDefaultPct?: number | null;
   contributionBasis?: string;
+  isCurrent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SocialSecurityEnrollmentRoster {
+  enrollmentId: string;
+  organizationId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode?: string | null;
+  ruleId: string;
+  ruleName?: string | null;
+  schemeId?: string | null;
+  schemeName?: string | null;
+  enrollmentType: string;
+  enrollmentStatus: string;
+  effectiveDate: string;
+  endDate?: string | null;
+  employeeCustomPct?: number | null;
+  employerCustomPct?: number | null;
+  ruleEmployeeDefaultPct?: number | null;
+  ruleEmployerDefaultPct?: number | null;
+  salaryCapOverride?: number | null;
+  contributionBasis?: string | null;
   isCurrent: boolean;
   createdAt: string;
   updatedAt: string;
@@ -3232,3 +3472,26 @@ export interface MarkSocialSecurityClaimPaidPayload {
   paymentReference?: string | null;
   authorityReference?: string | null;
 }
+
+export interface MyPayslipFilterDto {
+  periodId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface MyPayslipDto {
+  periodId: string;
+  periodName: string;
+  payslipUploadUrl?: string;
+  basicSalary: number;
+  netSalary: number;
+  calculatedAt: string;
+  employeeId: string;
+  organizationId: string;
+}
+
+export interface PayrollPeriodDto {
+  id: string;
+  label: string;
+}
+

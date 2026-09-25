@@ -1,3 +1,5 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -11,6 +13,7 @@ import { TicketMessageRequest, TicketMessageDto, Ticket } from '../../../../core
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Employee } from '@/app/core/models/employee.models';
 import {  OnInit } from '@angular/core';
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ReplyChatDialogData {
   ticket: Ticket; 
   senderId: string;       // Current user's ID
@@ -18,17 +21,21 @@ export interface ReplyChatDialogData {
   recipientIds?: string[]; // Combined assigned + group employee IDs
 }
 
+
 @Component({
   selector: 'app-reply-chat-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatIconModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './reply-chat-dialog.component.html',
   styleUrls: ['./reply-chat-dialog.component.scss'],
@@ -131,3 +138,6 @@ employees: Employee[] = [];
     this.dialogRef.close();
   }
 }
+
+
+

@@ -11,7 +11,7 @@
     </button>
   </div>
 
-  <mat-dialog-content class="dialog-body">
+  <div class="dialog-body">
     <form [formGroup]="assignShiftForm" autocomplete="off">
       <div class="form-grid">
 
@@ -20,7 +20,7 @@
           <mat-form-field appearance="outline" class="mat-field">
             <mat-select formControlName="shiftId" placeholder="Select a shift">
               <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
-                {{ shift.shiftName }} — {{ shift.startTime }}-{{ shift.endTime }}
+                {{ shift.shiftName }} — {{ shift.startTime | localizedTime }}-{{ shift.endTime | localizedTime }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -142,7 +142,7 @@
 
       </div>
     </form>
-  </mat-dialog-content>
+  </div>
 
   <div class="dialog-footer">
     <button mat-stroked-button type="button" mat-dialog-close [disabled]="isSubmitting" class="btn-cancel">

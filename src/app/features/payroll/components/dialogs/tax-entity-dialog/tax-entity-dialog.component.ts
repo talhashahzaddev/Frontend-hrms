@@ -9,6 +9,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type TaxDialogEntityType = 'category' | 'slab' | 'rule';
 type TaxDialogMode = 'create' | 'edit';
 type SlabAmountType = 'fixed' | 'percentage';
@@ -28,11 +29,13 @@ export interface TaxEntityDialogData {
   initialValue?: any;
 }
 
+
 @Component({
   selector: 'app-tax-entity-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type GratuityRecordStatus = 'calculated' | 'approved' | 'paid' | 'cancelled';
 
 export interface GratuityEmployeeOption {
@@ -45,11 +46,13 @@ interface GratuityRecordDialogData {
   initialValue?: Partial<GratuityRecordDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-gratuity-record-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-gratuity-record-dialog.component.html',
   styleUrl: './add-gratuity-record-dialog.component.scss'
 })

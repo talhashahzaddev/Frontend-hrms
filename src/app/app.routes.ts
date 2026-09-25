@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { PlatformAdminGuard } from './features/platform-admin/guards/platform-admin.guard';
+
 // import { RoleRedirectGuard } from './core/guards/role-redirect.guard';
 // import { EmptyRouteComponent } from './shared/components/Empty-Component/empty-route.component';
 
@@ -12,7 +13,13 @@ export const appRoutes: Routes = [
     redirectTo: '/dashboard',
     pathMatch: 'full'
   },
-
+{
+  path: 'onboarding',
+  canActivate: [AuthGuard],
+  loadComponent: () =>
+    import('./onboarding/onboarding.component').then(m => m.Onboarding),
+  title: 'Employee Onboarding - HRMS'
+},
   // Authentication Routes (accessible only when not authenticated)
   {
     path: 'login',
@@ -26,26 +33,21 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/register/register.component').then(m => m.RegisterComponent)
   },
+  // Dev-only signup — only visible on local / preview environments
+  {
+    path: 'dev-signup',
+    canActivate: [NoAuthGuard],
+    loadComponent: () =>
+      import('./features/auth/components/dev-signup/dev-signup.component').then(m => m.DevSignupComponent),
+    title: 'Create Dev Account - HRMS'
+  },
   {
     path: 'forgot-password',
     canActivate: [NoAuthGuard],
     loadComponent: () =>
       import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
   },
-  {
-    path: 'employee/dashboard',
-    canActivate: [AuthGuard],
-    //data: { roles: ['Employee','Manager'] },
-    loadComponent: () =>
-      import('./features/employee-dashboard/employee-dashboard.component').then(m => m.EmployeeDashboardComponent),
-    pathMatch: 'full'
-  },
-  // Redirect old path for backward compatibility
-  // {
-  //   path: 'employee-dashboard',
-  //   redirectTo: 'employee/dashboard',
-  //   pathMatch: 'full'
-  // },
+
 
 
 
@@ -78,6 +80,13 @@ export const appRoutes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./features/attendance/attendance.routes').then(m => m.attendanceRoutes)
+  },
+  // Timesheet Module
+  {
+    path: "timesheet",
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import("./features/timesheet/timesheet.routes").then(m => m.timesheetRoutes)
   },
   // Assets Management Routes
   {
@@ -238,6 +247,13 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
   },
+
+  // Set Password (public — for invited users)
+  {
+    path: 'set-password',
+    loadComponent: () =>
+      import('./features/auth/components/set-password/set-password.component').then(m => m.SetPasswordComponent)
+  },
   {
     path: 'platform-admin/login',
     loadComponent: () =>
@@ -264,6 +280,12 @@ export const appRoutes: Routes = [
         title: 'Organizations - Brisk People'
       },
       {
+        path: 'invitations',
+        loadComponent: () =>
+          import('./features/platform-admin/components/invitation-list/invitation-list.component').then(m => m.InvitationListComponent),
+        title: 'User Invitations - Brisk People'
+      },
+      {
         path: 'organizations/:id',
         loadComponent: () =>
           import('./features/platform-admin/components/organization-detail/organization-detail.component').then(m => m.OrganizationDetailComponent),
@@ -280,6 +302,38 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/platform-admin/components/payment-management/payment-management.component').then(m => m.PaymentManagementComponent),
         title: 'Payment Management - Brisk People'
+      },
+      {
+        path: 'global-roles',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-roles/global-role-list.component').then(m => m.GlobalRoleListComponent),
+            title: 'Global Roles - Brisk People'
+          },
+          {
+            path: 'add',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-role-form/global-role-form.component').then(m => m.GlobalRoleFormComponent),
+            title: 'Add Global Role - Brisk People',
+            data: { mode: 'add' }
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-role-form/global-role-form.component').then(m => m.GlobalRoleFormComponent),
+            title: 'Edit Global Role - Brisk People',
+            data: { mode: 'edit' }
+          },
+          {
+            path: ':id/view',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-role-form/global-role-form.component').then(m => m.GlobalRoleFormComponent),
+            title: 'View Global Role - Brisk People',
+            data: { mode: 'view' }
+          }
+        ]
       }
     ]
   },
@@ -303,10 +357,12 @@ export const appRoutes: Routes = [
       import('./shared/components/server-error/server-error.component').then(m => m.ServerErrorComponent),
     title: 'Server Error - HRMS'
   },
+  
 
   // Catch all route - redirect to 404
   {
     path: '**',
     redirectTo: '/404'
   }
+  
 ];

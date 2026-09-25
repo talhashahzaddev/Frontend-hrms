@@ -1,13 +1,16 @@
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
 
 import { RoleService } from '../../services/role.service';
 import { MenuService } from '../../services/menu.service';
@@ -20,10 +23,13 @@ import {
   ApiMenu
 } from '../../../../core/models/role.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-role-form',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -32,7 +38,8 @@ import {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule
   ],
   templateUrl: './role-form.component.html',
   styleUrls: ['./role-form.component.scss']
@@ -40,6 +47,7 @@ import {
 export class RoleFormComponent implements OnInit {
   roleForm!: FormGroup;
   permissionGroups: MenuPermissionGroup[] = [];
+  availableRoles: Role[] = [];
   isLoadingMenus = false;
   isSaving = false;
   grantFullAccess = false;
@@ -54,6 +62,7 @@ export class RoleFormComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
+    private location: Location,
     private roleService: RoleService,
     private menuService: MenuService,
     private notificationService: NotificationService
@@ -70,6 +79,7 @@ export class RoleFormComponent implements OnInit {
 
   private buildForm(): void {
     this.roleForm = this.fb.group({
+      baseRole: [{ value: '', disabled: this.isViewMode }],
       roleName: [
         { value: this.role?.roleName || '', disabled: this.isViewMode },
         [Validators.required, Validators.minLength(2)]
@@ -86,10 +96,24 @@ export class RoleFormComponent implements OnInit {
         if ((this.isEditMode || this.isViewMode) && this.role?.menus) {
           this.populateExistingPermissions(this.role.menus);
         }
-        this.isLoadingMenus = false;
+        // Also load base roles for dropdown
+        this.loadBaseRoles();
       },
       error: () => {
         this.notificationService.showError('Failed to load menu permissions');
+        this.isLoadingMenus = false;
+      }
+    });
+  }
+
+  private loadBaseRoles(): void {
+    this.roleService.getRoles().subscribe({
+      next: (roles) => {
+        this.availableRoles = roles.filter(r => !r.roleId?.startsWith('temp-'));
+        this.isLoadingMenus = false;
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load base roles');
         this.isLoadingMenus = false;
       }
     });
@@ -111,6 +135,61 @@ export class RoleFormComponent implements OnInit {
         }))
       }))
     }));
+  }
+
+  onBaseRoleChange(selectedRoleId: string): void {
+    if (!selectedRoleId) {
+      // Reset permissions if no base role selected
+      this.resetPermissions();
+      return;
+    }
+
+    // Find the selected role
+    const selectedRole = this.availableRoles.find(r => r.roleId === selectedRoleId);
+    if (selectedRole && selectedRole.menus) {
+      this.applyRolePermissions(selectedRole);
+    }
+  }
+
+  private applyRolePermissions(role: Role): void {
+    if (!role.menus || role.menus.length === 0) {
+      this.resetPermissions();
+      return;
+    }
+    // Reset first
+    this.resetPermissions();
+
+    // Apply permissions from the selected role
+    role.menus.forEach(roleMenu => {
+      const group = this.permissionGroups.find(g => g.menuId === roleMenu.menuId);
+      if (!group) return;
+
+      roleMenu.subMenus?.forEach(roleSub => {
+        const sub = group.subMenus.find(s => s.subMenuId === roleSub.subMenuId);
+        if (!sub) return;
+
+        roleSub.actions?.forEach(roleAction => {
+          // Match by actionId first, then by actionKey as fallback
+          const action = sub.actions.find(
+            a => a.actionId === roleAction.actionId || a.actionKey === roleAction.actionKey
+          );
+          if (action) {
+            action.hasPermission = roleAction.hasPermission;
+          }
+        });
+      });
+    });
+
+    // Force UI update
+    this.permissionGroups = [...this.permissionGroups];
+  }
+
+  private resetPermissions(): void {
+    this.permissionGroups.forEach(group =>
+      group.subMenus.forEach(sub =>
+        sub.actions.forEach(action => action.hasPermission = false)
+      )
+    );
   }
 
   private populateExistingPermissions(existingMenus: any[]): void {
@@ -175,6 +254,7 @@ export class RoleFormComponent implements OnInit {
     const iconMap: Record<string, string> = {
       'Employee Management': 'people',
       'Attendance': 'schedule',
+      'Timesheet': 'date_range',
       'Leave Management': 'event_available',
       'Assets Management': 'inventory_2',
       'Performance': 'trending_up',
@@ -194,7 +274,7 @@ export class RoleFormComponent implements OnInit {
   // ─── Navigation ────────────────────────────────────────────────
 
   onBack(): void {
-    this.router.navigate(['/settings/roles']);
+    this.router.navigate(['/dashboard']);
   }
 
   // ─── Submit ────────────────────────────────────────────────────
@@ -249,3 +329,5 @@ export class RoleFormComponent implements OnInit {
     });
   }
 }
+
+

@@ -273,6 +273,6 @@
   <!-- Footer -->
   <div class="dialog-footer">
     <button class="cancel-btn" (click)="close()">Cancel</button>
-    <button class="save-btn" (click)="save()">Save record</button>
+    <button class="save-btn" type="button" [disabled]="!canSubmit" (click)="save()">Save record</button>
   </div>
 </div>

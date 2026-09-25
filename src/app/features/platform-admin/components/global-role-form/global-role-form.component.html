@@ -1,0 +1,204 @@
+<!-- Global Role Form Page (Add / Edit / View) -->
+<div class="role-form-page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a class="breadcrumb-link" (click)="onBack()">
+      <mat-icon>chevron_left</mat-icon>
+      Global Roles &amp; Permissions
+    </a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">
+      {{ isViewMode ? 'View Global Role' : isEditMode ? 'Edit Global Role' : 'Add New Global Role' }}
+    </span>
+  </div>
+
+  <!-- Page Title -->
+  <div class="page-heading">
+    <h1 class="page-title">
+      {{ isViewMode ? 'View Global Role' : isEditMode ? 'Edit Global Role' : 'Add New Global Role' }}
+    </h1>
+    <p class="page-subtitle">
+      {{ isViewMode
+          ? 'View global role permissions and access details assigned to this role across all organizations.'
+          : 'Define a new global role and configure its specific access permissions across modules to manage platform-wide access levels.' }}
+    </p>
+  </div>
+
+  <!-- Role Details Card -->
+  <div class="section-card" [formGroup]="roleForm">
+    <div class="section-header">
+      <div class="section-header-icon">
+        <mat-icon>info</mat-icon>
+      </div>
+      <span class="section-title">Role Details</span>
+    </div>
+
+    <!-- Edit/Add Mode: Role Name & Base Role on same row -->
+    <div class="form-row" *ngIf="!isViewMode">
+      <!-- Role Name -->
+      <div class="form-group">
+        <label class="form-label">Role Name</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-icon matPrefix>shield</mat-icon>
+          <input matInput formControlName="roleName" placeholder="e.g. Platform Super Admin">
+          <mat-error *ngIf="roleForm.get('roleName')?.hasError('required')">Role name is required</mat-error>
+          <mat-error *ngIf="roleForm.get('roleName')?.hasError('minlength')">Minimum 2 characters</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Base Role Selection (Add & Edit Mode) -->
+      <div class="form-group">
+        <label class="form-label">Base Role Template (Optional)</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-icon matPrefix>layers</mat-icon>
+          <mat-select formControlName="baseRole" (selectionChange)="onBaseRoleChange($event.value)">
+            <mat-option value="">None</mat-option>
+            <mat-option *ngFor="let role of baseRoles" [value]="role.roleId">
+              {{ role.roleName }}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Choose an existing global role to inherit its permissions</mat-hint>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Description Row (Full width in edit mode) -->
+    <div class="form-row" *ngIf="!isViewMode">
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <textarea matInput formControlName="description"
+            placeholder="Describe the purpose of this global role..."></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- View Mode: Role Name & Description on same row -->
+    <div class="form-row" *ngIf="isViewMode">
+      <!-- Role Name -->
+      <div class="form-group">
+        <label class="form-label">Role Name</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-icon matPrefix>shield</mat-icon>
+          <input matInput formControlName="roleName" placeholder="e.g. Platform Super Admin" readonly>
+        </mat-form-field>
+      </div>
+
+      <!-- Description in View Mode -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <textarea matInput formControlName="description"
+            placeholder="Describe the purpose of this global role..." readonly></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Permissions Card -->
+  <div class="section-card permissions-card">
+
+    <!-- Permissions Header -->
+    <div class="permissions-header">
+      <div class="permissions-header-left">
+        <span class="section-title">Menu Permissions</span>
+        <p class="permissions-sub">Control which features this global role can view or manage across all organizations</p>
+      </div>
+      <div class="permissions-header-right" *ngIf="!isViewMode">
+        <span class="grant-label">Grant Full Access</span>
+        <label class="toggle-switch">
+          <input type="checkbox"
+            [(ngModel)]="grantFullAccess"
+            (change)="onGrantFullAccessChange()"
+            [disabled]="isViewMode">
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoadingMenus" class="menus-loading">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Loading permissions...</span>
+    </div>
+
+    <!-- Permission Grid -->
+    <div *ngIf="!isLoadingMenus" class="permissions-grid">
+
+      <div *ngFor="let menuGroup of permissionGroups" class="perm-card">
+
+        <!-- Card Header -->
+        <div class="perm-card-header">
+          <div class="perm-card-header-left">
+            <div class="perm-card-icon">
+              <mat-icon>{{ getMenuIcon(menuGroup.menuName) }}</mat-icon>
+            </div>
+            <span class="perm-card-title">{{ menuGroup.menuName }}</span>
+          </div>
+          <!-- Master checkbox -->
+          <label class="custom-checkbox" [class.disabled]="isViewMode"
+            [matTooltip]="isMenuFullyEnabled(menuGroup) ? 'Disable all' : 'Enable all'">
+            <input type="checkbox"
+              [checked]="isMenuFullyEnabled(menuGroup)"
+              [indeterminate]="isMenuPartiallyEnabled(menuGroup)"
+              (change)="toggleAllMenuActions(menuGroup, $event)"
+              [disabled]="isViewMode">
+            <span class="checkmark"></span>
+          </label>
+        </div>
+
+        <!-- Card Body -->
+        <div class="perm-card-body">
+          <ng-container *ngFor="let subMenu of menuGroup.subMenus">
+
+            <div class="submenu-label" *ngIf="menuGroup.subMenus.length > 1">
+              {{ subMenu.subMenuName }}
+            </div>
+
+            <div class="action-row" *ngFor="let action of subMenu.actions">
+              <span class="action-label">{{ action.actionName }}</span>
+              <label class="custom-checkbox" [class.disabled]="isViewMode">
+                <input type="checkbox"
+                  [(ngModel)]="action.hasPermission"
+                  [ngModelOptions]="{standalone: true}"
+                  [disabled]="isViewMode">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+
+            <div *ngIf="subMenu.actions.length === 0" class="no-actions">No actions defined</div>
+          </ng-container>
+
+          <div *ngIf="menuGroup.subMenus.length === 0" class="no-actions">No permissions defined</div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="perm-card-footer">
+          <span class="status-label">STATUS</span>
+          <span class="status-count">{{ getEnabledCount(menuGroup) }} / {{ getTotalCount(menuGroup) }} enabled</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Footer Actions -->
+  <div class="page-footer">
+    <button mat-stroked-button (click)="onBack()" class="cancel-btn">
+      <mat-icon>{{ isViewMode ? 'arrow_back' : 'cancel' }}</mat-icon>
+      {{ isViewMode ? 'Back to List' : 'Cancel' }}
+    </button>
+    <button *ngIf="!isViewMode" mat-flat-button
+      (click)="onSubmit()"
+      [disabled]="roleForm.invalid || isSaving"
+      class="submit-btn">
+      <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+      <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add_circle' }}</mat-icon>
+      <span>{{ isEditMode ? 'Save Changes' : '+ Add Global Role' }}</span>
+    </button>
+  </div>
+
+</div>

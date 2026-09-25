@@ -23,28 +23,67 @@ export const settingsRoutes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('../settings/components/roles/role-list.component.').then(m => m.RoleListComponent),
+        pathMatch: 'full',
+        loadComponent: () => import('./components/roles/role-list.component').then(m => m.RoleListComponent),
         title: 'Roles & Permissions - HRMS'
       },
       {
         path: 'add',
-        loadComponent: () => import('../settings/components/role-form/role-form.component').then(m => m.RoleFormComponent),
+        loadComponent: () => import('./components/role-form/role-form.component').then(m => m.RoleFormComponent),
         title: 'Add New Role - HRMS',
         data: { mode: 'add' }
       },
       {
         path: ':id/edit',
-        loadComponent: () => import('../settings/components/role-form/role-form.component').then(m => m.RoleFormComponent),
+        loadComponent: () => import('./components/role-form/role-form.component').then(m => m.RoleFormComponent),
         title: 'Edit Role - HRMS',
         data: { mode: 'edit' }
       },
       {
         path: ':id/view',
-        loadComponent: () => import('../settings/components/role-form/role-form.component').then(m => m.RoleFormComponent),
+        loadComponent: () => import('./components/role-form/role-form.component').then(m => m.RoleFormComponent),
         title: 'View Role - HRMS',
         data: { mode: 'view' }
       }
     ]
+  },
+  {
+    path: 'policies',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/company-policies/policy-list.component').then(m => m.PolicyListComponent),
+        title: 'Company Policies - HRMS'
+      },
+      // {
+      //   path: 'add',
+      //   loadComponent: () => import('./components/company-policies/policy-form.component').then(m => m.PolicyFormComponent),
+      //   title: 'Create Policy - HRMS',
+      //   data: { mode: 'add' }
+      // },
+      // {
+      //   path: ':id/edit',
+      //   loadComponent: () => import('./components/company-policies/policy-form.component').then(m => m.PolicyFormComponent),
+      //   title: 'Edit Policy - HRMS',
+      //   data: { mode: 'edit' }
+      // },
+      // {
+      //   path: ':id/view',
+      //   loadComponent: () => import('./components/company-policies/policy-form.component').then(m => m.PolicyFormComponent),
+      //   title: 'View Policy - HRMS',
+      //   data: { mode: 'view' }
+      // }
+    ]
+  },
+  {
+    path: 'onboarding-configuration',
+    loadComponent: () => import('./components/onboarding-configuration/onboarding-configuration.component').then(m => m.OnboardingConfigurationComponent),
+    title: 'Onboarding Configuration - HRMS'
+  },
+  {
+    path: 'payslip-template',
+    loadComponent: () => import('./components/payslip-template/payslip-template.component').then(m => m.PayslipTemplateComponent),
+    title: 'Payslip Template - HRMS'
   }
 ];
 

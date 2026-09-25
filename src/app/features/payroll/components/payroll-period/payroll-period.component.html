@@ -1,3 +1,4 @@
+@if (hasPermission('payroll_period_view')) {
 <div class="time-tracking-container">
   <!-- Page Header -->
   <div class="page-header">
@@ -5,12 +6,14 @@
       <h1 class="title">Payroll periods</h1>
       <p class="subtitle">Manage and track organizational payroll cycles</p>
     </div>
+    @if (hasPermission('payroll_period_add')) {
     <div class="actions">
       <button class="add-btn" (click)="openDialog('add')">
         <mat-icon>add</mat-icon>
         Create period
       </button>
     </div>
+    }
   </div>
 
   <!-- Summary Stat Cards -->
@@ -123,7 +126,7 @@
               <span class="badge" [ngClass]="record.statusClass">{{ record.status }}</span>
             </td>
             <td class="action-cell">
-              @if(record.status === 'Open') {
+              @if(record.status === 'Open' && hasPermission('payroll_period_edit')) {
               <button class="action-btn hover-primary" (click)="openDialog('edit', record)">
                 <mat-icon>edit</mat-icon>
               </button>
@@ -131,7 +134,7 @@
               <!-- <button class="action-btn hover-primary" (click)="onView(record)">
                 <mat-icon>visibility</mat-icon>
               </button> -->
-              @if(record.status === 'Open') {
+              @if(record.status === 'Open' && hasPermission('payroll_period_delete')) {
               <button class="action-btn hover-danger" (click)="onDelete(record)">
                 <mat-icon>delete</mat-icon>
               </button>
@@ -188,11 +191,22 @@
       <h3>Create a payroll period</h3>
       <p>You haven't defined any payroll cycles yet. Start by creating the first one to manage your organization's
         payroll.</p>
+      @if (hasPermission('payroll_period_add')) {
       <button class="create-period-btnn" (click)="openDialog('add')">
         <mat-icon>add</mat-icon>
         Create period
       </button>
+      }
     </div>
     }
   </div>
 </div>
+} @else {
+  <div class="empty-state" style="padding: 5rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="empty-icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+      <mat-icon>block</mat-icon>
+    </div>
+    <h3>Access Denied</h3>
+    <p>You do not have permission to view payroll periods.</p>
+  </div>
+}

@@ -14,16 +14,19 @@ import { Department, Employee, CreateDepartmentRequest, UpdateDepartmentRequest 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeService } from '../../services/employee.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface DepartmentDialogData {
   mode: 'create' | 'edit';
   department?: Department;
   managers: Employee[];
 }
 
+
 @Component({
   selector: 'app-department-form-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

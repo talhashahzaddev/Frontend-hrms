@@ -7,16 +7,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { Position, Department, Role } from '../../../../core/models/employee.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ViewPositionData {
   position: Position;
   departments: Department[];
   roles: Role[];
 }
 
+
 @Component({
   selector: 'app-position-details-view',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,

@@ -56,7 +56,7 @@
             </div>
             <div class="info-item">
               <span class="label">Bill Date</span>
-              <span class="value">{{ claim.billDate | date:'MMMM d, y' }}</span>
+              <span class="value">{{ claim.billDate | localizedDate:'MMMM d, y' }}</span>
             </div>
           </div>
         </section>
@@ -107,9 +107,9 @@
 
         <section class="info-section">
           <div class="timestamps">
-            <span>Created on {{ claim.createdAt | date:'medium' }}</span>
+            <span>Created on {{ claim.createdAt | localizedDate:'medium' }}</span>
             @if (claim.updatedAt && claim.updatedAt !== claim.createdAt) {
-              <span>• Last updated {{ claim.updatedAt | date:'medium' }}</span>
+              <span>• Last updated {{ claim.updatedAt | localizedDate:'medium' }}</span>
             }
           </div>
         </section>

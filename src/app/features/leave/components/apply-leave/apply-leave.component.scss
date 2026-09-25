@@ -1,4 +1,11 @@
-@use '../leave-types/leave-types-dialog' as dialog;
+@use '../leave-types/leave-types-dialog';
+@use '../../../attendance/styles/attendance-dialog' as ad;
+
+:host {
+  @include ad.ad-scroll-host;
+}
+
+@include ad.ad-panel-shell;
 
 // ══════════════════════════════════════════════════════════════
 // CUSTOM FIELD PATTERN
@@ -26,7 +33,7 @@
       width: 15px;
       height: 15px;
       line-height: 15px;
-      color: #6366f1;
+      color: #2563eb;
       flex-shrink: 0;
     }
 
@@ -72,7 +79,7 @@
         font-size: 14px;
         color: #111827;
         line-height: 1.4;
-        caret-color: #6366f1;
+        caret-color: #2563eb;
         &::placeholder { color: #b0b7c3; font-size: 14px; }
       }
 
@@ -102,13 +109,13 @@
 
       &:hover {
         .mdc-notched-outline__leading,
-        .mdc-notched-outline__trailing { border-color: #6366f1 !important; }
+        .mdc-notched-outline__trailing { border-color: #2563eb !important; }
       }
 
       .mdc-text-field--focused {
         .mdc-notched-outline__leading,
         .mdc-notched-outline__trailing {
-          border-color: #6366f1 !important;
+          border-color: #2563eb !important;
           border-width: 2px !important;
         }
       }
@@ -175,20 +182,20 @@
   }
 
   .info-alert {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(37, 99, 235, 0.2);
 
     &::before {
       content: '';
       position: absolute;
       top: 0; left: 0; bottom: 0;
       width: 4px;
-      background: linear-gradient(180deg, #6366f1, #8b5cf6);
+      background: linear-gradient(180deg, #2563eb, #2563eb);
     }
 
     > mat-icon {
-      color: #6366f1;
-      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.15);
+      color: #2563eb;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
       &.spin-icon { animation: spin 1s linear infinite; }
     }
 
@@ -201,7 +208,7 @@
 
     .alert-label { font-size: 13px; font-weight: 600; color: #4b5563; }
     .alert-value {
-      font-size: 14px; font-weight: 700; color: #6366f1;
+      font-size: 14px; font-weight: 700; color: #2563eb;
       background: white; padding: 3px 11px;
       border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.05);
     }
@@ -235,7 +242,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
   border: 1px solid #f0f1f5 !important;
 
-  .mat-calendar-body-selected { background: #6366f1 !important; color: white !important; }
+  .mat-calendar-body-selected { background: #2563eb !important; color: white !important; }
 
   .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover {
     .mat-calendar-body-cell-content { background: #eef2ff !important; }
@@ -265,7 +272,7 @@
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 
-    ::ng-deep mat-spinner circle { stroke: #6366f1 !important; }
+    ::ng-deep mat-spinner circle { stroke: #2563eb !important; }
     p { margin: 0; color: #111827; font-weight: 600; font-size: 15px; }
   }
 }
@@ -290,10 +297,10 @@
   .available-days {
     margin-left: auto;
     font-size: 11.5px;
-    color: #6366f1;
+    color: #2563eb;
     font-weight: 700;
     padding: 3px 9px;
-    background: rgba(99, 102, 241, 0.08);
+    background: rgba(37, 99, 235, 0.08);
     border-radius: 12px;
   }
 }
@@ -350,7 +357,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
           }
-          .header-sub {
+          .header-subtitle {
             font-size: 12px;
             white-space: normal;
           }

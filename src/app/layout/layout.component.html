@@ -25,10 +25,13 @@
       </app-header>
 
       <!-- Page Content -->
-      <main class="page-content">
+      <main class="page-content" id="page-content-boundary">
         <div class="content-wrapper">
           <router-outlet></router-outlet>
         </div>
+        
+        <!-- Chat Widget -->
+        <app-chat-widget *ngIf="!isAiAssistantPage"></app-chat-widget>
       </main>
 
     </mat-sidenav-content>

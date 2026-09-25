@@ -2,9 +2,12 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
     selector: 'app-loading-spinner',
     imports: [
+    SharedCommonModule,
         CommonModule,
         MatProgressSpinnerModule
     ],

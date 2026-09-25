@@ -2,8 +2,9 @@ import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, filter, take, timeout, catchError, of } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,10 +18,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
+import { environment } from '@environments/environment';
+
 
 @Component({
   selector: 'app-login',
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -197,21 +201,34 @@ onSubmit(): void {
 
           if (targetSubdomain && targetSubdomain !== currentSubdomain) {
             const authData = encodeURIComponent(JSON.stringify(response));
-
-            let redirectUrl = sessionStorage.getItem('redirectUrl');
+            const storedRedirect = sessionStorage.getItem('redirectUrl');
             sessionStorage.removeItem('redirectUrl');
 
-
-            if (!redirectUrl) {
-              redirectUrl = '/dashboard';
+            if (storedRedirect) {
+              const separator = storedRedirect.includes('?') ? '&' : '?';
+              this.isSubmitting = false;
+              this.redirectToSubdomain(targetSubdomain, `${storedRedirect}${separator}auth_transfer=${authData}`);
+              return;
             }
 
-            const separator = redirectUrl.includes('?') ? '&' : '?';
-            redirectUrl += `${separator}auth_transfer=${authData}`;
+            // Wait for permissions then redirect cross-subdomain
+            this.authService.permissions$
+              .pipe(
+                filter(p => p !== null),
+                take(1),
+                timeout(3000),
+                catchError(() => of(null)),
+                takeUntil(this.destroy$)
+              )
+              .subscribe(() => {
+                const route = this.authService.getFirstAllowedRoute();
+                const separator = route.includes('?') ? '&' : '?';
+                const redirectUrl = `${route}${separator}auth_transfer=${authData}`;
+                this.isSubmitting = false;
+                this.redirectToSubdomain(targetSubdomain, redirectUrl);
+              });
 
-            this.isSubmitting = false;
-            this.redirectToSubdomain(targetSubdomain, redirectUrl);
-            return;
+            return; // stop execution, subscriber handles the redirect
           }
         }
 
@@ -220,17 +237,35 @@ onSubmit(): void {
         this.notificationService.loginSuccess(response.firstName);
 
         /* 🔹 REDIRECT LOGIC (FIXED) */
-        let redirectUrl = sessionStorage.getItem('redirectUrl');
+        const storedRedirect = sessionStorage.getItem('redirectUrl');
         sessionStorage.removeItem('redirectUrl');
 
-        if (!redirectUrl) {
-          redirectUrl = '/dashboard';
+        if (storedRedirect) {
+          // Honour an explicit stored redirect (e.g. deep-link before login)
+          this.isSubmitting = false;
+          this.router.navigateByUrl(storedRedirect);
+          return;
         }
 
-        this.isSubmitting = false;
+        // Permissions are fetched async inside authService.login() tap().
+        // Wait briefly for the fetch to land, then pick the first allowed route.
+        const permissions$ = this.authService.permissions$;
 
-        // ✅ IMPORTANT FIX
-        this.router.navigateByUrl(redirectUrl);
+        // Give the permission fetch up to 3 s; fall back immediately if it errors.
+        import('rxjs').then(({ filter, timeout, catchError, of, take }) => {
+          permissions$
+            .pipe(
+              filter(p => p !== null),   // wait until permissions arrive
+              take(1),
+              timeout(3000),             // don't wait forever
+              catchError(() => of(null)) // on timeout/error use fallback
+            )
+            .subscribe(() => {
+              const route = this.authService.getFirstAllowedRoute();
+              this.isSubmitting = false;
+              this.router.navigateByUrl(route);
+            });
+        });
       },
 
       error: (error) => {
@@ -342,42 +377,25 @@ onSubmit(): void {
    * Replaces current subdomain with the user's organization domain
    */
   private redirectToSubdomain(subdomain: string, path: string): void {
-    const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     const currentPort = window.location.port ? `:${window.location.port}` : '';
+    const baseDomain = environment.baseDomain;
 
-    let newHost = '';
+    let newHost: string;
 
-    // Handle localhost (including subdomains like login.localhost)
-    if (currentHost.includes('localhost')) {
-      // Always redirect to subdomain.localhost (not subdomain.login.localhost)
+    if (baseDomain === 'localhost') {
+      // Local development: redirect to subdomain.localhost
       newHost = `${subdomain}.localhost`;
-    }
-    // Handle IP addresses
-    else if (currentHost.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-      newHost = `${subdomain}.${currentHost}`;
-    }
-    // Handle production domains
-    else {
-      const hostParts = currentHost.split('.');
-
-      if (hostParts.length >= 2) {
-        // Extract base domain (last two parts)
-        const baseDomain = hostParts.slice(-2).join('.');
-        newHost = `${subdomain}.${baseDomain}`;
-      } else {
-        // Fallback
-        newHost = `${subdomain}.${currentHost}`;
-      }
+    } else {
+      // Cloud environments (both Production and Dev)
+      // Production: company.briskpeople.com
+      // Dev:        company.dev.briskpeople.com
+      newHost = `${subdomain}.${baseDomain}`;
     }
 
-    // Construct new URL with user's subdomain
     const newUrl = `${currentProtocol}//${newHost}${currentPort}${path}`;
 
     console.log(`Redirecting to user's organization domain: ${newUrl}`);
-    console.log(`From: ${currentHost} -> To: ${newHost}`);
-
-    // Redirect to the new subdomain
     window.location.href = newUrl;
   }
 
@@ -386,10 +404,19 @@ onSubmit(): void {
     this.router.navigate(['/forgot-password']);
   }
   onsignup(): void {
-    const parent = (window as any)?.APP_SETTINGS?.parentUrl || 'https://www.briskpeople.com';
-    const base = typeof parent === 'string' ? parent.replace(/\/+$/, '') : 'https://www.briskpeople.com';
-    const url = `${base}/sign-up`;
-    window.location.href = url;
+    // If the base domain is NOT the production domain, we are in a dev or local environment.
+    const isDevEnv = environment.baseDomain !== 'briskpeople.com';
+
+    if (isDevEnv) {
+      // Local / Dev environments: use internal dev-signup page
+      this.router.navigate(['/dev-signup']);
+    } else {
+      // Production: redirect to the public marketing site
+      const parent = (window as any)?.APP_SETTINGS?.parentUrl || 'https://www.briskpeople.com';
+      const base = typeof parent === 'string' ? parent.replace(/\/+$/, '') : 'https://www.briskpeople.com';
+      const url = `${base}/sign-up`;
+      window.location.href = url;
+    }
   }
 
   togglePasswordVisibility(): void {

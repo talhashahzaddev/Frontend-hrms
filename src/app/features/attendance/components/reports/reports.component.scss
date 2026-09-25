@@ -1,12 +1,9 @@
-// Attendance Reports - Complete Final CSS (All Issues Fixed)
-
-/* Import Google Fonts - Add this to your index.html or styles.scss */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+// Attendance Reports - Synced with Attendance Dashboard Design System
 
 /* Root Variables */
 :root {
-  --primary-color: #534be7;
-  --primary-hover: #4338ca;
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
   --secondary-color: #64748b;
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
@@ -29,10 +26,10 @@
   --amber-50: #fffbeb;
   --amber-100: #fef3c7;
   --amber-700: #b45309;
-  --indigo-50: #eef2ff;
-  --indigo-700: #4338ca;
-  --purple-100: #f3e8ff;
-  --purple-700: #7e22ce;
+  --indigo-50: #eff6ff;
+  --indigo-700: #1d4ed8;
+  --purple-100: #eff6ff;
+  --purple-700: #2563eb;
 }
 
 /* Global Styles */
@@ -41,7 +38,7 @@
 }
 
 body {
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   color: var(--gray-900);
 }
 
@@ -49,16 +46,57 @@ body {
 .reports-container {
   background-color: var(--gray-50);
   min-height: 100vh;
-  padding: 0;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
 }
 
 .reports-wrapper {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+  box-sizing: border-box;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .icon-box {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      background-color: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon { font-size: 28px; width: 28px; height: 28px; }
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.25;
+      color: #0f172a;
+    }
+
+    .page-subtitle {
+      color: #64748b;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+  }
 }
 
 /* Report Configuration Card - COMPACT */
@@ -77,8 +115,8 @@ body {
 }
 
 .config-title {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.125rem;
+  font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--gray-900);
   margin: 0;
@@ -163,14 +201,25 @@ body {
   gap: 0.75rem;
 }
 
-.filters-header-row {
+.filters-action-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0;
+  align-items: flex-end;
+  gap: 1rem;
+  overflow: visible;
+}
+
+.action-buttons-col {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: flex-end;
 }
 
 .clear-filters-btn {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  right: 0;
+  white-space: nowrap;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--primary-color);
@@ -180,17 +229,10 @@ body {
   text-decoration: none;
   padding: 0;
   line-height: 1;
-}
 
-.clear-filters-btn:hover {
-  text-decoration: underline;
-}
-
-.filters-action-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-  overflow: visible;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .filters-grid {
@@ -208,29 +250,52 @@ body {
   overflow: visible !important;
 }
 
-.generate-report-btn {
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 600;
-  padding: 0 1.5rem;
-  border-radius: 8px;
-  border: none;
+button.generate-report-btn {
+  background: var(--primary-color) !important;
+  background-image: none !important;
+  color: white !important;
+  font-weight: 700;
+  padding: 0 1.25rem;
+  border-radius: 0.5rem;
+  border: none !important;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   white-space: nowrap;
   font-size: 0.875rem;
-  height: 38px;
+  height: 40px;
   flex-shrink: 0;
-}
+  outline: none;
 
-.generate-report-btn:disabled {
-  background-color: var(--gray-300);
-  cursor: not-allowed;
-  opacity: 0.6;
+  &:hover:not(:disabled) {
+    background: #1d4ed8 !important;
+    background-image: none !important;
+    color: white !important;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45) !important;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    background: #1e40af !important;
+    background-image: none !important;
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  }
+
+  &:disabled {
+    background: var(--gray-300) !important;
+    background-image: none !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 
 .btn-icon {
@@ -829,19 +894,19 @@ body {
     font-size: 0.875rem !important;
     min-height: auto !important;
     height: auto !important;
-    font-family: 'Manrope', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
     color: var(--gray-700) !important;
     white-space: nowrap !important;
     overflow: visible !important;
   }
 
   .mat-mdc-option:hover {
-    background: rgba(83, 75, 231, 0.08) !important;
+    background: rgba(37, 99, 235, 0.08) !important;
   }
 
   .mat-mdc-option.mat-mdc-option-active,
   .mat-mdc-option.mdc-list-item--selected {
-    background: rgba(83, 75, 231, 0.12) !important;
+    background: rgba(37, 99, 235, 0.12) !important;
     color: var(--primary-color) !important;
     font-weight: 600 !important;
   }
@@ -867,7 +932,7 @@ body {
   }
 
   .mat-calendar {
-    font-family: 'Manrope', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
   }
 
   .mat-calendar-header {
@@ -880,7 +945,7 @@ body {
   }
 
   .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
-    background-color: rgba(83, 75, 231, 0.1) !important;
+    background-color: rgba(37, 99, 235, 0.1) !important;
   }
 
   /* Spinner */

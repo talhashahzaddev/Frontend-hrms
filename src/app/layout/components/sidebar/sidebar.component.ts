@@ -12,7 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 // Services
 import { AuthService } from '@core/services/auth.service';
 import { User, UserPermissions } from '@core/models/auth.models';
-
+import { Onboarding } from '@/app/onboarding/onboarding.component';
 interface MenuItem {
   label: string;
   icon: string;
@@ -21,6 +21,10 @@ interface MenuItem {
   children?: MenuItem[];
   menuName?: string;
   subMenuName?: string;
+  /** When set, item is visible only if this action key is granted. */
+  actionKey?: string;
+  /** When set, item is visible if any of these action keys is granted. */
+  anyOfActionKeys?: string[];
   permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
@@ -47,6 +51,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   activeRoute = '';
   activeItemKey: string | null = null;
+  /** Bumped when permissions load/refresh so the menu re-filters. */
+  private menuPermissionsVersion = 0;
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
 
   private destroy$ = new Subject<void>();
@@ -56,21 +62,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Dashboard',
       icon: 'dashboard',
       route: '/dashboard',
-      menuName: 'Admin Dashboard',
     },
-    {
-      label: 'Dashboard',
-      icon: 'dashboard',
-      route: '/employee/dashboard',
-      menuName: 'Employee Dashboard',
-    },
+
     {
       label: 'Employee Management',
       icon: 'people',
       menuName: 'Employee Management',
       children: [
         { label: 'All Employees', icon: 'group', route: '/employees', menuName: 'Employee Management', subMenuName: 'All Employees', exact: true },
-        { label: 'Add Employee', icon: 'person_add', route: '/employees/add', menuName: 'Employee Management', subMenuName: 'All Employees' },
+        { label: 'Add Employee', icon: 'person_add', route: '/employees/add', menuName: 'Employee Management', subMenuName: 'Add Employee' },
         { label: 'Departments', icon: 'apartment', route: '/employees/departments', menuName: 'Employee Management', subMenuName: 'Department' },
         { label: 'Positions', icon: 'work', route: '/employees/positions', menuName: 'Employee Management', subMenuName: 'Positions' }
       ]
@@ -90,8 +90,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           permissionAliases: ['TimeTracker']
         },
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', menuName: 'Attendance', subMenuName: 'Team Attendance' },
-        { label: 'Timesheet', icon: 'date_range', route: '/attendance/timesheet', menuName: 'Attendance', subMenuName: 'Timesheet' },
-        { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', menuName: 'Attendance', subMenuName: 'Timesheet Dashboard' },
+
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts' },
         { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime' },
@@ -112,6 +111,27 @@ export class SidebarComponent implements OnInit, OnDestroy {
           subMenuName: 'Geo Violations',
           permissionAliases: ['Geo-Fence Violations', 'GeoFence Violations', 'Geofence Violations']
         },
+        {
+          label: 'Calendar',
+          icon: 'calendar_month',
+          route: '/calendar'
+        }
+      ]
+    },
+    {
+      label: 'Timesheet',
+      icon: 'date_range',
+      menuName: 'Timesheet',
+      children: [
+        { label: 'Dashboard', icon: 'dashboard', route: '/timesheet/dashboard', menuName: 'Timesheet', subMenuName: 'Dashboard' },
+        { label: 'Periods', icon: 'view_list', route: '/timesheet/periods', menuName: 'Timesheet', subMenuName: 'Periods' },
+        { label: 'Approvals', icon: 'check_circle', route: '/timesheet/approvals', menuName: 'Timesheet', subMenuName: 'Approvals' },
+        { label: 'Projects', icon: 'work', route: '/timesheet/projects', menuName: 'Timesheet', subMenuName: 'Projects' },
+        { label: 'Config', icon: 'settings', route: '/timesheet/config', menuName: 'Timesheet', subMenuName: 'Config' },
+        { label: 'Rate Cards', icon: 'attach_money', route: '/timesheet/rate-cards', menuName: 'Timesheet', subMenuName: 'Rate Cards' },
+        { label: 'Comp Time', icon: 'hourglass_empty', route: '/timesheet/comp-time', menuName: 'Timesheet', subMenuName: 'Comp Time' },
+        { label: 'Delegation', icon: 'swap_horiz', route: '/timesheet/delegation', menuName: 'Timesheet', subMenuName: 'Delegation' },
+        { label: 'Payroll Export', icon: 'payments', route: '/timesheet/payroll-export', menuName: 'Timesheet', subMenuName: 'Payroll Export' },
       ]
     },
     {
@@ -146,37 +166,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
           route: '/leave/types',
           menuName: 'Leave Management',
           subMenuName: 'Leave Types'
-        }
-      ]
-    },
-    {
-      label: 'Holidays',
-      icon: 'celebration',
-      menuName: 'Holidays',
-      children: [
+        },
         { label: 'Holiday Management', icon: 'event', route: '/holidays', menuName: 'Holidays', subMenuName: 'Holiday Management', exact: true },
         { label: 'My Holidays', icon: 'beach_access', route: '/holidays/my-holidays', menuName: 'Holidays', subMenuName: 'My Holidays' },
       ]
     },
-    // {
-    //   label: 'Payroll',
-    //   icon: 'payments',
-    //   menuName: 'Payroll',
-    //   children: [
-    //     { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods', menuName: 'Payroll', subMenuName: 'Payroll Periods' },
-    //     { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process', menuName: 'Payroll', subMenuName: 'Process Payroll' },
-    //     { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation', menuName: 'Payroll', subMenuName: 'Payroll Calculation' },
-    //     { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component', menuName: 'Payroll', subMenuName: 'Salary Components' },
-    //     { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports', menuName: 'Payroll', subMenuName: 'Payroll Reports' },
-    //     { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips', menuName: 'Payroll', subMenuName: 'Salary Slips' }
-    //   ]
-    // },
     {
       label: 'Assets Management',
       icon: 'inventory_2',
       menuName: 'Assets Management',
       children: [
-        { label: 'Types of Assets', icon: 'category', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
+        { label: 'Types of Assets', icon: 'folder-tree', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
         { label: 'Assets', icon: 'add_box', route: '/assets/create', menuName: 'Assets Management', subMenuName: 'Assets' }
       ]
     },
@@ -196,28 +196,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      label: 'Calendar',
-      icon: 'calendar_month',
-      route: '/calendar',
-      menuName: 'Calendar'
-    },
-    {
-      label: 'AI Assistant',
-      icon: 'smart_toy',
-      route: '/ai-assistant',
-      menuName: 'AI Assistant'
-    },
-    {
-      label: 'Subscription',
+      label: 'Subscription & Billing',
       icon: 'subscriptions',
-      route: '/subscription',
-      menuName: 'Subscription'
-    },
-    {
-      label: 'Billing',
-      icon: 'receipt_long',
-      route: '/subscription/billing',
-      menuName: 'Billings'
+      children: [
+        { label: 'Subscription', icon: 'subscriptions', route: '/subscription', menuName: 'Subscription' },
+        { label: 'Billing', icon: 'receipt_long', route: '/subscription/billing', menuName: 'Billings' },
+      ]
     },
     {
       label: 'Expense',
@@ -236,19 +220,19 @@ export class SidebarComponent implements OnInit, OnDestroy {
       menuName: 'News',
       children: [
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard', menuName: 'News', subMenuName: 'New Dashboard' },
-        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'New Dashboard' }
+        { label: 'Create News', icon: 'plus-circle', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'Create News' }
 
       ]
     },
     {
       label: 'Help Desk',
-      icon: 'event_available',
+      icon: 'support_agent',
       menuName: 'Help Desk',
       children: [
-        { label: 'Tickets Dashbaord', icon: 'event', menuName: 'Help Desk', subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
-        { label: 'Agent Group', icon: 'event', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
-        { label: 'Ticket Involvement', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Involvement', route: '/help-desk/ticket-involvement' },
-        { label: 'Ticket Category', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Category', route: '/help-desk/ticket-category', exact: true }
+        { label: 'Tickets Dashboard', icon: 'confirmation_number', menuName: 'Help Desk', subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
+        { label: 'Agent Group', icon: 'groups', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
+        { label: 'Ticket Involvement', icon: 'assignment_ind', menuName: 'Help Desk', subMenuName: 'Ticket Involvement', route: '/help-desk/ticket-involvement' },
+        { label: 'Ticket Category', icon: 'category', menuName: 'Help Desk', subMenuName: 'Ticket Category', route: '/help-desk/ticket-category', exact: true }
       ]
     },
     {
@@ -256,56 +240,65 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'work',
       menuName: 'Jobs',
       children: [
-        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings' },
-        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications' },
-        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage' }
+        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings', actionKey: 'opnings_view_all' },
+        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications', anyOfActionKeys: ['all_job_application', 'received_application_by_my_job_post', 'my_referenced_application', 'ats_inbox_view', 'my_self_application'] },
+        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage', actionKey: 'stage_view_all' },
+        { label: 'Question Bank', icon: 'quiz', route: '/jobs/question-bank', menuName: 'Jobs', subMenuName: 'Question Bank', actionKey: 'question_bank_view' },
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management', actionKey: 'career_management_view' }
       ]
     },
     {
       label: 'Payroll',
       icon: 'payments',
+      menuName: 'Payroll',
       children: [
         {
           label: 'Bonus & Performance',
           icon: 'card_giftcard',
           route: '/payroll/bonus',
-          activeRoutes: ['/payroll/performance']
+          activeRoutes: ['/payroll/performance'],
+          anyOfActionKeys: ['bonus_entry_view', 'performance_pay_view']
         },
         {
           label: 'Loans',
           icon: 'account_balance',
           route: '/payroll/loans',
-          exact: true
+          exact: true,
+          anyOfActionKeys: ['loan_admin_view']
         },
         {
           label: 'Provident Funds',
           icon: 'account_balance_wallet',
           route: '/payroll/provident-fund',
-          exact: true
+          exact: true,
+          anyOfActionKeys: ['pf_admin_view']
         },
         {
           label: 'Tax Ledger',
           icon: 'history_edu',
           route: '/payroll/tax-ledger',
-          exact: true
+          exact: true,
+          actionKey: 'get_transaction_ledger'
         },
         {
           label: 'Salary Advances',
           icon: 'savings',
           route: '/payroll/salary-advances',
-          exact: true
+          exact: true,
+          anyOfActionKeys: [
+            'salary_advance_admin_list',
+            'salary_advance_admin_view',
+            'salary_advance_admin_approve',
+            'salary_advance_admin_reject',
+            'salary_advance_admin_disburse'
+          ]
         },
         {
           label: 'Gratuity',
           icon: 'emoji_events',
           route: '/payroll/gratuity',
-          exact: true
-        },
-        {
-          label: 'Income Tax',
-          icon: 'request_quote',
-          route: '/payroll/tax-management',
-          exact: true
+          exact: true,
+          actionKey: 'gratuity_admin_view'
         },
         {
           label: 'Social Security',
@@ -317,13 +310,41 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Payslip Management',
           icon: 'receipt_long',
           route: '/payroll/payslips',
-          exact: true
+          exact: true,
+          anyOfActionKeys: [
+            'my_payslip',
+            'compliance_payslip_view',
+            'payslip_generation',
+            'mail_upload_payslip'
+          ]
         },
-        { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
-        { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
-        { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
-        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
-        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies', actionKey: 'payroll_rules_view' },
+        {
+          label: 'Time Tracking',
+          icon: 'schedule',
+          route: '/payroll/time-tracking',
+          anyOfActionKeys: [
+            'overtime_entry_view',
+            'attendance_summary_view',
+            'late_attendance_view',
+            'leave_summary_view'
+          ]
+        },
+        { label: 'Periods', icon: 'date_range', route: '/payroll/periods', actionKey: 'payroll_period_view' },
+        {
+          label: 'My Benefits',
+          icon: 'card_giftcard',
+          route: '/payroll/my-benefits',
+          menuName: 'Payroll',
+          subMenuName: 'My Benefits',
+          actionKey: 'my_benefits'
+        },
+        {
+          label: 'Payroll Calculation',
+          icon: 'calculate',
+          route: '/payroll/calculation',
+          anyOfActionKeys: ['payroll_calculation', 'payroll_result']
+        }
       ]
     },
     {
@@ -332,11 +353,27 @@ export class SidebarComponent implements OnInit, OnDestroy {
       menuName: 'Settings',
       children: [
         { label: 'Company Settings', icon: 'work_outline', route: '/settings/general', menuName: 'Settings', subMenuName: 'Company Name' },
+        { label: 'Payslip Template', icon: 'receipt_long', route: '/settings/payslip-template', anyOfActionKeys: ['payslip_template_view', 'payslip_template_edit'] },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
-        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management' },
-        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' }
+        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' },
+        { label: 'Company Policies', icon: 'policy', route: '/settings/policies', menuName: 'Settings', subMenuName: 'Company Policies' }
       ]
-    }
+    },
+    {
+      label: 'Onboarding',
+      icon: 'person_add',
+      menuName: 'Onboarding',
+      children: [
+        { label: 'Employee Onboarding', icon: 'person_add', route: '/onboarding', menuName: 'Onboarding', subMenuName: 'Employee Onboarding' },
+        { label: 'Onboarding Configuration', icon: 'settings', route: '/settings/onboarding-configuration', menuName: 'Onboarding', subMenuName: 'Onboarding Configuration' }
+      ]
+    },
+    {
+      label: 'AI Assistant',
+      icon: 'smart_toy',
+      route: '/ai-assistant',
+      menuName: 'AI Assistant'
+    },
   ];
 
   constructor(
@@ -346,6 +383,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscribeToUser();
+    this.subscribeToPermissions();
     this.subscribeToRouterEvents();
     // Ensure active state is correct on initial load (before first NavigationEnd)
     this.activeRoute = this.router.url;
@@ -387,6 +425,24 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(item: MenuItem): boolean {
+    // Show Company Policies to Super Admin always (if this route exists but permissions are missing)
+    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Question Bank' || item.route === '/settings/payslip-template') {
+      if (this.currentUser?.roleName?.toLowerCase() === 'super admin' || this.currentUser?.roleName?.toLowerCase() === 'admin' || this.currentUser?.roleName?.toLowerCase() === 'hr manager') {
+        return true;
+      }
+    }
+
+    if (item.actionKey) {
+      if (item.menuName && item.subMenuName) {
+        return this.authService.hasMenuPermission(item.menuName, item.subMenuName, item.actionKey);
+      }
+      return this.authService.hasPermissionByActionKey(item.actionKey);
+    }
+
+    if (item.anyOfActionKeys && item.anyOfActionKeys.length > 0) {
+      return item.anyOfActionKeys.some(key => this.authService.hasPermissionByActionKey(key));
+    }
+
     // If the item has no menuName, it either has no permission requirements or is a standalone item
     if (!item.menuName) {
       return true;
@@ -422,10 +478,20 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   getFilteredMenuItems(): MenuItem[] {
-    return this.menuItems.filter(item => this.hasPermission(item));
+    void this.menuPermissionsVersion;
+    return this.menuItems.filter(item => {
+      if (!this.hasPermission(item)) return false;
+      
+      if (item.children && item.children.length > 0) {
+        return this.getFilteredChildren(item.children).length > 0;
+      }
+      
+      return true;
+    });
   }
 
   getFilteredChildren(children: MenuItem[]): MenuItem[] {
+    void this.menuPermissionsVersion;
     return children.filter(child => this.hasPermission(child));
   }
 
@@ -460,6 +526,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => { this.currentUser = user; });
+  }
+
+  private subscribeToPermissions(): void {
+    this.authService.permissions$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.menuPermissionsVersion++;
+      });
   }
 
   private subscribeToRouterEvents(): void {

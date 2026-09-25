@@ -1,0 +1,83 @@
+// ═══ Design Tokens — aligned with Attendance module (blue #2563eb / slate) ═══
+:root {
+  // Primary
+  --ts-primary: #2563eb;
+  --ts-primary-light: #2563eb;
+  --ts-primary-hover: #1d4ed8;
+  --ts-primary-bg: #eff6ff;
+  --ts-primary-bg-light: #f8fafc;
+
+  // Semantic
+  --ts-success: #16A34A;
+  --ts-success-bg: #DCFCE7;
+  --ts-warning: #D97706;
+  --ts-warning-bg: #FEF3C7;
+  --ts-danger: #DC2626;
+  --ts-danger-bg: #FEE2E2;
+
+  // Neutrals (slate palette)
+  --ts-bg: #f8fafc;
+  --ts-card: #FFFFFF;
+  --ts-border: #e2e8f0;
+  --ts-border-light: #f1f5f9;
+  --ts-border-focus: #2563eb;
+
+  // Text
+  --ts-text: #0f172a;
+  --ts-text-secondary: #475569;
+  --ts-text-muted: #64748b;
+  --ts-text-subtle: #94a3b8;
+  --ts-text-inverse: #FFFFFF;
+
+  // Spacing (8px grid)
+  --ts-space-1: 4px;
+  --ts-space-2: 8px;
+  --ts-space-3: 12px;
+  --ts-space-4: 16px;
+  --ts-space-5: 20px;
+  --ts-space-6: 24px;
+  --ts-space-8: 32px;
+  --ts-space-10: 40px;
+  --ts-space-12: 48px;
+
+  // Radius
+  --ts-radius-sm: 4px;
+  --ts-radius: 6px;
+  --ts-radius-lg: 8px;
+  --ts-radius-xl: 12px;
+  --ts-radius-full: 9999px;
+
+  // Shadows
+  --ts-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --ts-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --ts-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  // Status colors
+  --ts-status-draft: #64748b;
+  --ts-status-inprogress: #2563eb;
+  --ts-status-submitted: #D97706;
+  --ts-status-underreview: #2563eb;
+  --ts-status-approved: #16A34A;
+  --ts-status-finalized: #16A34A;
+  --ts-status-locked: #DC2626;
+  --ts-status-archived: #94a3b8;
+
+  --ts-header-height: 56px;
+  --ts-sidebar-width: 260px;
+}
+
+// Timesheet pages + employee grid + MatDialog hosts
+.ts-page-layout,
+.period-detail-layout,
+app-timesheet-correction-dialog,
+app-time-allocation-dialog {
+  --ts-primary: #2563eb;
+  --ts-primary-light: #2563eb;
+  --ts-primary-hover: #1d4ed8;
+  --ts-primary-bg: #eff6ff;
+  --ts-primary-bg-light: #f8fafc;
+  --ts-border-focus: #2563eb;
+  --ts-bg: #f8fafc;
+  --ts-border: #e2e8f0;
+  --ts-border-light: #f1f5f9;
+}

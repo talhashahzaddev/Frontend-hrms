@@ -31,9 +31,12 @@ import { PaymentService } from '../../../../core/services/payment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-list',
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
@@ -93,7 +96,6 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25, 50];
   profilePreviewUrl: string | null = null;
-  private backendBaseUrl = 'https://localhost:60485';
 
   // Search and Filters
   searchControl = new FormControl('');
@@ -244,12 +246,8 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
           // this.employees = response.employees;
           this.employees = response.employees.map(emp => ({
             ...emp,
-            profilePictureUrl: emp.profilePictureUrl
-              ? emp.profilePictureUrl.startsWith('http')
-                ? emp.profilePictureUrl
-                : `${this.backendBaseUrl}${emp.profilePictureUrl}`
-              : undefined,// ✅ use undefined instead of null
-            status: emp.status === 'delete' ? 'deleted' : emp.status // <-- key line
+            profilePictureUrl: this.employeeService.resolveProfilePictureUrl(emp.profilePictureUrl) ?? undefined,
+            status: emp.status === 'delete' ? 'deleted' : emp.status
           }));
 
           this.totalCount = response.totalCount;

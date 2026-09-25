@@ -16,6 +16,7 @@ import { EmployeeService } from '@features/employee/services/employee.service';
 import { NotificationService } from '@core/services/notification.service';
 import { Employee } from '@core/models/employee.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ApplicationStageDialogData {
   mode: 'create' | 'edit';
   jobApplyId: string;
@@ -23,10 +24,12 @@ export interface ApplicationStageDialogData {
   stageMaster?: StageMasterDto; // For create mode
 }
 
+
 @Component({
   selector: 'app-application-stage-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

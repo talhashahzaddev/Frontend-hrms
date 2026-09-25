@@ -1,32 +1,50 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { PayrollService, PayRollRulesGroupedDto } from '../../services/payroll.service';
 import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
+import {
+  canCreateAnyPayrollPolicy,
+  hasPayrollRulePermission,
+  PAYROLL_POLICY_VIEW_KEYS,
+  watchPayrollRuleViewAccess
+} from '../../utils/payroll-rule-permissions';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-payroll-rules',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule],
   templateUrl: './payroll-rules.component.html',
   styleUrl: './payroll-rules.component.scss'
 })
 export class PayrollRulesComponent implements OnInit {
+  private readonly payrollService = inject(PayrollService);
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly notification = inject(NotificationService);
+
   policyCards: { key: string; title: string; rulesCount: number }[] = [];
   groupedRulesData: PayRollRulesGroupedDto | null = null;
   isLoading = true;
   error: string | null = null;
 
-  constructor(
-    private payrollService: PayrollService,
-    private dialog: MatDialog,
-    private router: Router
-  ) { }
+  readonly policyPermissionMap = PAYROLL_POLICY_VIEW_KEYS;
 
   ngOnInit(): void {
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'payroll_rules_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
   fetchRules(): void {
@@ -136,10 +154,15 @@ export class PayrollRulesComponent implements OnInit {
       };
     });
 
-    return entries.filter(x => x.rulesCount > 0);
+    return entries.filter(x => this.hasPermission(this.policyPermissionMap[x.key]));
   }
 
   openRuleDialog(): void {
+    if (!this.canCreateAnyPolicy) {
+      this.notification.showError('You do not have permission to create any policies.');
+      return;
+    }
+
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel'
@@ -158,6 +181,12 @@ export class PayrollRulesComponent implements OnInit {
   }
 
   onPolicyClick(policy: { key: string; title: string; rulesCount: number }): void {
+    const permission = this.policyPermissionMap[policy.key];
+    if (permission && !this.hasPermission(permission)) {
+      this.notification.showError('You do not have permission to view this policy.');
+      return;
+    }
+
     switch (policy.key) {
       case 'overtimePolicy':
         this.router.navigate(['/payroll/policies/overtime-rules']);
@@ -189,7 +218,7 @@ export class PayrollRulesComponent implements OnInit {
       case 'incomeTaxPolicy':
         this.router.navigate(['/payroll/policies/tax-regime-rules']);
         break;
-        case 'socialSecurityPolicy':
+      case 'socialSecurityPolicy':
         this.router.navigate(['/payroll/policies/social-security-rules']);
         break;
       case 'gratuityPolicy':
@@ -198,5 +227,13 @@ export class PayrollRulesComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
+  }
+
+  get canCreateAnyPolicy(): boolean {
+    return canCreateAnyPayrollPolicy(this.authService);
   }
 }

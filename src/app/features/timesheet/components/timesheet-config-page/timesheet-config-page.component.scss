@@ -1,0 +1,34 @@
+@use '../../styles/timesheet-shared';
+
+.ts-config-section {
+  margin-bottom: var(--ts-space-5);
+}
+
+.ts-switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--ts-space-3) 0;
+  border-bottom: 1px solid var(--ts-border-light);
+}
+
+.ts-switch-row:last-child {
+  border-bottom: none;
+}
+
+.ts-switch-label {
+  font-size: 14px;
+  color: var(--ts-text);
+  font-weight: 500;
+}
+
+.ts-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--ts-space-4);
+}
+
+.ts-form-group.ts-half { flex: 1; }
+.ts-form-group.ts-third { flex: 1; }
+
+:host ::ng-deep .p-inputnumber { max-width: 140px; }

@@ -20,8 +20,17 @@ import {
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import {
+  canAddPayrollPolicy,
+  canEditPayrollPolicy,
+  getCreatablePolicies,
+  getPolicyPermissionKey,
+  hasPayrollRulePermission
+} from '../../../utils/payroll-rule-permissions';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RuleDialogData {
   // Pass any initial data if needed, e.g., for edit mode
   mode?: 'create' | 'edit';
@@ -70,11 +79,13 @@ export interface RuleDialogData {
   };
 }
 
+
 @Component({
   selector: 'app-rule-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -99,29 +110,22 @@ export class RuleDialogComponent implements OnInit {
   private readonly injectedData = inject<RuleDialogData | null>(MAT_DIALOG_DATA, { optional: true });
   public readonly data: RuleDialogData = this.injectedData ?? {};
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly isSubmitting = signal(false);
   readonly currencySymbol = signal('$');
 
-  readonly policies = [
-    { id: 1, name: 'Overtime Policy' },
-    { id: 2, name: 'Attendance Deduction Policy' },
-    { id: 3, name: 'Late Arrival Policy' },
-    { id: 4, name: 'Leave Deduction Policy' },
-    { id: 5, name: 'Performance Bonus Policy' },
-    { id: 6, name: 'Bonus' },
-    { id: 7, name: 'Employee Loan Policy' },
-    { id: 8, name: 'Salary Advance Policy' },
-    { id: 9, name: 'Provident Fund Policy' },
-    { id: 10, name: 'Tax regime Policy' },
-    { id: 11, name: 'Social Security Policy' },
-    { id: 12, name: 'Gratuity Policy' }
-  ];
+  /** Policies the user may select when creating a rule (add permission required). */
+  get availablePolicies() {
+    return getCreatablePolicies(this.authService);
+  }
 
   readonly overtimeTypes = ['regular', 'holiday', 'weekend'];
   readonly socialSecurityJurisdictions = signal<SocialSecurityJurisdictionOption[]>([]);
   readonly socialSecurityAuthorities = signal<SocialSecurityAuthorityOption[]>([]);
   readonly socialSecuritySchemes = signal<SocialSecuritySchemeOption[]>([]);
+  readonly socialSecurityRulesList = signal<any[]>([]);
+  readonly socialMode = signal<'select-existing' | 'create-new'>('create-new');
 
   get isEditMode(): boolean {
     return this.data?.mode === 'edit';
@@ -184,6 +188,10 @@ export class RuleDialogComponent implements OnInit {
     validators: [this.socialSecurityDateRangeValidator()]
   });
 
+  setSocialMode(mode: 'select-existing' | 'create-new'): void {
+    this.socialMode.set(mode);
+  }
+
   ngOnInit(): void {
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
@@ -195,6 +203,24 @@ export class RuleDialogComponent implements OnInit {
           this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
+
+    if (!this.isEditMode && this.data?.policyId && !canAddPayrollPolicy(this.authService, this.data.policyId)) {
+      this.notification.showError('You do not have permission to create this policy.');
+      this.dialogRef.close();
+      return;
+    }
+
+    if (!this.isEditMode && !this.data?.policyId && this.availablePolicies.length === 0) {
+      this.notification.showError('You do not have permission to create any policies.');
+      this.dialogRef.close();
+      return;
+    }
+
+    if (this.isEditMode && this.data?.policyId && !canEditPayrollPolicy(this.authService, this.data.policyId)) {
+      this.notification.showError('You do not have permission to edit this policy.');
+      this.dialogRef.close();
+      return;
+    }
 
     if (this.selectedPolicy === 11 || this.data?.policyId === 11) {
       this.loadSocialSecurityLookups();
@@ -807,14 +833,28 @@ export class RuleDialogComponent implements OnInit {
     return date.toISOString().slice(0, 10);
   }
 
+  hasPermission(policyId: number, isEdit: boolean): boolean {
+    const key = getPolicyPermissionKey(policyId, isEdit ? 'edit' : 'add');
+    if (!key) {
+      return false;
+    }
+    return hasPayrollRulePermission(this.authService, key);
+  }
+
   onSubmit(): void {
     if (this.ruleForm.invalid || this.isSubmitting()) {
       this.ruleForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmitting.set(true);
     const formValue = this.ruleForm.getRawValue();
+    const policyId = Number(formValue.selectedPolicy);
+    if (!this.hasPermission(policyId, this.isEditMode)) {
+      this.notification.showError('You do not have permission to perform this action.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
 
     // We only send back the relevant fields based on the selected policy
     let resultPayload: any = {
@@ -1159,17 +1199,58 @@ export class RuleDialogComponent implements OnInit {
         return;
       }
 
+      // % XOR fixed amount per side
+      const empPct = Number(formValue.socialEmployeeDefaultPct ?? 0);
+      const erPct = Number(formValue.socialEmployerDefaultPct ?? 0);
+      const empFixed = formValue.socialEmployeeFixedAmount;
+      const erFixed = formValue.socialEmployerFixedAmount;
+      const empFixedSet = empFixed != null && Number(empFixed) > 0;
+      const erFixedSet = erFixed != null && Number(erFixed) > 0;
+      const basis = String(formValue.socialContributionBasis ?? 'gross').toLowerCase();
+
+      if (basis === 'fixed' && !empFixedSet && !erFixedSet) {
+        this.notification.showError('For Fixed amount basis, set at least one fixed amount.');
+        this.isSubmitting.set(false);
+        return;
+      }
+      if (basis !== 'fixed') {
+        if (empPct > 0 && empFixedSet) {
+          this.notification.showError('Use either Employee % or Employee fixed amount — not both.');
+          this.isSubmitting.set(false);
+          return;
+        }
+        if (erPct > 0 && erFixedSet) {
+          this.notification.showError('Use either Employer % or Employer fixed amount — not both.');
+          this.isSubmitting.set(false);
+          return;
+        }
+        if (empPct + erPct > 100) {
+          this.notification.showError('Employee % + Employer % cannot exceed 100%.');
+          this.isSubmitting.set(false);
+          return;
+        }
+      }
+
+      // min ≤ max sanity
+      const minS = formValue.socialMinSalaryLimit;
+      const maxS = formValue.socialMaxSalaryLimit;
+      if (minS != null && maxS != null && Number(maxS) > 0 && Number(maxS) < Number(minS)) {
+        this.notification.showError('Max salary limit must be greater than or equal to min salary limit.');
+        this.isSubmitting.set(false);
+        return;
+      }
+
       const payload = {
         schemeId: String(formValue.socialSchemeId ?? ''),
         ruleName: String(formValue.ruleName ?? '').trim(),
         description: formValue.description ? String(formValue.description).trim() : null,
-        contributionBasis: String(formValue.socialContributionBasis ?? 'gross').toLowerCase(),
-        employeeDefaultPct: Number(formValue.socialEmployeeDefaultPct ?? 0),
-        employerDefaultPct: Number(formValue.socialEmployerDefaultPct ?? 0),
-        employeeFixedAmount: formValue.socialEmployeeFixedAmount == null ? null : Number(formValue.socialEmployeeFixedAmount),
-        employerFixedAmount: formValue.socialEmployerFixedAmount == null ? null : Number(formValue.socialEmployerFixedAmount),
-        minSalaryLimit: formValue.socialMinSalaryLimit == null ? null : Number(formValue.socialMinSalaryLimit),
-        maxSalaryLimit: formValue.socialMaxSalaryLimit == null ? null : Number(formValue.socialMaxSalaryLimit),
+        contributionBasis: basis,
+        employeeDefaultPct: empPct,
+        employerDefaultPct: erPct,
+        employeeFixedAmount: empFixed == null ? null : Number(empFixed),
+        employerFixedAmount: erFixed == null ? null : Number(erFixed),
+        minSalaryLimit: minS == null ? null : Number(minS),
+        maxSalaryLimit: maxS == null ? null : Number(maxS),
         annualSalaryCap: formValue.socialAnnualSalaryCap == null ? null : Number(formValue.socialAnnualSalaryCap),
         effectiveFrom: this.toIsoDate(formValue.socialEffectiveFrom),
         effectiveTo: this.toIsoDate(formValue.socialEffectiveTo),
@@ -1188,7 +1269,7 @@ export class RuleDialogComponent implements OnInit {
             this.notification.showSuccess(
               this.isEditMode ? 'Social security rule updated successfully' : 'Social security rule created successfully'
             );
-            this.dialogRef.close({ success: true, data: res, policyId: 11 });
+            this.dialogRef.close({ success: true, data: res, policyId: 11, mode: 'created' });
           },
           error: (err: any) => {
             console.error(err);

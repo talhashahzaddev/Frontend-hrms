@@ -14,7 +14,9 @@ import {
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface AbsentRecordDto {
   id: string;
   employeeId: string;
@@ -36,10 +38,12 @@ export interface AbsentRecordDto {
   totalDeduction?: number;
 }
 
+
 @Component({
   selector: 'app-time-tracking-absents',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
   templateUrl: './time-tracking-absents.component.html',
   styleUrl: './time-tracking-absents.component.scss'
 })
@@ -48,6 +52,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly records = signal<AbsentRecordDto[]>([]);
   readonly isLoading = signal(true);
@@ -106,7 +111,16 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     return !!(this.filterSearch || this.filterPeriod || this.filterRule);
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   ngOnInit(): void {
+    if (!this.hasPermission('attendance_summary_view')) {
+      this.isLoading.set(false);
+      return;
+    }
+
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
@@ -143,6 +157,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
   }
 
   fetchAbsents(): void {
+    if (!this.hasPermission('attendance_summary_view')) return;
     this.isLoading.set(true);
     const params: any = {
       page: this.page(),
@@ -237,6 +252,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
   }
 
   logAbsent(): void {
+    if (!this.hasPermission('attendance_summary_add')) return;
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'attendance-dialog-panel',
@@ -258,6 +274,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
   }
 
   editRecord(record: AbsentRecordDto): void {
+    if (!this.hasPermission('attendance_summary_edit')) return;
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'attendance-dialog-panel',
@@ -294,6 +311,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
   }
 
   deleteRecord(record: AbsentRecordDto): void {
+    if (!this.hasPermission('attendance_summary_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Record',
       message: 'Are you sure you want to delete this absent record?',

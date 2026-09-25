@@ -1,22 +1,77 @@
 <div class="time-tracking-container payslips-page">
+    <div class="ledger-switch-container">
+      <div class="ledger-switch">
+        @if (showComplianceTab) {
+        <a routerLink="/payroll/payslips" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Compliance payslips</a>
+        }
+        @if (canViewMyPayslipsTab) {
+        <a routerLink="/payroll/my-payslips" routerLinkActive="active">My payslips</a>
+        }
+      </div>
+    </div>
     <!-- Header -->
     <header class="page-header">
         <div class="title-section">
             <h1 class="title">Payslips</h1>
-            <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.</p>
+            <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.
+                @if (hasPermission('payslip_template_view')) {
+                <a routerLink="/settings/payslip-template" class="template-link">Configure payslip template</a>
+                }
+            </p>
         </div>
         <div class="header-actions">
-            <button class="ghost-btn" (click)="openBulkGenerateDialog()">Bulk Generate</button>
+            @if (hasPermission('mail_upload_payslip')) {
             <button class="green-btn" (click)="openBulkEmailDialog()">
                 <mat-icon>mail</mat-icon>
                 Bulk Email
             </button>
+            }
+            @if (hasPermission('payslip_generation')) {
             <button class="primary-btn" (click)="openBulkGenerateDialog()">
                 <mat-icon>add</mat-icon>
                 Generate Payslip
             </button>
+            }
         </div>
     </header>
+
+    @if (bulkJobActive()) {
+    <section class="bulk-progress-banner" role="status" aria-live="polite">
+        <div class="bulk-progress-header">
+            <div class="bulk-progress-title">
+                <span class="pulse-dot"></span>
+                <div>
+                    <strong>{{ bulkProgress()?.isComplete ? 'Bulk email complete' : 'Uploading & emailing payslips' }}</strong>
+                    <small>Job {{ bulkProgress()?.jobId | slice:0:8 }}…</small>
+                </div>
+            </div>
+            <span class="bulk-progress-percent">{{ bulkProgress()?.percentageCompleted ?? 0 }}%</span>
+        </div>
+
+        <div class="bulk-progress-track">
+            <div class="bulk-progress-fill" [style.width.%]="bulkProgress()?.percentageCompleted ?? 0"></div>
+        </div>
+
+        <div class="bulk-progress-stats">
+            <div class="stat">
+                <span class="label">Total</span>
+                <span class="value">{{ bulkProgress()?.total ?? 0 }}</span>
+            </div>
+            <div class="stat success">
+                <span class="label">Sent</span>
+                <span class="value">{{ bulkProgress()?.processed ?? 0 }}</span>
+            </div>
+            <div class="stat danger">
+                <span class="label">Failed</span>
+                <span class="value">{{ bulkProgress()?.failed ?? 0 }}</span>
+            </div>
+        </div>
+
+        @if (bulkProgress()?.lastError) {
+        <p class="bulk-progress-error">{{ bulkProgress()?.lastError }}</p>
+        }
+    </section>
+    }
 
     <!-- Summary Stats -->
     <section class="summary-cards">
@@ -161,9 +216,9 @@
                             </div>
                         </td>
                         <td>{{ row.periodLabel }}</td>
-                        <td class="text-right">{{ row.grossSalaryPkr | number }}</td>
-                        <td class="text-right danger">{{ row.deductionsPkr | number }}</td>
-                        <td class="text-right success">{{ row.netSalaryPkr | number }}</td>
+                        <td class="text-right">{{ currencySymbol() }} {{ row.grossSalaryPkr | number }}</td>
+                        <td class="text-right danger">{{ currencySymbol() }} {{ row.deductionsPkr | number }}</td>
+                        <td class="text-right success">{{ currencySymbol() }} {{ row.netSalaryPkr | number }}</td>
                         <td class="text-center">
                             <span class="status-pill" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
                         </td>
@@ -171,19 +226,19 @@
                             <span class="version-chip">v{{ row.versionNo }}</span>
                         </td>
                         <td class="text-right">
-                            @if (row.status === 'draft') {
+                            @if (row.status === 'draft' && hasPermission('payslip_generation')) {
                             <button class="generate-btn" (click)="generateSinglePayslip(row)">Generate</button>
                             } @else {
                             <div class="action-icons">
                                 <button type="button" (click)="openViewPayslip(row)" title="View Payslip">
                                     <mat-icon>visibility</mat-icon>
                                 </button>
-                                <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
+                                <!-- <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
                                     <mat-icon>alternate_email</mat-icon>
                                 </button>
                                 <button type="button" (click)="openReissueDialog(row)" title="Reissue Payslip">
                                     <mat-icon>refresh</mat-icon>
-                                </button>
+                                </button> -->
                             </div>
                             }
                         </td>
@@ -217,7 +272,7 @@
     </div>
 
     <!-- Quick Insights -->
-    <aside class="insight-card">
+    <!-- <aside class="insight-card">
         <h4>
             <span class="pulse"></span>
             Quick Insights
@@ -234,5 +289,5 @@
             <span>{{ distributionPercent }}% complete</span>
         </div>
         <button type="button">View Distribution Report</button>
-    </aside>
+    </aside> -->
 </div>

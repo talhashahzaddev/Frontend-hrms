@@ -6,17 +6,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AttendanceService } from '../../../features/attendance/services/attendance.service';
+import { DateTimeFormatService } from '@core/services/date-time-format.service';
 import { AuthService } from '../../../core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface DayDetailsDialogData {
     date: Date;
     events: any[];
 }
 
+
 @Component({
     selector: 'app-day-details-dialog',
     standalone: true,
-    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatDividerModule, MatProgressSpinnerModule],
+    imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatDividerModule, MatProgressSpinnerModule],
     templateUrl: './day-details-dialog.component.html',
     styleUrls: ['./day-details-dialog.component.scss']
 })
@@ -35,7 +39,8 @@ export class DayDetailsDialogComponent implements OnInit {
         public dialogRef: MatDialogRef<DayDetailsDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: DayDetailsDialogData,
         private attendanceService: AttendanceService,
-        private authService: AuthService
+        private authService: AuthService,
+        private dateTimeFormat: DateTimeFormatService
     ) { }
 
     ngOnInit(): void {
@@ -107,16 +112,16 @@ export class DayDetailsDialogComponent implements OnInit {
             const m = Math.floor((diff % 3600000) / 60000);
 
             return {
-                checkIn: inTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                checkOut: outTime ? outTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Active',
+                checkIn: this.dateTimeFormat.formatTime(inTime),
+                checkOut: outTime ? this.dateTimeFormat.formatTime(outTime) : 'Active',
                 duration: `${h}h ${m}m`
             };
         });
 
         // Summary
-        this.details.summary.firstCheckIn = new Date(sorted[0].checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        this.details.summary.firstCheckIn = this.dateTimeFormat.formatTime(sorted[0].checkInTime);
         const last = sorted[sorted.length - 1];
-        this.details.summary.lastCheckOut = last.checkOutTime ? new Date(last.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Active';
+        this.details.summary.lastCheckOut = last.checkOutTime ? this.dateTimeFormat.formatTime(last.checkOutTime) : 'Active';
         this.details.summary.status = 'Present';
 
         const totalMins = Math.floor(totalMs / 60000);

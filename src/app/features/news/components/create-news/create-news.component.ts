@@ -16,12 +16,17 @@ import { PerformanceService } from '@/app/features/performance/services/performa
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '@/app/core/services/notification.service';
 import { NewsService } from '../../services/news.services';
+import { AuthService } from '@/app/core/services/auth.service';
 import { QuillModule } from 'ngx-quill';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { MatDividerModule } from '@angular/material/divider';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-create-news',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -31,7 +36,9 @@ import { QuillModule } from 'ngx-quill';
     QuillModule ,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
+    MatDividerModule,
+    PageHeaderComponent
   ],
   templateUrl: './create-news.component.html',
   styleUrls: ['./create-news.component.scss']
@@ -54,6 +61,7 @@ export class CreateNewsComponent implements OnInit {
     private performanceService: PerformanceService,
     private notification: NotificationService,
     private newsService: NewsService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -264,6 +272,10 @@ quillConfig = {
 
   get showEmployeeDropdown(): boolean {
     return this.newsForm.get('visibleTo')?.value === 'Selected';
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('News', 'Create News', actionKey);
   }
 
   onCancel() {

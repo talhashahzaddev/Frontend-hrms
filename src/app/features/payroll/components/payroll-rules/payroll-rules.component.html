@@ -1,3 +1,10 @@
+@if (!hasPermission('payroll_rules_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view payroll policies. Please contact your system administrator.</p>
+  </div>
+} @else {
 <div class="payroll-rules-container">
   <!-- Page Header -->
   <div class="page-header">
@@ -46,10 +53,12 @@
       <div class="empty-rules-state"
         style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 16px;">
         <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure policy for your Payroll</h3>
-        <div class="add-card" (click)="openRuleDialog()">
-          <mat-icon>add_circle</mat-icon>
-          <p>Create Policy</p>
-        </div>
+        @if (canCreateAnyPolicy) {
+          <div class="add-card" (click)="openRuleDialog()">
+            <mat-icon>add_circle</mat-icon>
+            <p>Create Policy</p>
+          </div>
+        }
       </div>
       } @else {
       @for (policy of policyCards; track policy.key) {
@@ -75,11 +84,14 @@
       }
 
       <!-- Add New Card -->
-      <div class="add-card" (click)="openRuleDialog()">
-        <mat-icon>add_circle</mat-icon>
-        <p>Create Policy</p>
-      </div>
+      @if (canCreateAnyPolicy) {
+        <div class="add-card" (click)="openRuleDialog()">
+          <mat-icon>add_circle</mat-icon>
+          <p>Create Policy</p>
+        </div>
+      }
       }
     </div>
   </section>
 </div>
+}

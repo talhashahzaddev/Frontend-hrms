@@ -8,13 +8,16 @@ import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface ProvidentFundRule {
   ruleId: string;
   ruleName: string;
@@ -30,10 +33,12 @@ interface ProvidentFundRule {
   isActive: boolean;
 }
 
+
 @Component({
   selector: 'app-provident-fund-rule',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './provident-fund-rule.component.html',
   styleUrl: './provident-fund-rule.component.scss'
 })
@@ -43,6 +48,7 @@ export class ProvidentFundRuleComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly providentFundRules = signal<ProvidentFundRule[]>([]);
   readonly isLoading = signal(true);
@@ -60,7 +66,10 @@ export class ProvidentFundRuleComponent implements OnInit {
         }
       });
 
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'provident_fund_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   goBack(): void {
@@ -68,6 +77,7 @@ export class ProvidentFundRuleComponent implements OnInit {
   }
 
   fetchRules(): void {
+    if (!this.hasPermission('provident_fund_rule_view')) return;
     this.isLoading.set(true);
     this.payrollService.getProvidentFundRules().subscribe({
       next: (data) => {
@@ -100,6 +110,7 @@ export class ProvidentFundRuleComponent implements OnInit {
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('provident_fund_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -114,6 +125,7 @@ export class ProvidentFundRuleComponent implements OnInit {
   }
 
   editRule(rule: ProvidentFundRule): void {
+    if (!this.hasPermission('provident_fund_rule_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -132,6 +144,7 @@ export class ProvidentFundRuleComponent implements OnInit {
   }
 
   onToggleStatus(rule: ProvidentFundRule): void {
+    if (!this.hasPermission('provident_fund_rule_edit')) return;
     const updatedRule = {
       ruleName: rule.ruleName,
       description: rule.description,
@@ -157,6 +170,7 @@ export class ProvidentFundRuleComponent implements OnInit {
   }
 
   onDelete(id: string, ruleName?: string): void {
+    if (!this.hasPermission('provident_fund_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Rule',
       message: 'Are you sure you want to delete this provident fund rule?',
@@ -239,5 +253,9 @@ export class ProvidentFundRuleComponent implements OnInit {
       year: 'numeric'
     });
     return `Updated: ${formatted}`;
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -39,8 +39,11 @@ export class AssetsService {
     return this.assetsSubject.value.find(a => a.id === assetId);
   }
 
-  getFromServer(): Observable<Asset[]> {
-    return this.http.get<any>(this.apiUrl).pipe(
+  getFromServer(silent = false): Observable<Asset[]> {
+    const headers = silent
+      ? new HttpHeaders({ 'X-Skip-Global-Error': 'true' })
+      : new HttpHeaders();
+    return this.http.get<any>(this.apiUrl, { headers }).pipe(
       map((resp: any) => {
         console.log('🔍 Raw API response:', resp);
         
@@ -286,7 +289,9 @@ export class AssetsService {
   // SERVER SYNC
   // =========================
   private syncFromServer(): void {
-    this.getFromServer().subscribe();
+    // Pass silent=true so the background startup sync does not trigger
+    // the global "permission denied" toast if permissions aren't loaded yet.
+    this.getFromServer(true).subscribe();
   }
 
   // =========================

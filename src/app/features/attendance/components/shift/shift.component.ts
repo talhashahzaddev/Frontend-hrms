@@ -31,10 +31,15 @@ import { PerformanceService } from '@/app/features/performance/services/performa
 import {ShiftRejectDialogComponent} from './shiftReject';
 import { GeoFenceService } from '../../services/geofence.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { LocalizedTimePipe } from '@shared/pipes/localized-time.pipe';
 @Component({
   selector: 'app-shift',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    LocalizedTimePipe,
     CommonModule,
     FormsModule,
     MatButtonModule,
@@ -84,10 +89,20 @@ export class ShiftComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadCurrentUser();
     this.loadAllShifts();
-  this.loadShiftSummary(); 
-    this.loadSuperAdminPendingSwaps();
-    this.loadEmployeeShiftSwaps();
+
+    if (this.hasPermission('Shift_Summary')) {
+      this.loadShiftSummary();
+    }
+
+    if (this.hasPermission('TEAM_SHIFT_SWAP_TABLE')) {
+      this.loadEmployeeShiftSwaps();
+    }
+
     this.loadEmployeeCurrentShift();
+
+    if (this.canViewAdminShiftSwaps()) {
+      this.loadSuperAdminPendingSwaps();
+    }
 
 
     this.selectedShiftId = '';
@@ -104,6 +119,10 @@ export class ShiftComponent implements OnInit, OnDestroy {
 
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
+  }
+
+  private canViewAdminShiftSwaps(): boolean {
+    return ['Super Admin', 'HR Manager', 'Manager'].includes((this.currentUser?.role || '').toString());
   }
 
   loadAllShifts(): void {
@@ -288,7 +307,9 @@ rejectRequest(swap: PendingShiftSwap): void {
 
   const dialogRef = this.dialog.open(ShiftRejectDialogComponent, {
     width: '450px',
+    maxHeight: '90vh',
     disableClose: true,
+    panelClass: 'attendance-dialog-panel',
     data: {
       title: 'Reject Shift Swap',
       message: 'Are you sure you want to reject shift swap request for',
@@ -338,6 +359,11 @@ rejectRequest(swap: PendingShiftSwap): void {
   private loadEmployeeShiftSwaps(): void {
     if (!this.currentUser?.userId) return;
 
+    if (!this.hasPermission('TEAM_SHIFT_SWAP_TABLE')) {
+      this.employeeShiftSwaps = [];
+      return;
+    }
+
     this.attendanceService.getEmployeeShiftSwaps(this.currentUser.userId).subscribe({
       next: (response: any) => {
         this.employeeShiftSwaps = response.data;
@@ -385,7 +411,7 @@ rejectRequest(swap: PendingShiftSwap): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '450px',
       data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
+      panelClass: ['attendance-dialog-panel', 'confirm-delete-dialog-panel']
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -408,9 +434,10 @@ rejectRequest(swap: PendingShiftSwap): void {
     const dialogRef = this.dialog.open(CreateShiftComponent, {
       width: '600px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container',
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container', 'create-shift-dialog'],
       data: {
         shiftId: shift.shiftId,
         shiftName: shift.shiftName,
@@ -436,9 +463,10 @@ rejectRequest(swap: PendingShiftSwap): void {
     const dialogRef = this.dialog.open(CreateShiftComponent, {
       width: '600px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container'
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container']
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -453,7 +481,7 @@ rejectRequest(swap: PendingShiftSwap): void {
       maxHeight: 'none',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container',
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container', 'create-shift-dialog'],
       data: {
         isManager: false
       }
@@ -471,7 +499,7 @@ rejectRequest(swap: PendingShiftSwap): void {
       maxWidth: '95vw',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container'
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container']
     });
 
     dialogRef.afterClosed().subscribe(result => {

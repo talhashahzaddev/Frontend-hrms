@@ -1,4 +1,4 @@
-<div class="time-tracking-container loans-advances-page social-security-page social-security-masters-page">
+<div class="time-tracking-container loans-advances-page social-security-page">
   <div class="page-header">
     <div class="title-section">
       <h1 class="title">Social Security Management</h1>
@@ -6,34 +6,6 @@
     </div>
 
     <div class="header-actions">
-      @if (currentTab === 'jurisdictions') {
-        <button class="add-btn" type="button" (click)="openCreateJurisdictionDialog()">
-          <mat-icon>add</mat-icon>
-          Add jurisdiction
-        </button>
-      }
-
-      @if (currentTab === 'authorities') {
-        <button class="add-btn" type="button" (click)="openCreateAuthorityDialog()">
-          <mat-icon>add</mat-icon>
-          Add authority
-        </button>
-      }
-
-      @if (currentTab === 'schemes') {
-        <button class="add-btn" type="button" (click)="openCreateSchemeDialog()">
-          <mat-icon>add</mat-icon>
-          Add scheme
-        </button>
-      }
-
-      @if (currentTab === 'rules') {
-        <button class="add-btn" type="button" (click)="openCreateRuleDialog()">
-          <mat-icon>add</mat-icon>
-          Add rule
-        </button>
-      }
-
       @if (currentTab === 'transactions') {
         <button class="add-btn" type="button" (click)="openAddTransactionDialog()">
           <mat-icon>add</mat-icon>
@@ -55,38 +27,13 @@
   </div>
 
   <div class="tab-navigation">
-    <button class="tab" [class.active]="currentTab === 'jurisdictions'" (click)="setTab('jurisdictions')">Jurisdictions</button>
-    <button class="tab" [class.active]="currentTab === 'authorities'" (click)="setTab('authorities')">Authorities</button>
-    <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
-    <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
-    <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
     <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
+    <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
+    <button class="tab" [class.active]="currentTab === 'enrollments'" (click)="setTab('enrollments')">Enrollments</button>
     <button class="tab" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">Claims</button>
   </div>
 
   <div class="summary-cards">
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Jurisdictions</span>
-          <span class="value">{{ jurisdictionsCount }}</span>
-        </div>
-        <div class="icon-wrapper color-blue"><mat-icon>public</mat-icon></div>
-      </div>
-      <p class="card-footer">configured regions</p>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Authorities</span>
-          <span class="value">{{ authoritiesCount }}</span>
-        </div>
-        <div class="icon-wrapper color-green"><mat-icon>apartment</mat-icon></div>
-      </div>
-      <p class="card-footer">registered authorities</p>
-    </div>
-
     <div class="card">
       <div class="card-content">
         <div class="info">
@@ -109,185 +56,6 @@
       <p class="card-footer">current page total</p>
     </div>
   </div>
-
-  @if (isMasterLoading && currentTab !== 'transactions') {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading social security masters...</p>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'jurisdictions') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Country</th>
-              <th>Currency</th>
-              <th>Default</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (jurisdictions.length === 0) {
-              <tr>
-                <td colspan="6" class="empty-row">No jurisdictions found.</td>
-              </tr>
-            } @else {
-              @for (item of jurisdictions; track item.jurisdictionId) {
-                <tr>
-                  <td>{{ item.jurisdictionCode }}</td>
-                  <td>{{ item.jurisdictionName }}</td>
-                  <td>{{ item.countryCode || '-' }}</td>
-                  <td>{{ item.currency || '-' }}</td>
-                  <td>{{ item.isDefault ? 'Yes' : 'No' }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditJurisdictionDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteJurisdiction(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'authorities') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Jurisdiction</th>
-              <th>Portal</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (authorities.length === 0) {
-              <tr>
-                <td colspan="5" class="empty-row">No authorities found.</td>
-              </tr>
-            } @else {
-              @for (item of authorities; track item.authorityId) {
-                <tr>
-                  <td>{{ item.authorityCode }}</td>
-                  <td>{{ item.authorityName }}</td>
-                  <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
-                  <td>{{ item.portalUrl || '-' }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditAuthorityDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteAuthority(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'schemes') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Jurisdiction</th>
-              <th>Authority</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (schemes.length === 0) {
-              <tr>
-                <td colspan="5" class="empty-row">No schemes found.</td>
-              </tr>
-            } @else {
-              @for (item of schemes; track item.schemeId) {
-                <tr>
-                  <td>{{ item.schemeCode }}</td>
-                  <td>{{ item.schemeName }}</td>
-                  <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
-                  <td>{{ getAuthorityName(item.authorityId) }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditSchemeDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteScheme(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'rules') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Rule</th>
-              <th>Scheme</th>
-              <th class="text-right">Employee %</th>
-              <th class="text-right">Employer %</th>
-              <th class="text-right">Max salary</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (rules.length === 0) {
-              <tr>
-                <td colspan="6" class="empty-row">No rules found.</td>
-              </tr>
-            } @else {
-              @for (item of rules; track item.ruleId) {
-                <tr>
-                  <td>{{ item.ruleName }}</td>
-                  <td>{{ getSchemeName(item.schemeId) }}</td>
-                  <td class="text-right">{{ item.employeeDefaultPct ?? 0 | number:'1.0-2' }}%</td>
-                  <td class="text-right">{{ item.employerDefaultPct ?? 0 | number:'1.0-2' }}%</td>
-                  <td class="text-right">{{ item.maxSalaryLimit ?? '-' }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditRuleDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteRule(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
 
   @if (currentTab === 'transactions') {
     <div class="content-card">
@@ -452,6 +220,7 @@
             <tr>
               <th>Employee</th>
               <th>Type</th>
+              <th>Requested rule</th>
               <th>Submitted</th>
               <th>Reason</th>
               <th class="text-right">Requested EE %</th>
@@ -463,32 +232,130 @@
           </thead>
           <tbody>
             @if (enrollmentRequests.length === 0) {
-              <tr><td colspan="9" class="empty-row">No enrollment requests found.</td></tr>
+              <tr><td colspan="10" class="empty-row">No enrollment requests found.</td></tr>
             } @else {
               @for (req of enrollmentRequests; track req.requestId) {
                 <tr>
                   <td>{{ req.employeeName }}</td>
                   <td>{{ req.requestType }}</td>
-                  <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                  <td>
+                    {{ req.ruleName || (req.configName ? req.configName : '—') }}
+                  </td>
+                  <td>{{ req.requestedAt | localizedDate:'mediumDate' }}</td>
                   <td>{{ req.reason || '-' }}</td>
                   <td class="text-right">{{ req.requestedEmployeePct != null ? (req.requestedEmployeePct + '%') : '-' }}</td>
                   <td class="text-right">{{ req.requestedEmployerPct != null ? (req.requestedEmployerPct + '%') : '-' }}</td>
-                  <td>{{ req.documentCount }} file(s)</td>
+                  <td>
+                    @if (req.documentCount > 0) {
+                      <button type="button" class="link-btn" (click)="openRequestDocuments(req)"
+                              style="background:none;border:none;color:#1d4ed8;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">
+                        {{ req.documentCount }} file(s)
+                      </button>
+                    } @else {
+                      <span class="muted">No files</span>
+                    }
+                  </td>
                   <td class="text-center">
                     <span class="status-pill" [ngClass]="getStatusClass(req.requestStatus)">{{ req.requestStatus }}</span>
                   </td>
                   <td class="text-right action-cell">
                     @if (req.requestStatus === 'pending') {
-                      <button class="action-btn hover-primary" type="button" title="Approve" (click)="approveEnrollmentRequest(req)">
-                        <mat-icon>check_circle</mat-icon>
-                      </button>
-                      <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectEnrollmentRequest(req)">
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    } @else {
-                      <span class="muted">{{ req.rejectionReason || req.remarks || '—' }}</span>
+                      <div class="request-actions">
+                        <button class="approve-btn" type="button" (click)="approveEnrollmentRequest(req)">
+                          <mat-icon>check_circle</mat-icon>
+                          Approve
+                        </button>
+                        <button class="reject-btn" type="button" (click)="rejectEnrollmentRequest(req)">
+                          <mat-icon>cancel</mat-icon>
+                          Reject
+                        </button>
+                      </div>
                     }
                   </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'enrollments') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="enrollmentSearch"
+                   (keyup.enter)="applyEnrollmentFilters()" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="enrollmentStatusFilter" (change)="applyEnrollmentFilters()">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="suspended">Suspended</option>
+            <option value="withdrawn">Withdrawn</option>
+            <option value="closed">Closed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" type="button" (click)="applyEnrollmentFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" type="button"
+                    [disabled]="!enrollmentSearch && !enrollmentStatusFilter"
+                    (click)="clearEnrollmentFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="enrollmentsLoading">
+        @if (enrollmentsLoading) {
+          <div class="loading-overlay"><div class="spinner"></div><p>Loading enrollments...</p></div>
+        }
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Rule</th>
+              <th>Scheme</th>
+              <th>Type</th>
+              <th class="text-right">EE %</th>
+              <th class="text-right">ER %</th>
+              <th>Effective from</th>
+              <th>Ends</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Current</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (enrollments.length === 0) {
+              <tr><td colspan="10" class="empty-row">No enrollments found.</td></tr>
+            } @else {
+              @for (e of enrollments; track e.enrollmentId) {
+                <tr>
+                  <td>
+                    {{ e.employeeName }}
+                    @if (e.employeeCode) { <small style="color:#94a3b8;">({{ e.employeeCode }})</small> }
+                  </td>
+                  <td>{{ e.ruleName || '-' }}</td>
+                  <td>{{ e.schemeName || '-' }}</td>
+                  <td>{{ e.enrollmentType }}</td>
+                  <td class="text-right">{{ effectiveEmployeePct(e) | number:'1.0-2' }}%</td>
+                  <td class="text-right">{{ effectiveEmployerPct(e) | number:'1.0-2' }}%</td>
+                  <td>{{ e.effectiveDate | localizedDate:'mediumDate' }}</td>
+                  <td>{{ e.endDate ? (e.endDate | localizedDate:'mediumDate') : '-' }}</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(e.enrollmentStatus)">{{ e.enrollmentStatus }}</span>
+                  </td>
+                  <td class="text-center">{{ e.isCurrent ? 'Yes' : 'No' }}</td>
                 </tr>
               }
             }
@@ -539,22 +406,33 @@
               <th class="text-right">Claimed</th>
               <th class="text-right">Approved</th>
               <th class="text-right">Paid</th>
+              <th>Documents</th>
               <th class="text-center">Status</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             @if (benefitClaims.length === 0) {
-              <tr><td colspan="8" class="empty-row">No claims found.</td></tr>
+              <tr><td colspan="9" class="empty-row">No claims found.</td></tr>
             } @else {
               @for (claim of benefitClaims; track claim.claimId) {
                 <tr>
                   <td>{{ claim.employeeName }}</td>
                   <td>{{ claim.claimType }}</td>
-                  <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                  <td>{{ claim.claimDate | localizedDate:'mediumDate' }}</td>
                   <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
                   <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>
                   <td class="text-right">{{ claim.paidAmount != null ? (currencySymbol() + ' ' + (claim.paidAmount | number:'1.0-2')) : '-' }}</td>
+                  <td>
+                    @if (claim.documentCount > 0) {
+                      <button type="button" class="link-btn" (click)="openClaimDocuments(claim)"
+                              style="background:none;border:none;color:#1d4ed8;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">
+                        {{ claim.documentCount }} file(s)
+                      </button>
+                    } @else {
+                      <span class="muted">No files</span>
+                    }
+                  </td>
                   <td class="text-center">
                     <span class="status-pill" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
                   </td>
@@ -570,8 +448,6 @@
                       <button class="action-btn hover-primary" type="button" title="Mark paid" (click)="markBenefitClaimPaid(claim)">
                         <mat-icon>payments</mat-icon>
                       </button>
-                    } @else {
-                      <span class="muted">{{ claim.rejectionReason || claim.decisionNotes || '—' }}</span>
                     }
                   </td>
                 </tr>

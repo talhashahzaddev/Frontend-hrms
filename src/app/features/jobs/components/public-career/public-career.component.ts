@@ -20,6 +20,7 @@ import { map } from 'rxjs/operators';
 import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto, PagedResult } from '@core/models/jobs.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CompanyCareerDetails {
     organizationId: string;
     name?: string | null;
@@ -29,10 +30,12 @@ export interface CompanyCareerDetails {
     careerDescription?: string | null;
 }
 
+
 @Component({
     selector: 'app-public-career',
     standalone: true,
     imports: [
+    SharedCommonModule,
         CommonModule,
         ReactiveFormsModule,
         MatCardModule,

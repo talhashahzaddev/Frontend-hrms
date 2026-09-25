@@ -16,13 +16,18 @@ import { AssetType } from '../../../../core/models/assets.models';
 import { AssetTypeService } from '../../services/asset-type.service';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CreateAssetTypeDialogComponent } from './create-asset-type-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-asset-types',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -35,7 +40,8 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
     MatChipsModule,
     MatDialogModule,
     MatDividerModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    PageHeaderComponent
   ],
   templateUrl: './asset-types.component.html',
   styleUrls: ['./asset-types.component.scss']
@@ -73,8 +79,13 @@ export class AssetTypesComponent implements OnInit {
     private assetTypeService: AssetTypeService,
     private notification: NotificationService,
     private loading: LoadingService,
+    private authService: AuthService,
     private dialog: MatDialog
-  ) {}
+  ) { }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Assets Management', 'Type of Assets', actionKey);
+  }
 
   ngOnInit(): void {
     this.loadTypes();

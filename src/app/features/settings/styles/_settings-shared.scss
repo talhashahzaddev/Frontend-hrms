@@ -1,0 +1,587 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// Settings Module — Shared Design Tokens
+// Aligned with Assets / Attendance / Timesheet / Performance (slate-blue palette)
+// ═══════════════════════════════════════════════════════════════════════════
+@use '../../timesheet/styles/timesheet-shared' as ts;
+
+// ── Design tokens ────────────────────────────────────────────────────────────
+$st-primary:        #2563eb;
+$st-primary-hover:  #1d4ed8;
+$st-primary-light:  #eff6ff;
+$st-border:         #e2e8f0;
+$st-surface:        #f8fafc;
+$st-bg:             #f1f5f9;
+$st-text:           #0f172a;
+$st-text-secondary: #64748b;
+$st-text-muted:     #94a3b8;
+$st-success:        #16a34a;
+$st-danger:         #dc2626;
+
+// ── Section card inside the page ────────────────────────────────────────────
+.st-section-card {
+  background: #ffffff;
+  border: 1px solid $st-border;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+
+  &:last-child { margin-bottom: 0; }
+
+  .st-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: $st-surface;
+    border-bottom: 1px solid $st-border;
+
+    .st-section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: $st-primary-light;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      mat-icon {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        color: $st-primary !important;
+      }
+    }
+
+    .st-section-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: $st-text;
+      margin: 0;
+    }
+
+    .st-section-subtitle {
+      font-size: 0.8125rem;
+      color: $st-text-secondary;
+      margin: 2px 0 0;
+    }
+  }
+
+  .st-section-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+}
+
+// ── Form grid ────────────────────────────────────────────────────────────────
+.st-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  &.full { grid-template-columns: 1fr; }
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.st-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .st-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+
+    .req { color: #ef4444; margin-left: 2px; }
+  }
+
+  .mat-field {
+    width: 100%;
+
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        background: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 0 !important;
+        border: 1px solid $st-border !important;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .mdc-notched-outline { display: none !important; }
+      .mat-mdc-form-field-infix {
+        min-height: 42px !important;
+        padding: 0 12px !important;
+        display: flex;
+        align-items: center;
+        border: none !important;
+      }
+      input.mat-mdc-input-element { height: 42px !important; padding: 0; font-size: 0.875rem; color: $st-text; }
+      textarea.mat-mdc-input-element { padding: 10px 0 !important; min-height: 80px; font-size: 0.875rem; color: $st-text; }
+      .mat-mdc-select-value { font-size: 0.875rem; color: $st-text; }
+      .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+    }
+
+    &:hover ::ng-deep .mat-mdc-text-field-wrapper { border-color: #94a3b8 !important; }
+    &.mat-focused ::ng-deep .mat-mdc-text-field-wrapper {
+      border-color: $st-primary !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  }
+}
+
+// ── Page footer actions ───────────────────────────────────────────────────────
+.st-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid $st-border;
+  margin-top: 4px;
+}
+
+// ── Table toolbar ─────────────────────────────────────────────────────────────
+.st-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid $st-border;
+  background: #ffffff;
+  flex-wrap: wrap;
+
+  .st-search-wrapper {
+    display: flex;
+    align-items: center;
+    background: $st-surface;
+    border: 1px solid $st-border;
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 38px;
+    gap: 8px;
+    min-width: 280px;
+    transition: border-color 0.15s;
+
+    &:focus-within { border-color: $st-primary; }
+
+    mat-icon { font-size: 18px; color: $st-text-muted; flex-shrink: 0; }
+
+    input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.875rem;
+      color: $st-text;
+      flex: 1;
+
+      &::placeholder { color: $st-text-muted; }
+    }
+  }
+
+  .st-toolbar-spacer { flex: 1; }
+
+  .st-record-count {
+    font-size: 0.8125rem;
+    color: $st-text-secondary;
+    font-weight: 500;
+  }
+}
+
+// ── Loading & empty states ────────────────────────────────────────────────────
+.st-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 16px;
+
+  p { margin: 0; font-size: 0.875rem; color: $st-text-muted; }
+
+  ::ng-deep .mat-mdc-progress-spinner circle { stroke: $st-primary; }
+}
+
+.st-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 72px 24px;
+
+  .st-empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: $st-surface;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    border: 1px solid $st-border;
+
+    mat-icon { font-size: 36px; width: 36px; height: 36px; color: $st-text-muted; }
+  }
+
+  h3 { margin: 0 0 8px; font-size: 1.125rem; font-weight: 700; color: $st-text; }
+  p { margin: 0; font-size: 0.875rem; color: $st-text-secondary; max-width: 360px; }
+}
+
+// ── Mat-table overrides ───────────────────────────────────────────────────────
+.st-table {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-header-row {
+      background: $st-surface;
+      height: 44px;
+
+      .mat-mdc-header-cell {
+        font-size: 11px;
+        font-weight: 700;
+        color: $st-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        border-bottom: 1px solid $st-border;
+        padding: 0 16px;
+      }
+    }
+
+    .mat-mdc-row {
+      height: 60px;
+      transition: background 0.12s ease;
+
+      &:hover { background: #f8fafc; }
+
+      .mat-mdc-cell {
+        padding: 0 16px;
+        border-bottom: 1px solid $st-border;
+        font-size: 0.875rem;
+        color: $st-text;
+      }
+    }
+  }
+}
+
+// ── Breadcrumb bar ────────────────────────────────────────────────────────────
+.st-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.8125rem;
+  color: $st-text-secondary;
+
+  .st-breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: $st-primary;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.75; }
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+
+  .st-breadcrumb-sep { color: $st-text-muted; }
+
+  .st-breadcrumb-current { color: $st-text; font-weight: 600; }
+}
+
+// ── Status / category chips ───────────────────────────────────────────────────
+.st-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  .st-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &.st-chip-published {
+    background: #dcfce7;
+    color: $st-success;
+    .st-dot { background: $st-success; }
+  }
+
+  &.st-chip-draft {
+    background: #f1f5f9;
+    color: $st-text-secondary;
+    .st-dot { background: $st-text-muted; }
+  }
+
+  &.st-chip-primary {
+    background: $st-primary-light;
+    color: $st-primary;
+  }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+.st-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  border-bottom: 1px solid $st-border;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  &::-webkit-scrollbar { display: none; }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.st-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.25rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: $st-text-secondary;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; }
+
+  &:hover { color: $st-text; }
+
+  &.active {
+    color: $st-primary;
+    border-bottom-color: $st-primary;
+    mat-icon { color: $st-primary; }
+  }
+}
+
+
+// ── Action menu btn ───────────────────────────────────────────────────────────
+.st-action-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 7px !important;
+  color: $st-text-secondary !important;
+  transition: background 0.12s ease !important;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+  &:hover { background: $st-surface !important; color: $st-text !important; }
+}
+
+// ── Paginator override ────────────────────────────────────────────────────────
+::ng-deep mat-paginator {
+  background: $st-surface !important;
+  border-top: 1px solid $st-border;
+
+  .mat-mdc-paginator-range-label { font-size: 0.8125rem; color: $st-text-secondary; }
+}
+
+// ── Permission/toggle card used in role-form ──────────────────────────────────
+.st-perm-card {
+  background: #ffffff;
+  border: 1px solid $st-border;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+
+  &:hover { box-shadow: 0 2px 12px rgba(37, 99, 235, 0.07); }
+
+  .st-perm-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: $st-surface;
+    border-bottom: 1px solid $st-border;
+
+    .st-perm-card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .st-perm-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        background: $st-primary-light;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon { font-size: 15px !important; width: 15px !important; height: 15px !important; color: $st-primary !important; }
+      }
+
+      .st-perm-card-title { font-size: 0.875rem; font-weight: 700; color: $st-text; }
+    }
+  }
+
+  .st-perm-card-body {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .st-perm-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: $st-surface;
+    border-top: 1px solid $st-border;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $st-text-muted;
+  }
+}
+
+// ── Custom checkboxes for permissions ─────────────────────────────────────────
+.st-custom-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  &.disabled { pointer-events: none; opacity: 0.5; }
+
+  input[type="checkbox"] { display: none; }
+
+  .st-checkmark {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid $st-border;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+
+  input[type="checkbox"]:checked ~ .st-checkmark {
+    background: $st-primary;
+    border-color: $st-primary;
+
+    &::after {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 9px;
+      border: 2px solid white;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translateY(-1px);
+    }
+  }
+}
+
+// ── Primary action button — blue ─────────────────────────────────────────────
+.btn-submit {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 40px !important;
+  padding: 0 20px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: $st-primary !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.28) !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; margin: 0 !important; }
+  mat-spinner { flex-shrink: 0; }
+
+  &:hover:not([disabled]) {
+    background: $st-primary-hover !important;
+    box-shadow: 0 3px 8px rgba(37,99,235,0.38) !important;
+    transform: translateY(-1px);
+  }
+
+  &[disabled], &:disabled { opacity: 0.5 !important; cursor: not-allowed !important; transform: none !important; }
+}
+
+// ── Cancel / outline button ───────────────────────────────────────────────────
+.btn-cancel {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid $st-border !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; margin: 0 !important; }
+
+  &:hover:not([disabled]) {
+    background: $st-surface !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+  }
+
+  &[disabled], &:disabled { opacity: 0.5 !important; cursor: not-allowed !important; }
+}
+
+.st-toggle-switch {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+
+  input[type="checkbox"] { display: none; }
+
+  .st-toggle-track {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background: #cbd5e1;
+    transition: background 0.2s;
+    padding: 2px;
+  }
+
+  .st-toggle-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transform: translateX(0);
+    transition: transform 0.2s ease;
+  }
+
+  input[type="checkbox"]:checked ~ .st-toggle-track {
+    background: $st-primary;
+
+    .st-toggle-thumb { transform: translateX(18px); }
+  }
+}

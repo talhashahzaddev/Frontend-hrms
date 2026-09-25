@@ -14,6 +14,7 @@ import { Position, Department, Role, CreatePositionRequest, UpdatePositionReques
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PositionDialogData {
   mode: 'create' | 'edit';
   position?: Position;
@@ -21,10 +22,12 @@ export interface PositionDialogData {
   roles: Role[];
 }
 
+
 @Component({
   selector: 'app-position-form-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

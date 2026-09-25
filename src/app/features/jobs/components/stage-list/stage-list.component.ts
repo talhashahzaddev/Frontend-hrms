@@ -20,11 +20,15 @@ import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { AuthService } from '@core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-stage-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -50,6 +54,8 @@ export class StageListComponent implements OnInit, OnDestroy {
     private jobsService: JobsService,
     private notification: NotificationService,
     private dialog: MatDialog
+    ,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -157,5 +163,10 @@ export class StageListComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.searchControl.setValue('');
     this.loadStages();
+  }
+
+  /** Permission helper (delegates to AuthService) */
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Jobs', 'Stage', actionKey);
   }
 }

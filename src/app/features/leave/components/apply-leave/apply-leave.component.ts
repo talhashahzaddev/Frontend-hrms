@@ -17,10 +17,13 @@ import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LeaveType, LeaveBalance, CreateLeaveRequest, LeaveRequest } from '../../../../core/models/leave.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-apply-leave',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

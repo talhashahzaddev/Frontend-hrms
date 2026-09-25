@@ -8,17 +8,22 @@ import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-gratuity-rules',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './gratuity-rules.component.html',
   styleUrl: './gratuity-rules.component.scss'
 })
@@ -28,6 +33,7 @@ export class GratuityRulesComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly gratuityRules = signal<any[]>([]);
   readonly isLoading = signal(true);
@@ -45,10 +51,14 @@ export class GratuityRulesComponent implements OnInit {
         }
       });
 
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'gratuity_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchRules(): void {
+    if (!this.hasPermission('gratuity_rule_view')) return;
     this.isLoading.set(true);
     this.payrollService.getGratuityConfigs().subscribe({
       next: (data) => {
@@ -68,6 +78,7 @@ export class GratuityRulesComponent implements OnInit {
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('gratuity_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -82,6 +93,7 @@ export class GratuityRulesComponent implements OnInit {
   }
 
   editRule(rule: any): void {
+    if (!this.hasPermission('gratuity_rule_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -109,6 +121,7 @@ export class GratuityRulesComponent implements OnInit {
   }
 
   onToggleStatus(rule: any): void {
+    if (!this.hasPermission('gratuity_rule_edit')) return;
     const updatedRule = {
       configRuleName: rule.configRuleName || rule.configrulename,
       description: rule.description,
@@ -130,6 +143,7 @@ export class GratuityRulesComponent implements OnInit {
   }
 
   onDelete(id: string, ruleName?: string): void {
+    if (!this.hasPermission('gratuity_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Gratuity Rule',
       message: 'Are you sure you want to delete this gratuity rule?',
@@ -180,5 +194,9 @@ export class GratuityRulesComponent implements OnInit {
     if (normalized === 'percentage') return 'calc-percentage';
     if (normalized === 'peryear') return 'calc-peryear';
     return 'calc-fixed';
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

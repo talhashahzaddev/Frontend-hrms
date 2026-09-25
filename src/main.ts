@@ -64,6 +64,8 @@ import { PlatformAdminInterceptor } from './app/features/platform-admin/intercep
 import { environment } from './environments/environment';
 import { APP_INITIALIZER } from '@angular/core';
 import { domainInitializer } from './app/core/initializers/domain.initializer';
+import { localizationInitializer } from './app/core/initializers/localization.initializer';
+import { LocalizationService } from './app/core/services/localization.service';
 
 registerLocaleData(localeGb);
 
@@ -150,6 +152,12 @@ bootstrapApplication(AppComponent, {
     {
       provide: APP_INITIALIZER,
       useFactory: domainInitializer,
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: localizationInitializer,
+      deps: [LocalizationService],
       multi: true
     },
     

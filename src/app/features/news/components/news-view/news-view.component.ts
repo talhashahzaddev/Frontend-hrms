@@ -3,21 +3,28 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NewsService } from '../../services/news.services';
 import { NewsDto } from '@/app/core/models/news.models';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { MatDividerModule } from '@angular/material/divider';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-news-view',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    DatePipe
+    MatDividerModule,
+    MatButtonModule,
+    PageHeaderComponent
   ],
   templateUrl: './news-view.component.html',
   styleUrls: ['./news-view.component.scss'],

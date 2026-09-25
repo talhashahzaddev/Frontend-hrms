@@ -1,3 +1,9 @@
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 import {
   Component, OnInit, OnDestroy, ChangeDetectionStrategy,
   ChangeDetectorRef, HostListener, ElementRef, Inject, Optional
@@ -16,10 +22,16 @@ import { Department } from '@/app/core/models/employee.models';
 import { TicketGroup, CategoryDto } from '@/app/core/models/helpdesk.models';
 import { NotificationService } from '@/app/core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-create-agent-group-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    SharedCommonModule, CommonModule, ReactiveFormsModule, MatIconModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatProgressSpinnerModule, MatDialogModule
+  ],
   templateUrl: './create-agent-group-dialog.component.html',
   styleUrls: ['./create-agent-group-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -342,3 +354,5 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
     return control.value?.length ? null : { required: true };
   }
 }
+
+

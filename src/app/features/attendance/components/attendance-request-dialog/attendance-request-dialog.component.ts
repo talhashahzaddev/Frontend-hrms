@@ -14,9 +14,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AttendanceService } from '../../services/attendance.service';
 import { LeaveService } from '../../../leave/services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { DateTimeFormatService } from '@core/services/date-time-format.service';
 import { AttendanceUpdateRequestDto, ManualAttendanceRequest } from '../../../../core/models/attendance.models';
 import { LeaveType } from '../../../../core/models/leave.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface AttendanceRequestDialogData {
   attendanceId?: string | null;
   timesheetId?: string;
@@ -30,10 +32,12 @@ export interface AttendanceRequestDialogData {
   mode: 'create' | 'edit';
 }
 
+
 @Component({
   selector: 'app-attendance-request-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -83,7 +87,8 @@ export class AttendanceRequestDialogComponent implements OnInit {
     private fb: FormBuilder,
     private attendanceService: AttendanceService,
     private leaveService: LeaveService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dateTimeFormat: DateTimeFormatService
   ) {
     this.requestForm = this.fb.group({
       requestedCheckIn: [''],
@@ -180,14 +185,10 @@ export class AttendanceRequestDialogComponent implements OnInit {
 
   formatDateForDisplay(dateString: string): string {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return this.dateTimeFormat.formatDateTime(dateString, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      fallback: 'N/A'
     });
   }
 

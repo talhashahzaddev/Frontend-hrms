@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ApproveLeaveDialogData {
   employeeName: string;
   leaveTypeName: string;
@@ -14,10 +15,12 @@ export interface ApproveLeaveDialogData {
   reason?: string;
 }
 
+
 @Component({
   selector: 'app-approve-leave-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,

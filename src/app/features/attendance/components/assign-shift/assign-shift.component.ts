@@ -19,6 +19,7 @@ import { Employee, Department } from '@/app/core/models/employee.models';
 import { DepartmentEmployee } from '../../../../core/models/attendance.models';
 import { PerformanceService } from '@/app/features/performance/services/performance.service';
 import { GeoFenceService, GeoFenceDto, ShiftGeoFenceDto } from '../../services/geofence.service';
+import { SharedCommonModule } from '@shared/shared-common.module';
 declare const L: any;
 
 export interface ShiftDto {
@@ -32,10 +33,12 @@ export interface ShiftDto {
   isActive: boolean;
 }
 
+
 @Component({
   selector: 'app-assign-shift',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -103,7 +106,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy, AfterViewInit {
     this.assignShiftForm.get('shiftId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((shiftId: string) => {
-        this.loadShiftFences(shiftId);
+        setTimeout(() => this.loadShiftFences(shiftId), 0);
       });
 
     if (this.isManager) {
@@ -158,6 +161,10 @@ export class AssignShiftComponent implements OnInit, OnDestroy, AfterViewInit {
       this.renderShiftFencesOnMap();
       this.cdr.markForCheck();
       return;
+    }
+
+    if (!this.shiftFenceMap) {
+      this.initShiftFenceMap();
     }
 
     this.isFencesLoading = true;

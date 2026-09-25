@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { take } from 'rxjs';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
 
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { PayrollService } from '../../services/payroll.service';
@@ -18,6 +19,7 @@ import {
 } from '../dialogs/add-gratuity-record-dialog/add-gratuity-record-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type GratuityTab = 'active' | 'history';
 
 interface GratuityConfigRow {
@@ -52,10 +54,12 @@ interface GratuityRecordRow {
   updatedAt: string;
 }
 
+
 @Component({
   selector: 'app-gratuity',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './gratuity.component.html',
   styleUrl: './gratuity.component.scss'
 })
@@ -65,8 +69,17 @@ export class GratuityComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+
+  get canAccessGratuityAdmin(): boolean {
+    return this.hasPermission('gratuity_admin_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
 
   currentTab: GratuityTab = 'active';
 
@@ -89,6 +102,9 @@ export class GratuityComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCurrencySymbol();
+    if (!this.canAccessGratuityAdmin) {
+      return;
+    }
     this.loadEmployees();
     this.loadRecords();
     this.loadConfigs();
@@ -238,6 +254,9 @@ export class GratuityComponent implements OnInit {
   // ── Dialogs – Records ──────────────────────────────────────────────────────
 
   openAddRecordDialog(): void {
+    if (!this.hasPermission('gratuity_admin_add')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddGratuityRecordDialogComponent, {
       width: '560px',
       maxWidth: '95vw',
@@ -254,6 +273,9 @@ export class GratuityComponent implements OnInit {
   }
 
   openEditRecordDialog(row: GratuityRecordRow): void {
+    if (!this.hasPermission('gratuity_admin_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddGratuityRecordDialogComponent, {
       width: '560px',
       maxWidth: '95vw',
@@ -286,6 +308,9 @@ export class GratuityComponent implements OnInit {
   }
 
   requestDeleteRecord(row: GratuityRecordRow): void {
+    if (!this.hasPermission('gratuity_admin_delete')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',
@@ -304,6 +329,9 @@ export class GratuityComponent implements OnInit {
   }
 
   approveRecord(row: GratuityRecordRow): void {
+    if (!this.hasPermission('gratuity_admin_edit')) {
+      return;
+    }
     if (row.paymentStatus !== 'calculated') return;
     this.payrollService.approveGratuityTransaction(row.id, {})
       .pipe(take(1))
@@ -317,6 +345,9 @@ export class GratuityComponent implements OnInit {
   }
 
   markPaid(row: GratuityRecordRow): void {
+    if (!this.hasPermission('gratuity_admin_edit')) {
+      return;
+    }
     if (row.paymentStatus !== 'approved') return;
     this.payrollService.markGratuityPaid(row.id, {
       periodId: row.periodId,

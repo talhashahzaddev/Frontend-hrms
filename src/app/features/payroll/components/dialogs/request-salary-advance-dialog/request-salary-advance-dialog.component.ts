@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SalaryAdvanceRuleOption {
   ruleId: string;
   ruleName: string;
@@ -26,11 +27,13 @@ interface RequestSalaryAdvanceDialogData {
   initialValue?: Partial<RequestSalaryAdvanceDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-request-salary-advance-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './request-salary-advance-dialog.component.html',
   styleUrl: './request-salary-advance-dialog.component.scss'
 })
@@ -38,7 +41,9 @@ export class RequestSalaryAdvanceDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<RequestSalaryAdvanceDialogComponent, RequestSalaryAdvanceDialogPayload | undefined>);
 
-  readonly currencySymbol = this.data?.currencySymbol ?? 'PKR';
+  // Caller supplies the org currency (resolved from SettingsService). Fall back to
+  // the system-wide neutral default rather than a country-specific symbol.
+  readonly currencySymbol = this.data?.currencySymbol ?? '$';
   readonly availableLimit = Math.max(0, Number(this.data?.availableLimit ?? 0));
   readonly activeRules = (this.data?.activeRules ?? [])
     .filter((rule) => !!String(rule?.ruleId ?? '').trim())

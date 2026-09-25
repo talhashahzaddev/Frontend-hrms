@@ -1,3 +1,4 @@
+@use "sass:color";
 // Font and basic vars
 $brand-blue: #1D7DFC;
 $bg-body: #F9FAFB;
@@ -150,10 +151,15 @@ $border: #E5E7EB;
   text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   color: #FFFFFF;
   text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 
   ::ng-deep * {
     color: #FFFFFF !important;
     text-align: center !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   ::ng-deep p {
@@ -161,6 +167,14 @@ $border: #E5E7EB;
     font-size: inherit;
     font-weight: inherit;
     text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 36px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 28px;
   }
 }
 
@@ -177,7 +191,7 @@ $border: #E5E7EB;
   text-align: left;
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
-  word-break: normal !important;
+  word-break: break-word !important;
   overflow-wrap: break-word !important;
 
   ::ng-deep p, 
@@ -195,7 +209,7 @@ $border: #E5E7EB;
     text-align: left !important;
     white-space: pre-wrap !important;
     word-wrap: break-word !important;
-    word-break: normal !important;
+    word-break: break-word !important;
     overflow-wrap: break-word !important;
     min-width: 0 !important;
   }
@@ -225,7 +239,7 @@ $border: #E5E7EB;
   transition: all 0.2s;
 
   &:hover {
-    background-color: darken($brand-blue, 10%);
+    background-color: color.adjust($brand-blue, $lightness: -10%);
   }
 }
 
@@ -397,7 +411,7 @@ $border: #E5E7EB;
   &:hover {
     @include shadow-hover;
     transform: translateY(-2px);
-    border-color: lighten($brand-blue, 30%);
+    border-color: color.adjust($brand-blue, $lightness: 30%);
   }
 }
 
@@ -477,7 +491,7 @@ $border: #E5E7EB;
 
 .job-code {
   font-size: 13px;
-  color: lighten($text-secondary, 10%);
+  color: color.adjust($text-secondary, $lightness: 10%);
 }
 
 .card-footer {
@@ -494,7 +508,7 @@ $border: #E5E7EB;
     transition: all 0.2s;
 
     &:hover {
-      background-color: darken($brand-blue, 10%);
+      background-color: color.adjust($brand-blue, $lightness: -10%);
     }
   }
 }
@@ -603,7 +617,7 @@ $border: #E5E7EB;
 
     &:hover {
       transform: translateY(-1px);
-      background-color: darken($brand-blue, 5%);
+      background-color: color.adjust($brand-blue, $lightness: -5%);
     }
 
     &.linkedin {
@@ -634,7 +648,7 @@ $border: #E5E7EB;
 
   .dialog-header {
     padding: 24px 32px;
-    background: linear-gradient(135deg, $brand-blue 0%, darken($brand-blue, 15%) 100%);
+    background: linear-gradient(135deg, $brand-blue 0%, color.adjust($brand-blue, $lightness: -15%) 100%);
     color: white;
 
     h2 {

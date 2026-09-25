@@ -15,6 +15,7 @@ import { ChartConfiguration, ChartData } from 'chart.js';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { PlatformDashboard } from '../../models/super-admin.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface KpiCard {
   label: string;
   value: number;
@@ -23,10 +24,12 @@ interface KpiCard {
   route?: string;
 }
 
+
 @Component({
   selector: 'app-platform-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     MatCardModule,

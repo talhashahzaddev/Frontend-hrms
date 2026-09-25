@@ -1,0 +1,145 @@
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 100%;
+  background: #fff;
+  overflow: hidden;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .icon-wrapper {
+      background: rgba(37, 99, 235, 0.1);
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2563eb;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+  }
+
+  .close-btn {
+    color: #94a3b8;
+    &:hover { color: #475569; }
+  }
+}
+
+.modal-body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+
+  .form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    
+    .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      &.full-width {
+        flex: 1 1 100%;
+      }
+
+      .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+        
+        &.required::after {
+          content: ' *';
+          color: #ef4444;
+        }
+      }
+
+      .custom-input {
+        height: 44px;
+        padding: 0 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0f172a;
+        transition: all 0.2s;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+
+        &::placeholder {
+          color: #94a3b8;
+        }
+
+        &:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      .error-text {
+        font-size: 12px;
+        color: #ef4444;
+        margin-top: -2px;
+      }
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+
+  .btn-cancel {
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    
+    &:hover:not([disabled]) {
+      background: #1d4ed8;
+    }
+
+    .btn-spinner {
+      ::ng-deep circle { stroke: #fff; }
+    }
+  }
+}

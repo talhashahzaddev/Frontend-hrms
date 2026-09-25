@@ -16,10 +16,13 @@ import {
   ConfirmDeleteData
 } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-category-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatIconModule,

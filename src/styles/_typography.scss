@@ -1,0 +1,61 @@
+// ═══ Typography ═══════════════════════════════════════════════════════════════
+.ts-page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ts-text);
+  margin: 0 0 var(--ts-space-6) 0;
+  line-height: 1.3;
+}
+
+.ts-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 var(--ts-space-4) 0;
+  padding-bottom: var(--ts-space-2);
+  border-bottom: 1px solid var(--ts-border);
+  line-height: 1.4;
+}
+
+.ts-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ts-text-muted);
+  margin-bottom: var(--ts-space-1);
+  display: block;
+}
+
+.ts-body {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ts-text);
+  line-height: 1.5;
+}
+
+.ts-muted {
+  font-size: 13px;
+  color: var(--ts-text-muted);
+  line-height: 1.4;
+}
+
+// Monospace for numeric columns
+.ts-mono {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+// Text overflow utility
+.ts-truncate {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+// Table header text standard
+.ts-th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

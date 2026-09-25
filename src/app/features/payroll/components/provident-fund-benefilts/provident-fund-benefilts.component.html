@@ -1,4 +1,7 @@
 <div class="provident-fund-page">
+  @if (!canAccessPfEmployee) {
+  <div class="empty-state">You do not have permission to access provident fund benefits.</div>
+  } @else {
   <div class="requests-headline">
     <div class="title-section">
       <button class="icon-button back-btn" type="button" aria-label="Back to My Benefits" (click)="goBackToBenefits()">
@@ -10,10 +13,12 @@
       </div>
     </div>
 
+    @if (hasPermission('pf_employee_enroll')) {
     <button class="primary-action" type="button" [disabled]="!!activeFund" (click)="openAddRequestDialog()">
       <mat-icon>add</mat-icon>
       Enroll in provident fund
     </button>
+    }
   </div>
 
   @if (isLoading()) {
@@ -117,6 +122,7 @@
 
           <div class="card-footer">
             <div class="request-actions">
+              @if (hasPermission('pf_employee_update_percentage')) {
               <button
                 class="action-btn secondary"
                 type="button"
@@ -124,6 +130,8 @@
                 <mat-icon>percent</mat-icon>
                 Update percentage
               </button>
+              }
+              @if (hasPermission('pf_employee_withdraw')) {
               <button
                 class="action-btn secondary"
                 type="button"
@@ -132,16 +140,19 @@
                 <mat-icon>payments</mat-icon>
                 Withdraw request
               </button>
+              }
             </div>
           </div>
         </article>
       } @else {
         <div class="empty-state">
           <p>No active provident fund account found.</p>
+          @if (hasPermission('pf_employee_enroll')) {
           <button class="primary-action" type="button" (click)="openAddRequestDialog()">
             <mat-icon>add</mat-icon>
             Enroll in provident fund
           </button>
+          }
         </div>
       }
     </section>
@@ -220,13 +231,13 @@
                 </td>
                 <td class="status-column">
                   <div class="request-actions">
-                    @if (r.requestType === 'enrollment' && r.status === 'pending') {
+                    @if (r.requestType === 'enrollment' && r.status === 'pending' && hasPermission('pf_employee_edit_enroll')) {
                       <button class="action-btn secondary" type="button" (click)="openEditRequestDialog(r)">
                         <mat-icon>edit</mat-icon>
                         Edit
                       </button>
                     }
-                    @if (r.status === 'pending') {
+                    @if (r.status === 'pending' && hasPermission('pf_employee_delete_request')) {
                       <button class="action-btn danger" type="button" (click)="cancelRequest(r)">
                         <mat-icon>cancel</mat-icon>
                         Cancel
@@ -377,5 +388,6 @@
         </div>
       </div>
     </section>
+  }
   }
 </div>

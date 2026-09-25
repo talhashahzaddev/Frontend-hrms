@@ -1,215 +1,45 @@
-
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// import { environment } from '../../../../environments/environment';
 import { environment } from '@/environments/environment';
 import {
-  DashboardSummary,
-  AttendanceStats,
-  LeaveStats,
-  PerformanceStats,
-  RecentActivity,
-  EmployeeGrowth,
-  DepartmentStats,
-  UpcomingEvents,
-  OnboardingStatus
-} from '../../../core/models/dashboard.models';
+  EmployeeOverview,
+  ManagerOverview,
+  HrOverview,
+  HrStats,
+  LatestHiredEmployee
+} from '@core/models/dashboard.models';
 
-
-interface ServiceResponse<T> {
+export interface ServiceResponse<T> {
   data: T;
   success: boolean;
   message: string;
 }
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
   private readonly apiUrl = `${environment.apiUrl}/Dashboard`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) { }
-
-  /**
-   * Get dashboard summary with key metrics
-   */
-  getDashboardSummary(): Observable<DashboardSummary> {
-    return this.http.get<ServiceResponse<DashboardSummary>>(`${this.apiUrl}/summary`).pipe(
-    map(res => res.data),  // extract only the data object
-    catchError(err => {
-      console.error('Failed to load employee growth:', err);
-      return of({
-        totalEmployees: 0,
-        presentToday: 0,
-        onLeaveToday: 0,
-        pendingApprovals: 0,
-        newHiresThisMonth: 0,
-        attendanceRate: 0,
-        employeeSatisfaction: 0
-      } as DashboardSummary);
-    })
-  );
+  getEmployeeOverview(): Observable<ServiceResponse<EmployeeOverview>> {
+    return this.http.get<ServiceResponse<EmployeeOverview>>(`${this.apiUrl}/my-overview`);
   }
 
-  /**
-   * Get attendance statistics
-   */
- getAttendanceStats(period?: string): Observable<AttendanceStats> {
-  let params = new HttpParams();
-  if (period) {
-    params = params.set('period', period);
-  }
-  return this.http.get<ServiceResponse<AttendanceStats>>(`${this.apiUrl}/attendance-stats`, { params }).pipe(
-    map(res => res.data)
-  );
-}
-  /**
-   * Get leave statistics
-   */
-getLeaveStats(period?: string): Observable<LeaveStats> {
-  let params = new HttpParams();
-  if (period) {
-    params = params.set('period', period);
-  }
-  return this.http.get<ServiceResponse<LeaveStats>>(`${this.apiUrl}/leave-stats`, { params }).pipe(
-    map(res => res.data)
-  );
-}
-
-
-  /**
-   * Get performance statistics
-   */
-getPerformanceStats(): Observable<PerformanceStats> {
-  return this.http.get<ServiceResponse<PerformanceStats>>(`${this.apiUrl}/performance-stats`).pipe(
-    map(res => res.data)
-  );
-}
-  /**
-   * Get recent activities
-   */
-  getRecentActivities(limit: number = 10): Observable<RecentActivity[]> {
-    const params = new HttpParams().set('limit', limit.toString());
-    return this.http.get<ServiceResponse<RecentActivity[]>>(`${this.apiUrl}/recent-activities`, { params }).pipe(
-      map(res => res.data)
-    );
-  }
- 
-
-/**
- * Get employee growth data
- */
-getEmployeeGrowth(period: string = '12m'): Observable<EmployeeGrowth> {
-  const params = new HttpParams().set('period', period);
-
-  return this.http.get<ServiceResponse<EmployeeGrowth>>(`${this.apiUrl}/employee-growth`, { params }).pipe(
-    map(res => res.data),  // extract only the data object
-    catchError(err => {
-      console.error('Failed to load employee growth:', err);
-      return of({
-        months: [],
-        counts: [],
-        growthRate: 0,
-        cumulativeEmployees: [],
-        newEmployees: []
-      } as EmployeeGrowth);
-    })
-  );
-}
-
-
-
-
-  /**
-   * Get department statistics
-   */
-  getDepartmentStats(): Observable<DepartmentStats[]> {
-    return this.http.get<ServiceResponse<DepartmentStats[]>>(`${this.apiUrl}/department-stats`).pipe(
-      map(res => res.data)
-    );
+  getManagerOverview(): Observable<ServiceResponse<ManagerOverview>> {
+    return this.http.get<ServiceResponse<ManagerOverview>>(`${this.apiUrl}/manager-overview`);
   }
 
-
-  /**
-   * Get upcoming events and important dates
-   */
-   getUpcomingEvents(limit: number = 5): Observable<UpcomingEvents[]> {
-    const params = new HttpParams().set('limit', limit.toString());
-    return this.http.get<ServiceResponse<UpcomingEvents[]>>(`${this.apiUrl}/upcoming-events`, { params }).pipe(
-      map(res => res.data)
-    );
-  }
-  /**
-   * Get attendance trends for chart display
-   */
-  getAttendanceTrends(period: string = '30d'): Observable<any> {
-    const params = new HttpParams().set('period', period);
-    return this.http.get<ServiceResponse<any>>(`${this.apiUrl}/attendance-trends`, { params }).pipe(
-      map(res => res.data)
-    );
+  getHrOverview(): Observable<ServiceResponse<HrOverview>> {
+    return this.http.get<ServiceResponse<HrOverview>>(`${this.apiUrl}/hr-overview`);
   }
 
-  /**
-   * Get leave trends for chart display
-   */
-  getLeaveTrends(period: string = '12m'): Observable<any> {
-    const params = new HttpParams().set('period', period);
-    return this.http.get<ServiceResponse<any>>(`${this.apiUrl}/leave-trends`, { params }).pipe(
-      map(res => res.data)
-    );
+  getHrStats(): Observable<ServiceResponse<HrStats>> {
+    return this.http.get<ServiceResponse<HrStats>>(`${this.apiUrl}/hr-stats`);
   }
 
-  /**
-   * Get top performers data
-   */
-   getTopPerformers(limit: number = 5): Observable<any[]> {
-    const params = new HttpParams().set('limit', limit.toString());
-    return this.http.get<ServiceResponse<any[]>>(`${this.apiUrl}/top-performers`, { params }).pipe(
-      map(res => res.data)
-    );
+  getLatestHires(): Observable<ServiceResponse<LatestHiredEmployee[]>> {
+    return this.http.get<ServiceResponse<LatestHiredEmployee[]>>(`${this.apiUrl}/latest-hires`);
   }
-
-  /**
-   * Get birthday and work anniversary reminders
-   */
-  getReminders(): Observable<any> {
-    return this.http.get<ServiceResponse<any>>(`${this.apiUrl}/reminders`).pipe(
-      map(res => res.data)
-    );
-  }
-  /**
-   * Get quick stats for widgets
-   */
-  getQuickStats(): Observable<any> {
-  return this.http.get<ServiceResponse<any>>(`${this.apiUrl}/quick-stats`).pipe(
-    map(res => res.data),
-    catchError(err => {
-      console.error('Failed to load quick stats:', err);
-      return of({});
-    })
-  );
-}
-
-  /**
-   * Get onboarding status for Super Admin
-   */
-  getOnboardingStatus(): Observable<OnboardingStatus> {
-    return this.http.get<ServiceResponse<OnboardingStatus>>(`${this.apiUrl}/onboarding-status`).pipe(
-      map(res => res.data),
-      catchError(err => {
-        console.error('Failed to load onboarding status:', err);
-        return of({
-          signUp: true,
-          createTeam: false,
-          defineLeaveTypes: false,
-          markAttendance: false
-        } as OnboardingStatus);
-      })
-    );
-  }
-
 }

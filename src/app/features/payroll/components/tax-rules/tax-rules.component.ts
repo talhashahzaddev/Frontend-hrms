@@ -7,16 +7,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { PayrollService, TaxComponentRuleDto, TaxRegimeDto } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteData,
   ConfirmDeleteDialogComponent
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { TaxEntityDialogComponent } from '../dialogs/tax-entity-dialog/tax-entity-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-tax-rules',
   standalone: true,
-  imports: [CommonModule, MatIconModule, RouterModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, RouterModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './tax-rules.component.html',
   styleUrl: './tax-rules.component.scss'
 })
@@ -25,6 +30,7 @@ export class TaxRulesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly taxTabs = [
     { key: 'regime', label: 'Tax Regime', route: '/payroll/policies/tax-regime-rules' },
@@ -37,7 +43,10 @@ export class TaxRulesComponent implements OnInit {
   readonly isLoading = signal(true);
 
   ngOnInit(): void {
-    this.fetchData();
+    watchPayrollRuleViewAccess(this.authService, 'tax_component_rule_view', {
+      onAllowed: () => this.fetchData(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   goBack(): void {
@@ -49,6 +58,7 @@ export class TaxRulesComponent implements OnInit {
   }
 
   openCreateDialog(): void {
+    if (!this.hasPermission('tax_component_rule_add')) return;
     const dialogRef = this.dialog.open(TaxEntityDialogComponent, {
       width: '620px',
       data: {
@@ -76,6 +86,7 @@ export class TaxRulesComponent implements OnInit {
   }
 
   editRule(rule: TaxComponentRuleDto): void {
+    if (!this.hasPermission('tax_component_rule_edit')) return;
     const dialogRef = this.dialog.open(TaxEntityDialogComponent, {
       width: '620px',
       data: {
@@ -111,6 +122,7 @@ export class TaxRulesComponent implements OnInit {
   }
 
   deleteRule(rule: TaxComponentRuleDto): void {
+    if (!this.hasPermission('tax_component_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Tax Rule',
       message: 'Are you sure you want to delete this tax rule?',
@@ -173,5 +185,9 @@ export class TaxRulesComponent implements OnInit {
       id: regime.regimeId,
       label: `${regime.regimeName || 'Unnamed Regime'}${regime.country ? ` (${regime.country})` : ''}`
     }));
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

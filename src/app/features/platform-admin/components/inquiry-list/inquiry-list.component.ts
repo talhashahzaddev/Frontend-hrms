@@ -20,10 +20,13 @@ import { DemoInquiryService } from '../../services/demo-inquiry.service';
 import { DemoInquiry, DemoInquiryFilter } from '../../models/super-admin.models';
 import { InquiryDetailDialogComponent } from '../inquiry-detail-dialog/inquiry-detail-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-inquiry-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatTableModule,

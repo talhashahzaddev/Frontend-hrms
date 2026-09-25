@@ -1,0 +1,320 @@
+// Holiday dialogs — matches create-shift / leave-types dialog pattern
+@use '../../attendance/styles/attendance-dialog' as ad;
+@use '../../leave/components/leave-types/leave-types-dialog';
+
+:host {
+  @include ad.ad-scroll-host;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+@include ad.ad-panel-shell;
+
+.dialog-body {
+  .holiday-form,
+  .catalog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .form-section + .form-section {
+    margin-top: 0;
+  }
+
+  .employee-picker {
+    margin-bottom: 0.25rem;
+  }
+}
+
+// Single-column form grid for holiday dialogs
+.holiday-form .form-section .form-grid,
+.catalog-controls .form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1rem 1rem 0.25rem;
+
+  .field,
+  .mat-field {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .form-row {
+    padding: 0.25rem 0 0.75rem;
+
+    ::ng-deep .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+      background-color: ad.$ad-primary !important;
+      border-color: ad.$ad-primary !important;
+    }
+
+    ::ng-deep .mdc-label {
+      font-size: 0.875rem;
+      color: ad.$ad-text-primary;
+    }
+  }
+}
+
+// Catalog import — step panels
+.step-panel.form-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.step-panel:not(.form-section) {
+  background: #ffffff;
+  border: 1px solid ad.$ad-border;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.step-panel-body {
+  padding: 1rem;
+}
+
+.step-desc {
+  color: ad.$ad-text-secondary;
+  font-size: 0.875rem;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: ad.$ad-surface;
+  border-bottom: 1px solid ad.$ad-border;
+
+  h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: ad.$ad-text-primary;
+  }
+
+  button {
+    color: ad.$ad-text-secondary;
+
+    &:hover {
+      color: ad.$ad-primary;
+      background: #eff6ff !important;
+    }
+  }
+}
+
+.catalog-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.875rem 1rem;
+  background: ad.$ad-surface;
+  border-bottom: 1px solid ad.$ad-border;
+
+  ::ng-deep .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+    background-color: ad.$ad-primary !important;
+    border-color: ad.$ad-primary !important;
+  }
+
+  ::ng-deep .mdc-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: ad.$ad-text-primary;
+  }
+
+  .type-select {
+    width: 11rem;
+    margin-bottom: 0;
+  }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem;
+
+  ::ng-deep mat-spinner circle { stroke: ad.$ad-primary !important; }
+}
+
+.country-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+.country-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid ad.$ad-border;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  background: #ffffff;
+
+  &:hover {
+    border-color: rgba(37, 99, 235, 0.35);
+    background: #f8fafc;
+  }
+
+  &.selected {
+    border-color: ad.$ad-primary;
+    background: #eff6ff;
+
+    .check-icon {
+      opacity: 1;
+      color: ad.$ad-primary;
+    }
+  }
+
+  .country-flag { font-size: 1.75rem; line-height: 1; }
+
+  .country-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+
+    .country-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: ad.$ad-text-primary;
+    }
+
+    .country-count {
+      font-size: 0.75rem;
+      color: ad.$ad-text-secondary;
+    }
+  }
+
+  .check-icon {
+    opacity: 0;
+    transition: opacity 0.2s;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+.country-flag-sm { font-size: 1.25rem; line-height: 1; }
+
+.holiday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 22rem;
+  overflow-y: auto;
+  padding-right: 0.125rem;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-thumb {
+    background: ad.$ad-border;
+    border-radius: 4px;
+  }
+}
+
+.holiday-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ad.$ad-border;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #ffffff;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+
+  &.selected {
+    background: #eff6ff;
+    border-color: rgba(37, 99, 235, 0.35);
+  }
+
+  ::ng-deep .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+    background-color: ad.$ad-primary !important;
+    border-color: ad.$ad-primary !important;
+  }
+
+  .holiday-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+
+    .holiday-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: ad.$ad-text-primary;
+    }
+
+    .holiday-date {
+      font-size: 0.75rem;
+      color: ad.$ad-text-secondary;
+    }
+  }
+
+  .holiday-desc {
+    font-size: 0.75rem;
+    color: ad.$ad-text-muted;
+    max-width: 12.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .recurring-icon {
+    color: #16a34a;
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+  }
+}
+
+.selection-summary {
+  padding: 0.75rem 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: ad.$ad-text-secondary;
+  font-weight: 600;
+}
+
+.dialog-footer {
+  .btn-save mat-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .catalog-controls {
+    flex-direction: column;
+    align-items: stretch;
+
+    .type-select { width: 100%; }
+  }
+
+  .country-grid {
+    grid-template-columns: 1fr;
+  }
+}

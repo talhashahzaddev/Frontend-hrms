@@ -13,6 +13,8 @@ import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LeaveCalendarEvent } from '../../../../core/models/leave.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 interface CalendarDay {
   date: Date;
   dayNumber: number;
@@ -21,10 +23,12 @@ interface CalendarDay {
   events: LeaveCalendarEvent[];
 }
 
+
 @Component({
   selector: 'app-leave-calendar',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -32,22 +36,21 @@ interface CalendarDay {
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    PageHeaderComponent,
   ],
   template: `
-    <div class="leave-calendar-container">
-      
-      <!-- Header -->
-      <div class="calendar-header">
-        <h1 class="page-title">
-          <mat-icon>calendar_month</mat-icon>
-          Leave Calendar
-        </h1>
+    <div class="ts-page-layout">
+
+      <app-page-header matIcon="calendar_month" title="Leave Calendar" subtitle="View team leave events by month">
+      </app-page-header>
+
+      <div class="filters-section calendar-nav">
         <div class="calendar-controls">
           <button mat-icon-button (click)="previousMonth()" [disabled]="isLoading">
             <mat-icon>chevron_left</mat-icon>
           </button>
-          <h2 class="month-year">{{ currentMonth | date:'MM-yyyy' }}</h2>
+          <h2 class="month-year">{{ currentMonth | localizedDate:'MM-yyyy' }}</h2>
           <button mat-icon-button (click)="nextMonth()" [disabled]="isLoading">
             <mat-icon>chevron_right</mat-icon>
           </button>
@@ -134,13 +137,13 @@ interface CalendarDay {
           <div class="upcoming-list">
             <div *ngFor="let event of upcomingLeaves" class="upcoming-item">
               <div class="upcoming-date">
-                <div class="date-day">{{ event.startDate | date:'dd' }}</div>
-                <div class="date-month">{{ event.startDate | date:'MM' }}</div>
+                <div class="date-day">{{ event.startDate | localizedDate:'dd' }}</div>
+                <div class="date-month">{{ event.startDate | localizedDate:'MM' }}</div>
               </div>
               <div class="upcoming-details">
                 <h4>{{ event.employeeName }}</h4>
                 <p>{{ event.leaveTypeName }}</p>
-                <span class="duration">{{ event.startDate | date:'dd-MM-yyyy' }} - {{ event.endDate | date:'dd-MM-yyyy' }}</span>
+                <span class="duration">{{ event.startDate | localizedDate:'dd-MM-yyyy' }} - {{ event.endDate | localizedDate:'dd-MM-yyyy' }}</span>
               </div>
               <div class="upcoming-status">
                 <mat-icon 

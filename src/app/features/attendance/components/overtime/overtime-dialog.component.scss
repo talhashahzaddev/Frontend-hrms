@@ -1,0 +1,43 @@
+@use '../../styles/attendance-dialog';
+
+:host {
+  @include attendance-dialog.ad-scroll-host;
+}
+
+@include attendance-dialog.ad-panel-shell;
+
+.dialog-wrapper {
+  width: 100%;
+  max-width: 520px;
+}
+
+.dialog-body {
+  gap: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-toggle {
+  position: absolute;
+  right: 0;
+}
+
+@media (max-width: 600px) {
+  .row-2col { grid-template-columns: 1fr; }
+}

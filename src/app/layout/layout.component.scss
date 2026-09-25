@@ -18,6 +18,11 @@
   border-right: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
 
+  @media (max-width: 959px) {
+    width: 250px !important;
+    max-width: 85vw !important; /* Ensure it leaves space on very small screens */
+  }
+
   // Remove default Material padding
   ::ng-deep .mat-drawer-inner-container {
     padding: 0;

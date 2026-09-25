@@ -23,44 +23,34 @@
   </div>
 
   <!-- Enrollment status panel -->
-  @if (!enrollmentLoading) {
-    <div class="status-panel" [class.no-enrollment]="!enrollment">
-      @if (enrollment) {
-        <div class="status-grid">
-          <div class="status-cell">
-            <span class="label">Enrollment status</span>
-            <span class="status-pill" [ngClass]="statusBadgeClass">{{ enrollment.enrollmentStatus }}</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Rule</span>
-            <span class="value">{{ enrollment.ruleName || '-' }}</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Scheme</span>
-            <span class="value">{{ enrollment.schemeName || '-' }}</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Employee %</span>
-            <span class="value">{{ effectiveEmployeePct ?? 0 | number:'1.0-2' }}%</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Employer %</span>
-            <span class="value">{{ effectiveEmployerPct ?? 0 | number:'1.0-2' }}%</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Effective from</span>
-            <span class="value">{{ enrollment.effectiveDate | date:'mediumDate' }}</span>
-          </div>
+  @if (!enrollmentLoading && enrollment) {
+    <div class="status-panel">
+      <div class="status-grid">
+        <div class="status-cell">
+          <span class="label">Enrollment status</span>
+          <span class="status-pill" [ngClass]="statusBadgeClass">{{ enrollment.enrollmentStatus }}</span>
         </div>
-      } @else {
-        <div class="empty-state">
-          <mat-icon>info</mat-icon>
-          <div>
-            <strong>You're not currently enrolled in social security.</strong>
-            <p>Click "Request enrollment" to submit a request to HR.</p>
-          </div>
+        <div class="status-cell">
+          <span class="label">Rule</span>
+          <span class="value">{{ enrollment.ruleName || '-' }}</span>
         </div>
-      }
+        <div class="status-cell">
+          <span class="label">Scheme</span>
+          <span class="value">{{ enrollment.schemeName || '-' }}</span>
+        </div>
+        <div class="status-cell">
+          <span class="label">Employee %</span>
+          <span class="value">{{ effectiveEmployeePct ?? 0 | number:'1.0-2' }}%</span>
+        </div>
+        <div class="status-cell">
+          <span class="label">Employer %</span>
+          <span class="value">{{ effectiveEmployerPct ?? 0 | number:'1.0-2' }}%</span>
+        </div>
+        <div class="status-cell">
+          <span class="label">Effective from</span>
+          <span class="value">{{ enrollment.effectiveDate | localizedDate:'mediumDate' }}</span>
+        </div>
+      </div>
     </div>
   }
 
@@ -118,13 +108,18 @@
 
     <div class="section-tabs with-tools">
       <div>
-        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
         <button type="button" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">My requests</button>
         <button type="button" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">My claims</button>
+        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
       </div>
 
       @if (currentTab === 'transactions') {
-        <div class="filters">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search rule or period..." [(ngModel)]="searchTerm" />
+          </div>
+
           <select class="filter-select" [(ngModel)]="selectedPeriodId">
             <option value="">All periods</option>
             @for (period of periodOptions; track period.id) {
@@ -140,11 +135,6 @@
             <option value="rejected">Rejected</option>
             <option value="cancelled">Cancelled</option>
           </select>
-
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search config or period..." [(ngModel)]="searchTerm" />
-          </div>
         </div>
       }
     </div>
@@ -213,7 +203,7 @@
                 } @else {
                   @for (req of requests; track req.requestId) {
                     <tr>
-                      <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                      <td>{{ req.requestedAt | localizedDate:'mediumDate' }}</td>
                       <td><span class="type-pill">{{ req.requestType }}</span></td>
                       <td class="truncate">{{ req.reason || '-' }}</td>
                       <td>{{ req.documentCount }} file(s)</td>
@@ -255,7 +245,7 @@
                 } @else {
                   @for (claim of claims; track claim.claimId) {
                     <tr>
-                      <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                      <td>{{ claim.claimDate | localizedDate:'mediumDate' }}</td>
                       <td><span class="type-pill">{{ claim.claimType }}</span></td>
                       <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
                       <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>

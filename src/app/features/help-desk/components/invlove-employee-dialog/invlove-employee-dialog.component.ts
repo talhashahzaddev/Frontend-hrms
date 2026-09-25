@@ -15,6 +15,7 @@ import { Department } from '@/app/core/models/employee.models';
 import { catchError, of } from 'rxjs';
 import { AssignTicketRequest } from '@/app/core/models/helpdesk.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface Employee {
   employeeId: string;
   fullName: string;
@@ -25,10 +26,12 @@ interface Employee {
   departmentId?: string;
 }
 
+
 @Component({
   selector: 'app-invlove-employee-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

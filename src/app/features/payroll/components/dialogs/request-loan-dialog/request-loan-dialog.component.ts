@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { PayrollService } from '../../../services/payroll.service';
 import { Observable, shareReplay, take } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type LoanRepaymentType = 'installment' | 'full';
 
 export interface RequestLoanDialogPayload {
@@ -24,11 +25,13 @@ interface RequestLoanDialogData {
   loanId?: string;
 }
 
+
 @Component({
   selector: 'app-request-loan-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './request-loan-dialog.component.html',
   styleUrl: './request-loan-dialog.component.scss'
 })
@@ -104,6 +107,14 @@ export class RequestLoanDialogComponent {
     this.form.get('totalAmount')?.valueChanges.subscribe(() => {
       if (this.isFullRepayment) {
         this.applyFullRepaymentValues();
+      } else {
+        this.calculateMonthlyInstallment();
+      }
+    });
+
+    this.form.get('totalInstallments')?.valueChanges.subscribe(() => {
+      if (!this.isFullRepayment) {
+        this.calculateMonthlyInstallment();
       }
     });
 
@@ -134,6 +145,14 @@ export class RequestLoanDialogComponent {
     return !!(
       (control.touched && (control.hasError('required') || control.hasError('min')))
       || (control.touched && this.form.hasError('maxAmountExceeded'))
+    );
+  }
+
+  get showTotalInstallmentsError(): boolean {
+    const control = this.form.get('totalInstallments');
+    return !!control && (
+      (control.touched && (control.hasError('required') || control.hasError('min') || control.hasError('max')))
+      || (control.touched && this.form.hasError('maxInstallmentsExceeded'))
     );
   }
 
@@ -202,7 +221,7 @@ export class RequestLoanDialogComponent {
       return;
     }
 
-    installmentControl.enable({ emitEvent: false });
+    installmentControl.disable({ emitEvent: false });
     countControl.enable({ emitEvent: false });
     returnDateControl.clearValidators();
     returnDateControl.setValue(null, { emitEvent: false });
@@ -211,6 +230,8 @@ export class RequestLoanDialogComponent {
     if (!countControl.value || Number(countControl.value) <= 0) {
       countControl.setValue(12, { emitEvent: false });
     }
+    
+    this.calculateMonthlyInstallment();
   }
 
   private applyFullRepaymentValues(): void {
@@ -222,6 +243,18 @@ export class RequestLoanDialogComponent {
       },
       { emitEvent: false }
     );
+  }
+
+  private calculateMonthlyInstallment(): void {
+    const totalAmount = Number(this.form.get('totalAmount')?.value ?? 0);
+    const totalInstallments = Number(this.form.get('totalInstallments')?.value ?? 1);
+    
+    if (totalAmount > 0 && totalInstallments > 0) {
+      const monthly = totalAmount / totalInstallments;
+      this.form.get('monthlyInstallment')?.setValue(Number(monthly.toFixed(2)), { emitEvent: false });
+    } else {
+      this.form.get('monthlyInstallment')?.setValue(null, { emitEvent: false });
+    }
   }
 
   private updateSelectedRule(id: string | null): void {
@@ -273,6 +306,11 @@ export class RequestLoanDialogComponent {
       const maxAllowed = rule?.maxLoanAmount;
       if (maxAllowed !== undefined && maxAllowed !== null && totalAmount > maxAllowed) {
         errors['maxAmountExceeded'] = true;
+      }
+
+      const maxInstallmentsAllowed = rule?.maxInstallments;
+      if (repaymentType === 'installment' && maxInstallmentsAllowed !== undefined && maxInstallmentsAllowed !== null && totalInstallments > maxInstallmentsAllowed) {
+        errors['maxInstallmentsExceeded'] = true;
       }
 
       return Object.keys(errors).length ? errors : null;

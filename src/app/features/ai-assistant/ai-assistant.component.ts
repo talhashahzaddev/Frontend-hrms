@@ -7,16 +7,19 @@ import { ChatService, ChatMessage } from '../../shared/services/chat.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface FormattedMessagePart {
   type: 'text' | 'url' | 'linebreak';
   content: string;
   url?: string;
 }
 
+
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './ai-assistant.component.html',
   styleUrl: './ai-assistant.component.scss'
 })
@@ -25,6 +28,22 @@ export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
   messages: ChatMessage[] = [];
   newMessage = '';
   isLoading = false;
+  composerFocused = false;
+
+  readonly starterSuggestions = [
+    'What is my basic salary?',
+    'Show my last payroll',
+    'Show my leave balance',
+    'Is my timesheet finalized?'
+  ];
+
+  readonly quickActions = [
+    'What is my basic salary?',
+    'Show my last payroll',
+    'Show my leave balance',
+    'Do I have a payslip?'
+  ];
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -46,6 +65,11 @@ export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  sendSuggestion(text: string): void {
+    this.newMessage = text;
+    this.sendMessage();
   }
 
   sendMessage(): void {

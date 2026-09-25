@@ -9,7 +9,9 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '@core/services/notification.service';
 import { take } from 'rxjs';
 import { AddTaxEntryDialogComponent, AddTaxEntryDialogPayload } from '../dialogs/add-tax-entry/add-tax-entry.component';
+import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface TaxLedgerRow {
   id: string;
   employeeId: string;
@@ -22,10 +24,12 @@ interface TaxLedgerRow {
   status: 'fully_paid' | 'partially_paid' | 'unpaid';
 }
 
+
 @Component({
   selector: 'app-tax-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './tax-ledger.component.html',
   styleUrl: './tax-ledger.component.scss'
 })
@@ -35,8 +39,10 @@ export class TaxLedgerComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly notificationService = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+  isSuperAdmin = false;
 
   searchTerm = '';
   periodId = '';
@@ -54,6 +60,22 @@ export class TaxLedgerComponent implements OnInit {
   taxLedgerRows: any[] = [];
 
   ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: unknown) => {
+          const code = typeof currencyCode === 'string' ? currencyCode : undefined;
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
+
+    this.authService.currentUser$.pipe(take(1)).subscribe(user => {
+      this.isSuperAdmin = user?.roleName?.toLowerCase() === 'super admin';
+    });
+
     this.loadFilterData();
     this.loadTaxTransactions();
     this.loadEmployees();
@@ -232,5 +254,10 @@ export class TaxLedgerComponent implements OnInit {
 
   get activeProfilesCount(): number {
     return this.totalCount;
+  }
+
+  hasPermission(actionKey: string): boolean {
+    if (this.isSuperAdmin) return true;
+    return this.authService.hasPermissionByActionKey(actionKey);
   }
 }

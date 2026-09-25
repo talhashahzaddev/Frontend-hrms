@@ -12,11 +12,16 @@ import { CreateEmployeeOvertimeDialogComponent } from './create-employee-overtim
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeOverTimeDto } from '../../../../core/models/attendance.models';
+import { AuthService } from '@/app/core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { LocalizedTimePipe } from '@shared/pipes/localized-time.pipe';
 @Component({
   selector: 'app-overtime',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, MatTableModule, MatMenuModule, MatTooltipModule],
+  imports: [
+    SharedCommonModule, LocalizedTimePipe, CommonModule, MatButtonModule, MatIconModule, MatDialogModule, MatTableModule, MatMenuModule, MatTooltipModule],
   templateUrl: './overtime.component.html',
   styleUrls: ['./overtime.component.scss']
 })
@@ -35,7 +40,8 @@ export class OvertimeComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private attendanceService: AttendanceService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -62,7 +68,11 @@ export class OvertimeComponent implements OnInit {
   }
 
   openManagerOvertime(): void {
-    const ref = this.dialog.open(CreateManagerOvertimeDialogComponent, { width: '520px' });
+    const ref = this.dialog.open(CreateManagerOvertimeDialogComponent, {
+      width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel'
+    });
     ref.afterClosed().pipe(take(1)).subscribe(result => {
       if (result) {
         // manager overtime created — refresh list or show notification as needed
@@ -71,7 +81,11 @@ export class OvertimeComponent implements OnInit {
   }
 
   openEmployeeOvertime(): void {
-    const ref = this.dialog.open(CreateEmployeeOvertimeDialogComponent, { width: '520px' });
+    const ref = this.dialog.open(CreateEmployeeOvertimeDialogComponent, {
+      width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel'
+    });
     ref.afterClosed().pipe(take(1)).subscribe(result => {
       if (result) {
         // employee overtime created — refresh list or show notification as needed
@@ -199,6 +213,10 @@ export class OvertimeComponent implements OnInit {
         this.notification.showError('Failed to reject employee request');
       }
     });
+  }
+
+   hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Overtime', actionKey);
   }
 
   selectTab(index: number): void {

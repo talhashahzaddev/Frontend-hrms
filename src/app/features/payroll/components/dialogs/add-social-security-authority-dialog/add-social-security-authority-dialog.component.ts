@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { SocialSecurityJurisdictionOption } from '../../../services/payroll.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SocialSecurityAuthorityDialogPayload {
   jurisdictionId: string;
   authorityCode: string;
@@ -20,11 +21,13 @@ interface SocialSecurityAuthorityDialogData {
   initialValue?: Partial<SocialSecurityAuthorityDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-social-security-authority-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-authority-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

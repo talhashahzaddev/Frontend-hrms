@@ -15,15 +15,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { CommonModule } from '@angular/common';
 import { NewsService } from '../../services/news.services';
+import { AuthService } from '@/app/core/services/auth.service';
 import { NewsDto } from '@/app/core/models/news.models';
 import { CreateNewsComponent } from '../create-news/create-news.component';
 import { Subject, takeUntil } from 'rxjs';
 import { NewsViewDialogueboxComponent } from './news-view-dialoguebox';
 import { MatMenuModule } from '@angular/material/menu';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-news-dashbaord',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -39,7 +44,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatProgressSpinnerModule,
     MatDialogModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    PageHeaderComponent
   ],
   templateUrl: './news-dashbaord.component.html',
   styleUrls: ['./news-dashbaord.component.scss']
@@ -86,13 +92,18 @@ export class NewsDashbaordComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
       category: [''],
       status: ['']
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('News', 'New Dashboard', actionKey);
   }
 
   ngOnInit(): void {
@@ -131,28 +142,46 @@ export class NewsDashbaordComponent implements OnInit {
   deleteNews(newsId: string): void {
     if (!newsId) return;
 
-    const confirmDelete = confirm('Are you sure you want to delete this news?');
-    if (!confirmDelete) return;
+    // Find the news item to get its title
+    const newsItem = this.newsList.find(n => n.newsId === newsId);
+    const newsTitle = newsItem?.title || 'this news';
 
-    this.isLoading = true;
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete News',
+      message: 'Are you sure you want to delete this news?',
+      itemName: newsTitle,
+      confirmButtonText: 'Yes, Delete'
+    };
 
-    this.newsService.deleteNews(newsId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (isDeleted) => {
-          if (isDeleted) {
-            // Remove from UI instantly (optional but smooth)
-            this.newsList = this.newsList.filter(n => n.newsId !== newsId);
-            this.applyFilters();
-          }
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }
-      });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.isLoading = true;
+
+        this.newsService.deleteNews(newsId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (isDeleted) => {
+              if (isDeleted) {
+                // Remove from UI instantly (optional but smooth)
+                this.newsList = this.newsList.filter(n => n.newsId !== newsId);
+                this.applyFilters();
+              }
+              this.isLoading = false;
+              this.cdr.markForCheck();
+            },
+            error: () => {
+              this.isLoading = false;
+              this.cdr.markForCheck();
+            }
+          });
+      }
+    });
   }
 
   // Navigate to create-news page in edit mode (as route param)

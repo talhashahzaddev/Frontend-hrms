@@ -23,10 +23,13 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { AttendanceReport,DepartmentEmployee } from '../../../../core/models/attendance.models';
 import { Department, Employee } from '../../../../core/models/employee.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-reports',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

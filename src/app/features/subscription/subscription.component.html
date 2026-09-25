@@ -1,31 +1,28 @@
-<div class="subscription-page">
-  <!-- Hero Section -->
-  <section class="page-hero section">
-    <div class="container">
-      <div class="hero-content text-center">
-        <h1>Subscription Plans</h1>
-        <p class="hero-description">
-          Choose the plan that fits your organization's needs. Toggle between monthly and annual billing.
-        </p>
-
-        <!-- Billing Toggle -->
-        <div class="billing-toggle">
-          <button [class.active]="billingCycle === 'monthly'" (click)="onBillingCycleChange('monthly')"
-            class="toggle-btn">
-            Monthly
-          </button>
-          <button [class.active]="billingCycle === 'annual'" (click)="onBillingCycleChange('annual')"
-            class="toggle-btn">
-            Annual <span class="save-badge">Save 20%</span>
-          </button>
-        </div>
-      </div>
+<div class="ts-page-layout">
+  
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+  <app-page-header matIcon="workspace_premium" title="Subscription Plans" subtitle="Choose the plan that fits your organization's needs. Toggle between monthly and annual billing.">
+    <div actions class="billing-toggle" style="display:flex; align-items:center; background:#f1f5f9; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">
+      <button [class.active]="billingCycle === 'monthly'" (click)="onBillingCycleChange('monthly')"
+        class="toggle-btn" style="border:none; background:transparent; padding:8px 24px; border-radius:8px; font-weight:600; cursor:pointer; color:#64748b; font-size:14px; transition:all 0.2s;"
+        [style.background]="billingCycle === 'monthly' ? 'white' : 'transparent'"
+        [style.color]="billingCycle === 'monthly' ? '#0f172a' : '#64748b'"
+        [style.boxShadow]="billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'">
+        Monthly
+      </button>
+      <button [class.active]="billingCycle === 'annual'" (click)="onBillingCycleChange('annual')"
+        class="toggle-btn" style="border:none; background:transparent; padding:8px 24px; border-radius:8px; font-weight:600; cursor:pointer; color:#64748b; font-size:14px; transition:all 0.2s; display:flex; align-items:center; gap:6px;"
+        [style.background]="billingCycle === 'annual' ? 'white' : 'transparent'"
+        [style.color]="billingCycle === 'annual' ? '#0f172a' : '#64748b'"
+        [style.boxShadow]="billingCycle === 'annual' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'">
+        Annual <span class="save-badge" style="background:#22c55e; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700;">Save 20%</span>
+      </button>
     </div>
-  </section>
+  </app-page-header>
 
   <!-- Pricing Cards -->
   <section class="pricing-section section">
-    <div class="container">
+    <div>
       <!-- Loading State -->
       <div *ngIf="isLoading" class="loading-container">
         <mat-spinner diameter="48"></mat-spinner>
@@ -48,7 +45,7 @@
         <!-- Carousel Content -->
         <div class="pricing-carousel-wrapper">
           <div class="pricing-grid">
-            <mat-card *ngFor="let plan of displayedPlans; let i = index" [class.featured-plan]="plan.isPopular"
+            <div *ngFor="let plan of displayedPlans; let i = index" [class.featured-plan]="plan.isPopular"
               [class.center-card]="isCenterCard(i)" class="pricing-card carousel-item"
               [class.elevated]="plan.isPopular || false" [class.current-plan-card]="plan.isCurrentPlan"
               [class.expired-plan]="plan.isExpired">
@@ -59,9 +56,9 @@
               </div>
 
               <div class="pricing-header">
-                <div class="plan-name-row">
-                  <h3>{{ plan.name }}</h3>
-                  <span *ngIf="plan.isPopular" class="popular-badge">Recommended</span>
+                <div class="plan-name-row" style="display:flex; justify-content:space-between; align-items:center;">
+                  <h3 style="margin:0; font-size:1.25rem; font-weight:700; color:#0f172a;">{{ plan.name }}</h3>
+                  <span *ngIf="plan.isPopular" class="popular-badge" style="background:#eff6ff; color:#2563eb; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; border:1px solid #bfdbfe;">Recommended</span>
                 </div>
                 <div class="plan-price">
                   <span class="price-amount">{{ getPriceLabel(plan) }}</span>
@@ -73,23 +70,27 @@
               </div>
 
               <div class="pricing-actions">
-                <button *ngIf="!plan.isCustom && !plan.isCurrentPlan" mat-raised-button color="primary"
-                  [class.btn-outline]="!plan.isPopular" class="action-btn" (click)="selectPlan(plan)">
+                <button *ngIf="!plan.isCustom && !plan.isCurrentPlan" 
+                  [class.btn-primary]="plan.isPopular"
+                  [class.btn-secondary]="!plan.isPopular" 
+                  class="action-btn"
+                  (click)="selectPlan(plan)">
                   Select Plan
                 </button>
 
                 <ng-container *ngIf="plan.isCurrentPlan">
-                  <button *ngIf="!plan.isExpired" mat-flat-button disabled class="action-btn current-plan-btn">
+                  <button *ngIf="!plan.isExpired" disabled class="btn-secondary action-btn current-plan-btn">
                     Your Plan
                   </button>
-                  <button *ngIf="plan.isExpired" mat-raised-button class="action-btn renew-btn"
+                  <button *ngIf="plan.isExpired" class="btn-primary action-btn renew-btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
                     (click)="selectPlan(plan)">
-                    <mat-icon>refresh</mat-icon>
+                    <mat-icon style="margin-right:6px;">refresh</mat-icon>
                     Renew Plan
                   </button>
                 </ng-container>
 
-                <button *ngIf="plan.isCustom" mat-stroked-button color="primary" class="action-btn">
+                <button *ngIf="plan.isCustom" class="btn-secondary action-btn"
+                  (click)="selectPlan(plan)">
                   Contact Sales
                 </button>
               </div>
@@ -102,7 +103,7 @@
                   <span>{{ feature }}</span>
                 </div>
               </div>
-            </mat-card>
+            </div>
           </div>
         </div>
 

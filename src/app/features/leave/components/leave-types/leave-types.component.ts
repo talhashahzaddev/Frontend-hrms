@@ -29,10 +29,14 @@ import { LeaveType } from '../../../../core/models/leave.models';
 import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
 import { AuthService } from '../../../../core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-leave-types',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -42,7 +46,8 @@ import { AuthService } from '../../../../core/services/auth.service';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatMenuModule,
-    MatDialogModule
+    MatDialogModule,
+    PageHeaderComponent,
   ],
   templateUrl: './leave-types.component.html',
   styleUrls: ['./leave-types.component.scss']
@@ -93,8 +98,9 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   addLeaveType(): void {
     const dialogRef = this.dialog.open(AddLeaveTypeDialogTemplate, {
       width: '600px',
-      maxWidth: '90vw',
-      disableClose: true
+      maxWidth: '95vw',
+      disableClose: true,
+      panelClass: 'attendance-dialog-panel',
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -119,8 +125,9 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   editLeaveType(type: LeaveType): void {
     const dialogRef = this.dialog.open(EditLeaveTypeDialogTemplate, {
       width: '600px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
       disableClose: true,
+      panelClass: 'attendance-dialog-panel',
       data: { leaveType: type }
     });
 
@@ -162,12 +169,14 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
 /* ------------------------------------------------------------------
    Inline Dialog Component for Adding Leave Type
 ------------------------------------------------------------------- */
+
 @Component({
   selector: 'add-leave-type-dialog-template',
   standalone: true,
   templateUrl: './add-leave-type-dialog.html',
   styleUrls: ['./leave-types-dialog.scss'],
   imports: [
+    SharedCommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -298,12 +307,14 @@ export class AddLeaveTypeDialogTemplate {
 /* ------------------------------------------------------------------
    Inline Dialog Component for Editing Leave Type
 ------------------------------------------------------------------- */
+
 @Component({
   selector: 'edit-leave-type-dialog-template',
   standalone: true,
   templateUrl: './edit-leave-type-dialog.html',
   styleUrls: ['./leave-types-dialog.scss'],
   imports: [
+    SharedCommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

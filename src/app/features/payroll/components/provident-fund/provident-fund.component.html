@@ -1,21 +1,26 @@
+@if (canAccessPfAdmin) {
 <div class="time-tracking-container loans-advances-page provident-fund-page">
   <div class="page-header">
     <div class="title-section">
       <h1 class="title">Provident Funds</h1>
       <p class="subtitle">Manage provident fund requests, provident fund payments, and repayment records from one place.</p>
     </div>
+    @if (hasPermission('pf_admin_add')) {
     <div class="header-actions">
       <button class="add-btn" (click)="openManualEnrollmentDialog()">
         <mat-icon>person_add</mat-icon>
         Enroll employee
       </button>
     </div>
+    }
   </div>
 
   <div class="tab-navigation">
+    @if (hasPermission('pf_admin_view')) {
     <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Provident fund requests</button>
     <button class="tab" [class.active]="currentTab === 'payments'" (click)="setTab('payments')">Provident fund payments</button>
     <button class="tab" [class.active]="currentTab === 'repayments'" (click)="setTab('repayments')">Repayments</button>
+    }
   </div>
 
   @if (currentTab === 'requests') {
@@ -179,15 +184,17 @@
 
                 <div class="card-right">
                   <div class="request-actions">
-                    @if (row.status === 'pending') {
+                    @if (row.status === 'pending' && hasPermission('pf_admin_edit')) {
                       <button class="approve-btn" (click)="approveRequest(row)">
                         <mat-icon>check_circle</mat-icon>
                         Approve
                       </button>
+                      @if (hasPermission('pf_admin_delete')) {
                       <button class="reject-btn" (click)="rejectRequest(row)">
                         <mat-icon>cancel</mat-icon>
                         Reject
                       </button>
+                      }
                     } @else if (row.status === 'approved') {
                       <button class="disburse-btn" disabled>
                         <mat-icon>check_circle</mat-icon>
@@ -307,12 +314,14 @@
           </div>
         </div>
 
+        @if (hasPermission('pf_admin_add')) {
         <div class="add-btn-wrap">
           <button class="add-btn" (click)="openAddPfFundsDialog()">
             <mat-icon>add</mat-icon>
             Add PF funds
           </button>
         </div>
+        }
 
       </div>
 
@@ -551,3 +560,13 @@
     </div>
   }
 </div>
+} @else {
+  <div class="empty-state"
+    style="padding: 5rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="empty-icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+      <mat-icon>block</mat-icon>
+    </div>
+    <h3>Access Denied</h3>
+    <p>You do not have permission to access Provident Funds administration.</p>
+  </div>
+}

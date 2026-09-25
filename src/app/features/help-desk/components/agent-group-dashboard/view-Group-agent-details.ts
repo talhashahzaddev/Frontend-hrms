@@ -5,10 +5,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TicketGroup } from '../../../../core/models/helpdesk.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-view-group-agent-details',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
     <div class="dialog-container">
       <div class="dialog-header">
@@ -49,7 +52,7 @@ import { TicketGroup } from '../../../../core/models/helpdesk.models';
 
         <div class="detail-section" *ngIf="group.createdAt">
           <label class="detail-label">Created Date:</label>
-          <p class="detail-value">{{ group.createdAt | date: 'short' }}</p>
+          <p class="detail-value">{{ group.createdAt | localizedDate: 'short' }}</p>
         </div>
       </div>
 

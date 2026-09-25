@@ -1,89 +1,106 @@
-<div class="tax-page-container">
-  <div class="page-header-wrapper">
-    <div class="page-header">
-      <div class="title-section">
-        <button class="icon-button back-btn" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="title-text-group">
-          <h1 class="title">Tax Slabs</h1>
-          <p class="subtitle">Manage slab ranges and rates under each tax category.</p>
+@if (!hasPermission('tax_slab_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view tax slabs. Please contact your system administrator.</p>
+    <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
+  </div>
+} @else {
+  <div class="tax-page-container">
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="title-section">
+          <button class="icon-button back-btn" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-text-group">
+            <h1 class="title">Tax Slabs</h1>
+            <p class="subtitle">Manage slab ranges and rates under each tax category.</p>
+          </div>
         </div>
+        @if (hasPermission('tax_slab_add')) {
+          <button class="create-rule-btn" (click)="openCreateDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Add Slab</span>
+          </button>
+        }
       </div>
-      <button class="create-rule-btn" (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon>
-        <span>Add Slab</span>
+    </div>
+
+    <div class="tab-navigation">
+      @for (tab of taxTabs; track tab.key) {
+      <button class="tab" [class.active]="tab.key === 'slabs'" (click)="navigateToTab(tab.route)">
+        {{ tab.label }}
       </button>
-    </div>
-  </div>
-
-  <div class="tab-navigation">
-    @for (tab of taxTabs; track tab.key) {
-    <button class="tab" [class.active]="tab.key === 'slabs'" (click)="navigateToTab(tab.route)">
-      {{ tab.label }}
-    </button>
-    }
-  </div>
-
-  <div class="content-card">
-    @if (isLoading()) {
-    <div class="loading-state">
-      <mat-spinner diameter="34"></mat-spinner>
-    </div>
-    } @else if (taxSlabs().length === 0) {
-    <div class="empty-state">
-      <h3>No tax slabs configured yet.</h3>
-      <button class="create-rule-btn" (click)="openCreateDialog()" style="width: auto;">
-        <mat-icon>add</mat-icon>
-        <span>Create slab</span>
-      </button>
-    </div>
-    } @else {
-    <div class="slab-grid">
-      @for (slab of taxSlabs(); track slab.slabId) {
-      <article class="slab-card">
-        <div class="card-head">
-          <div class="rule-name-with-icon">
-            <div class="rule-icon-box">
-              <mat-icon>stacked_line_chart</mat-icon>
-            </div>
-            <div class="card-title-wrap">
-              <h3>{{ slab.categoryName || '-' }}</h3>
-              <p>Slab Order #{{ slab.slabOrder }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <div class="meta-item">
-            <span class="meta-label">Min Income</span>
-            <span class="meta-value">{{ slab.minIncome | number:'1.0-2' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Max Income</span>
-            <span class="meta-value">{{ slab.maxIncome ?? '-' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Fixed Amount</span>
-            <span class="meta-value">{{ slab.fixedAmount | number:'1.0-2' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Percentage</span>
-            <span class="meta-value">{{ slab.percentage | number:'1.0-2' }}%</span>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button mat-icon-button class="action-btn hover-primary" title="Edit Slab" (click)="editSlab(slab)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button class="action-btn hover-danger" title="Delete Slab" (click)="deleteSlab(slab)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </article>
       }
     </div>
-    }
+
+    <div class="content-card">
+      @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="34"></mat-spinner>
+      </div>
+      } @else if (taxSlabs().length === 0) {
+      <div class="empty-state">
+        <h3>No tax slabs configured yet.</h3>
+        @if (hasPermission('tax_slab_add')) {
+          <button class="create-rule-btn" (click)="openCreateDialog()" style="width: auto;">
+            <mat-icon>add</mat-icon>
+            <span>Create slab</span>
+          </button>
+        }
+      </div>
+      } @else {
+      <div class="slab-grid">
+        @for (slab of taxSlabs(); track slab.slabId) {
+        <article class="slab-card">
+          <div class="card-head">
+            <div class="rule-name-with-icon">
+              <div class="rule-icon-box">
+                <mat-icon>stacked_line_chart</mat-icon>
+              </div>
+              <div class="card-title-wrap">
+                <h3>{{ slab.categoryName || '-' }}</h3>
+                <p>Slab Order #{{ slab.slabOrder }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="meta-item">
+              <span class="meta-label">Min Income</span>
+              <span class="meta-value">{{ slab.minIncome | number:'1.0-2' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Max Income</span>
+              <span class="meta-value">{{ slab.maxIncome ?? '-' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Fixed Amount</span>
+              <span class="meta-value">{{ slab.fixedAmount | number:'1.0-2' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Percentage</span>
+              <span class="meta-value">{{ slab.percentage | number:'1.0-2' }}%</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            @if (hasPermission('tax_slab_edit')) {
+              <button mat-icon-button class="action-btn hover-primary" title="Edit Slab" (click)="editSlab(slab)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            @if (hasPermission('tax_slab_delete')) {
+              <button mat-icon-button class="action-btn hover-danger" title="Delete Slab" (click)="deleteSlab(slab)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </article>
+        }
+      </div>
+      }
+    </div>
   </div>
-</div>
+}

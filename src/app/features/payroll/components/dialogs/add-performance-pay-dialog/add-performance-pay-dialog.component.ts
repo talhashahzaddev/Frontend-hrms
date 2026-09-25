@@ -8,7 +8,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { SettingsService } from '../../../../settings/services/settings.service';
 import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PerformanceDialogResult {
   employee: string;
   designation: string;
@@ -42,11 +44,13 @@ interface PerformanceDialogData {
   rules?: any[];
 }
 
+
 @Component({
   selector: 'app-add-performance-pay-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './add-performance-pay-dialog.component.html',
   styleUrl: './add-performance-pay-dialog.component.scss'
 })
@@ -54,6 +58,7 @@ export class AddPerformancePayDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<AddPerformancePayDialogComponent, PerformanceDialogResultPayload | undefined>);
+  private readonly authService = inject(AuthService);
   
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   readonly currencySymbol = signal('$');
@@ -66,7 +71,7 @@ export class AddPerformancePayDialogComponent implements OnInit {
     employeeId: ['', Validators.required],
     periodId: ['', Validators.required],
     ruleId: [null as string | null],
-    score: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+    score: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
     rating: ['Average' as const],
     amount: [0, [Validators.required, Validators.min(0)]]
   });
@@ -110,11 +115,18 @@ export class AddPerformancePayDialogComponent implements OnInit {
       });
   }
 
+  get canSubmit(): boolean {
+    if (this.mode === 'edit') {
+      return this.authService.hasPermissionByActionKey('performance_pay_edit');
+    }
+    return this.authService.hasPermissionByActionKey('performance_pay_add');
+  }
+
   updateRating(score: number): void {
     let rating = 'Average';
-    if (score >= 90) rating = 'Excellent';
-    else if (score >= 75) rating = 'Good';
-    else if (score < 50) rating = 'Below average';
+    if (score >= 4.5) rating = 'Excellent';
+    else if (score >= 3.5) rating = 'Good';
+    else if (score < 2.5) rating = 'Below average';
 
     this.form.patchValue({ rating: rating as any }, { emitEvent: false });
   }
@@ -137,6 +149,9 @@ export class AddPerformancePayDialogComponent implements OnInit {
   }
 
   save(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

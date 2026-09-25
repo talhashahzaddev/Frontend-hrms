@@ -3,7 +3,10 @@ import { Routes } from '@angular/router';
 export const payrollRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'bonus',
+    loadComponent: () =>
+      import('./components/payroll-default-redirect/payroll-default-redirect.component').then(
+        m => m.PayrollDefaultRedirectComponent
+      ),
     pathMatch: 'full'
   },
   {
@@ -68,9 +71,8 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'social-security-masters',
-    loadComponent: () =>
-      import('./components/social-security-masters/social-security-masters.component').then(m => m.SocialSecurityMastersComponent),
-    title: 'Social Security Masters - HRMS'
+    redirectTo: 'policies/social-security-rules',
+    pathMatch: 'full'
   },
   {
     path: 'loans/requests/compliance',
@@ -185,6 +187,24 @@ export const payrollRoutes: Routes = [
     title: 'Social Security Policy - HRMS'
   },
   {
+    path: 'policies/social-security-schemes',
+    loadComponent: () =>
+      import('./components/social-security-schemes/social-security-schemes.component').then(m => m.SocialSecuritySchemesComponent),
+    title: 'Social Security Schemes - HRMS'
+  },
+  {
+    path: 'policies/social-security-jurisdictions',
+    loadComponent: () =>
+      import('./components/social-security-jurisdictions/social-security-jurisdictions.component').then(m => m.SocialSecurityJurisdictionsComponent),
+    title: 'Social Security Jurisdictions - HRMS'
+  },
+  {
+    path: 'policies/social-security-authorities',
+    loadComponent: () =>
+      import('./components/social-security-authorities/social-security-authorities.component').then(m => m.SocialSecurityAuthoritiesComponent),
+    title: 'Social Security Authorities - HRMS'
+  },
+  {
     path: 'periods',
     loadComponent: () =>
       import('./components/payroll-period/payroll-period.component').then(m => m.PayrollPeriodComponent),
@@ -225,5 +245,11 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/payroll-result/payroll-result.component').then(m => m.PayrollResultComponent),
     title: 'Payroll Results - HRMS'
+  },
+  {
+    path: 'my-payslips',
+    loadComponent: () =>
+      import('./components/payslips/payslips.component').then(m => m.PayslipsComponent),
+    title: 'My Payslips - HRMS'
   }
 ];

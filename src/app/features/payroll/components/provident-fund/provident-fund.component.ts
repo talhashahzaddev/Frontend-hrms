@@ -9,6 +9,7 @@ import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
+import { AuthService } from '@core/services/auth.service';
 import { Employee } from '../../../../core/models/employee.models';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
@@ -24,6 +25,7 @@ import {
   ManualProvidentFundEnrollmentDialogComponent
 } from '../dialogs/manual-provident-fund-enrollment-dialog/manual-provident-fund-enrollment-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type ProvidentFundTab = 'requests' | 'payments' | 'repayments';
 type ProvidentFundStatus = 'pending' | 'approved' | 'rejected';
 type ProvidentFundFundStatus = 'active' | 'closed' | 'pending';
@@ -89,10 +91,12 @@ interface ProvidentFundRepaymentRow {
   createdAt: string | null;
 }
 
+
 @Component({
   selector: 'app-provident-fund',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './provident-fund.component.html',
   styleUrl: './provident-fund.component.scss'
 })
@@ -102,6 +106,7 @@ export class ProvidentFundComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly notification = inject(NotificationService);
   private readonly employeeService = inject(EmployeeService);
+  private readonly authService = inject(AuthService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
@@ -146,13 +151,29 @@ export class ProvidentFundComponent implements OnInit {
   isLoadingRequests = false;
   isLoadingRepayments = false;
 
+  get canAccessPfAdmin(): boolean {
+    return this.hasPermission('pf_admin_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   ngOnInit(): void {
+    this.currentTab = this.getDefaultTab();
     this.loadCurrencySymbol();
     this.localPeriodsSeed = this.buildLocalPeriods();
     this.loadPayrollPeriods();
-    this.loadProvidentFundRequests();
-    this.loadProvidentFundAccounts();
-    this.loadProvidentFundRepayments();
+
+    if (this.hasPermission('pf_admin_view')) {
+      this.loadProvidentFundRequests();
+      this.loadProvidentFundAccounts();
+      this.loadProvidentFundRepayments();
+    }
+  }
+
+  private getDefaultTab(): ProvidentFundTab {
+    return 'requests';
   }
 
   get hasActiveFilters(): boolean {
@@ -338,6 +359,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   setTab(tab: ProvidentFundTab): void {
+    if (!this.hasPermission('pf_admin_view')) {
+      return;
+    }
     this.currentTab = tab;
     if (tab === 'payments' && !this.paymentRows.length) {
       this.loadProvidentFundAccounts();
@@ -380,6 +404,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   openAddPfFundsDialog(): void {
+    if (!this.hasPermission('pf_admin_add')) {
+      return;
+    }
     const employees = this.getDialogEmployees();
     const periods = this.getAvailablePeriods();
 
@@ -429,6 +456,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   openManualEnrollmentDialog(): void {
+    if (!this.hasPermission('pf_admin_add')) {
+      return;
+    }
     forkJoin({
       employeesResult: this.employeeService.getEmployees({ page: 1, pageSize: 1000 } as any),
       rulesResult: this.payrollService.getActiveProvidentFundRules()
@@ -564,6 +594,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   approveRequest(row: ProvidentFundRequestRow): void {
+    if (!this.hasPermission('pf_admin_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',
@@ -601,6 +634,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   rejectRequest(row: ProvidentFundRequestRow): void {
+    if (!this.hasPermission('pf_admin_delete')) {
+      return;
+    }
     const dialogRef = this.dialog.open(LoanRejectionDialogComponent, {
       width: '460px',
       panelClass: 'delete-dialog-panel',
@@ -703,6 +739,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   private loadProvidentFundRequests(): void {
+    if (!this.hasPermission('pf_admin_view')) {
+      return;
+    }
     this.isLoadingRequests = true;
     const filter = {
       SearchTerm: this.filterSearch || undefined,
@@ -731,6 +770,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   private loadProvidentFundAccounts(): void {
+    if (!this.hasPermission('pf_admin_view')) {
+      return;
+    }
     const filter = {
       SearchTerm: this.paymentSearch || undefined,
       PfStatus: this.paymentStatus || undefined,
@@ -756,6 +798,9 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   private loadProvidentFundRepayments(): void {
+    if (!this.hasPermission('pf_admin_view')) {
+      return;
+    }
     this.isLoadingRepayments = true;
 
     this.payrollService.getAllProvidentFundRepayments({

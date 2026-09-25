@@ -13,10 +13,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { PlatformAdminAuthService } from '../../services/platform-admin-auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-platform-login',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

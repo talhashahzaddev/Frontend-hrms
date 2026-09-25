@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { take, forkJoin } from 'rxjs';
+import { take, forkJoin, of } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import {
@@ -24,6 +25,7 @@ import {
   SalaryAdvanceRuleOption
 } from '../dialogs/request-salary-advance-dialog/request-salary-advance-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type ModuleTab = 'loans' | 'salary-advance';
 type LoanSectionTab = 'requested' | 'active' | 'history';
 type SalarySectionTab = 'requested' | 'active' | 'history';
@@ -94,10 +96,12 @@ interface SalaryAdvanceRecord {
   deductedAt: string | null;
 }
 
+
 @Component({
   selector: 'app-loan-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './loan-requests.component.html',
   styleUrl: './loan-requests.component.scss'
 })
@@ -107,9 +111,43 @@ export class LoanRequestsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly payrollService = inject(PayrollService);
+  private readonly notificationService = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+
+  private readonly loanEmployeePermissionKeys = [
+    'loan_employee_list',
+    'loan_employee_view',
+    'loan_employee_request',
+    'loan_employee_edit',
+    'loan_employee_delete',
+    'loan_employee_active',
+    'loan_employee_pending',
+    'loan_employee_history',
+    'loan_employee_references'
+  ];
+
+  private readonly salaryAdvanceEmployeePermissionKeys = [
+    'salary_advance_employee_list',
+    'salary_advance_employee_view',
+    'salary_advance_employee_request',
+    'salary_advance_employee_edit',
+    'salary_advance_employee_delete',
+    'salary_advance_employee_summary'
+  ];
+
+  get canAccessLoanEmployee(): boolean {
+    return this.loanEmployeePermissionKeys.some((key) => this.hasPermission(key));
+  }
+
+  get canAccessSalaryAdvanceEmployee(): boolean {
+    return this.salaryAdvanceEmployeePermissionKeys.some((key) => this.hasPermission(key));
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
 
   moduleTab: ModuleTab = 'loans';
   loanSectionTab: LoanSectionTab = 'active';
@@ -122,6 +160,12 @@ export class LoanRequestsComponent implements OnInit {
   loanPayments: LoanPaymentHistoryRecord[] = [];
 
   salaryAdvances: SalaryAdvanceRecord[] = [];
+
+  // Resolved from the backend salary-advance summary. This is the employee's basic
+  // salary — the basis every rule cap ("max % of salary") is applied against, and
+  // the same value the server validates the requested amount against. Never hardcode.
+  salaryAdvanceBasis = 0;
+  salaryAdvanceBasisConfigured = false;
 
   private localLoanSeed: EmployeeLoanRecord[] = [];
   private localLoanPaymentSeed: LoanPaymentHistoryRecord[] = [];
@@ -160,18 +204,63 @@ export class LoanRequestsComponent implements OnInit {
   ngOnInit(): void {
     this.resolveCurrentUserContext();
     this.applyModuleFromQueryParam();
+    this.ensureModuleAccess();
 
     this.localLoanSeed = this.buildLocalLoanSeed();
     this.localLoanPaymentSeed = this.buildLocalLoanPaymentSeed();
     this.localAdvanceSeed = this.buildLocalAdvanceSeed();
 
-    this.loadLoans();
-    this.loadLoanPayments();
-    this.loadSalaryAdvances();
-    this.loadPayrollPeriods();
-    this.loadLoanReferences();
+    if (this.moduleTab === 'loans' && this.canAccessLoanEmployee) {
+      this.loadLoans();
+      if (this.hasPermission('loan_employee_history')) {
+        this.loadLoanPayments();
+      }
+      if (this.hasPermission('loan_employee_references')) {
+        this.loadLoanReferences();
+      }
+    }
 
+    if (this.moduleTab === 'salary-advance' && this.canAccessSalaryAdvanceEmployee) {
+      if (this.hasPermission('salary_advance_employee_list')) {
+        this.loadSalaryAdvances();
+      }
+      if (this.hasPermission('salary_advance_employee_summary')) {
+        this.loadSalaryAdvanceSummary();
+      }
+    }
+
+    this.loadPayrollPeriods();
     this.loadCurrencySymbol();
+  }
+
+  private ensureModuleAccess(): void {
+    if (this.moduleTab === 'loans' && !this.canAccessLoanEmployee) {
+      if (this.canAccessSalaryAdvanceEmployee) {
+        this.moduleTab = 'salary-advance';
+        this.salarySectionTab = 'requested';
+        return;
+      }
+      this.redirectWhenNoEmployeeModuleAccess();
+      return;
+    }
+
+    if (this.moduleTab === 'salary-advance' && !this.canAccessSalaryAdvanceEmployee) {
+      if (this.canAccessLoanEmployee) {
+        this.moduleTab = 'loans';
+        this.loanSectionTab = 'requested';
+        return;
+      }
+      this.redirectWhenNoEmployeeModuleAccess();
+    }
+  }
+
+  private redirectWhenNoEmployeeModuleAccess(): void {
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits'], { replaceUrl: true });
+      return;
+    }
+
+    void this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
 
   private loadCurrencySymbol(): void {
@@ -206,6 +295,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoanReferences(): void {
+    if (!this.hasPermission('loan_employee_references')) {
+      return;
+    }
+
     this.payrollService.getMyLoanReferences()
       .pipe(take(1))
       .subscribe({
@@ -261,13 +354,13 @@ export class LoanRequestsComponent implements OnInit {
 
   get activeLoanRecords(): EmployeeLoanRecord[] {
     return this.loans
-      .filter((row) => row.status === 'active')
+      .filter((row) => row.status === 'active' || row.status === 'accepted')
       .sort((a, b) => this.compareDateDesc(a.requestedOn, b.requestedOn));
   }
 
   get requestedLoanRecords(): EmployeeLoanRecord[] {
     return this.loans
-      .filter((row) => row.status !== 'active')
+      .filter((row) => row.status !== 'active' && row.status !== 'accepted')
       .sort((a, b) => this.compareDateDesc(a.requestedOn, b.requestedOn));
   }
 
@@ -442,8 +535,20 @@ export class LoanRequestsComponent implements OnInit {
       .length;
   }
 
+  get hasActiveOrPendingLoan(): boolean {
+    return this.loans.some(row => ['active', 'pending', 'approved', 'accepted'].includes(row.status));
+  }
+
+  get hasActiveOrPendingAdvance(): boolean {
+    return this.salaryAdvances.some(row => ['pending', 'approved', 'disbursed'].includes(row.status));
+  }
+
   get availableAdvanceLimit(): number {
-    return Math.max(0, 125000 - this.outstandingAdvanceAmount);
+    // The cap basis the dialog multiplies by each rule's max percentage. Must equal
+    // the server's basis (employee basic salary) so the FE preview matches what the
+    // backend will actually accept. Stacking is blocked server-side, so we do not
+    // net out outstanding here — that would desync the FE cap from the BE cap.
+    return Math.max(0, this.salaryAdvanceBasis);
   }
 
   setModuleTab(tab: ModuleTab): void {
@@ -451,7 +556,12 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   goBackToBenefits(): void {
-    this.router.navigate(['/payroll/my-benefits']);
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits']);
+      return;
+    }
+
+    void this.router.navigate(['/dashboard']);
   }
 
   setLoanSectionTab(tab: LoanSectionTab): void {
@@ -535,6 +645,13 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openLoanRequestDialog(): void {
+    if (!this.hasPermission('loan_employee_request')) {
+      return;
+    }
+    if (this.hasActiveOrPendingLoan) {
+      this.notificationService.warning('You already have an active or pending loan request.');
+      return;
+    }
     const dialogRef = this.dialog.open(RequestLoanDialogComponent, {
       width: '560px',
       panelClass: 'request-loan-dialog-panel',
@@ -554,6 +671,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openEditLoanRequestDialog(row: EmployeeLoanRecord): void {
+    if (!this.hasPermission('loan_employee_edit')) {
+      return;
+    }
     if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
@@ -587,6 +707,13 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openSalaryAdvanceDialog(): void {
+    if (!this.hasPermission('salary_advance_employee_request')) {
+      return;
+    }
+    if (this.hasActiveOrPendingAdvance) {
+      this.notificationService.warning('You already have an active or pending salary advance request.');
+      return;
+    }
     this.payrollService.getActiveSalaryAdvanceRules()
       .pipe(take(1))
       .subscribe({
@@ -606,6 +733,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   cancelLoanRequest(row: EmployeeLoanRecord): void {
+    if (!this.hasPermission('loan_employee_delete')) {
+      return;
+    }
     if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
@@ -638,6 +768,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   cancelAdvanceRequest(row: SalaryAdvanceRecord): void {
+    if (!this.hasPermission('salary_advance_employee_delete')) {
+      return;
+    }
     if (row.status !== 'pending') {
       return;
     }
@@ -839,10 +972,18 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoans(): void {
+    if (!this.hasPermission('loan_employee_pending') && !this.hasPermission('loan_employee_active')) {
+      return;
+    }
+
     // We combine pending requests and active loans into a single list
     forkJoin({
-      pending: this.payrollService.getMyPendingLoans().pipe(take(1)),
-      active: this.payrollService.getMyActiveLoans().pipe(take(1))
+      pending: this.hasPermission('loan_employee_pending')
+        ? this.payrollService.getMyPendingLoans().pipe(take(1))
+        : of([]),
+      active: this.hasPermission('loan_employee_active')
+        ? this.payrollService.getMyActiveLoans().pipe(take(1))
+        : of([])
     }).subscribe({
       next: (res: any) => {
         const pendingLoans = (res.pending || []).map((item: any, i: number) => this.mapLoan(item, i));
@@ -865,6 +1006,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoanPayments(): void {
+    if (!this.hasPermission('loan_employee_history')) {
+      return;
+    }
+
     const filter = {
       page: this.loanHistoryCurrentPage,
       pageSize: this.historyPageSize,
@@ -909,6 +1054,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadSalaryAdvances(): void {
+    if (!this.hasPermission('salary_advance_employee_list')) {
+      return;
+    }
+
     this.payrollService.getMySalaryAdvances({ page: 1, pageSize: 200 })
       .pipe(take(1))
       .subscribe({
@@ -927,6 +1076,29 @@ export class LoanRequestsComponent implements OnInit {
 
           this.activateLocalAdvanceFallback();
           this.salaryAdvances = this.filterForCurrentEmployee([...this.localAdvanceSeed]);
+        }
+      });
+  }
+
+  private loadSalaryAdvanceSummary(): void {
+    if (!this.hasPermission('salary_advance_employee_summary')) {
+      return;
+    }
+
+    this.payrollService.getMySalaryAdvanceSummary()
+      .pipe(take(1))
+      .subscribe({
+        next: (summary: any) => {
+          const basis = Number(summary?.basicSalary ?? 0);
+          this.salaryAdvanceBasis = Number.isFinite(basis) && basis > 0 ? basis : 0;
+          this.salaryAdvanceBasisConfigured = !!summary?.hasBasicSalary && this.salaryAdvanceBasis > 0;
+        },
+        error: (error) => {
+          if (!this.isUnsupportedEndpointError(error)) {
+            console.error('Failed to load salary advance summary', error);
+          }
+          this.salaryAdvanceBasis = 0;
+          this.salaryAdvanceBasisConfigured = false;
         }
       });
   }

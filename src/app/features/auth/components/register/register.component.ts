@@ -20,9 +20,12 @@ import { RegisterRequest } from '../../../../core/models/auth.models';
 import { ValidationService } from '../../../../shared/services/validation.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
     selector: 'app-register',
     imports: [
+    SharedCommonModule,
         CommonModule,
         RouterModule,
         ReactiveFormsModule,

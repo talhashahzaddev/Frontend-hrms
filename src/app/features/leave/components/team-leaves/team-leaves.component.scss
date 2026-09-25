@@ -1,15 +1,12 @@
-// Team Leaves – Clean Enterprise Redesign
-// Inspired by employee-list-component
+// Team Leaves — aligned with Attendance / Timesheet
+@use '../../styles/leave-shared';
 
-.team-leaves-container {
-  padding: 12px 16px;
-  max-width: 1600px;
-  margin: 0 auto;
-  background: #f5f6fa;
-  min-height: 100vh;
-  font-family: 'Inter', 'DM Sans', sans-serif;
+$primary: #2563eb;
 
-  // ─── Page Header ──────────────────────────────────────────────
+.ts-page-layout {
+  // Page shell padding/background comes from leave-shared → timesheet-shared
+
+  // ─── Page Header (legacy) ──────────────────────────────────────
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -40,7 +37,7 @@
         border-radius: 8px !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+        background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%) !important;
         color: white !important;
         letter-spacing: 0.1px;
         transition: all 0.2s ease !important;
@@ -88,6 +85,16 @@
         }
       }
     }
+  }
+
+  // Filters + table are one visual block — no extra gap between them
+  .team-leaves-filters.ts-section {
+    margin-bottom: 0;
+  }
+
+  .table-card.ts-section {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
   }
 
   // ─── Filters Row ──────────────────────────────────────────────
@@ -144,7 +151,7 @@
         &.mat-focused .mdc-notched-outline__leading,
         &.mat-focused .mdc-notched-outline__notch,
         &.mat-focused .mdc-notched-outline__trailing {
-          border-color: #6366f1 !important;
+          border-color: #2563eb !important;
           border-width: 1.5px !important;
         }
       }
@@ -248,9 +255,9 @@
     }
 
     &.open .employee-select-trigger {
-      border-color: #6366f1;
+      border-color: #2563eb;
       border-width: 1.5px;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
       background: white;
 
       .select-arrow-icon {
@@ -293,7 +300,7 @@
       color: #374151;
       font-family: 'Inter', 'DM Sans', sans-serif;
       min-width: 0;
-      caret-color: #6366f1;
+      caret-color: #2563eb;
 
       &::placeholder {
         color: #9ca3af;
@@ -303,7 +310,7 @@
 
     .trigger-spinner {
       flex-shrink: 0;
-      ::ng-deep circle { stroke: #6366f1; }
+      ::ng-deep circle { stroke: #2563eb; }
     }
 
     // ── Dropdown list ──
@@ -352,7 +359,7 @@
         width: 34px;
         height: 34px;
         border-radius: 8px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -406,7 +413,7 @@
         flex-shrink: 0;
         font-size: 10.5px;
         font-weight: 700;
-        color: #6366f1;
+        color: #2563eb;
         background: #eef2ff;
         border: 1px solid #c7d2fe;
         border-radius: 5px;
@@ -421,7 +428,7 @@
         font-size: 15px;
         width: 15px;
         height: 15px;
-        color: #6366f1;
+        color: #2563eb;
         flex-shrink: 0;
       }
     }
@@ -446,7 +453,7 @@
       }
 
       ::ng-deep .mat-mdc-progress-spinner circle {
-        stroke: #6366f1;
+        stroke: #2563eb;
       }
     }
 
@@ -480,7 +487,7 @@
       gap: 6px;
       font-size: 13px;
       font-weight: 600;
-      color: #4f46e5;
+      color: #2563eb;
 
       mat-icon {
         font-size: 18px;
@@ -501,7 +508,7 @@
       border-radius: 6px !important;
       font-size: 13px !important;
       font-weight: 500 !important;
-      color: #4f46e5 !important;
+      color: #2563eb !important;
       border-color: #c7d2fe !important;
       background: white !important;
 
@@ -578,7 +585,7 @@
       }
 
       ::ng-deep .mat-mdc-progress-spinner circle {
-        stroke: #6366f1;
+        stroke: #2563eb;
       }
     }
 
@@ -615,7 +622,7 @@
             transition: background 0.12s ease;
 
             &:hover {
-              background: #fafbff;
+              background: #eff6ff;
             }
 
             &.selected-row {
@@ -650,7 +657,7 @@
             width: 36px;
             height: 36px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -935,13 +942,13 @@
   // ─── Checkbox styling ─────────────────────────────────────────
   ::ng-deep .mat-mdc-checkbox {
     .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background {
-      background-color: #6366f1 !important;
-      border-color: #6366f1 !important;
+      background-color: #2563eb !important;
+      border-color: #2563eb !important;
     }
 
     .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
-      background-color: #6366f1 !important;
-      border-color: #6366f1 !important;
+      background-color: #2563eb !important;
+      border-color: #2563eb !important;
     }
 
     .mdc-checkbox__ripple {
@@ -954,9 +961,7 @@
 
 // Tablet (≤1200px)
 @media (max-width: 1200px) {
-  .team-leaves-container {
-    padding: 24px 20px;
-
+  .ts-page-layout {
     .filters-row {
       flex-wrap: wrap;
       gap: 10px;
@@ -978,10 +983,7 @@
 
 // Mobile (≤768px)
 @media (max-width: 768px) {
-  .team-leaves-container {
-    padding: 16px 14px;
-    background: #f5f6fa;
-
+  .ts-page-layout {
     .page-header {
       flex-direction: row;
       justify-content: space-between;
@@ -1259,9 +1261,7 @@
 
 // Extra small screens (≤380px)
 @media (max-width: 380px) {
-  .team-leaves-container {
-    padding: 12px 10px;
-
+  .ts-page-layout {
     .page-header {
       .header-content .page-title {
         font-size: 18px;

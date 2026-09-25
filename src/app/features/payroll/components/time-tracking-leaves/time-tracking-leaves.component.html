@@ -72,12 +72,14 @@
       </div>
     </div>
 
+    @if (hasPermission('leave_summary_add')) {
     <div class="add-btn-wrap">
       <button class="add-btn" (click)="openAddDialog()">
         <mat-icon>add</mat-icon>
         Add Record
       </button>
     </div>
+    }
   </div>
 
   <!-- Content States -->
@@ -95,10 +97,12 @@
       <h3 class="empty-title">No leave records found</h3>
       <p class="empty-subtitle">Configure leave records for tracked employees to see them here.</p>
     </div>
+    @if (hasPermission('leave_summary_add')) {
     <button class="add-record-btn" (click)="openAddDialog()">
       <mat-icon>add</mat-icon>
       Create first record
     </button>
+    }
   </div>
   } @else {
   <!-- Employee Grid -->
@@ -150,16 +154,21 @@
       </div>
 
       <div class="card-actions">
+        @if (hasPermission('leave_summary_edit')) {
         <button class="btn-edit" (click)="editRecord(record)">
           <mat-icon>edit</mat-icon> Edit
         </button>
+        }
+        @if (hasPermission('leave_summary_delete')) {
         <button class="btn-delete" (click)="deleteRecord(record)">
           <mat-icon>delete</mat-icon> Delete
         </button>
+        }
       </div>
     </div>
     }
 
+    @if (hasPermission('leave_summary_add')) {
     <!-- Add New Quick Card -->
     <div class="add-placeholder-card" (click)="openAddDialog()">
       <div class="placeholder-icon">
@@ -167,6 +176,7 @@
       </div>
       <p class="placeholder-text">Add another record</p>
     </div>
+    }
   </div>
   }
 </div>

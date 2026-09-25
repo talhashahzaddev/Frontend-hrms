@@ -13,10 +13,14 @@ import { HolidayService } from '../../services/holiday.service';
 import { CompanyHoliday, EmployeeRestrictedHoliday } from '../../../../core/models/holiday.models';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-restricted-holiday-picker',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -25,7 +29,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    PageHeaderComponent,
   ],
   templateUrl: './restricted-holiday-picker.component.html',
   styleUrls: ['./restricted-holiday-picker.component.scss']

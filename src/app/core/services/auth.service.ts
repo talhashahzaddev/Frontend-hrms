@@ -24,6 +24,7 @@ import {
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/Auth`;
   private readonly uploadsUrl = `${environment.apiUrl}/uploads`;
+  private readonly backendBaseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
@@ -86,6 +87,7 @@ export class AuthService {
 
         const user: User = {
           userId: authResponse.userId,
+          employeeId: this.getEmployeeIdFromToken(authResponse.token) || undefined,
           email: authResponse.email,
           firstName: authResponse.firstName,
           lastName: authResponse.lastName,
@@ -120,6 +122,7 @@ export class AuthService {
         const authResponse: AuthResponse = JSON.parse(pendingAuthJson);
         const user: User = {
           userId: authResponse.userId,
+          employeeId: this.getEmployeeIdFromToken(authResponse.token) || undefined,
           email: authResponse.email,
           firstName: authResponse.firstName,
           lastName: authResponse.lastName,
@@ -458,6 +461,20 @@ export class AuthService {
       );
   }
 
+  /**
+   * Resolves a profile picture URL to a fully qualified URL.
+   * - If the URL already starts with http (e.g. Cloudinary), it is returned as-is.
+   * - If it is a relative path, it is prefixed with the backend base URL.
+   * - If falsy, returns null.
+   */
+  resolveProfilePictureUrl(url: string | null | undefined): string | null {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    const normalized = url.replace(/\\/g, '/');
+    const path = normalized.startsWith('/') ? normalized : `/${normalized}`;
+    return `${this.backendBaseUrl}${path}`;
+  }
+
   /** Upload file through uploads API; returns the hosted URL. */
   uploadProfilePic(file: File): Observable<string> {
     const formData = new FormData();
@@ -510,6 +527,7 @@ export class AuthService {
   private setAuthData(authResponse: AuthResponse): void {
     const user: User = {
       userId: authResponse.userId,
+      employeeId: this.getEmployeeIdFromToken(authResponse.token) || undefined,
       email: authResponse.email,
       firstName: authResponse.firstName,
       lastName: authResponse.lastName,
@@ -555,6 +573,11 @@ export class AuthService {
     if (token && userJson) {
       try {
         const user: User = JSON.parse(userJson);
+        const employeeId = user.employeeId || this.getEmployeeIdFromToken(token);
+        if (employeeId && user.employeeId !== employeeId) {
+          user.employeeId = employeeId;
+          localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+        }
         if (!this.isTokenExpired(token)) {
           this.currentUserSubject.next(user);
           this.tokenSubject.next(token);
@@ -583,11 +606,10 @@ export class AuthService {
   }
 
   private initializePermissionsIfNeeded(): void {
-    const permissionsJson = localStorage.getItem(this.PERMISSIONS_KEY);
     const user = this.currentUserSubject.value;
 
-    // If we have a user logged in but no permissions yet, fetch them
-    if (user && !permissionsJson) {
+    // Always refresh when logged in so role permission changes apply without re-login
+    if (user) {
       this.fetchAndStoreUserPermissions(user.userId).subscribe();
     }
   }
@@ -609,8 +631,8 @@ export class AuthService {
    * The backend embeds it as the "EmployeeId" custom claim.
    * Returns null if the token is absent or the claim is not present.
    */
-  getEmployeeIdFromToken(): string | null {
-    const token = this.getToken();
+  getEmployeeIdFromToken(tokenOverride?: string | null): string | null {
+    const token = tokenOverride ?? this.getToken();
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -633,6 +655,23 @@ export class AuthService {
   }
 
   /**
+   * Refreshes user permissions from the backend API
+   * Called when role permissions are updated via SignalR or other triggers
+   * @returns Observable<UserPermissions | null> with the refreshed permissions
+   */
+  refreshPermissions(): Observable<UserPermissions | null> {
+    const user = this.getCurrentUserValue();
+    
+    if (!user) {
+      console.warn('⚠️ [AuthService] No user logged in, cannot refresh permissions');
+      return of(null);
+    }
+
+    console.log('🔄 [AuthService] Refreshing permissions for user:', user.userId);
+    return this.fetchAndStoreUserPermissions(user.userId);
+  }
+
+  /**
    * Checks if user has permission for a specific action under a menu/submenu
    * @param menuName - Name of the menu
    * @param subMenuName - Name of the submenu
@@ -643,21 +682,43 @@ export class AuthService {
     const permissions = this.permissionsSubject.value;
     if (!permissions) return false;
 
-    const menu = permissions.menus.find(m => 
+    const menu = permissions.menus.find(m =>
       m.menuName.toLowerCase() === menuName.toLowerCase()
     );
     if (!menu) return false;
 
-    const subMenu = menu.subMenus.find(sm => 
+    const normalizedKey = actionKey.toLowerCase();
+    const matchingSubMenus = menu.subMenus.filter(sm =>
       sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
     );
-    if (!subMenu) return false;
 
-    const action = subMenu.actions.find(act => 
-      act.actionKey.toLowerCase() === actionKey.toLowerCase()
+    return matchingSubMenus.some(subMenu =>
+      subMenu.actions.some(
+        act => act.actionKey.toLowerCase() === normalizedKey && act.hasPermission
+      )
     );
-    
-    return action ? action.hasPermission : false;
+  }
+
+  /**
+   * Checks permission by action key across all menus/submenus.
+   * When the same action key appears under multiple submenus, any granted match wins.
+   */
+  hasPermissionByActionKey(actionKey: string): boolean {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return false;
+
+    const normalizedKey = actionKey.toLowerCase();
+    for (const menu of permissions.menus) {
+      for (const subMenu of menu.subMenus) {
+        if (subMenu.actions.some(
+          act => act.actionKey.toLowerCase() === normalizedKey && act.hasPermission
+        )) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -679,15 +740,16 @@ export class AuthService {
       return false;
     }
 
-    const subMenu = menu.subMenus.find(sm => 
+    const matchingSubMenus = menu.subMenus.filter(sm =>
       sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
     );
-    if (!subMenu) {
+    if (matchingSubMenus.length === 0) {
       return false;
     }
 
-    // Check if any action has permission
-    return subMenu.actions.some(action => action.hasPermission);
+    return matchingSubMenus.some(subMenu =>
+      subMenu.actions.some(action => action.hasPermission)
+    );
   }
 
   /**
@@ -734,18 +796,189 @@ export class AuthService {
       return false;
     }
 
-    const subMenu = menu.subMenus.find(sm => 
-      sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
-    );
-    if (!subMenu) {
-      return false;
+    return this.hasMenuPermission(menuName, subMenuName, actionKey);
+  }
+
+  getFirstAllowedRoute(): string {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return '/dashboard';
+
+    // Priority-ordered list: menuName → default route to navigate to
+    const menuRouteMap: { menuName: string; route: string }[] = [
+      { menuName: 'Dashboard',            route: '/dashboard' },
+      { menuName: 'Admin Dashboard',      route: '/dashboard' },
+      { menuName: 'Employee Dashboard',   route: '/employee/dashboard' },
+      { menuName: 'Employee Management',  route: '/employees' },
+      { menuName: 'Attendance',           route: '/attendance' },
+      { menuName: 'Leave Management',     route: '/leave' },
+      { menuName: 'Holidays',             route: '/holidays' },
+      { menuName: 'Assets Management',    route: '/assets' },
+      { menuName: 'Performance',          route: '/performance' },
+      { menuName: 'Calendar',             route: '/calendar' },
+      { menuName: 'AI Assistant',         route: '/ai-assistant' },
+      { menuName: 'Subscription',         route: '/subscription' },
+      { menuName: 'Billings',             route: '/subscription/billing' },
+      { menuName: 'Expense',              route: '/expense' },
+      { menuName: 'News',                 route: '/news' },
+      { menuName: 'Help Desk',            route: '/help-desk' },
+      { menuName: 'Jobs',                 route: '/jobs' },
+      { menuName: 'Payroll',              route: '/payroll' },
+      { menuName: 'Settings',             route: '/settings' },
+    ];
+
+    for (const entry of menuRouteMap) {
+      if (this.hasMenuParentPermission(entry.menuName)) {
+        return entry.route;
+      }
     }
 
-    const action = subMenu.actions.find(a => 
-      a.actionKey.toLowerCase() === actionKey.toLowerCase()
+    return '/dashboard'; // absolute fallback
+  }
+
+  private normalizeRouteToken(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  private getModuleRouteName(moduleName: string): string | null {
+    const normalizedModule = this.normalizeRouteToken(moduleName);
+
+    const moduleAliases: { [key: string]: string } = {
+      'employee': 'Employee Dashboard',
+      'employees': 'Employee Management',
+      'attendance': 'Attendance',
+      'leave': 'Leave Management',
+      'performance': 'Performance',
+      'holiday': 'Holidays',
+      'holidays': 'Holidays',
+      'news': 'News',
+      'expense': 'Expense',
+      'timesheet': 'Timesheet',
+      'assets': 'Assets Management',
+      'subscription': 'Subscription',
+      'billing': 'Billings',
+      'jobs': 'Jobs',
+      'payroll': 'Payroll',
+      'settings': 'Settings',
+      'help desk': 'Help Desk',
+      'help-desk': 'Help Desk'
+    };
+
+    return moduleAliases[normalizedModule] ?? null;
+  }
+
+  private getMappedSubmenuRoute(menuName: string, subMenuName: string): string | null {
+    const routeMap: Array<{ menuName: string; subMenuName: string; route: string }> = [
+      { menuName: 'Leave Management', subMenuName: 'My Leaves', route: '/leave/dashboard' },
+      { menuName: 'Leave Management', subMenuName: 'Team Leaves', route: '/leave/team' },
+      { menuName: 'Leave Management', subMenuName: 'Team Requests', route: '/leave/team-requests' },
+      { menuName: 'Leave Management', subMenuName: 'Leave Types', route: '/leave/types' },
+      { menuName: 'Attendance', subMenuName: 'My Attendance', route: '/attendance/dashboard' },
+      { menuName: 'Attendance', subMenuName: 'Time Tracker', route: '/attendance/time-tracker' },
+      { menuName: 'Attendance', subMenuName: 'Team Attendance', route: '/attendance/team-attendance' },
+      { menuName: 'Attendance', subMenuName: 'Reports', route: '/attendance/reports' },
+      { menuName: 'Attendance', subMenuName: 'Shifts', route: '/attendance/shift' },
+      { menuName: 'Attendance', subMenuName: 'Overtime', route: '/attendance/overtime' },
+      { menuName: 'Attendance', subMenuName: 'Geo-Fences', route: '/attendance/geo-fences' },
+      { menuName: 'Attendance', subMenuName: 'Geo Violations', route: '/attendance/geo-violations' },
+      { menuName: 'Employee Management', subMenuName: 'All Employees', route: '/employees' },
+      { menuName: 'Employee Management', subMenuName: 'Add Employee', route: '/employees/add' },
+      { menuName: 'Employee Management', subMenuName: 'Department', route: '/employees/departments' },
+      { menuName: 'Employee Management', subMenuName: 'Positions', route: '/employees/positions' },
+      { menuName: 'Performance', subMenuName: 'My Performance', route: '/performance/dashboard' },
+      { menuName: 'Performance', subMenuName: 'Performance', route: '/performance/dashboard' },
+      { menuName: 'Performance', subMenuName: 'Appraisal Cycles', route: '/performance/cycles' },
+      { menuName: 'Performance', subMenuName: 'Appraisals', route: '/performance/appraisals' },
+      { menuName: 'Performance', subMenuName: 'Skill Matrix', route: '/performance/skills' },
+      { menuName: 'Performance', subMenuName: 'Goals & KRAs', route: '/performance/goals' },
+      { menuName: 'Performance', subMenuName: 'Performance Reports', route: '/performance/reports' },
+      { menuName: 'Holidays', subMenuName: 'Holiday Management', route: '/holidays' },
+      { menuName: 'Holidays', subMenuName: 'My Holidays', route: '/holidays/my-holidays' },
+      { menuName: 'News', subMenuName: 'News Dashboard', route: '/news/dashboard' },
+      { menuName: 'News', subMenuName: 'Create News', route: '/news/create-news' },
+      { menuName: 'Expense', subMenuName: 'Category', route: '/expense/categories' },
+      { menuName: 'Expense', subMenuName: 'Claims', route: '/expense/claims' },
+      { menuName: 'Expense', subMenuName: 'Recurring Expenses', route: '/expense/recurring' },
+      { menuName: 'Expense', subMenuName: 'Reports', route: '/expense/expense-report' },
+      { menuName: 'Timesheet', subMenuName: 'Dashboard', route: '/timesheet/dashboard' },
+      { menuName: 'Timesheet', subMenuName: 'Periods', route: '/timesheet/periods' },
+      { menuName: 'Timesheet', subMenuName: 'Approvals', route: '/timesheet/approvals' },
+      { menuName: 'Timesheet', subMenuName: 'Projects', route: '/timesheet/projects' },
+      { menuName: 'Timesheet', subMenuName: 'Config', route: '/timesheet/config' },
+      { menuName: 'Timesheet', subMenuName: 'Rate Cards', route: '/timesheet/rate-cards' },
+      { menuName: 'Timesheet', subMenuName: 'Comp Time', route: '/timesheet/comp-time' },
+      { menuName: 'Timesheet', subMenuName: 'Delegation', route: '/timesheet/delegation' },
+      { menuName: 'Timesheet', subMenuName: 'Payroll Export', route: '/timesheet/payroll-export' },
+      { menuName: 'Assets Management', subMenuName: 'Type of Assets', route: '/assets/types' },
+      { menuName: 'Assets Management', subMenuName: 'Assets', route: '/assets/create' },
+      { menuName: 'Subscription', subMenuName: 'Subscription', route: '/subscription' },
+      { menuName: 'Billings', subMenuName: 'Billing', route: '/subscription/billing' }
+    ];
+
+    return routeMap.find(entry =>
+      this.normalizeRouteToken(entry.menuName) === this.normalizeRouteToken(menuName) &&
+      this.normalizeRouteToken(entry.subMenuName) === this.normalizeRouteToken(subMenuName)
+    )?.route ?? null;
+  }
+
+  /**
+   * Gets the first allowed submenu route in a given module
+   * @param moduleName - The module name (e.g., 'attendance', 'leave')
+   * @returns Route with first allowed submenu (e.g., '/leave/dashboard') or just module (e.g., '/leave')
+   */
+  getFirstAllowedRouteInModule(moduleName: string): string {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return `/${moduleName}`;
+
+    const menuName = this.getModuleRouteName(moduleName) ?? moduleName;
+    const menu = permissions.menus.find(m =>
+      this.normalizeRouteToken(m.menuName) === this.normalizeRouteToken(menuName)
     );
-    
-    return action ? action.hasPermission : false;
+
+    if (!menu) {
+      const baseRoute = this.getFirstAllowedRoute();
+      return baseRoute.startsWith(`/${moduleName}`) ? baseRoute : `/${moduleName}`;
+    }
+
+    // Find the first submenu with allowed permission and a known route
+    for (const subMenu of menu.subMenus) {
+      const hasPermission = subMenu.actions.some(action => action.hasPermission);
+      if (!hasPermission) continue;
+
+      const mappedRoute = this.getMappedSubmenuRoute(menu.menuName, subMenu.subMenuName);
+      if (mappedRoute) {
+        return mappedRoute;
+      }
+
+      const fallbackRoute = `/${moduleName}/${subMenu.subMenuName
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')}`;
+
+      if (fallbackRoute !== `/${moduleName}/`) {
+        return fallbackRoute;
+      }
+    }
+
+    const baseRouteByMenu: { [key: string]: string } = {
+      'Employee Dashboard': '/employee/dashboard',
+      'Employee Management': '/employees',
+      'Attendance': '/attendance',
+      'Leave Management': '/leave',
+      'Holidays': '/holidays',
+      'Performance': '/performance',
+      'News': '/news',
+      'Expense': '/expense',
+      'Timesheet': '/timesheet',
+      'Assets Management': '/assets',
+      'Subscription': '/subscription',
+      'Billings': '/subscription/billing',
+      'Help Desk': '/help-desk',
+      'Jobs': '/jobs',
+      'Payroll': '/payroll',
+      'Settings': '/settings'
+    };
+
+    return baseRouteByMenu[menu.menuName] ?? `/${moduleName}`;
   }
 
   private isTokenExpired(token: string): boolean {

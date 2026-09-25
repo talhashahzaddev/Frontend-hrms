@@ -14,7 +14,9 @@ import {
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface LateRecordDto {
   id: string;
   employeeId: string;
@@ -30,10 +32,12 @@ export interface LateRecordDto {
   ruleName?: string;
 }
 
+
 @Component({
   selector: 'app-time-tracking-late',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
   templateUrl: './time-tracking-late.component.html',
   styleUrl: './time-tracking-late.component.scss'
 })
@@ -42,6 +46,7 @@ export class TimeTrackingLateComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly records = signal<LateRecordDto[]>([]);
   readonly isLoading = signal(true);
@@ -102,7 +107,16 @@ export class TimeTrackingLateComponent implements OnInit {
     return !!(this.filterSearch || this.filterPeriod || this.filterRule);
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   ngOnInit(): void {
+    if (!this.hasPermission('late_attendance_view')) {
+      this.isLoading.set(false);
+      return;
+    }
+
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
@@ -139,6 +153,7 @@ export class TimeTrackingLateComponent implements OnInit {
   }
 
   fetchLateRecords(): void {
+    if (!this.hasPermission('late_attendance_view')) return;
     this.isLoading.set(true);
     const params: any = {
       page: this.page(),
@@ -229,6 +244,7 @@ export class TimeTrackingLateComponent implements OnInit {
   }
 
   addRecord(): void {
+    if (!this.hasPermission('late_attendance_add')) return;
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'attendance-dialog-panel',
@@ -250,6 +266,7 @@ export class TimeTrackingLateComponent implements OnInit {
   }
 
   editRecord(record: LateRecordDto): void {
+    if (!this.hasPermission('late_attendance_edit')) return;
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'attendance-dialog-panel',
@@ -284,6 +301,7 @@ export class TimeTrackingLateComponent implements OnInit {
   }
 
   deleteRecord(record: LateRecordDto): void {
+    if (!this.hasPermission('late_attendance_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Record',
       message: 'Are you sure you want to delete this late record?',

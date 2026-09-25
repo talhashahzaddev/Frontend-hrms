@@ -1,0 +1,80 @@
+@use '../../styles/settings-shared';
+
+.pl-card { padding: 0; overflow: hidden; }
+
+// Toolbar
+.pl-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e2e8f0;
+
+  .pl-record-count {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+// Table
+.pl-table-wrap { overflow-x: auto; }
+
+// Policy name cell
+.pl-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .pl-policy-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon { font-size: 17px; width: 17px; height: 17px; color: #2563eb; }
+  }
+
+  .pl-policy-name { font-size: 0.875rem; font-weight: 600; color: #0f172a; }
+}
+
+.pl-date-cell { font-size: 0.8125rem; color: #64748b; white-space: nowrap; }
+
+.pl-table-row {
+  transition: background 0.12s ease;
+  &:hover { background: #f8fafc; }
+}
+
+// Action menu
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+  min-width: 160px !important;
+
+  .mat-mdc-menu-content {
+    padding: 6px !important;
+
+    .mat-mdc-menu-item {
+      border-radius: 6px !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      font-size: 0.875rem !important;
+      color: #374151 !important;
+
+      &:hover { background: #f8fafc !important; }
+      mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #64748b; }
+
+      &.danger-action {
+        color: #dc2626 !important;
+        mat-icon { color: #dc2626 !important; }
+        &:hover { background: #fef2f2 !important; }
+      }
+    }
+
+    mat-divider { margin: 4px 0 !important; border-color: #e2e8f0 !important; }
+  }
+}

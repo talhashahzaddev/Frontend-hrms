@@ -6,7 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { AttendanceService } from '../../services/attendance.service';
 import { AttendanceCalendarData } from '../../../../core/models/attendance.models';
 import { NotificationService } from '../../../../core/services/notification.service';
-
+import { DateTimeFormatService } from '@core/services/date-time-format.service';
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface CalendarCell {
   date: Date;
   inCurrentMonth: boolean;
@@ -16,10 +17,12 @@ interface CalendarCell {
   isHoliday: boolean;
 }
 
+
 @Component({
   selector: 'app-attendance-calendar',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatTooltipModule,
     MatIconModule,
@@ -36,7 +39,7 @@ export class AttendanceCalendarComponent implements OnInit {
   daysGrid: CalendarCell[] = [];
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  constructor(private attendanceService: AttendanceService, private notification: NotificationService) {}
+  constructor(private attendanceService: AttendanceService, private notification: NotificationService, private dateTimeFormat: DateTimeFormatService) {}
 
   ngOnInit(): void {
     this.buildAndLoad(this.currentYear, this.currentMonth);
@@ -226,10 +229,6 @@ get currentMonthYear(): string {
   }
 
   shortTime(isoOrTime: string): string {
-    const dt = new Date(isoOrTime);
-    if (!isNaN(dt.getTime())) {
-      return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    return isoOrTime;
+    return this.dateTimeFormat.formatTime(isoOrTime, { fallback: isoOrTime });
   }
 }

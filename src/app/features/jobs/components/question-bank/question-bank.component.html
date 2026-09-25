@@ -1,0 +1,137 @@
+<div class="question-bank-container">
+  
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>quiz</mat-icon>
+      </div>
+      <div class="title-details">
+        <h1>Question Bank</h1>
+        <p>Manage categories and questions for job applications</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn-primary" *ngIf="hasPermission('add_question_category')" (click)="openCreateCategoryDialog()">
+        <mat-icon>add</mat-icon>
+        New Category
+      </button>
+    </div>
+  </div>
+
+  <!-- Search / Category Selector Card -->
+  <div class="search-card">
+    <div class="search-input-wrapper category-selector">
+      <mat-icon class="search-icon">category</mat-icon>
+      <div class="select-wrapper">
+        <span class="label">Category:</span>
+        <select class="custom-select" [formControl]="selectedCategoryControl">
+          <option [ngValue]="null" disabled>Select a Category</option>
+          <option *ngFor="let cat of categories" [value]="cat.categoryId">
+            {{ cat.name }}
+          </option>
+        </select>
+      </div>
+      <div class="spinner-inline" *ngIf="isLoadingCategories">
+        <mat-spinner diameter="20"></mat-spinner>
+      </div>
+    </div>
+  </div>
+
+  <!-- Questions Table Card -->
+  <div class="table-card" *ngIf="selectedCategoryControl.value">
+    <div class="card-header border-bottom">
+      <h3>
+        Questions 
+        <span class="count" *ngIf="!isLoadingQuestions">({{ questions.length }})</span>
+      </h3>
+      <div class="card-actions">
+        <button class="btn-secondary" *ngIf="hasPermission('add_question')" (click)="openCreateQuestionDialog()">
+          <mat-icon>add</mat-icon>
+          Add Question
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="isLoadingQuestions" class="loading-container p-4">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading questions...</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoadingQuestions">
+      <table class="custom-table" *ngIf="questions.length > 0">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Type</th>
+            <th class="text-center">Knockout</th>
+            <th>Expected Answer</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let q of questions" class="table-row">
+            <td class="font-semibold text-slate-700">
+              <div style="margin-bottom: 4px;">{{ q.questionText }}</div>
+              <div class="options-wrapper" *ngIf="q.options" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                <span *ngFor="let opt of parseOptions(q.options)" class="badge badge-neutral" style="font-size: 11px; padding: 2px 6px; font-weight: normal; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 4px;">{{ opt }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-neutral">{{ q.questionType }}</span>
+            </td>
+            <td class="text-center">
+              <span class="badge" [class.badge-danger]="q.isKnockout" [class.badge-neutral]="!q.isKnockout">
+                {{ q.isKnockout ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td class="text-sm text-slate-500">
+              {{ q.expectedAnswer || 'N/A' }}
+            </td>
+            <td class="text-right action-cell">
+              <button mat-icon-button *ngIf="hasPermission('edit_question')" (click)="editQuestion(q)" class="action-btn text-muted hover-primary" matTooltip="Edit Question">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button *ngIf="hasPermission('delete_question')" (click)="deleteQuestion(q.questionId)" class="action-btn text-muted hover-danger" matTooltip="Delete Question">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="questions.length === 0">
+        <div class="empty-icon-box">
+          <mat-icon>quiz</mat-icon>
+        </div>
+        <h3>No Questions Found</h3>
+        <p>This category doesn't have any questions yet.</p>
+        <button *ngIf="hasPermission('add_question')" class="btn-primary mt-3" (click)="openCreateQuestionDialog()">
+          <mat-icon>add</mat-icon> Add Question
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State when no category is selected -->
+  <div class="empty-state-card mt-4" *ngIf="!selectedCategoryControl.value && categories.length > 0">
+    <div class="empty-icon-box">
+      <mat-icon>touch_app</mat-icon>
+    </div>
+    <h3>Select a Category</h3>
+    <p>Please select a category from the dropdown above to view or add questions.</p>
+  </div>
+  
+  <div class="empty-state-card mt-4" *ngIf="categories.length === 0 && !isLoadingCategories">
+    <div class="empty-icon-box">
+      <mat-icon>category</mat-icon>
+    </div>
+    <h3>No Categories Found</h3>
+    <p>Get started by creating your first question category.</p>
+    <button *ngIf="hasPermission('add_question_category')" class="btn-primary mt-3" (click)="openCreateCategoryDialog()">
+      <mat-icon>add</mat-icon> New Category
+    </button>
+  </div>
+
+</div>

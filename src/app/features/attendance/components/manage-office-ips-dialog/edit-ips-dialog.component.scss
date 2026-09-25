@@ -1,0 +1,16 @@
+@use '../../styles/attendance-dialog';
+
+:host {
+  @include attendance-dialog.ad-scroll-host;
+}
+
+@include attendance-dialog.ad-panel-shell;
+
+.edit-ip-dialog {
+  min-width: 480px;
+}
+
+.full-width {
+  display: block;
+  margin-bottom: 0.5rem;
+}

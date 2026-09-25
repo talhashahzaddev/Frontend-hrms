@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface AddTaxEntryEmployeeOption {
   employeeId: string;
   employeeCode: string;
@@ -37,11 +38,13 @@ interface AddTaxEntryDialogData {
   categories: AddTaxEntryCategoryOption[];
 }
 
+
 @Component({
   selector: 'app-add-tax-entry',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-tax-entry.component.html',
   styleUrl: './add-tax-entry.component.scss'
 })

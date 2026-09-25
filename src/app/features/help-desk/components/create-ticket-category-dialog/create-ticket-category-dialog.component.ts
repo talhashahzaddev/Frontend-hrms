@@ -1,3 +1,5 @@
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Component, OnInit, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -11,6 +13,7 @@ import { EmployeeService } from '@/app/features/employee/services/employee.servi
 import { NotificationService } from '@/app/core/services/notification.service';
 import { CreateCategoryRequest, UpdateCategoryRequest } from '@/app/core/models/helpdesk.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface Department {
   departmentId: string;
   departmentName: string;
@@ -25,10 +28,12 @@ export interface Category {
   createdAt: string;
 }
 
+
 @Component({
   selector: 'app-create-ticket-category-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -36,7 +41,7 @@ export interface Category {
     MatSelectModule,
     MatButtonModule,
     MatDialogModule
-  ],
+  , MatIconModule, MatProgressSpinnerModule],
   templateUrl: './create-ticket-category-dialog.component.html',
   styleUrls: ['./create-ticket-category-dialog.component.scss']
 })
@@ -171,3 +176,4 @@ export class CreateTicketCategoryDialogComponent implements OnInit {
     this.dialogRef.close(false);
   }
 }
+

@@ -1,3 +1,4 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -14,20 +15,25 @@ import { Subject, combineLatest, debounceTime, distinctUntilChanged, startWith, 
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { NotificationService } from '@/app/core/services/notification.service';
+import { AuthService } from '@/app/core/services/auth.service';
 import { TicketGroup } from '../../../../core/models/helpdesk.models';
 import { CreateAgentGroupDialogComponent } from '../create-agent-group-dialog/create-agent-group-dialog.component';
 import { ViewGroupAgentDetailsComponent } from './view-Group-agent-details';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 interface Department {
   departmentId: string;
   departmentName: string;
 }
 
+
 @Component({
   selector: 'app-agent-group-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -39,7 +45,9 @@ interface Department {
     MatDialogModule,
     MatMenuModule,
     MatIconModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    PageHeaderComponent,
+    MatProgressSpinnerModule
   ],
   templateUrl: './agent-group-dashboard.component.html',
   styleUrls: ['./agent-group-dashboard.component.scss'],
@@ -67,6 +75,7 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private dialog: MatDialog,
     private notificationService: NotificationService
+    , private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -221,4 +230,10 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Agent Group', actionKey);
+  }
 }
+
+

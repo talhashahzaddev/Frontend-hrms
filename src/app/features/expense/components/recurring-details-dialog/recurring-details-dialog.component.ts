@@ -11,14 +11,17 @@ import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RecurringDetailsDialogData {
   recurringExpenseId: string;
 }
+
 
 @Component({
   selector: 'app-recurring-details-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,

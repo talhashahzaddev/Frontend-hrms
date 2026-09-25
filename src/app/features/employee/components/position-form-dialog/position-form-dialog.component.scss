@@ -1,9 +1,11 @@
+// Position Form Dialog – Synced with Jobs/Expense Module Design System
+
 // ── Dialog Container ──────────────────────────────────────────
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 12px !important;
+  border-radius: 0.75rem !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
 }
 
 // ── Dialog Header ─────────────────────────────────────────────
@@ -11,262 +13,187 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 22px 28px 18px;
-  background: #ffffff;
-  border-bottom: 1px solid #ebebeb;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 
-  h2 {
+  .title-section {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 0;
-    font-size: 25px;
-    font-weight: 700;
-    color: #111827;
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    letter-spacing: -0.2px;
+    gap: 1rem;
 
-    mat-icon {
-      font-size: 30px;
-      width: 30px;
-      height: 30px;
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .icon-wrapper {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: #eff6ff;
+      color: #2563eb;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; }
     }
-  }
 
-  .close-button {
-    color: #9ca3af;
-    width: 32px !important;
-    height: 32px !important;
-    transition: all 0.15s ease;
+    .title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
 
-    mat-icon { font-size: 18px; }
-
-    &:hover {
-      color: #374151;
-      background: #f3f4f6;
+    .subtitle {
+      font-size: 0.8125rem;
+      color: #64748b;
+      margin: 0.125rem 0 0 0;
     }
   }
 }
 
 // ── Dialog Content ────────────────────────────────────────────
 .dialog-content {
-  padding: 20px 24px !important;
+  padding: 1.5rem !important;
   min-width: 480px;
   max-width: 580px;
-  background: #f7f8fa;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #f8fafc;
 
   .position-form {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1.25rem;
 
-    .full-width {
-      width: 100%;
-      margin-bottom: 4px;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
 
-      &:last-child { margin-bottom: 0; }
-    }
+      label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #475569;
 
-    ::ng-deep mat-form-field {
-      &.mat-form-field-appearance-outline {
+        .required { color: #ef4444; }
+      }
 
-        .mat-mdc-text-field-wrapper {
-          background: #ffffff;
-          border-radius: 8px !important;
-          transition: background 0.15s ease;
-        }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #0f172a;
+        outline: none;
+        transition: all 0.2s;
+        font-family: inherit;
 
-        .mat-mdc-form-field-flex { padding: 0 14px; }
-        .mat-mdc-form-field-infix { padding: 11px 0 !important; min-height: unset; }
+        &::placeholder { color: #94a3b8; }
+        &:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background: white; }
+      }
 
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: #e5e7eb !important;
-          transition: border-color 0.15s ease;
-        }
+      textarea { resize: vertical; min-height: 80px; }
 
-        &:hover .mat-mdc-text-field-wrapper { background: #ffffff; }
+      .select-wrapper {
+        position: relative;
+        width: 100%;
 
-        &:hover {
-          .mdc-notched-outline__leading,
-          .mdc-notched-outline__notch,
-          .mdc-notched-outline__trailing {
-            border-color: #c4b5fd !important;
-          }
-        }
+        select { appearance: none; padding-right: 2.5rem; }
 
-        &.mat-focused {
-          .mat-mdc-text-field-wrapper { background: #ffffff; }
-
-          .mdc-notched-outline__leading,
-          .mdc-notched-outline__notch,
-          .mdc-notched-outline__trailing {
-            border-color: #6366f1 !important;
-            border-width: 2px !important;
-          }
-
-          label { color: #6366f1 !important; }
-        }
-
-        .mat-mdc-form-field-label,
-        label {
-          font-size: 13px;
-          color: #6b7280;
-          font-weight: 500;
-        }
-
-        input,
-        textarea,
-        .mat-mdc-select-value {
-          font-size: 13.5px;
-          color: #111827;
-          font-weight: 500;
-        }
-
-        textarea { resize: vertical; }
-
-        &.mat-form-field-invalid {
-          .mdc-notched-outline__leading,
-          .mdc-notched-outline__notch,
-          .mdc-notched-outline__trailing {
-            border-color: #ef4444 !important;
-          }
-
-          label { color: #ef4444 !important; }
-        }
-
-        .mat-mdc-form-field-hint {
-          font-size: 11.5px;
-          color: #9ca3af;
-          font-weight: 400;
+        .select-icon {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #64748b;
+          pointer-events: none;
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
         }
       }
+
+      .error-msg { font-size: 0.75rem; color: #ef4444; font-weight: 500; margin-top: 0.125rem; }
     }
   }
 }
 
-// ── Dialog Actions ────────────────────────────────────────────
-.dialog-actions {
-  padding: 14px 24px !important;
-  background: #ffffff;
-  border-top: 1px solid #ebebeb;
+// ── Dialog Footer ─────────────────────────────────────────────
+.dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
 
   button {
-    height: 38px;
-    padding: 0 20px !important;
-    border-radius: 8px !important;
-    font-size: 13.5px !important;
-    font-weight: 600 !important;
-    text-transform: none !important;
-    transition: all 0.15s ease !important;
-    display: flex;
+    height: 2.5rem;
+    padding: 0 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    border: 1px solid transparent;
 
-    // Cancel Button
-    &[mat-stroked-button] {
-      background: #ffffff !important;
-      color: #374151 !important;
-      border-color: #d1d5db !important;
+    mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
+  }
 
-      &:hover {
-        background: #f9fafb !important;
-        border-color: #9ca3af !important;
-      }
-    }
+  .cancel-btn {
+    background: white;
+    border-color: #e2e8f0;
+    color: #475569;
 
-    // Submit Button
-    &.submit-button:not([disabled]) {
-      background: #111827 !important;
-      color: #ffffff !important;
-      border: none !important;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
+    &:hover { background: #f1f5f9; color: #0f172a; }
+  }
 
-      &:hover {
-        background: #1f2937 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-      }
+  .submit-btn {
+    background: #2563eb;
+    color: white;
+    min-width: 120px;
 
-      mat-spinner {
-        display: inline-block;
-        margin-right: 6px;
+    &:hover:not(:disabled) { background: #1d4ed8; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
 
-        ::ng-deep circle { stroke: white !important; }
-      }
-    }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    // Disabled State
-    &[disabled] {
-      background: #f3f4f6 !important;
-      color: #9ca3af !important;
-      border: 1px solid #e5e7eb !important;
-      cursor: not-allowed;
-      box-shadow: none !important;
+    mat-spinner {
+      display: inline-block;
+      margin-right: 6px;
+
+      ::ng-deep circle { stroke: white !important; }
     }
   }
 }
 
 // ── Error Messages ────────────────────────────────────────────
 ::ng-deep mat-error {
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 500;
   color: #dc2626;
   margin-top: 2px;
 }
 
-// ── Select Panel ──────────────────────────────────────────────
-::ng-deep .mat-mdc-select-panel {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10) !important;
-  border: 1px solid #f0f1f5 !important;
-
-  .mat-mdc-option {
-    border-radius: 6px !important;
-    margin: 2px 6px !important;
-    font-size: 13.5px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-
-    &:hover { background: #f5f3ff !important; }
-
-    &.mat-mdc-option-active,
-    &.mdc-list-item--selected {
-      background: #eef2ff !important;
-      color: #6366f1 !important;
-    }
-  }
-}
-
 // ── Responsive ────────────────────────────────────────────────
 @media (max-width: 600px) {
-  .dialog-header {
-    padding: 16px 18px 14px;
-
-    h2 { font-size: 15px; }
-  }
-
-  .dialog-content {
-    min-width: unset;
-    padding: 14px 14px !important;
-  }
-
-  .dialog-actions {
+  .dialog-header { padding: 1rem 1.25rem; .title-section .title { font-size: 1rem; } }
+  .dialog-content { min-width: unset; padding: 1rem !important; }
+  .dialog-footer {
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 14px !important;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
 
-    button {
-      width: 100%;
-      justify-content: center;
-      height: 40px !important;
-    }
+    button { width: 100%; height: 2.5rem !important; }
   }
 }

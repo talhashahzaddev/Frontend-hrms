@@ -7,16 +7,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-salary-advance-rules',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './salary-advance-rules.component.html',
   styleUrl: './salary-advance-rules.component.scss'
 })
@@ -25,15 +30,20 @@ export class SalaryAdvanceRulesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly salaryAdvanceRules = signal<any[]>([]);
   readonly isLoading = signal(true);
 
   ngOnInit(): void {
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'salary_advance_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchRules(): void {
+    if (!this.hasPermission('salary_advance_rule_view')) return;
     this.isLoading.set(true);
     this.payrollService.getSalaryAdvanceRules().subscribe({
       next: (data) => {
@@ -53,6 +63,7 @@ export class SalaryAdvanceRulesComponent implements OnInit {
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('salary_advance_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -67,6 +78,7 @@ export class SalaryAdvanceRulesComponent implements OnInit {
   }
 
   editRule(rule: any): void {
+    if (!this.hasPermission('salary_advance_rule_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -85,6 +97,7 @@ export class SalaryAdvanceRulesComponent implements OnInit {
   }
 
   onToggleStatus(rule: any): void {
+    if (!this.hasPermission('salary_advance_rule_edit')) return;
     const ruleId = this.resolveRuleId(rule);
     if (!ruleId) {
       this.notification.showError('Unable to update status for this rule');
@@ -110,6 +123,7 @@ export class SalaryAdvanceRulesComponent implements OnInit {
   }
 
   onDelete(rule: any): void {
+    if (!this.hasPermission('salary_advance_rule_delete')) return;
     const ruleId = this.resolveRuleId(rule);
     if (!ruleId) {
       this.notification.showError('Unable to delete this rule');
@@ -161,5 +175,9 @@ export class SalaryAdvanceRulesComponent implements OnInit {
 
   private resolveRuleId(rule: any): string {
     return String(rule?.ruleId ?? rule?.id ?? '');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

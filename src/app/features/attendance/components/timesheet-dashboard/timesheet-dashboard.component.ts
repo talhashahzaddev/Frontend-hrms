@@ -20,10 +20,13 @@ import { TimesheetDetailDialogComponent } from '../timesheet-detail-dialog/times
 import { CreateSnapshotDialogComponent } from '../create-snapshot-dialog/create-snapshot-dialog.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog_component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-timesheet-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -100,7 +103,9 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(CreateSnapshotDialogComponent, {
       width: '600px',
       maxWidth: '95vw',
-      disableClose: false
+      maxHeight: '90vh',
+      disableClose: false,
+      panelClass: 'attendance-dialog-panel'
     });
 
     dialogRef.afterClosed()
@@ -151,7 +156,7 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
         monthName: timesheet.monthName,
         userRole: this.currentUserRole
       },
-      panelClass: 'timesheet-detail-dialog-panel',
+      panelClass: ['attendance-dialog-panel', 'timesheet-detail-dialog-panel'],
       disableClose: false,
       hasBackdrop: true
     });
@@ -238,6 +243,7 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: dialogData
     });
 

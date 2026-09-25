@@ -35,5 +35,11 @@ export const jobsRoutes: Routes = [
     loadComponent: () =>
       import('./components/stage-list/stage-list.component').then(m => m.StageListComponent),
     title: 'Stages - HRMS'
+  },
+  {
+    path: 'question-bank',
+    loadComponent: () =>
+      import('./components/question-bank/question-bank.component').then(m => m.QuestionBankComponent),
+    title: 'Question Bank - HRMS'
   }
 ];

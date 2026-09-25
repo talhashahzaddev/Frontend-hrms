@@ -17,10 +17,13 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LeaveRequest } from '../../core/models/leave.models';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDividerModule, MatDialogModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatButtonModule, MatIconModule, MatDividerModule, MatDialogModule],
   templateUrl: './notification-dialogue.component.html',
   styleUrls: ['./notification-dialogue.component.scss']
 })
@@ -192,7 +195,9 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   private openRejectDialog(leaveRequest: LeaveRequest, notification: ServerNotification): void {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName: leaveRequest.employeeName || 'Employee',
         leaveTypeName: leaveRequest.leaveTypeName || 'Leave',

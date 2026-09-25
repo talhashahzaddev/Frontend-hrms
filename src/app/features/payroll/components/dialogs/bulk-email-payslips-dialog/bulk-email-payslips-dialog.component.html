@@ -10,85 +10,130 @@
     <div class="info-box">
       <mat-icon>info</mat-icon>
       <p>
-        Only employees with a generated payslip will receive an email.
-        Employees without a payslip will be skipped automatically.
+        Select employees with generated payslips, compose your message, then click Process to upload PDFs and email employees.
       </p>
     </div>
 
-    <div class="field-grid">
-      <div class="field-wrap">
-        <label for="bulkEmailPeriod">Payroll period</label>
-        <select id="bulkEmailPeriod" formControlName="payrollPeriodId">
-          @for (period of data.periods; track period.id) {
-            <option [value]="period.id">{{ period.label }}</option>
-          }
-        </select>
-      </div>
+    <section class="accordion-section" [class.is-collapsed]="!selectionExpanded">
+      <button type="button" class="section-toggle" (click)="selectionExpanded = !selectionExpanded">
+        <span class="section-title">
+          <span class="step-badge">1</span>
+          Period &amp; employee selection
+        </span>
+        <span class="section-meta">{{ sendCount }} recipient{{ sendCount === 1 ? '' : 's' }}</span>
+        <mat-icon>{{ selectionExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
 
-      <div class="field-wrap">
-        <label for="bulkEmailSendMode">Send to</label>
-        <select id="bulkEmailSendMode" formControlName="sendToMode">
-          <option value="all-generated">All generated</option>
-          <option value="not-sent">Not yet sent</option>
-          <option value="custom">Custom selection</option>
-        </select>
-      </div>
-    </div>
+      @if (selectionExpanded) {
+        <div class="section-body">
+          <div class="field-grid">
+            <div class="field-wrap">
+              <label for="bulkEmailPeriod">Payroll period</label>
+              <select id="bulkEmailPeriod" formControlName="payrollPeriodId">
+                @for (period of data.periods; track period.id) {
+                  <option [value]="period.id">{{ period.label }}</option>
+                }
+              </select>
+            </div>
 
-    <div class="field-wrap">
-      <label for="bulkEmailSubject">Email subject</label>
-      <input id="bulkEmailSubject" type="text" formControlName="subject" />
-    </div>
+            <div class="field-wrap">
+              <label for="bulkEmailSendMode">Send to</label>
+              <select id="bulkEmailSendMode" formControlName="sendToMode">
+                <option value="all-generated">All generated</option>
+                <option value="not-sent">Not yet sent</option>
+                <option value="custom">Custom selection</option>
+              </select>
+            </div>
+          </div>
 
-    <div class="field-wrap">
-      <label for="bulkEmailMessage">Message</label>
-      <textarea id="bulkEmailMessage" rows="5" formControlName="message"></textarea>
-    </div>
-
-    @if (showCustomSelection) {
-      <div class="recipient-ledger">
-        <div class="ledger-head">
-          <label>
-            <input type="checkbox" [checked]="allCustomSelected" (change)="toggleSelectAllCustom($any($event.target).checked)" />
-            Select recipients
-          </label>
-          <span>{{ customRecipients.length }} employees</span>
-        </div>
-
-        <div class="ledger-list">
-          @if (customRecipients.length === 0) {
-            <div class="empty-state">No generated payslips found for this period.</div>
-          } @else {
-            @for (recipient of customRecipients; track recipient.id) {
-              <div class="ledger-row">
+          <div class="recipient-ledger">
+            <div class="ledger-head">
+              @if (showCustomSelection) {
                 <label>
                   <input
                     type="checkbox"
-                    [checked]="isRecipientSelected(recipient.id)"
-                    (change)="toggleRecipient(recipient.id, $any($event.target).checked)"
+                    [checked]="allCustomSelected"
+                    (change)="toggleSelectAllCustom($any($event.target).checked)"
                   />
-                  <span>{{ recipient.employeeName }}</span>
+                  Select recipients
                 </label>
-                <small>{{ recipient.employeeEmail }}</small>
-              </div>
-            }
+              } @else {
+                <span class="ledger-label">Recipients preview</span>
+              }
+              <span>{{ displayRecipients.length }} employee{{ displayRecipients.length === 1 ? '' : 's' }}</span>
+            </div>
+
+            <div class="ledger-list">
+              @if (displayRecipients.length === 0) {
+                <div class="empty-state">No generated payslips found for this period.</div>
+              } @else {
+                @for (recipient of displayRecipients; track recipient.id) {
+                  <div class="ledger-row">
+                    @if (showCustomSelection) {
+                      <label>
+                        <input
+                          type="checkbox"
+                          [checked]="isRecipientSelected(recipient.id)"
+                          (change)="toggleRecipient(recipient.id, $any($event.target).checked)"
+                        />
+                        <span>{{ recipient.employeeName }}</span>
+                      </label>
+                    } @else {
+                      <span class="name-only">{{ recipient.employeeName }}</span>
+                    }
+                    <small>{{ recipient.employeeEmail }}</small>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+          @if (selectionError) {
+            <p class="selection-error">No sendable recipients are available for the current selection.</p>
           }
         </div>
-      </div>
-    }
+      }
+    </section>
 
-    @if (selectionError) {
-      <p class="selection-error">No sendable recipients are available for the current selection.</p>
-    }
+    <section class="accordion-section" [class.is-collapsed]="!emailExpanded">
+      <button type="button" class="section-toggle" (click)="emailExpanded = !emailExpanded">
+        <span class="section-title">
+          <span class="step-badge email">2</span>
+          Email details
+        </span>
+        <mat-icon>{{ emailExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+
+      @if (emailExpanded) {
+        <div class="section-body email-body">
+          <p class="email-hint">
+            Subject and message below are sent to each employee. The payslip PDF is included as a secure download link in the email.
+          </p>
+
+          <div class="field-wrap">
+            <label for="bulkEmailSubject">Email subject</label>
+            <input id="bulkEmailSubject" type="text" formControlName="subject" placeholder="Payslip for selected period" />
+          </div>
+
+          <div class="field-wrap">
+            <label for="bulkEmailMessage">Message</label>
+            <textarea id="bulkEmailMessage" rows="6" formControlName="message" placeholder="Write your message to employees..."></textarea>
+          </div>
+        </div>
+      }
+    </section>
 
     <div class="summary-row">
       <mat-icon>groups</mat-icon>
-      <span>Will send to: <strong>{{ sendCount }} employees</strong> · {{ alreadySentCount }} already sent (will resend)</span>
+      <span>Ready to process: <strong>{{ sendCount }} employees</strong></span>
     </div>
   </div>
 
   <footer>
     <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
-    <button type="button" class="primary-btn" (click)="save()">Send to all</button>
+    <button type="button" class="primary-btn" (click)="process()">
+      <mat-icon>play_arrow</mat-icon>
+      Process
+    </button>
   </footer>
 </div>

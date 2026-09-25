@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 import {
   ApiResponse,
@@ -13,6 +14,17 @@ import {
   SubscriptionHistoryItem,
   SubscriptionPlan
 } from '../models/super-admin.models';
+import {
+  GlobalRole,
+  CreateGlobalRoleRequest,
+  UpdateGlobalRoleRequest
+} from '../models/global-role.models';
+import { MenusResponse } from '../../../core/models/role.models';
+import {
+  InviteUserRequest,
+  UserInvitation,
+  UserInvitationFilter
+} from '../models/user-invitation.models';
 import {
   TransactionDto,
   TransactionDetailDto,
@@ -117,5 +129,68 @@ export class SuperAdminService {
   getRevenueAnalytics(months: number = 12): Observable<ApiResponse<RevenueAnalyticsDto>> {
     const params = new HttpParams().set('months', months.toString());
     return this.http.get<ApiResponse<RevenueAnalyticsDto>>(`${this.API_URL}/revenue-analytics`, { params });
+  }
+
+  // ========== Global Role Menus ==========
+
+  /** GET /SuperAdmin/menus - Retrieve all menus, submenus and their actions for global roles */
+  getMenus(): Observable<MenusResponse> {
+    return this.http.get<MenusResponse>(`${this.API_URL}/menus`);
+  }
+
+  // ========== Global Roles ==========
+
+  /** GET /SuperAdmin/global-roles */
+  getGlobalRoles(): Observable<GlobalRole[]> {
+    return this.http.get<ApiResponse<GlobalRole[]>>(`${this.API_URL}/global-roles`)
+      .pipe(map(res => res.data ?? []));
+  }
+
+  /** POST /SuperAdmin/create-global-role */
+  createGlobalRole(payload: CreateGlobalRoleRequest): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.API_URL}/create-global-role`, payload)
+      .pipe(map(res => res.data));
+  }
+
+  /** PUT /SuperAdmin/update-global-role */
+  updateGlobalRole(roleId: string, payload: CreateGlobalRoleRequest): Observable<any> {
+    const body: UpdateGlobalRoleRequest = { ...payload, roleId };
+    return this.http.put<ApiResponse<any>>(`${this.API_URL}/update-global-role`, body)
+      .pipe(map(res => res.data));
+  }
+
+  /** DELETE /SuperAdmin/delete-global-role/{roleId} */
+  deleteGlobalRole(roleId: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.API_URL}/delete-global-role/${roleId}`)
+      .pipe(map(res => res.data ?? false));
+  }
+
+  // ========== User Invitations ==========
+
+  /** POST /SuperAdmin/invite-user */
+  inviteUser(request: InviteUserRequest): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/invite-user`, request);
+  }
+
+  /** GET /SuperAdmin/invitations */
+  getInvitations(filter: UserInvitationFilter): Observable<ApiResponse<PagedResult<UserInvitation>>> {
+    let params = new HttpParams()
+      .set('page', filter.page.toString())
+      .set('pageSize', filter.pageSize.toString());
+
+    if (filter.search) params = params.set('search', filter.search);
+    if (filter.status) params = params.set('status', filter.status);
+
+    return this.http.get<ApiResponse<PagedResult<UserInvitation>>>(`${this.API_URL}/invitations`, { params });
+  }
+
+  /** POST /SuperAdmin/invitations/{id}/resend */
+  resendInvitation(invitationId: string): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/invitations/${invitationId}/resend`, {});
+  }
+
+  /** DELETE /SuperAdmin/invitations/{id} */
+  deleteInvitation(invitationId: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.API_URL}/invitations/${invitationId}`);
   }
 }
