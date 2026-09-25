@@ -29,6 +29,7 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.json",
+              "src/_redirects",
               {
                 "glob": "hub.png",
                 "input": "public",
