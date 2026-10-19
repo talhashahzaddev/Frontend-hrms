@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://hrmsapplicationcodifiedlabs-production-b497.up.railway.app/api',
+apiUrl: 'https://briskpeople.blitz.cloud/api',
   baseDomain: 'briskpeople.com',
   apiKey: '',
   appName: 'HRMS Frontend',
@@ -9,4 +9,4 @@ export const environment = {
     refreshTokenKey: 'refresh_token',
     userKey: 'user'
   }
-};
+};
