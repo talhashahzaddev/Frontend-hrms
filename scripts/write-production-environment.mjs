@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 
-const defaultApiUrl = 'https://hrmsapplicationcodifiedlabs-production-b497.up.railway.app/api';
+const defaultApiUrl = 'https://briskpeople.blitz.cloud/api';
 const apiUrl = (process.env.API_URL || process.env.NG_APP_API_URL || defaultApiUrl).replace(/\/$/, '');
 const normalizedApiUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
 const baseDomain = process.env.BASE_DOMAIN || 'briskpeople.com';
