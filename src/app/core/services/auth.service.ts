@@ -432,7 +432,7 @@ export class AuthService {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/register`, request)
       .pipe(
         tap(response => {
-          if (response.success && response.data) {
+          if (response.success && response.data?.token) {
             this.setAuthData(response.data);
             // Fetch permissions immediately after successful registration
             this.fetchAndStoreUserPermissions(response.data.userId).subscribe();
