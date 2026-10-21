@@ -297,6 +297,10 @@ export class AppComponent implements OnInit, OnDestroy {
     try {
       console.log('🔌 [AppComponent] Setting up SignalR notifications...');
 
+      if (window.location.pathname.startsWith('/platform-admin')) {
+        return;
+      }
+
       // Check if user is authenticated before setting up SignalR
       if (!this.authService.isAuthenticated) {
         console.log('⚠️ [AppComponent] User not authenticated, skipping SignalR setup');
