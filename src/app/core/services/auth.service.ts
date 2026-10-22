@@ -41,6 +41,10 @@ export class AuthService {
   
   public isLoggingOut$ = this.isLoggingOutSubject.asObservable();
 
+  get isLoggingOutNow(): boolean {
+    return this.isLoggingOut;
+  }
+
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
@@ -181,7 +185,8 @@ export class AuthService {
       .pipe(
         tap(response => {
           if (response.success && response.data) {
-            // Fetch permissions immediately after successful login
+            // Store the token before requesting the protected permissions endpoint.
+            this.setAuthData(response.data);
             this.fetchAndStoreUserPermissions(response.data.userId).subscribe();
           }
         }),
@@ -196,38 +201,18 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    if (this.isLoggingOut) {
+      return of(true);
+    }
+
     // Set flags to prevent layout breaking and show loading
     this.isLoggingOut = true;
     this.isRedirecting = true;
     this.isLoggingOutSubject.next(true);
 
-    // Make API call in background (fire and forget) - don't wait for response
-    // This ensures smooth logout without delay
-    this.http.post<ApiResponse<boolean>>(`${this.API_URL}/logout`, {})
-      .pipe(
-        catchError(() => {
-          // Silently handle errors - we're redirecting anyway
-          return throwError(() => new Error('Logout failed'));
-        })
-      )
-      .subscribe({
-        next: () => {
-          // API call succeeded, but we're already redirecting
-        },
-        error: () => {
-          // API call failed, but we're already redirecting
-        }
-      });
-
-    // Small delay to ensure loading overlay is visible before redirect
-    // This prevents the screen from shrinking
-    setTimeout(() => {
-      // Clear auth data and redirect immediately for smooth logout experience
-      this.clearAuthData();
-      
-      // Redirect immediately - no delay for smooth transition
-      this.redirectToLoginSubdomain();
-    }, 100);
+    // Clear local credentials before any navigation or background request can run.
+    this.clearAuthData();
+    this.redirectToLoginSubdomain();
 
     // Return an observable that completes immediately
     return of(true);
@@ -268,6 +253,14 @@ export class AuthService {
         baseDomain = currentHost;
         loginHost = `login.${baseDomain}`;
       }
+    }
+
+    if (currentHost.toLowerCase() === loginHost.toLowerCase()) {
+      this.isLoggingOutSubject.next(false);
+      this.isLoggingOut = false;
+      this.isRedirecting = false;
+      this.router.navigate(['/login'], { replaceUrl: true });
+      return;
     }
 
     // Construct login subdomain URL with logout action

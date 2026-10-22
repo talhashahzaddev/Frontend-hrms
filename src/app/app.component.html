@@ -13,9 +13,8 @@
   <!-- Main Layout Container -->
   <div class="main-content">
 
-    <!-- Authenticated Layout -->
-    <!-- Keep authenticated layout visible during logout to prevent screen shrinking -->
-    <app-layout *ngIf="(isAuthenticated$ | async) || (isLoggingOut$ | async); else unauthenticated">
+    <!-- Authenticated layout is never rendered around login/register pages. -->
+    <app-layout *ngIf="(isAuthenticated$ | async) && !isAuthPage; else unauthenticated">
       <router-outlet></router-outlet>
     </app-layout>
 

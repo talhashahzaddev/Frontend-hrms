@@ -28,6 +28,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
+        if (this.authService.isLoggingOutNow) {
+          return throwError(() => error);
+        }
+
         // ✅ Never handle 401s when the user is on a platform-admin route.
         // Platform-admin has its own auth system (PlatformAdminAuthService).
         // Intercepting 401s here would incorrectly trigger a logout/redirect.

@@ -37,7 +37,7 @@ export class LocalizationService {
 
   loadOrganizationLocalization(): Observable<void> {
     return this.http
-      .get<ApiResponse<OrganizationLocalization>>(`${environment.apiUrl}/policies/organization`)
+      .get<ApiResponse<OrganizationLocalization>>(`${environment.apiUrl}/Settings/organization`)
       .pipe(
         map(res => {
           if (!res?.success) {
