@@ -45,8 +45,10 @@
         </mat-form-field>
 
         @if (searchTerm || statusFilter || planFilter) {
-          <button mat-icon-button matTooltip="Clear filters" (click)="clearFilters()">
+          <button mat-stroked-button type="button" class="clear-filters-button"
+                  matTooltip="Clear filters" (click)="clearFilters()">
             <mat-icon>filter_alt_off</mat-icon>
+            Clear
           </button>
         }
       </div>
