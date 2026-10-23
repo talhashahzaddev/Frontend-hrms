@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -44,10 +44,12 @@ export class GlobalRoleListComponent implements OnInit, OnDestroy {
 
   roles: GlobalRole[] = [];
   filteredRoles: GlobalRole[] = [];
+  displayedRoles: GlobalRole[] = [];
   isLoading = false;
   pageSize = 10;
+  pageIndex = 0;
 
-  displayedColumns: string[] = ['roleName', 'description', 'permissionsCount', 'status', 'createdAt', 'actions'];
+  displayedColumns: string[] = ['roleName', 'organization', 'description', 'permissionsCount', 'status', 'createdAt', 'actions'];
 
   searchControl = new FormControl('');
 
@@ -83,12 +85,27 @@ export class GlobalRoleListComponent implements OnInit, OnDestroy {
     const term = searchTerm.toLowerCase().trim();
     if (!term) {
       this.filteredRoles = [...this.roles];
+      this.updatePage();
     } else {
       this.filteredRoles = this.roles.filter(role =>
         role.roleName.toLowerCase().includes(term) ||
+        (role.organizationName && role.organizationName.toLowerCase().includes(term)) ||
         (role.description && role.description.toLowerCase().includes(term))
       );
     }
+    this.pageIndex = 0;
+    this.updatePage();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePage();
+  }
+
+  private updatePage(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.displayedRoles = this.filteredRoles.slice(start, start + this.pageSize);
   }
 
   loadRoles(): void {
@@ -99,6 +116,8 @@ export class GlobalRoleListComponent implements OnInit, OnDestroy {
         next: (roles) => {
           this.roles = roles;
           this.filteredRoles = [...roles];
+          this.pageIndex = 0;
+          this.updatePage();
           this.isLoading = false;
         },
         error: () => {
@@ -156,8 +175,9 @@ export class GlobalRoleListComponent implements OnInit, OnDestroy {
               this.notificationService.showSuccess('Global role deleted successfully');
               this.loadRoles();
             },
-            error: () => {
-              this.notificationService.showError('Failed to delete global role');
+            error: (error) => {
+              const message = error?.error?.message || 'Failed to delete global role';
+              this.notificationService.showError(message);
             }
           });
       }

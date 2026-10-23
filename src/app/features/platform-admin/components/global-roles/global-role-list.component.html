@@ -4,7 +4,7 @@
   <!-- Header Section -->
   <div class="page-header">
     <div class="header-content">
-      <h1 class="page-title">Global Roles & Permissions</h1>
+      <h1 class="page-title">Roles & Permissions</h1>
       <p class="page-subtitle">Manage global access control and permissions across all organizations</p>
     </div>
     <div class="header-actions">
@@ -47,7 +47,7 @@
 
     <!-- Table -->
     <div *ngIf="!isLoading" class="table-container">
-      <table mat-table [dataSource]="filteredRoles" class="role-table">
+      <table mat-table [dataSource]="displayedRoles" class="role-table">
 
         <!-- Role Name Column -->
         <ng-container matColumnDef="roleName">
@@ -70,6 +70,14 @@
           <th mat-header-cell *matHeaderCellDef>Description</th>
           <td mat-cell *matCellDef="let role">
             <span class="description-text">{{ role.description || '—' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Organization Column -->
+        <ng-container matColumnDef="organization">
+          <th mat-header-cell *matHeaderCellDef>Organization</th>
+          <td mat-cell *matCellDef="let role">
+            {{ role.organizationName || 'Global' }}
           </td>
         </ng-container>
 
@@ -133,7 +141,7 @@
         <div class="empty-icon">
           <mat-icon>admin_panel_settings</mat-icon>
         </div>
-        <h3>No Global Roles Found</h3>
+        <h3>No Roles Found</h3>
         <p>No global roles match your search. Try clearing filters or add a new global role.</p>
         <button mat-flat-button (click)="openAddRoleDialog()" class="add-first-btn">
           <mat-icon>add</mat-icon>
@@ -143,8 +151,8 @@
     </div>
 
     <!-- Pagination -->
-    <mat-paginator *ngIf="!isLoading && filteredRoles.length > 0" [length]="filteredRoles.length" [pageSize]="pageSize"
-      [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons>
+    <mat-paginator *ngIf="!isLoading && filteredRoles.length > 0" [length]="filteredRoles.length" [pageIndex]="pageIndex"
+      [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
     </mat-paginator>
   </div>
 </div>

@@ -22,6 +22,8 @@ export interface GlobalRoleMenu {
 export interface GlobalRole {
   roleId: string;
   roleName: string;
+  organizationId?: string;
+  organizationName?: string;
   description?: string;
   version: number;
   isActive: boolean;
