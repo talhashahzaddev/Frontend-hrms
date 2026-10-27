@@ -15,6 +15,7 @@ import { catchError, map } from 'rxjs/operators';
 import { SharedCommonModule } from '@shared/shared-common.module';
 
 import { AuthService } from '@core/services/auth.service';
+import { TenantEntitlementService } from '@core/services/tenant-entitlement.service';
 import { NotificationService } from '@core/services/notification.service';
 import { User } from '@core/models/auth.models';
 import { DashboardService } from './services/dashboard.service';
@@ -61,6 +62,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private entitlementService = inject(TenantEntitlementService);
   private dashboardService = inject(DashboardService);
   private attendanceService = inject(AttendanceService);
   private payrollService = inject(PayrollService);
@@ -142,6 +144,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ── Computed helpers ────────────────────────────────────────────────────────
   hasPermission(actionKey: string): boolean {
     return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
+  hasFeature(featureKey: string): boolean {
+    return this.entitlementService.isEnabled(featureKey);
   }
 
   get canViewFinancialApprovals(): boolean {
@@ -250,6 +256,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.entitlementService.load()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => this.cdr.markForCheck(),
+        error: error => console.error('Unable to load dashboard feature access.', error)
+      });
+
     // Start live clock
     interval(1000)
       .pipe(takeUntil(this.destroy$))

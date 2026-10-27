@@ -11,6 +11,9 @@
     </div>
 
     <div class="header-right">
+      @if (remainingAiQueries !== null) {
+        <span class="ai-query-allowance">{{ remainingAiQueries }} AI queries left this month</span>
+      }
       <span class="status-badge"><span class="status-dot"></span>Online</span>
       @if (messages.length > 0) {
         <button class="btn-clear" (click)="clearChat()" aria-label="Clear chat">

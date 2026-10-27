@@ -5,7 +5,7 @@ import { PlatformAdminAuthService } from '../services/platform-admin-auth.servic
 
 /**
  * HTTP interceptor that attaches the platform admin JWT token
- * to requests going to SuperAdmin or DemoInquiry (admin) endpoints.
+ * to requests going to platform-admin endpoints.
  */
 @Injectable()
 export class PlatformAdminInterceptor implements HttpInterceptor {
@@ -14,7 +14,7 @@ export class PlatformAdminInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Only intercept requests to platform admin endpoints
-    const platformEndpoints = ['/SuperAdmin', '/PlatformAuth'];
+    const platformEndpoints = ['/SuperAdmin', '/PlatformAuth', '/Entitlements'];
     const isPlatformRequest = platformEndpoints.some(ep => req.url.includes(ep));
 
     // Also intercept DemoInquiry GET/PUT (admin operations, not the public POST)

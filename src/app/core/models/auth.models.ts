@@ -14,6 +14,7 @@ export interface AuthResponse {
   token: string;
   refreshToken: string;
   tokenExpiration: string;
+  emailVerificationSent?: boolean;
 }
 
 export interface RefreshTokenRequest {

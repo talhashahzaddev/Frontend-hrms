@@ -95,6 +95,15 @@
           <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
         </button>
 
+        <div class="verification-notice" *ngIf="verificationRequired" role="status">
+          <p>{{ verificationMessage }}</p>
+          <button type="button" mat-button
+                  (click)="resendVerificationEmail()"
+                  [disabled]="isResendingVerification || !loginForm.get('email')?.value">
+            {{ isResendingVerification ? 'Sending…' : 'Resend verification email' }}
+          </button>
+        </div>
+
         <!-- Sign up -->
         <p class="signup-text">
           Don't have an account?

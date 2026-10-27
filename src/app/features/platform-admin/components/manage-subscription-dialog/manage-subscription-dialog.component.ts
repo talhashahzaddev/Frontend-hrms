@@ -93,7 +93,7 @@ export class ManageSubscriptionDialogComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           if (res.success && res.data) {
-            this.plans = res.data;
+            this.plans = res.data.filter(plan => plan.isActive);
           }
         }
       });

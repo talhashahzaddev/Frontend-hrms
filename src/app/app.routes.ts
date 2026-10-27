@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { PlatformAdminGuard } from './features/platform-admin/guards/platform-admin.guard';
+import { FeatureAccessGuard } from './core/guards/feature-access.guard';
+import { PlanAccessComponent } from './shared/components/plan-access/plan-access.component';
 
 // import { RoleRedirectGuard } from './core/guards/role-redirect.guard';
 // import { EmptyRouteComponent } from './shared/components/Empty-Component/empty-route.component';
@@ -15,7 +17,8 @@ export const appRoutes: Routes = [
   },
 {
   path: 'onboarding',
-  canActivate: [AuthGuard],
+  canActivate: [AuthGuard, FeatureAccessGuard],
+  data: { feature: 'onboarding' },
   loadComponent: () =>
     import('./onboarding/onboarding.component').then(m => m.Onboarding),
   title: 'Employee Onboarding - HRMS'
@@ -61,7 +64,8 @@ export const appRoutes: Routes = [
   // Protected Routes (require authentication)
   {
     path: 'dashboard',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'dashboard' },
     loadComponent: () =>
       import('../app/features/dashboard/dashboard.component').then(m => m.DashboardComponent),
     title: 'Dashboard - HRMS'
@@ -69,7 +73,8 @@ export const appRoutes: Routes = [
   // Employee Management Routes
   {
     path: 'employees',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'employee_management' },
     loadChildren: () =>
       import('./features/employee/employee.routes').then(m => m.employeeRoutes)
   },
@@ -77,21 +82,25 @@ export const appRoutes: Routes = [
   // Attendance Management Routes
   {
     path: 'attendance',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    canActivateChild: [FeatureAccessGuard],
+    data: { feature: 'attendance', childFeature: 'basic_attendance' },
     loadChildren: () =>
       import('./features/attendance/attendance.routes').then(m => m.attendanceRoutes)
   },
   // Timesheet Module
   {
     path: "timesheet",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'timesheet' },
     loadChildren: () =>
       import("./features/timesheet/timesheet.routes").then(m => m.timesheetRoutes)
   },
   // Assets Management Routes
   {
     path: 'assets',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'assets_management' },
     loadChildren: () =>
       import('./features/assets/assets.routes').then(m => m.assetsRoutes)
   },
@@ -99,7 +108,8 @@ export const appRoutes: Routes = [
   // Leave Management Routes
   {
     path: 'leave',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'leave_management' },
     loadChildren: () =>
       import('./features/leave/leave.routes').then(m => m.leaveRoutes)
   },
@@ -107,7 +117,8 @@ export const appRoutes: Routes = [
   // Performance Management Routes
   {
     path: 'performance',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'performance' },
     loadChildren: () =>
       import('./features/performance/performance.routes').then(m => m.performanceRoutes)
   },
@@ -131,7 +142,8 @@ export const appRoutes: Routes = [
   },
   {
     path: 'news',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'news' },
     loadChildren: () =>
       import('./features/news/news.routes').then(m => m.newsRoutes),
     title: 'Company News - HRMS'
@@ -140,7 +152,8 @@ export const appRoutes: Routes = [
   // Jobs Module Routes (all roles)
   {
     path: 'jobs',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'jobs' },
     loadChildren: () =>
       import('./features/jobs/jobs.routes').then(m => m.jobsRoutes),
     title: 'Jobs - HRMS'
@@ -149,7 +162,9 @@ export const appRoutes: Routes = [
   // Payroll Management Routes
   {
     path: 'payroll',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    canActivateChild: [FeatureAccessGuard],
+    data: { feature: 'payroll', childFeature: 'payroll_processing' },
     loadChildren: () =>
       import('./features/payroll/payroll.routes').then(m => m.payrollRoutes),
     title: 'Payroll - HRMS'
@@ -166,14 +181,16 @@ export const appRoutes: Routes = [
   // AI Assistant Route (accessible to all roles)
   {
     path: 'ai-assistant',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'ai_assistant' },
     loadComponent: () =>
       import('./features/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
     title: 'AI Assistant - HRMS'
   },
   {
     path:'help-desk',
-    canActivate:[AuthGuard],
+    canActivate:[AuthGuard, FeatureAccessGuard],
+    data: { feature: 'help_desk' },
      loadChildren: () =>
       import('./features/help-desk/help-desk.routes').then(m => m.helpdeskRoutes) ,
     title:'help-desk-HRMS'},
@@ -211,7 +228,8 @@ export const appRoutes: Routes = [
   // Expense Management Routes (HR Manager, Employee)
   {
     path: 'expense',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, FeatureAccessGuard],
+    data: { feature: 'expense' },
     loadChildren: () =>
       import('./features/expense/expense.routes').then(m => m.expenseRoutes),
   },
@@ -255,6 +273,12 @@ export const appRoutes: Routes = [
       import('./features/auth/components/set-password/set-password.component').then(m => m.SetPasswordComponent)
   },
   {
+    path: 'plan-access',
+    canActivate: [AuthGuard],
+    component: PlanAccessComponent,
+    title: 'Plan Access - HRMS'
+  },
+  {
     path: 'platform-admin/login',
     loadComponent: () =>
       import('./features/platform-admin/components/platform-login/platform-login.component').then(m => m.PlatformLoginComponent),
@@ -278,6 +302,12 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/platform-admin/components/organization-list/organization-list.component').then(m => m.OrganizationListComponent),
         title: 'Organizations - Brisk People'
+      },
+      {
+        path: 'plans',
+        loadComponent: () =>
+          import('./features/platform-admin/components/plan-management/plan-management.component').then(m => m.PlanManagementComponent),
+        title: 'Plans & Entitlements - Brisk People'
       },
       {
         path: 'invitations',

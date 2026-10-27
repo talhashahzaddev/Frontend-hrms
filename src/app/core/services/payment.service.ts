@@ -19,6 +19,7 @@ export interface SubscriptionPlanDto {
   monthlyPrice?: number;
   annualPrice?: number;
   maxUsers?: number;
+  currency?: string;
   features?: { [key: string]: any } | any[];
   isCustom: boolean;
   isActive: boolean;
@@ -238,4 +239,3 @@ export class PaymentService {
     return throwError(() => new Error(errorMessage));
   }
 }
-

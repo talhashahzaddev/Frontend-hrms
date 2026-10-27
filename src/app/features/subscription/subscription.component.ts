@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, forkJoin, catchError } from 'rxjs';
+import { Subject, takeUntil, forkJoin, catchError, of } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +19,7 @@ interface PricingPlan {
   price: number;
   monthlyPrice?: number;
   annualPrice?: number;
+  currency: string;
   pricePeriod: string;
   description: string;
   features: string[];
@@ -112,7 +113,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       .pipe(
         catchError(err => {
           console.error('Error fetching subscriptions or not authorized:', err);
-          return []; // Return empty array to allow plans to load
+          return of(null);
         })
       );
 
@@ -134,27 +135,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
           this.allPlans = plans.map(plan => this.transformToPricingPlan(plan));
 
           // Add custom plan template at the end if it doesn't exist
-          const hasCustomPlan = this.allPlans.some(p => p.isCustom);
-          if (!hasCustomPlan) {
-            this.allPlans.push({
-              id: 'custom',
-              name: 'Enterprise',
-              price: 0,
-              pricePeriod: 'month',
-              description: 'Custom solutions for large organizations',
-              features: [
-                'All Business features',
-                'Single Sign-On (SSO)',
-                'Custom Integrations',
-                'Dedicated Account Manager',
-                '24/7 Premium Support'
-              ],
-              isPopular: false,
-              isCustom: true,
-              isCurrentPlan: false
-            });
-          }
-
           // Mark middle plan as popular if there are 3 or more plans
           if (this.allPlans.length >= 3 && !this.allPlans.some(p => p.isPopular)) {
             const middleIndex = Math.floor(this.allPlans.length / 2);
@@ -168,52 +148,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
           console.error('Error loading data:', err);
           this.error = err.message || 'Failed to load data';
           this.isLoading = false;
-          this.loadDefaultPlans();
         }
       });
-  }
-
-  loadDefaultPlans(): void {
-    this.allPlans = [
-      {
-        id: 'starter',
-        name: 'Starter',
-        price: 29,
-        monthlyPrice: 29,
-        annualPrice: 278,
-        pricePeriod: 'month',
-        description: 'Perfect for small teams getting started',
-        features: ['Employee Directory', 'Leave Management', 'Basic Reporting', 'Standard Support'],
-        isPopular: false,
-        isCustom: false,
-        isCurrentPlan: false
-      },
-      {
-        id: 'business',
-        name: 'Business',
-        price: 79,
-        monthlyPrice: 79,
-        annualPrice: 758,
-        pricePeriod: 'month',
-        description: 'For growing teams that need advanced features',
-        features: ['All Starter features', 'Performance Management', 'Advanced Reporting', 'Priority Support'],
-        isPopular: true,
-        isCustom: false,
-        isCurrentPlan: false
-      },
-      {
-        id: 'enterprise',
-        name: 'Enterprise',
-        price: 0,
-        pricePeriod: 'month',
-        description: 'Custom solutions for large organizations',
-        features: ['All Business features', 'Single Sign-On (SSO)', 'Custom Integrations', 'Dedicated Account Manager'],
-        isPopular: false,
-        isCustom: true,
-        isCurrentPlan: false
-      }
-    ];
-    this.updateDisplayedPlans();
   }
 
   transformToPricingPlan(apiPlan: SubscriptionPlanDto): PricingPlan {
@@ -234,11 +170,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       }
     }
 
-    // If no features from API, use default based on plan name
-    if (features.length === 0) {
-      features = this.getDefaultFeatures(apiPlan.name, apiPlan.maxUsers);
-    }
-
     const price = this.billingCycle === 'monthly'
       ? (apiPlan.monthlyPrice || 0)
       : (apiPlan.annualPrice || 0);
@@ -249,6 +180,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       price: price,
       monthlyPrice: apiPlan.monthlyPrice,
       annualPrice: apiPlan.annualPrice,
+      currency: apiPlan.currency || 'BHD',
       pricePeriod: 'month', // Default, will be determined dynamically
       description: this.getDescription(apiPlan),
       features: features,
@@ -269,24 +201,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     }
 
     return `Flexible pricing plan for your business needs`;
-  }
-
-  getDefaultFeatures(planName: string, maxUsers?: number): string[] {
-    const baseFeatures = ['Employee Directory', 'Leave Management', 'Basic Reporting'];
-
-    if (maxUsers) {
-      baseFeatures.unshift(`Up to ${maxUsers} users`);
-    }
-
-    if (planName.toLowerCase().includes('starter') || planName.toLowerCase().includes('basic')) {
-      return [...baseFeatures, 'Standard Support'];
-    } else if (planName.toLowerCase().includes('business') || planName.toLowerCase().includes('professional')) {
-      return [...baseFeatures, 'Performance Management', 'Advanced Reporting', 'Priority Support'];
-    } else if (planName.toLowerCase().includes('enterprise') || planName.toLowerCase().includes('custom')) {
-      return [...baseFeatures, 'Performance Management', 'Single Sign-On (SSO)', 'Custom Integrations', 'Dedicated Support'];
-    }
-
-    return baseFeatures;
   }
 
   updateDisplayedPlans(): void {
@@ -343,7 +257,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   getPriceLabel(plan: PricingPlan): string {
     if (plan.isCustom) return 'Custom';
     const price = plan.price;
-    return `$${price}`;
+    return `${plan.currency} ${price}`;
   }
 
   getCarouselIndicators(): number[] {

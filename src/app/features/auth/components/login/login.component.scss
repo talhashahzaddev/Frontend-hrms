@@ -217,6 +217,23 @@
   margin: 0;
 }
 
+.verification-notice {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #fedf89;
+  border-radius: 8px;
+  background: #fffaeb;
+  color: #93370d;
+  text-align: center;
+
+  p {
+    margin: 0 0 6px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
 // ── Form ──────────────────────────────────────────────────────
 .login-form {
   width: 100%;

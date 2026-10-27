@@ -74,7 +74,7 @@
         <div class="kpi-cards-panel">
           <div class="kpi-grid kpi-grid--2x2">
 
-            <div class="kpi-card kpi-card--blue">
+            <div class="kpi-card kpi-card--blue" *ngIf="hasFeature('leave_management')">
               <div class="kpi-header">
                 <span class="kpi-title">Leave Balances</span>
                 <span class="kpi-icon-wrap kpi-icon-wrap--blue">
@@ -87,7 +87,7 @@
               <div class="kpi-sub">{{ leaveBalanceSummary }}</div>
             </div>
 
-            <div class="kpi-card kpi-card--blue">
+            <div class="kpi-card kpi-card--blue" *ngIf="hasFeature('payslips')">
               <div class="kpi-header">
                 <span class="kpi-title">Latest Payslip</span>
                 <span class="kpi-icon-wrap kpi-icon-wrap--blue">
@@ -111,7 +111,7 @@
               </div>
             </div>
 
-            <div class="kpi-card kpi-card--blue">
+            <div class="kpi-card kpi-card--blue" *ngIf="hasFeature('loans_advances')">
               <div class="kpi-header">
                 <span class="kpi-title">Active Loans / Advances</span>
                 <span class="kpi-icon-wrap kpi-icon-wrap--blue">

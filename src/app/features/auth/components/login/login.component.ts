@@ -42,6 +42,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   loginForm!: FormGroup;
   hidePassword = true;
   isLoading = false;
+  isResendingVerification = false;
+  verificationRequired = false;
+  verificationMessage = '';
   isReady = false; // Add ready state to prevent white card flash
   private isSubmitting = false;
   activeSlide = 0;
@@ -187,6 +190,8 @@ onSubmit(): void {
   }
 
   this.isSubmitting = true;
+  this.verificationRequired = false;
+  this.verificationMessage = '';
   const credentials = this.loginForm.value;
 
   this.authService.login(credentials)
@@ -272,7 +277,10 @@ onSubmit(): void {
         const status = error?.status || 0;
         const message = error?.error?.message || error?.message || '';
 
-        if (status === 401 || /invalid email or password/i.test(message)) {
+        if (/please verify your email/i.test(message)) {
+          this.verificationRequired = true;
+          this.verificationMessage = 'Your account is still pending verification. Resend the email and use the latest link.';
+        } else if (status === 401 || /invalid email or password/i.test(message)) {
           this.setPasswordAuthError('Invalid email or password');
         } else if (status === 404 || /email not found/i.test(message)) {
           this.setEmailAuthError('Email not found');
@@ -281,6 +289,28 @@ onSubmit(): void {
         }
 
         this.isSubmitting = false;
+      }
+    });
+}
+
+resendVerificationEmail(): void {
+  const email = String(this.loginForm.get('email')?.value ?? '').trim();
+  if (!email || this.isResendingVerification) return;
+
+  this.isResendingVerification = true;
+  this.verificationMessage = '';
+  this.authService.resendVerificationEmail(email)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: response => {
+        this.isResendingVerification = false;
+        this.verificationMessage = response.success
+          ? 'A new verification email was sent. Use the latest link from your inbox.'
+          : response.message || 'Unable to send a verification email.';
+      },
+      error: error => {
+        this.isResendingVerification = false;
+        this.verificationMessage = error?.error?.message || 'Unable to send a verification email. Please try again.';
       }
     });
 }

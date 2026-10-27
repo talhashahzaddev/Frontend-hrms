@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
@@ -12,7 +13,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, takeUntil } from 'rxjs';
-import { Router } from '@angular/router';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -51,6 +51,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
   hideConfirmPassword = true;
   isLinear = false;
    submitted=false;
+   registrationComplete = false;
+   registrationAlreadyExists = false;
+   verificationEmailSent = false;
+   isResendingVerification = false;
+   private registrationEmail = '';
   // Form steps
   organizationForm!: FormGroup;
   userForm!: FormGroup;
@@ -73,7 +78,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notificationService: NotificationService,
     private validationService: ValidationService,
-    private router: Router,
     private settingsService: SettingsService
   ) {}
 
@@ -139,34 +143,43 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const organizationData = this.organizationForm.value;
     const userData = this.userForm.value;
     const registerRequest: RegisterRequest = {
-      companyName: organizationData.companyName,
+      companyName: organizationData.companyName.trim(),
       companySize: organizationData.companySize,
-      website: organizationData.website,
+      website: organizationData.website?.trim() || undefined,
       currency: organizationData.currency || 'USD',
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
+      firstName: userData.firstName.trim(),
+      lastName: userData.lastName.trim(),
+      email: userData.email.trim(),
       password: userData.password
     };
+    this.registrationEmail = registerRequest.email;
     this.authService.register(registerRequest)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
+        next: (response) => {
           this.isLoading = false;
-          this.notificationService.showSuccess('Registration successful! Welcome to your new HRMS system.');
-          const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
-          sessionStorage.removeItem('redirectUrl');
-          this.router.navigate([redirectUrl]);
+          this.verificationEmailSent = response.emailVerificationSent !== false;
+          this.registrationComplete = true;
+          if (this.verificationEmailSent) {
+            this.notificationService.showSuccess('Account created. Check your email to verify it before logging in.');
+          } else {
+            this.notificationService.showError('Your account was created, but the verification email could not be sent. You can try again below.');
+          }
         },
-        error: (error) => {
+        error: (error: unknown) => {
           this.isLoading = false;
-          const status = (error && typeof error === 'object' && 'status' in error) ? (error as any).status : 0;
-          const errorMessage = error?.error?.message || error?.message || '';
-          if (status === 400 && /already exists/i.test(errorMessage)) {
-            const emailCtrl = this.userForm.get('email');
-            emailCtrl?.setErrors({ conflict: true });
-            emailCtrl?.markAsTouched();
-            this.notificationService.showError('A user with this email already exists');
+          const httpError = error instanceof HttpErrorResponse ? error : null;
+          const responseError = httpError?.error as { message?: string; errors?: string[] } | null;
+          const errorMessage = responseError?.errors?.join(', ') ||
+            responseError?.message ||
+            (error instanceof Error ? error.message : '');
+          if (httpError?.status === 400 && /already exists/i.test(errorMessage)) {
+            this.registrationAlreadyExists = true;
+            this.registrationComplete = true;
+            this.verificationEmailSent = false;
+            this.notificationService.showInfo(
+              'This email is already registered. If it has not been verified, you can request another verification email.'
+            );
           } else {
             this.notificationService.showError(errorMessage || 'Registration failed. Please try again.');
           }
@@ -177,7 +190,35 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.markFormGroupTouched(this.organizationForm);
     this.notificationService.showError('Please correct the highlighted fields');
   }
-}
+  }
+
+  resendVerificationEmail(): void {
+    if (!this.registrationEmail || this.isResendingVerification) {
+      return;
+    }
+
+    this.isResendingVerification = true;
+    this.authService.resendVerificationEmail(this.registrationEmail)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isResendingVerification = false;
+          this.verificationEmailSent = response.success && response.data === true;
+          if (this.verificationEmailSent) {
+            this.notificationService.showSuccess('Verification email sent. Check your inbox.');
+          } else {
+            this.notificationService.showError(response.message || 'Unable to send verification email.');
+          }
+        },
+        error: (error: unknown) => {
+          this.isResendingVerification = false;
+          const message = error instanceof HttpErrorResponse
+            ? (error.error?.message || 'Unable to send verification email. Please try again later.')
+            : 'Unable to send verification email. Please try again later.';
+          this.notificationService.showError(message);
+        }
+      });
+  }
 
 
 

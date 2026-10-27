@@ -56,17 +56,24 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
+    const isEmailVerificationRoute =
+      window.location.pathname.replace(/\/+$/, '').toLowerCase() === '/verify-email';
+
     // Check for pending auth from subdomain redirect FIRST
     // This must happen before loadStoredAuth() so the auth data is available
     this.completePendingAuthIfExists();
 
-    // Then load any existing auth from localStorage
-    this.loadStoredAuth();
+    // Verification links must work even when the browser has a stale session.
+    if (!isEmailVerificationRoute) {
+      this.loadStoredAuth();
+    }
 
     // Delay permission fetch to avoid circular dependency with HTTP interceptors
     // The service must be fully constructed and injected before making HTTP calls
     queueMicrotask(() => {
-      this.initializePermissionsIfNeeded();
+      if (!isEmailVerificationRoute) {
+        this.initializePermissionsIfNeeded();
+      }
     });
   }
 
@@ -226,33 +233,18 @@ export class AuthService {
     const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     const currentPort = window.location.port ? `:${window.location.port}` : '';
+    const isLocalHost =
+      currentHost === 'localhost' ||
+      currentHost.endsWith('.localhost') ||
+      /^\d{1,3}(?:\.\d{1,3}){3}$/.test(currentHost);
+    let loginHost: string;
 
-    let baseDomain = '';
-    let loginHost = '';
-
-    // Handle localhost (including subdomains like codified.localhost)
-    if (currentHost.includes('localhost')) {
-      // Always redirect to login.localhost (not login.org.localhost)
-      loginHost = 'login.localhost';
-    }
-    // Handle IP addresses
-    else if (currentHost.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-      baseDomain = currentHost;
-      loginHost = `login.${baseDomain}`;
-    }
-    // Handle production domains
-    else {
-      const hostParts = currentHost.split('.');
-
-      if (hostParts.length >= 2) {
-        // Extract base domain (last two parts)
-        baseDomain = hostParts.slice(-2).join('.');
-        loginHost = `login.${baseDomain}`;
-      } else {
-        // Fallback
-        baseDomain = currentHost;
-        loginHost = `login.${baseDomain}`;
-      }
+    if (isLocalHost) {
+      loginHost = currentHost.endsWith('.localhost') && currentHost !== 'localhost'
+        ? 'login.localhost'
+        : currentHost;
+    } else {
+      loginHost = `login.${environment.baseDomain}`;
     }
 
     if (currentHost.toLowerCase() === loginHost.toLowerCase()) {
@@ -384,6 +376,10 @@ export class AuthService {
   }
 
   checkAuthStatus(): void {
+    if (window.location.pathname.replace(/\/+$/, '').toLowerCase() === '/verify-email') {
+      return;
+    }
+
     const token = this.getToken();
     const user = this.getStoredUser();
 
@@ -439,6 +435,10 @@ export class AuthService {
         }),
         catchError(this.handleError)
       );
+  }
+
+  resendVerificationEmail(email: string): Observable<ApiResponse<boolean>> {
+      return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/resend-verification`, { email });
   }
 
   forgotPassword(request: ForgotPasswordRequest): Observable<ApiResponse<boolean>> {
@@ -998,6 +998,9 @@ export class AuthService {
     return throwError(() => new Error(errorMessage));
   }
   verifyEmail(token: string) {
-    return this.http.get<any>(`${this.API_URL}/verify-email?token=${token}`);
+    return this.http.get<ApiResponse<boolean>>(
+      `${this.API_URL}/verify-email`,
+      { params: { token } }
+    );
   }
 }

@@ -14,6 +14,34 @@
 
     <!-- Registration Form -->
     <div class="register-form">
+      <section *ngIf="registrationComplete; else registrationForm" class="registration-result" aria-live="polite">
+        <mat-icon>{{ verificationEmailSent ? 'mark_email_read' : 'error_outline' }}</mat-icon>
+        <h3>
+          {{ registrationAlreadyExists
+            ? 'Account already exists'
+            : 'Registration ' + (verificationEmailSent ? 'complete' : 'created') }}
+        </h3>
+        <p *ngIf="verificationEmailSent && !registrationAlreadyExists">
+          Check your inbox for the verification link. You must verify your email before logging in.
+        </p>
+        <p *ngIf="!verificationEmailSent && !registrationAlreadyExists">
+          Your account was created, but we couldn't send the verification email.
+        </p>
+        <p *ngIf="registrationAlreadyExists">
+          If this account has not been verified, you can request a new verification email.
+        </p>
+        <button
+          *ngIf="!verificationEmailSent"
+          mat-flat-button
+          type="button"
+          [disabled]="isResendingVerification"
+          (click)="resendVerificationEmail()">
+          {{ isResendingVerification ? 'Sending...' : 'Resend verification email' }}
+        </button>
+        <a routerLink="/login" class="login-link">Go to login</a>
+      </section>
+
+      <ng-template #registrationForm>
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
         
         <!-- Registration Stepper -->
@@ -229,8 +257,7 @@
         </mat-stepper>
 
       </form>
-
-    
+      </ng-template>
 
       <!-- Footer -->
       <div class="register-footer">
@@ -244,4 +271,3 @@
   </div>
 
 <!-- </div> -->
-

@@ -1,4 +1,7 @@
 <div class="verify-email-container">
-  <div class="spinner"></div>
-  <p>Verifying your email…</p>
+  <div *ngIf="status === 'verifying'" class="spinner"></div>
+  <mat-icon *ngIf="status === 'verified'" class="status-icon success">check_circle</mat-icon>
+  <mat-icon *ngIf="status === 'failed'" class="status-icon error">error</mat-icon>
+  <p>{{ message }}</p>
+  <a *ngIf="status !== 'verifying'" routerLink="/login">Go to login</a>
 </div>

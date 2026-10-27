@@ -164,6 +164,7 @@ export interface SubscriptionPlan {
   name: string;
   monthlyPrice?: number;
   annualPrice?: number;
+  currency?: string;
   maxUsers?: number;
   features?: Record<string, any>;
   isCustom: boolean;

@@ -118,6 +118,142 @@
         <!-- Subscription Tab -->
         <mat-tab label="Subscription">
           <div class="tab-body">
+            @if (isEntitlementLoading) {
+              <div class="entitlement-loading"><mat-spinner diameter="32"></mat-spinner></div>
+            } @else if (entitlementError) {
+              <div class="entitlement-alert error">{{ entitlementError }}</div>
+            }
+            @if (entitlementSuccess) {
+              <div class="entitlement-alert success">{{ entitlementSuccess }}</div>
+            }
+            @if (tenantEntitlements) {
+              <mat-card class="info-card entitlement-card">
+                <mat-card-header>
+                  <mat-card-title>Plan & tenant access</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="entitlement-usage">
+                    <span><strong>Current plan:</strong> {{ tenantEntitlements.planCode }}</span>
+                    <span><strong>Status:</strong> {{ tenantEntitlements.subscriptionStatus | titlecase }}</span>
+                    <span><strong>User usage:</strong> {{ tenantEntitlements.userCount }}/{{ tenantEntitlements.maxUsers ?? 'Unlimited' }}</span>
+                    <span><strong>Dates:</strong>
+                      {{ tenantEntitlements.startDate ? (tenantEntitlements.startDate | localizedDate:'mediumDate') : '—' }}
+                      –
+                      {{ tenantEntitlements.endDate ? (tenantEntitlements.endDate | localizedDate:'mediumDate') : 'No end date' }}
+                    </span>
+                  </div>
+
+                  <div class="custom-plan-form">
+                    <h3>Custom plan builder</h3>
+                    <p class="form-hint">Choose a base plan, then adjust its feature access, limits, price, or user cap for this tenant.</p>
+                    <div class="custom-plan-fields">
+                      <label>
+                        Base plan
+                        <select [ngModel]="basePlanId" (ngModelChange)="onBasePlanChange($event)">
+                          @for (plan of entitlementPlans; track plan.planId) {
+                            @if (plan.status === 'active') {
+                              <option [value]="plan.planId">{{ plan.name }} ({{ plan.code }})</option>
+                            }
+                          }
+                        </select>
+                        @if (!selectedBasePlan) {
+                          <small>Select an active plan; the tenant's previous plan is no longer assignable.</small>
+                        }
+                      </label>
+                      <label>
+                        Subscription status
+                        <select [(ngModel)]="customStatus">
+                          <option value="active">Active</option>
+                          <option value="trial">Trial</option>
+                          <option value="past_due">Past due</option>
+                          <option value="cancelled">Cancelled / suspend</option>
+                          <option value="expired">Expired</option>
+                        </select>
+                      </label>
+                      <label>
+                        Billing cycle
+                        <select [(ngModel)]="customBillingCycle">
+                          <option value="monthly">Monthly</option>
+                          <option value="annual">Annual</option>
+                        </select>
+                      </label>
+                      <label>
+                        Custom price ({{ customCurrency }})
+                        <input type="number" min="0" step="0.001" [ngModel]="customPrice" (ngModelChange)="customPrice = $event === '' ? null : +$event">
+                      </label>
+                      <label>
+                        Custom maximum users
+                        <input type="number" min="1" step="1" [ngModel]="customMaxUsers" (ngModelChange)="customMaxUsers = $event === '' ? null : +$event">
+                      </label>
+                      <label>
+                        End date
+                        <input type="date" [(ngModel)]="customEndDate">
+                      </label>
+                      <label>
+                        Trial end date
+                        <input type="date" [(ngModel)]="customTrialEndDate">
+                      </label>
+                    </div>
+
+                    <div class="feature-matrix">
+                      @for (group of featureGroups; track group.moduleKey) {
+                        <section class="feature-group">
+                          <h4>{{ group.moduleKey | titlecase }}</h4>
+                          @for (feature of group.features; track feature.key) {
+                            <div class="feature-row">
+                              <label class="feature-toggle">
+                                <input
+                                  type="checkbox"
+                                  [checked]="customFeatures[feature.key]?.enabled ?? false"
+                                  (change)="setCustomFeature(feature.key, $any($event.target).checked)">
+                                <span>{{ feature.name }}</span>
+                              </label>
+                              @if (feature.type === 'limit') {
+                                <label class="feature-limit">
+                                  Monthly limit
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    [disabled]="!customFeatures[feature.key]?.enabled"
+                                    [value]="customFeatures[feature.key]?.limit ?? ''"
+                                    (input)="setCustomLimit(feature.key, $any($event.target).value)">
+                                </label>
+                              }
+                              <small>{{ feature.description }}</small>
+                            </div>
+                          }
+                        </section>
+                      }
+                    </div>
+
+                    <div class="custom-plan-diff">
+                      <h4>Base plan vs custom changes</h4>
+                      @if (customFeatureDiff.length) {
+                        @for (change of customFeatureDiff; track change.featureKey) {
+                          <span class="diff-chip" [class.added]="change.enabled" [class.removed]="!change.enabled">
+                            {{ change.featureKey }}: {{ change.enabled ? 'enabled' : 'disabled' }}
+                            @if (change.limit !== null) { · limit {{ change.limit }} }
+                          </span>
+                        }
+                      } @else {
+                        <p>No feature differences from the selected base plan.</p>
+                      }
+                    </div>
+                    <label class="reason-field">
+                      Reason for change
+                      <textarea rows="2" [(ngModel)]="customReason" maxlength="1000" required></textarea>
+                    </label>
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      [disabled]="isCustomPlanSaving || !customReason.trim() || !selectedBasePlan"
+                      (click)="saveCustomPlan()">
+                      @if (isCustomPlanSaving) { Saving… } @else { Save tenant plan }
+                    </button>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
             @if (org.subscription) {
               <mat-card class="info-card">
                 <mat-card-header>

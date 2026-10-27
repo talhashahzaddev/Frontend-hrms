@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '@core/services/auth.service';
 import { User, UserPermissions } from '@core/models/auth.models';
 import { Onboarding } from '@/app/onboarding/onboarding.component';
+import { TenantEntitlementService } from '@core/services/tenant-entitlement.service';
 interface MenuItem {
   label: string;
   icon: string;
@@ -25,6 +26,7 @@ interface MenuItem {
   actionKey?: string;
   /** When set, item is visible if any of these action keys is granted. */
   anyOfActionKeys?: string[];
+  featureKey?: string;
   permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
@@ -62,12 +64,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Dashboard',
       icon: 'dashboard',
       route: '/dashboard',
+      featureKey: 'dashboard',
     },
 
     {
       label: 'Employee Management',
       icon: 'people',
       menuName: 'Employee Management',
+      featureKey: 'employee_management',
       children: [
         { label: 'All Employees', icon: 'group', route: '/employees', menuName: 'Employee Management', subMenuName: 'All Employees', exact: true },
         { label: 'Add Employee', icon: 'person_add', route: '/employees/add', menuName: 'Employee Management', subMenuName: 'Add Employee' },
@@ -79,6 +83,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Attendance',
       icon: 'schedule',
       menuName: 'Attendance',
+      featureKey: 'attendance',
       children: [
         { label: 'My Attendance', icon: 'access_time', route: '/attendance/dashboard', menuName: 'Attendance', subMenuName: 'My Attendance' },
         {
@@ -92,8 +97,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', menuName: 'Attendance', subMenuName: 'Team Attendance' },
 
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
-        { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts' },
-        { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime' },
+        { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts', featureKey: 'shifts_overtime' },
+        { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime', featureKey: 'shifts_overtime' },
 
         {
           label: 'Geo-Fences',
@@ -101,6 +106,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           route: '/attendance/geo-fences',
           menuName: 'Attendance',
           subMenuName: 'Geo-Fences',
+          featureKey: 'geo_fencing',
           permissionAliases: ['Geo Fences', 'GeoFence', 'Geo Fence', 'Geofence']
         },
         {
@@ -109,6 +115,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           route: '/attendance/geo-violations',
           menuName: 'Attendance',
           subMenuName: 'Geo Violations',
+          featureKey: 'geo_fencing',
           permissionAliases: ['Geo-Fence Violations', 'GeoFence Violations', 'Geofence Violations']
         },
         {
@@ -122,6 +129,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Timesheet',
       icon: 'date_range',
       menuName: 'Timesheet',
+      featureKey: 'timesheet',
       children: [
         { label: 'Dashboard', icon: 'dashboard', route: '/timesheet/dashboard', menuName: 'Timesheet', subMenuName: 'Dashboard' },
         { label: 'Periods', icon: 'view_list', route: '/timesheet/periods', menuName: 'Timesheet', subMenuName: 'Periods' },
@@ -138,6 +146,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Leave Management',
       icon: 'event_available',
       menuName: 'Leave Management',
+      featureKey: 'leave_management',
       children: [
         {
           label: 'My Leaves',
@@ -175,6 +184,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Assets Management',
       icon: 'inventory_2',
       menuName: 'Assets Management',
+      featureKey: 'assets_management',
       children: [
         { label: 'Types of Assets', icon: 'folder-tree', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
         { label: 'Assets', icon: 'add_box', route: '/assets/create', menuName: 'Assets Management', subMenuName: 'Assets' }
@@ -184,6 +194,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Performance',
       icon: 'trending_up',
       menuName: 'Performance',
+      featureKey: 'performance',
       children: [
 
         { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'My Performance' },
@@ -207,6 +218,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Expense',
       icon: 'receipt_long',
       menuName: 'Expense',
+      featureKey: 'expense',
       children: [
         { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, menuName: 'Expense', subMenuName: 'Category' },
         { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true, menuName: 'Expense', subMenuName: 'Claims' },
@@ -218,6 +230,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'News',
       icon: 'event_available',
       menuName: 'News',
+      featureKey: 'news',
       children: [
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard', menuName: 'News', subMenuName: 'New Dashboard' },
         { label: 'Create News', icon: 'plus-circle', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'Create News' }
@@ -228,6 +241,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Help Desk',
       icon: 'support_agent',
       menuName: 'Help Desk',
+      featureKey: 'help_desk',
       children: [
         { label: 'Tickets Dashboard', icon: 'confirmation_number', menuName: 'Help Desk', subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
         { label: 'Agent Group', icon: 'groups', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
@@ -239,6 +253,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Jobs',
       icon: 'work',
       menuName: 'Jobs',
+      featureKey: 'jobs',
       children: [
         { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings', actionKey: 'opnings_view_all' },
         { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications', anyOfActionKeys: ['all_job_application', 'received_application_by_my_job_post', 'my_referenced_application', 'ats_inbox_view', 'my_self_application'] },
@@ -251,11 +266,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Payroll',
       icon: 'payments',
       menuName: 'Payroll',
+      featureKey: 'payroll',
       children: [
         {
           label: 'Bonus & Performance',
           icon: 'card_giftcard',
           route: '/payroll/bonus',
+          featureKey: 'payroll_processing',
           activeRoutes: ['/payroll/performance'],
           anyOfActionKeys: ['bonus_entry_view', 'performance_pay_view']
         },
@@ -263,6 +280,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Loans',
           icon: 'account_balance',
           route: '/payroll/loans',
+          featureKey: 'loans_advances',
           exact: true,
           anyOfActionKeys: ['loan_admin_view']
         },
@@ -270,6 +288,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Provident Funds',
           icon: 'account_balance_wallet',
           route: '/payroll/provident-fund',
+          featureKey: 'sio_calculation',
           exact: true,
           anyOfActionKeys: ['pf_admin_view']
         },
@@ -277,6 +296,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Tax Ledger',
           icon: 'history_edu',
           route: '/payroll/tax-ledger',
+          featureKey: 'payroll_processing',
           exact: true,
           actionKey: 'get_transaction_ledger'
         },
@@ -284,6 +304,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Salary Advances',
           icon: 'savings',
           route: '/payroll/salary-advances',
+          featureKey: 'loans_advances',
           exact: true,
           anyOfActionKeys: [
             'salary_advance_admin_list',
@@ -297,6 +318,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Gratuity',
           icon: 'emoji_events',
           route: '/payroll/gratuity',
+          featureKey: 'eosb',
           exact: true,
           actionKey: 'gratuity_admin_view'
         },
@@ -304,12 +326,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Social Security',
           icon: 'shield_person',
           route: '/payroll/social-security',
+          featureKey: 'sio_calculation',
           exact: true
         },
         {
           label: 'Payslip Management',
           icon: 'receipt_long',
           route: '/payroll/payslips',
+          featureKey: 'payslips',
           exact: true,
           anyOfActionKeys: [
             'my_payslip',
@@ -318,11 +342,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
             'mail_upload_payslip'
           ]
         },
-        { label: 'Policies', icon: 'rule', route: '/payroll/policies', actionKey: 'payroll_rules_view' },
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies', featureKey: 'payroll_processing', actionKey: 'payroll_rules_view' },
         {
           label: 'Time Tracking',
           icon: 'schedule',
           route: '/payroll/time-tracking',
+          featureKey: 'payroll_processing',
           anyOfActionKeys: [
             'overtime_entry_view',
             'attendance_summary_view',
@@ -363,6 +388,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Onboarding',
       icon: 'person_add',
       menuName: 'Onboarding',
+      featureKey: 'onboarding',
       children: [
         { label: 'Employee Onboarding', icon: 'person_add', route: '/onboarding', menuName: 'Onboarding', subMenuName: 'Employee Onboarding' },
         { label: 'Onboarding Configuration', icon: 'settings', route: '/settings/onboarding-configuration', menuName: 'Onboarding', subMenuName: 'Onboarding Configuration' }
@@ -372,18 +398,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'AI Assistant',
       icon: 'smart_toy',
       route: '/ai-assistant',
-      menuName: 'AI Assistant'
+      menuName: 'AI Assistant',
+      featureKey: 'ai_assistant'
     },
   ];
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private entitlementService: TenantEntitlementService
   ) { }
 
   ngOnInit(): void {
     this.subscribeToUser();
     this.subscribeToPermissions();
+    this.entitlementService.load().subscribe({
+      error: error => console.error('Unable to load plan features for navigation.', error)
+    });
+    this.entitlementService.entitlements$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => { this.menuPermissionsVersion++; });
     this.subscribeToRouterEvents();
     // Ensure active state is correct on initial load (before first NavigationEnd)
     this.activeRoute = this.router.url;
@@ -425,6 +459,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(item: MenuItem): boolean {
+    if (item.featureKey && !this.entitlementService.isEnabled(item.featureKey)) {
+      return false;
+    }
+
     // Show Company Policies to Super Admin always (if this route exists but permissions are missing)
     if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Question Bank' || item.route === '/settings/payslip-template') {
       if (this.currentUser?.roleName?.toLowerCase() === 'super admin' || this.currentUser?.roleName?.toLowerCase() === 'admin' || this.currentUser?.roleName?.toLowerCase() === 'hr manager') {

@@ -183,6 +183,134 @@
   }
 }
 
+.entitlement-loading {
+  display: flex;
+  justify-content: center;
+  padding: 18px;
+}
+
+.entitlement-alert {
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+
+  &.error { color: #a4262c; background: #fde7e9; }
+  &.success { color: #176b3a; background: #e5f5ec; }
+}
+
+.entitlement-card {
+  margin-bottom: 20px;
+}
+
+.entitlement-usage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 8px 0 20px;
+  color: #555;
+}
+
+.custom-plan-form {
+  border-top: 1px solid #e8e8e8;
+  padding-top: 20px;
+
+  h3, h4 { margin: 0 0 8px; color: #263238; }
+  h3 { font-size: 1.1rem; }
+  h4 { font-size: 0.95rem; }
+  .form-hint { margin: 0 0 16px; color: #777; font-size: 0.85rem; }
+}
+
+.custom-plan-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.custom-plan-fields label,
+.reason-field,
+.feature-limit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #555;
+  font-size: 0.82rem;
+  font-weight: 500;
+
+  input, select, textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cfd8dc;
+    border-radius: 5px;
+    background: #fff;
+    color: #263238;
+    font: inherit;
+  }
+}
+
+.feature-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.feature-group {
+  padding: 14px;
+  border: 1px solid #e5e9ec;
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.feature-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(100px, 130px);
+  gap: 8px 12px;
+  padding: 10px 0;
+  border-top: 1px solid #edf0f2;
+
+  small {
+    grid-column: 1 / -1;
+    color: #7a858c;
+  }
+}
+
+.feature-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #424b50;
+  font-size: 0.86rem;
+
+  input { accent-color: #3f51b5; }
+}
+
+.custom-plan-diff {
+  margin: 20px 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: #f5f7fa;
+
+  p { margin: 4px 0 0; color: #777; font-size: 0.85rem; }
+}
+
+.diff-chip {
+  display: inline-block;
+  margin: 4px 6px 0 0;
+  padding: 5px 9px;
+  border-radius: 12px;
+  font-size: 0.76rem;
+
+  &.added { color: #176b3a; background: #dff3e7; }
+  &.removed { color: #a4262c; background: #fde7e9; }
+}
+
+.reason-field {
+  margin-bottom: 14px;
+  max-width: 600px;
+}
+
 // Responsive
 @media (max-width: 768px) {
   .info-grid {

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '../../core/guards/auth.guard';
+import { FeatureAccessGuard } from '../../core/guards/feature-access.guard';
 
 export const attendanceRoutes: Routes = [
   {
@@ -17,7 +18,9 @@ export const attendanceRoutes: Routes = [
   },
    {
     path: 'overtime',
-    loadComponent: () => import('./components/overtime/overtime.component').then(m => m.OvertimeComponent)
+     canActivate: [FeatureAccessGuard],
+     data: { feature: 'shifts_overtime' },
+     loadComponent: () => import('./components/overtime/overtime.component').then(m => m.OvertimeComponent)
   },
   {
     path: 'team-attendance',
@@ -33,10 +36,14 @@ export const attendanceRoutes: Routes = [
   },
   {
     path: 'shift',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'shifts_overtime' },
     loadComponent: () => import('./components/shift/shift.component').then(m => m.ShiftComponent)
   },
   {
     path: 'createshift',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'shifts_overtime' },
     loadComponent: () => import('./components/create-shift/create-shift.component').then(m => m.CreateShiftComponent)
   },
   {
@@ -45,6 +52,8 @@ export const attendanceRoutes: Routes = [
   },
   {
     path: 'timesheet',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'timesheet' },
     loadComponent: () => import('./components/timesheet-dashboard/timesheet-dashboard.component').then(m => m.TimesheetDashboardComponent)
   },
   {
@@ -54,12 +63,16 @@ export const attendanceRoutes: Routes = [
   // ── Geo-Fence routes 
   {
     path: 'geo-fences',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'geo_fencing' },
     loadComponent: () =>
       import('./components/geofence/geofence-management.component')
         .then(m => m.GeoFenceManagementComponent)
   },
   {
     path: 'geo-violations',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'geo_fencing' },
     loadComponent: () =>
       import('./components/geofence-violations/geofence-violations.component')
         .then(m => m.GeoFenceViolationsComponent)

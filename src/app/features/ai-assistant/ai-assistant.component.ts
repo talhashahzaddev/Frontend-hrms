@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { TenantEntitlementService } from '@core/services/tenant-entitlement.service';
 interface FormattedMessagePart {
   type: 'text' | 'url' | 'linebreak';
   content: string;
@@ -29,6 +30,7 @@ export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
   newMessage = '';
   isLoading = false;
   composerFocused = false;
+  remainingAiQueries: number | null = null;
 
   readonly starterSuggestions = [
     'What is my basic salary?',
@@ -48,11 +50,18 @@ export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private chatService: ChatService,
-    private router: Router
+    private router: Router,
+    private tenantEntitlementService: TenantEntitlementService
   ) {}
 
   ngOnInit(): void {
     this.loadMessages();
+    this.tenantEntitlementService.load()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: entitlements => this.remainingAiQueries = entitlements.aiQueriesRemaining ?? null,
+        error: error => console.error('Unable to load AI query allowance.', error)
+      });
     // Scroll to bottom on init
     setTimeout(() => this.scrollToBottom(), 100);
   }
@@ -101,6 +110,9 @@ export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
         next: (response) => {
           // Reload messages from service - it has both user and AI messages in correct order
           this.messages = [...this.chatService.getMessages()];
+          if (this.remainingAiQueries !== null) {
+            this.remainingAiQueries = Math.max(0, this.remainingAiQueries - 1);
+          }
           this.isLoading = false;
           // Small delay to ensure DOM updates before scrolling
           setTimeout(() => this.scrollToBottom(), 50);
@@ -316,4 +328,3 @@ export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 }
-

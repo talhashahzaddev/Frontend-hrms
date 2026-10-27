@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { FeatureAccessGuard } from '../../core/guards/feature-access.guard';
 
 export const payrollRoutes: Routes = [
   {
@@ -23,12 +24,16 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'loans',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'loans_advances' },
     loadComponent: () =>
       import('./components/loans/loans.component').then(m => m.LoansComponent),
     title: 'Loans - HRMS'
   },
   {
     path: 'provident-fund',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/provident-fund/provident-fund.component').then(m => m.ProvidentFundComponent),
     title: 'Provident Funds - HRMS'
@@ -41,30 +46,40 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'salary-advances',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'loans_advances' },
     loadComponent: () =>
       import('./components/salary-advances/salary-advances.component').then(m => m.SalaryAdvancesComponent),
     title: 'Salary Advances - HRMS'
   },
   {
     path: 'gratuity',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'eosb' },
     loadComponent: () =>
       import('./components/gratuity/gratuity.component').then(m => m.GratuityComponent),
     title: 'Gratuity - HRMS'
   },
   {
     path: 'loans/requests',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'loans_advances' },
     loadComponent: () =>
       import('./components/loan-requests/loan-requests.component').then(m => m.LoanRequestsComponent),
     title: 'My Loan & Advance Requests - HRMS'
   },
   {
     path: 'provident-fund-benefilts',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/provident-fund-benefilts/provident-fund-benefilts.component').then(m => m.ProvidentFundBenefiltsComponent),
     title: 'Provident Fund Benefits - HRMS'
   },
   {
     path: 'social-security',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/social-security/social-security.component').then(m => m.SocialSecurityComponent),
     title: 'Social Security Management - HRMS'
@@ -81,6 +96,8 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'payslips',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'payslips' },
     loadComponent: () =>
       import('./components/compliance-payslips/compliance-payslips.component').then(m => m.CompliancePayslipsComponent),
     title: 'Payslip Management - HRMS'
@@ -140,18 +157,24 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'policies/loan-rules',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'loans_advances' },
     loadComponent: () =>
       import('./components/loan-rules/loan-rules.component').then(m => m.LoanRulesComponent),
     title: 'Loan Policy - HRMS'
   },
   {
     path: 'policies/provident-fund-rule',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/provident-fund-rule/provident-fund-rule.component').then(m => m.ProvidentFundRuleComponent),
     title: 'Provident Fund Policy - HRMS'
   },
   {
     path: 'policies/salary-advance-rules',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'loans_advances' },
     loadComponent: () =>
       import('./components/salary-advance-rules/salary-advance-rules.component').then(m => m.SalaryAdvanceRulesComponent),
     title: 'Salary Advance Policy - HRMS'
@@ -182,24 +205,32 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'policies/social-security-rules',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/social-security-rules/social-security-rules.component').then(m => m.SocialSecurityRulesComponent),
     title: 'Social Security Policy - HRMS'
   },
   {
     path: 'policies/social-security-schemes',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/social-security-schemes/social-security-schemes.component').then(m => m.SocialSecuritySchemesComponent),
     title: 'Social Security Schemes - HRMS'
   },
   {
     path: 'policies/social-security-jurisdictions',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/social-security-jurisdictions/social-security-jurisdictions.component').then(m => m.SocialSecurityJurisdictionsComponent),
     title: 'Social Security Jurisdictions - HRMS'
   },
   {
     path: 'policies/social-security-authorities',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/social-security-authorities/social-security-authorities.component').then(m => m.SocialSecurityAuthoritiesComponent),
     title: 'Social Security Authorities - HRMS'
@@ -218,12 +249,16 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'policies/gratuity-rules',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'eosb' },
     loadComponent: () =>
       import('./components/gratuity-rules/gratuity-rules.component').then(m => m.GratuityRulesComponent),
     title: 'Gratuity Policy - HRMS'
   },
   {
     path: 'my-gratuity',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'eosb' },
     loadComponent: () =>
       import('./components/my-gratuity/my-gratuity.component').then(m => m.MyGratuityComponent),
     title: 'My Gratuity - HRMS'
@@ -236,6 +271,8 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'my-social-security',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'sio_calculation' },
     loadComponent: () =>
       import('./components/my-social-security/my-social-security.component').then(m => m.MySocialSecurityComponent),
     title: 'My Social Security - HRMS'
@@ -248,6 +285,8 @@ export const payrollRoutes: Routes = [
   },
   {
     path: 'my-payslips',
+    canActivate: [FeatureAccessGuard],
+    data: { feature: 'payslips' },
     loadComponent: () =>
       import('./components/payslips/payslips.component').then(m => m.PayslipsComponent),
     title: 'My Payslips - HRMS'

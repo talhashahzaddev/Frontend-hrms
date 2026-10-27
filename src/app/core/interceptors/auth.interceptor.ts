@@ -40,7 +40,11 @@ export class AuthInterceptor implements HttpInterceptor {
         }
 
         // ✅ Only handle 401 if NOT from auth endpoints
-        if (error.status === 401 && !this.isAuthUrl(request.url)) {
+        if (
+          error.status === 401 &&
+          !this.isAuthUrl(request.url) &&
+          !this.isEmailVerificationRoute()
+        ) {
           return this.handle401Error(request, next);
         }
 
@@ -95,8 +99,14 @@ export class AuthInterceptor implements HttpInterceptor {
       lowerUrl.includes('/auth/register') ||
       lowerUrl.includes('/auth/refresh') ||
       lowerUrl.includes('/auth/logout') ||
-      lowerUrl.includes('/auth/forgot-password')
+      lowerUrl.includes('/auth/forgot-password') ||
+      lowerUrl.includes('/auth/resend-verification') ||
+      lowerUrl.includes('/auth/verify-email')
     );
+  }
+
+  private isEmailVerificationRoute(): boolean {
+    return window.location.pathname.replace(/\/+$/, '').toLowerCase() === '/verify-email';
   }
 
   /**

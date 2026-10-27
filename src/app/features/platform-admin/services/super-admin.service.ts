@@ -15,6 +15,13 @@ import {
   SubscriptionPlan
 } from '../models/super-admin.models';
 import {
+  EntitlementAuditEntry,
+  EntitlementFeature,
+  EntitlementPlan,
+  EntitlementApiResponse,
+  TenantEntitlements
+} from '@core/models/entitlement.models';
+import {
   GlobalRole,
   CreateGlobalRoleRequest,
   UpdateGlobalRoleRequest
@@ -37,6 +44,8 @@ import {
   RevenueAnalyticsDto,
   PagedResult as PaymentPagedResult
 } from '@core/models/payment-management.models';
+
+const unavailableEntitlementFeatureKeys = new Set(['lms', 'air_ticket_management']);
 
 @Injectable({ providedIn: 'root' })
 export class SuperAdminService {
@@ -83,6 +92,133 @@ export class SuperAdminService {
   // ========== Subscription Plans (reuse existing payment endpoint) ==========
   getSubscriptionPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
     return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.PAYMENT_URL}/subscription-plans`);
+  }
+
+  getEntitlementPlans(includeArchived = false): Observable<EntitlementApiResponse<EntitlementPlan[]>> {
+    return this.http.get<EntitlementApiResponse<EntitlementPlan[]>>(
+      `${environment.apiUrl}/Entitlements/plans`,
+      { params: { includeArchived } }
+    ).pipe(map(response => ({
+      ...response,
+      data: response.data?.map(plan => ({
+        ...plan,
+        features: Object.fromEntries(
+          Object.entries(plan.features).filter(([key]) => !unavailableEntitlementFeatureKeys.has(key))
+        )
+      }))
+    })));
+  }
+
+  getEntitlementFeatures(): Observable<EntitlementApiResponse<EntitlementFeature[]>> {
+    return this.http.get<EntitlementApiResponse<EntitlementFeature[]>>(
+      `${environment.apiUrl}/Entitlements/features`
+    ).pipe(map(response => ({
+      ...response,
+      data: response.data?.filter(feature => !unavailableEntitlementFeatureKeys.has(feature.key))
+    })));
+  }
+
+  createEntitlementPlan(request: Record<string, unknown>): Observable<EntitlementApiResponse<string>> {
+    return this.http.post<EntitlementApiResponse<string>>(`${environment.apiUrl}/Entitlements/plans`, request);
+  }
+
+  updateEntitlementPlan(planId: string, request: Record<string, unknown>): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.put<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/plans/${planId}`,
+      request
+    );
+  }
+
+  duplicateEntitlementPlan(planId: string, name: string, code: string): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.post<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/plans/${planId}/duplicate`,
+      { name, code }
+    );
+  }
+
+  archiveEntitlementPlan(planId: string): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.post<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/plans/${planId}/archive`,
+      {}
+    );
+  }
+
+  reactivateEntitlementPlan(planId: string): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.post<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/plans/${planId}/reactivate`,
+      {}
+    );
+  }
+
+  getTenantEntitlements(tenantId: string): Observable<EntitlementApiResponse<TenantEntitlements>> {
+    return this.http.get<EntitlementApiResponse<TenantEntitlements>>(
+      `${environment.apiUrl}/Entitlements/tenants/${tenantId}`
+    );
+  }
+
+  saveTenantFeatureOverrides(
+    tenantId: string,
+    reason: string,
+    features: Array<{ featureKey: string; enabled: boolean; limit: number | null }>
+  ): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.put<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/tenants/${tenantId}/overrides`,
+      { reason, features }
+    );
+  }
+
+  assignEntitlementPlan(
+    tenantId: string,
+    request: {
+      planId: string;
+      status: string;
+      billingCycle: string;
+      startDate?: string;
+      endDate?: string;
+      trialEndsAt?: string;
+      customPrice?: number | null;
+      customMaxUsers?: number | null;
+      customCurrency?: string;
+    }
+  ): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.put<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/tenants/${tenantId}/subscription`,
+      request
+    );
+  }
+
+  saveTenantCustomPlan(
+    tenantId: string,
+    request: {
+      planId: string;
+      status: string;
+      billingCycle: string;
+      startDate?: string;
+      endDate?: string;
+      trialEndsAt?: string;
+      customPrice: number | null;
+      customMaxUsers: number | null;
+      customCurrency: string;
+      reason: string;
+      features: Array<{ featureKey: string; enabled: boolean; limit: number | null }>;
+    }
+  ): Observable<EntitlementApiResponse<boolean>> {
+    return this.http.put<EntitlementApiResponse<boolean>>(
+      `${environment.apiUrl}/Entitlements/tenants/${tenantId}/custom-plan`,
+      request
+    );
+  }
+
+  getEntitlementAuditLogs(filter: {
+    tenantId?: string;
+    from?: string;
+    to?: string;
+    action?: string;
+  }): Observable<EntitlementApiResponse<EntitlementAuditEntry[]>> {
+    return this.http.get<EntitlementApiResponse<EntitlementAuditEntry[]>>(
+      `${environment.apiUrl}/Entitlements/audit`,
+      { params: { ...filter } }
+    );
   }
 
   // ========== Payment Management (Admin) ==========

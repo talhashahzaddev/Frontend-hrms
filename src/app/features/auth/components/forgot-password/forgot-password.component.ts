@@ -138,7 +138,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.isEmailSent = true;
           this.isSubmitting = false;
-          this.notificationService.showSuccess('Password reset instructions have been sent to your email address.');
+          this.notificationService.showSuccess('If an account exists for that email, you will receive password reset instructions.');
         },
         error: (error) => {
           this.isLoading = false;

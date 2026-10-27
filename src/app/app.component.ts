@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
-import { Subject, filter, takeUntil, take, map, combineLatest } from 'rxjs';
+import { Subject, filter, takeUntil, take, map, combineLatest, distinctUntilChanged } from 'rxjs';
 import { ServerNotificationService } from './core/services/server-notification';
 import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
@@ -90,6 +90,7 @@ export class AppComponent implements OnInit, OnDestroy {
   );
 
   private destroy$ = new Subject<void>();
+  private signalRSetupInProgress = false;
 
   constructor(
     private router: Router,
@@ -107,7 +108,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.handleRouteChanges();
     this.setupRouterProgress();
     this.setFavicon();
-    this.setupSignalRNotifications();
+    this.setupSignalRForAuthenticatedUser();
   }
 
 
@@ -291,9 +292,35 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Connect to real-time notifications only while an authenticated user is active.
+   */
+  private setupSignalRForAuthenticatedUser(): void {
+    this.authService.currentUser$
+      .pipe(
+        distinctUntilChanged((previous, current) => previous?.userId === current?.userId),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(user => {
+        if (user) {
+          void this.setupSignalRNotifications();
+          return;
+        }
+
+        this.roleHubService.disconnect().catch(error => {
+          console.error('Error disconnecting from SignalR:', error);
+        });
+      });
+  }
+
+  /**
    * Setup SignalR real-time notifications for role updates
    */
   private async setupSignalRNotifications(): Promise<void> {
+    if (this.signalRSetupInProgress) {
+      return;
+    }
+
+    this.signalRSetupInProgress = true;
     try {
       console.log('🔌 [AppComponent] Setting up SignalR notifications...');
 
@@ -302,7 +329,7 @@ export class AppComponent implements OnInit, OnDestroy {
       }
 
       // Check if user is authenticated before setting up SignalR
-      if (!this.authService.isAuthenticated) {
+      if (!this.authService.isAuthenticated()) {
         console.log('⚠️ [AppComponent] User not authenticated, skipping SignalR setup');
         return;
       }
@@ -404,6 +431,8 @@ export class AppComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ [AppComponent] Unexpected error setting up SignalR notifications:', error);
       this.notificationService.showError('Failed to setup real-time notifications');
+    } finally {
+      this.signalRSetupInProgress = false;
     }
   }
 

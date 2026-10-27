@@ -1,0 +1,204 @@
+<section class="plan-page">
+  <header class="page-header">
+    <div>
+      <h1>Plans & Entitlements</h1>
+      <p>Manage feature access and tenant subscriptions.</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="createPlan()">
+      <mat-icon>add</mat-icon>
+      Create plan
+    </button>
+  </header>
+
+  <div class="feedback error" *ngIf="errorMessage">
+    <mat-icon>error_outline</mat-icon>{{ errorMessage }}
+  </div>
+  <div class="feedback success" *ngIf="successMessage">
+    <mat-icon>check_circle</mat-icon>{{ successMessage }}
+  </div>
+
+  <div class="loading" *ngIf="isLoading">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+
+  <mat-tab-group *ngIf="!isLoading">
+    <mat-tab label="Plans">
+      <div class="tab-content">
+        <section class="editor card" *ngIf="editorOpen">
+          <div class="section-title">
+            <h2>{{ editingPlan ? 'Edit plan' : 'Create plan' }}</h2>
+            <button mat-icon-button aria-label="Close editor" (click)="cancelEdit()"><mat-icon>close</mat-icon></button>
+          </div>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Plan name</mat-label>
+              <input matInput [(ngModel)]="planName">
+            </mat-form-field>
+            <mat-form-field appearance="outline" *ngIf="!editingPlan">
+              <mat-label>Unique code</mat-label>
+              <input matInput [(ngModel)]="planCode">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Monthly price</mat-label>
+              <input matInput type="number" min="0" [(ngModel)]="monthlyPrice">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Annual price</mat-label>
+              <input matInput type="number" min="0" [(ngModel)]="annualPrice">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Currency</mat-label>
+              <input matInput maxlength="3" [(ngModel)]="currency">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Maximum users</mat-label>
+              <input matInput type="number" min="1" [(ngModel)]="maxUsers">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>User counting</mat-label>
+              <mat-select [(ngModel)]="userCountType">
+                <mat-option value="active_only">Active users only</mat-option>
+                <mat-option value="active_and_inactive">Active and inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="flags">
+            <mat-checkbox [(ngModel)]="isPublic">Show on pricing page</mat-checkbox>
+            <mat-checkbox [(ngModel)]="isRecommended">Recommended plan</mat-checkbox>
+          </div>
+
+          <h3>Feature matrix</h3>
+          <div class="feature-modules">
+            <section class="feature-module" *ngFor="let module of modules">
+              <header>
+                <mat-checkbox
+                  [checked]="moduleEnabled(module)"
+                  (change)="toggleModule(module, $event.checked)">
+                  <strong>{{ module.key | titlecase }}</strong>
+                </mat-checkbox>
+              </header>
+              <div class="feature-row" *ngFor="let feature of module.features">
+                <mat-checkbox
+                  [checked]="featureValues[feature.key]?.enabled || false"
+                  (change)="setFeature(feature.key, $event.checked, featureValues[feature.key]?.limit ?? null)">
+                  {{ feature.name }}
+                </mat-checkbox>
+                <mat-form-field appearance="outline" *ngIf="feature.type === 'limit'">
+                  <mat-label>Monthly limit</mat-label>
+                  <input matInput type="number" min="0"
+                    [value]="featureValues[feature.key]?.limit ?? ''"
+                    (input)="setFeatureLimit(feature.key, $any($event.target).value)"
+                    [disabled]="!featureValues[feature.key]?.enabled">
+                </mat-form-field>
+              </div>
+            </section>
+          </div>
+
+          <aside class="summary">
+            <strong>Plan includes</strong>
+            <span>{{ selectedPlanFeatureSummary.join(', ') || 'No features selected' }}</span>
+          </aside>
+          <div class="editor-actions">
+            <button mat-button (click)="cancelEdit()">Cancel</button>
+            <button mat-flat-button color="primary" (click)="savePlan()" [disabled]="isSaving">
+              <mat-progress-spinner *ngIf="isSaving" diameter="18" mode="indeterminate"></mat-progress-spinner>
+              {{ isSaving ? 'Saving…' : 'Save plan' }}
+            </button>
+          </div>
+        </section>
+
+        <div class="table-wrap card" *ngIf="plans.length">
+          <table>
+            <thead>
+              <tr><th>Plan</th><th>Price</th><th>Users</th><th>Status</th><th>Features</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let plan of plans">
+                <td>
+                  <strong>{{ plan.name }}</strong>
+                  <span class="code">{{ plan.code }}</span>
+                  <span class="tag recommended" *ngIf="plan.isRecommended">Recommended</span>
+                  <span class="tag custom" *ngIf="plan.isCustom">Custom</span>
+                </td>
+                <td>{{ plan.priceMonthly === null ? 'Quote' : (plan.priceMonthly | currency:plan.currency) }}<small *ngIf="plan.priceMonthly !== null"> / month</small></td>
+                <td>{{ plan.maxUsers ?? 'Unlimited' }}</td>
+                <td><span class="status" [class.archived]="plan.status !== 'active'">{{ plan.status }}</span></td>
+                <td>{{ enabledFeatures(plan).length }} features</td>
+                <td class="actions">
+                  <button mat-icon-button aria-label="Edit plan" (click)="editPlan(plan)" [disabled]="plan.status !== 'active'"><mat-icon>edit</mat-icon></button>
+                  <button mat-icon-button aria-label="Duplicate plan" (click)="duplicatePlan(plan)"><mat-icon>content_copy</mat-icon></button>
+                  <button mat-icon-button aria-label="Archive plan" (click)="archivePlan(plan)" [disabled]="plan.status !== 'active'"><mat-icon>archive</mat-icon></button>
+                  <button mat-icon-button aria-label="Reactivate plan" (click)="reactivatePlan(plan)" *ngIf="plan.status !== 'active'"><mat-icon>unarchive</mat-icon></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="empty" *ngIf="!plans.length">No plans found.</p>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Compare">
+      <div class="tab-content">
+        <p class="comparison-note">Add-ons can be enabled for an individual tenant and are not included in base plans.</p>
+        <div class="table-wrap card comparison">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th *ngFor="let plan of activePlans">{{ plan.name }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let feature of catalog">
+                <td>
+                  <strong>{{ feature.name }}</strong>
+                  <span class="tag addon" *ngIf="isAddOnFeature(feature.key)">Add-on</span>
+                  <small>{{ feature.moduleKey | titlecase }}</small>
+                </td>
+                <td *ngFor="let plan of activePlans">
+                  <ng-container *ngIf="compareEnabled(plan, feature.key); else notIncluded">
+                    <mat-icon class="included">check_circle</mat-icon>
+                    <small *ngIf="getFeatureLimit(plan, feature.key) !== null">{{ getFeatureLimit(plan, feature.key) }}/month</small>
+                  </ng-container>
+                  <ng-template #notIncluded>
+                    <span class="addon-available" *ngIf="isAddOnFeature(feature.key); else unavailable">Add-on</span>
+                    <ng-template #unavailable>—</ng-template>
+                  </ng-template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Audit log">
+      <div class="tab-content">
+        <div class="audit-filters card">
+          <mat-form-field appearance="outline"><mat-label>Tenant ID</mat-label><input matInput [(ngModel)]="auditTenantId"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Action</mat-label><input matInput [(ngModel)]="auditAction"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>From</mat-label><input matInput type="date" [(ngModel)]="auditFrom"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>To</mat-label><input matInput type="date" [(ngModel)]="auditTo"></mat-form-field>
+          <button mat-flat-button color="primary" (click)="loadAudit()">Filter</button>
+        </div>
+        <div class="table-wrap card">
+          <table>
+            <thead><tr><th>Time</th><th>Tenant</th><th>Actor</th><th>Action</th><th>Entity</th><th>Changes</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let entry of auditEntries">
+                <td>{{ entry.createdAt | date:'medium' }}</td>
+                <td>{{ entry.tenantId || '—' }}</td>
+                <td>{{ entry.actor || '—' }}</td>
+                <td>{{ entry.action }}</td>
+                <td>{{ entry.entity }}</td>
+                <td><details><summary>View</summary><pre>{{ entry.beforeState }}\n→\n{{ entry.afterState }}</pre></details></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="empty" *ngIf="!auditEntries.length">Choose filters and load audit history.</p>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</section>
