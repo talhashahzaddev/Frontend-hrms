@@ -60,7 +60,7 @@
         <mat-select formControlName="newPlanId">
           @for (plan of plans; track plan.planId) {
             <mat-option [value]="plan.planId">
-              {{ plan.name }} — {{ plan.currency || 'BHD' }} {{ plan.monthlyPrice }}/mo
+              {{ plan.name }} — {{ plan.currency || 'BHD' }} {{ plan.priceMonthly ?? 'Quote' }}/mo
             </mat-option>
           }
         </mat-select>

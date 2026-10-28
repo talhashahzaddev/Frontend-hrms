@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '@core/services/auth.service';
 
 export interface ChatMessage {
   id: string;
@@ -31,7 +32,10 @@ export class ChatService {
   private messages: ChatMessage[] = [];
   private readonly apiUrl = `${environment.apiUrl}/Chat`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   sendMessage(message: string, skipUserMessage: boolean = false): Observable<ChatMessage> {
     // Add user message to local storage immediately (unless component handles it)
@@ -44,6 +48,23 @@ export class ChatService {
       };
       
       this.messages.push(userMessage);
+    }
+
+    const token = this.authService.getToken();
+    if (!token) {
+      const authMessage: ChatMessage = {
+        id: this.generateId(),
+        text: 'Please sign in to use the AI Assistant.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+
+      const lastMessage = this.messages[this.messages.length - 1];
+      if (!lastMessage || lastMessage.text !== authMessage.text || lastMessage.sender !== 'ai') {
+        this.messages.push(authMessage);
+      }
+
+      return of(authMessage);
     }
     
     // Prepare request
@@ -77,19 +98,25 @@ export class ChatService {
       }),
       catchError((error) => {
         console.error('Error sending chat message:', error);
+        const backendMessage = error?.error?.message;
+        const errorText = typeof backendMessage === 'string' && backendMessage.trim()
+          ? backendMessage.trim()
+          : error?.status === 401
+            ? 'Your session has expired. Please sign in again.'
+            : 'The AI service is unavailable. Please try again later.';
         
         // Check if error message was already added (for empty response case)
         // We add it here to handle all error cases consistently
         const errorMessage: ChatMessage = {
           id: this.generateId(),
-          text: 'The server is not responding',
+          text: errorText,
           sender: 'ai',
           timestamp: new Date()
         };
         
         // Only add if not already present (check last message)
         const lastMessage = this.messages[this.messages.length - 1];
-        if (!lastMessage || lastMessage.text !== 'The server is not responding' || lastMessage.sender !== 'ai') {
+        if (!lastMessage || lastMessage.text !== errorText || lastMessage.sender !== 'ai') {
           this.messages.push(errorMessage);
         }
         

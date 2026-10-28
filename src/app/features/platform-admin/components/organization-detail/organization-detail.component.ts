@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { OrganizationDetail, SubscriptionHistoryItem } from '../../models/super-admin.models';
 import { ManageSubscriptionDialogComponent } from '../manage-subscription-dialog/manage-subscription-dialog.component';
+import { PlanChangeConfirmationDialogComponent } from './plan-change-confirmation-dialog.component';
 import {
   EntitlementFeature,
   EntitlementPlan,
@@ -252,10 +253,29 @@ export class OrganizationDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.hasPlanDowngrade && !window.confirm('This change removes access or exceeds the user limit. Continue?')) {
+    if (this.hasPlanDowngrade) {
+      this.dialog.open(PlanChangeConfirmationDialogComponent, {
+        width: '460px',
+        maxWidth: 'calc(100vw - 32px)',
+        data: {
+          organizationName: this.org?.name || 'this organization',
+          planName: this.selectedBasePlan.name,
+          currentMaxUsers: this.tenantEntitlements?.maxUsers ?? null,
+          newMaxUsers: this.customMaxUsers
+        },
+        ariaLabel: 'Confirm plan access reduction'
+      }).afterClosed()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(confirmed => {
+          if (confirmed) this.persistCustomPlan();
+        });
       return;
     }
 
+    this.persistCustomPlan();
+  }
+
+  private persistCustomPlan(): void {
     this.isCustomPlanSaving = true;
     this.entitlementError = '';
     this.entitlementSuccess = '';

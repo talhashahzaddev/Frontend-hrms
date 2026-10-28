@@ -14,7 +14,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { SuperAdminService } from '../../services/super-admin.service';
-import { ManageSubscriptionRequest, SubscriptionDetail, SubscriptionPlan } from '../../models/super-admin.models';
+import { ManageSubscriptionRequest, SubscriptionDetail } from '../../models/super-admin.models';
+import { EntitlementPlan } from '@core/models/entitlement.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ManageSubscriptionDialogData {
@@ -56,7 +57,7 @@ export class ManageSubscriptionDialogComponent implements OnInit, OnDestroy {
     { value: 'cancel', label: 'Cancel Subscription', icon: 'cancel', color: '#f44336' }
   ];
 
-  plans: SubscriptionPlan[] = [];
+  plans: EntitlementPlan[] = [];
   selectedAction = '';
   minDate = new Date();
 
@@ -88,12 +89,12 @@ export class ManageSubscriptionDialogComponent implements OnInit, OnDestroy {
   }
 
   private loadPlans(): void {
-    this.superAdminService.getSubscriptionPlans()
+    this.superAdminService.getEntitlementPlans(false)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           if (res.success && res.data) {
-            this.plans = res.data.filter(plan => plan.isActive);
+            this.plans = res.data.filter(plan => plan.status?.toLowerCase() === 'active');
           }
         }
       });
