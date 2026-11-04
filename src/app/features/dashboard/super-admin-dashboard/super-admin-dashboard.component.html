@@ -1,0 +1,626 @@
+<section class="sa" aria-label="Dashboard">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="sa-hero">
+    <div class="sa-hero__text">
+      <p class="sa-eyebrow">{{ now() | date: 'EEEE, d MMMM' }}@if (organizationName) { · {{ organizationName }} }</p>
+      <h1 class="sa-title">{{ greeting() }}, {{ firstName }}</h1>
+      <p class="sa-subtitle">
+        @if (isPersonal()) { Here's your day at a glance. } @else { Here's what's happening across your organization today. }
+      </p>
+    </div>
+
+    <div class="sa-hero__side">
+      @if (can(rules.clock)) {
+        <div class="sa-clock" [class.sa-clock--on]="isClockedIn">
+          <span class="sa-clock__dot" aria-hidden="true"></span>
+          <div class="sa-clock__text">
+            <span class="sa-clock__label">{{ isClockedIn ? 'Clocked in' : 'Not clocked in' }}</span>
+            @if (isClockedIn && session()?.checkInTime) {
+              <span class="sa-clock__meta">since {{ session()!.checkInTime | date: 'shortTime' }}</span>
+            }
+          </div>
+          @if (isClockedIn) {
+            <button type="button" class="sa-btn sa-btn--ghost" (click)="clockOut()" [disabled]="clockBusy()">Clock out</button>
+          } @else {
+            <button type="button" class="sa-btn sa-btn--primary" (click)="clockIn()" [disabled]="clockBusy()">Clock in</button>
+          }
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- ── Quick actions ──────────────────────────────────────────────────── -->
+  @if (quickActions().length) {
+    <nav class="sa-actions" aria-label="Quick actions">
+      @for (action of quickActions(); track action.route) {
+        <a class="sa-action" [ngClass]="'tone-' + action.tone" [routerLink]="action.route">
+          <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
+          <span>{{ action.label }}</span>
+        </a>
+      }
+    </nav>
+  }
+
+  <!-- ── Getting started ────────────────────────────────────────────────── -->
+  @if (showSetup()) {
+    <section class="sa-card sa-setup" aria-labelledby="sa-setup-title">
+      <div class="sa-setup__head">
+        <div>
+          <h2 id="sa-setup-title" class="sa-card__title">Finish setting up</h2>
+          <p class="sa-card__sub">A few steps to get the most out of your workspace.</p>
+        </div>
+        <span class="sa-setup__count">{{ setupDone() }} of {{ setupSteps().length }} done</span>
+      </div>
+      <div class="sa-meter" role="progressbar" [attr.aria-valuenow]="setupDone()" aria-valuemin="0" [attr.aria-valuemax]="setupSteps().length">
+        <span class="sa-meter__fill" [style.width.%]="pct(setupDone(), setupSteps().length)"></span>
+      </div>
+      <ul class="sa-setup__list">
+        @for (step of setupSteps(); track step.label) {
+          <li [class.is-done]="step.done">
+            <mat-icon aria-hidden="true">{{ step.done ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            <span>{{ step.label }}</span>
+            @if (!step.done) { <a [routerLink]="step.route" class="sa-link">Set up</a> }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- ── KPI tiles ──────────────────────────────────────────────────────── -->
+  <section class="sa-kpis" aria-label="Key figures">
+    @if (loading()) {
+      @for (i of [1, 2, 3, 4]; track i) { <div class="sa-kpi sa-skeleton"></div> }
+    } @else {
+      @if (showMe() && me()) {
+        @if (can({ feature: 'leave_management' })) {
+          <a class="sa-kpi tone-teal" routerLink="/leave">
+            <span class="sa-kpi__icon"><mat-icon>beach_access</mat-icon></span>
+            <span class="sa-kpi__label">Leave days left</span>
+            <span class="sa-kpi__value">{{ (leaveLeft() ?? 0) | number: '1.0-1' }}</span>
+            <span class="sa-kpi__hint">
+              @if (leaveTypes().length) { Across {{ leaveTypes().length }} leave {{ leaveTypes().length === 1 ? 'type' : 'types' }} } @else { No allowance assigned yet }
+            </span>
+          </a>
+        }
+        <div class="sa-kpi tone-amber" [class.sa-kpi--attention]="myRequests().length > 0">
+          <span class="sa-kpi__icon"><mat-icon>hourglass_top</mat-icon></span>
+          <span class="sa-kpi__label">My open requests</span>
+          <span class="sa-kpi__value">{{ myRequests().length | number }}</span>
+          <span class="sa-kpi__hint">{{ myRequests().length ? 'Waiting for approval' : 'Nothing pending' }}</span>
+        </div>
+        @if (netPay(); as pay) {
+          <div class="sa-kpi tone-violet">
+            <span class="sa-kpi__icon"><mat-icon>payments</mat-icon></span>
+            <span class="sa-kpi__label">Last net pay</span>
+            <span class="sa-kpi__value">{{ money(pay.lastNetSalary!) }}</span>
+            <span class="sa-kpi__hint">
+              {{ pay.lastPayPeriodName || 'Latest period' }}
+              @if (pay.isPayslipAvailable && pay.payslipUploadUrl) {
+                · <a class="sa-link" [href]="pay.payslipUploadUrl" target="_blank" rel="noopener noreferrer">Payslip</a>
+              }
+            </span>
+          </div>
+        }
+        @if (loanBalance() > 0) {
+          <a class="sa-kpi tone-orange" routerLink="/payroll/my-benefits">
+            <span class="sa-kpi__icon"><mat-icon>account_balance</mat-icon></span>
+            <span class="sa-kpi__label">Loans &amp; advances</span>
+            <span class="sa-kpi__value">{{ money(loanBalance()) }}</span>
+            <span class="sa-kpi__hint">Remaining balance</span>
+          </a>
+        }
+      }
+      @if (!isPersonal()) {
+      @if (can(rules.workforce) && activeEmployees() !== null) {
+        <a class="sa-kpi tone-blue" routerLink="/employees">
+          <span class="sa-kpi__icon"><mat-icon>badge</mat-icon></span>
+          <span class="sa-kpi__label">Active employees</span>
+          <span class="sa-kpi__value">{{ activeEmployees() | number }}</span>
+          @if (seats()?.max) {
+            <span class="sa-kpi__hint">{{ seats()!.used }} of {{ seats()!.max }} seats used</span>
+          }
+        </a>
+      }
+      @if (can(rules.attendance) && team()) {
+        <a class="sa-kpi tone-green" routerLink="/attendance/team-attendance">
+          <span class="sa-kpi__icon"><mat-icon>how_to_reg</mat-icon></span>
+          <span class="sa-kpi__label">Present today</span>
+          <span class="sa-kpi__value">{{ (team()!.teamAttendanceSnapshot.presentCount + team()!.teamAttendanceSnapshot.lateCount) | number }}</span>
+          <span class="sa-kpi__hint">
+            @if (attendanceRate() !== null) { {{ attendanceRate() }}% attendance } @else { No check-ins yet }
+          </span>
+        </a>
+        <a class="sa-kpi tone-teal" routerLink="/leave/team-requests">
+          <span class="sa-kpi__icon"><mat-icon>beach_access</mat-icon></span>
+          <span class="sa-kpi__label">On leave today</span>
+          <span class="sa-kpi__value">{{ team()!.teamAttendanceSnapshot.onLeaveCount | number }}</span>
+          <span class="sa-kpi__hint">{{ team()!.teamAttendanceSnapshot.absentCount }} absent without leave</span>
+        </a>
+      }
+      @if (pendingItems().length) {
+        <div class="sa-kpi tone-amber" [class.sa-kpi--attention]="pendingTotal() > 0">
+          <span class="sa-kpi__icon"><mat-icon>pending_actions</mat-icon></span>
+          <span class="sa-kpi__label">Waiting for approval</span>
+          <span class="sa-kpi__value">{{ pendingTotal() | number }}</span>
+          <span class="sa-kpi__hint">{{ pendingTotal() ? 'Needs your review' : 'All caught up' }}</span>
+        </div>
+      }
+      @if (can(rules.hires)) {
+        <a class="sa-kpi tone-orange" routerLink="/jobs">
+          <span class="sa-kpi__icon"><mat-icon>work_outline</mat-icon></span>
+          <span class="sa-kpi__label">Open positions</span>
+          <span class="sa-kpi__value">{{ openPositions() | number }}</span>
+          <span class="sa-kpi__hint">{{ hires().length }} recent hires</span>
+        </a>
+      }
+      }
+    }
+  </section>
+
+  <!-- ── Main grid ──────────────────────────────────────────────────────── -->
+  <div class="sa-grid">
+    <div class="sa-col sa-col--main">
+
+      @if (showMe()) {
+        <!-- My leave balance -->
+        @if (can({ feature: 'leave_management' })) {
+          <section class="sa-card" aria-labelledby="sa-myleave-title">
+            <div class="sa-card__head">
+              <div>
+                <h2 id="sa-myleave-title" class="sa-card__title">My leave balance</h2>
+                <p class="sa-card__sub">Days left of your yearly allowance</p>
+              </div>
+              <a routerLink="/leave" class="sa-link">Request leave</a>
+            </div>
+            @if (loading()) {
+              <div class="sa-skeleton sa-skeleton--rows"></div>
+            } @else if (!leaveTypes().length) {
+              <div class="sa-empty sa-empty--compact">
+                <p>No leave allowance assigned yet. Ask HR if this looks wrong.</p>
+              </div>
+            } @else {
+              <ul class="sa-hbars" role="list">
+                @for (t of leaveTypes(); track t.label) {
+                  <li class="sa-hbar" tabindex="0"
+                      (mouseenter)="showTip($event, t.label, [t.left + ' of ' + t.total + ' days left', t.used + ' used'])"
+                      (mousemove)="showTip($event, t.label, [t.left + ' of ' + t.total + ' days left', t.used + ' used'])"
+                      (focus)="showTip($event, t.label, [t.left + ' of ' + t.total + ' days left', t.used + ' used'])"
+                      (mouseleave)="hideTip()" (blur)="hideTip()">
+                    <span class="sa-hbar__label">{{ t.label }}</span>
+                    <span class="sa-hbar__track sa-hbar__track--bg"><span class="sa-hbar__fill" [style.width.%]="pct(t.left, t.total)" [style.min-width.px]="t.left > 0 ? null : 0"></span></span>
+                    <span class="sa-hbar__value sa-hbar__value--wide">{{ t.left | number: '1.0-1' }}<span class="sa-hbar__of">/{{ t.total | number: '1.0-1' }}</span></span>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        }
+
+        <!-- My requests -->
+        <section class="sa-card" aria-labelledby="sa-myreq-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-myreq-title" class="sa-card__title">My requests</h2>
+              <p class="sa-card__sub">Submitted and waiting for a decision</p>
+            </div>
+          </div>
+          @if (loading()) {
+            <div class="sa-skeleton sa-skeleton--rows"></div>
+          } @else if (!myRequests().length) {
+            <div class="sa-empty sa-empty--compact">
+              <p>You're all caught up — nothing is waiting for approval.</p>
+            </div>
+          } @else {
+            <ul class="sa-list">
+              @for (r of myRequests().slice(0, 5); track r.requestId) {
+                <li class="sa-list__row">
+                  <span class="sa-list__icon" [ngClass]="'tone-' + requestIcon(r.requestType).tone"><mat-icon aria-hidden="true">{{ requestIcon(r.requestType).icon }}</mat-icon></span>
+                  <span class="sa-list__text">
+                    <span class="sa-list__title">{{ r.requestType }}</span>
+                    <span class="sa-list__meta">{{ r.description }}</span>
+                  </span>
+                  <span class="sa-list__meta">{{ r.submittedAt | date: 'd MMM' }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <!-- Attendance today -->
+      @if (can(rules.attendance)) {
+        <section class="sa-card" aria-labelledby="sa-att-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-att-title" class="sa-card__title">Attendance today</h2>
+              <p class="sa-card__sub">Live status of your team</p>
+            </div>
+            <a routerLink="/attendance/team-attendance" class="sa-link">View all</a>
+          </div>
+
+          @if (loading()) {
+            <div class="sa-skeleton sa-skeleton--bar"></div>
+          } @else if (attendanceTotal() === 0) {
+            <div class="sa-empty">
+              <mat-icon aria-hidden="true">schedule</mat-icon>
+              <p>No one has checked in yet today. Attendance will appear here as your team clocks in.</p>
+            </div>
+          } @else {
+            <div class="sa-segbar" role="img"
+                 [attr.aria-label]="'Attendance today: ' + attendanceTotal() + ' people'">
+              @for (seg of attendanceSegments(); track seg.key) {
+                @if (seg.value > 0) {
+                  <span class="sa-segbar__seg" tabindex="0"
+                        [style.width.%]="segmentWidth(attendanceSegments(), seg)"
+                        [style.background]="'var(' + seg.colorVar + ')'"
+                        (mouseenter)="showTip($event, seg.label, [seg.value + ' of ' + attendanceTotal() + ' people'])"
+                        (mousemove)="showTip($event, seg.label, [seg.value + ' of ' + attendanceTotal() + ' people'])"
+                        (focus)="showTip($event, seg.label, [seg.value + ' of ' + attendanceTotal() + ' people'])"
+                        (mouseleave)="hideTip()" (blur)="hideTip()"></span>
+                }
+              }
+            </div>
+            <ul class="sa-legend">
+              @for (seg of attendanceSegments(); track seg.key) {
+                <li>
+                  <span class="sa-legend__swatch" [style.background]="'var(' + seg.colorVar + ')'"></span>
+                  <mat-icon aria-hidden="true">{{ seg.icon }}</mat-icon>
+                  <span class="sa-legend__label">{{ seg.label }}</span>
+                  <span class="sa-legend__value">{{ seg.value }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <!-- Headcount by department -->
+      @if (can(rules.departments)) {
+        <section class="sa-card" aria-labelledby="sa-dept-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-dept-title" class="sa-card__title">Headcount by department</h2>
+              <p class="sa-card__sub">
+                {{ departments().length }} {{ departments().length === 1 ? 'department' : 'departments' }}
+                @if (largestDepartment()) { · largest: {{ largestDepartment() }} }
+              </p>
+            </div>
+            <a routerLink="/employees/departments" class="sa-link">Manage</a>
+          </div>
+
+          @if (loading()) {
+            <div class="sa-skeleton sa-skeleton--rows"></div>
+          } @else if (!departmentBars().length) {
+            <div class="sa-empty">
+              <mat-icon aria-hidden="true">account_tree</mat-icon>
+              <p>Create departments to see how your team is organized.</p>
+              <a routerLink="/employees/departments" class="sa-btn sa-btn--ghost">Add department</a>
+            </div>
+          } @else if (departmentHeadcount() === 0) {
+            <div class="sa-empty">
+              <mat-icon aria-hidden="true">group_add</mat-icon>
+              <p>No one is assigned to a department yet. Assign employees to see the breakdown.</p>
+              <a routerLink="/employees" class="sa-btn sa-btn--ghost">Go to employees</a>
+            </div>
+          } @else {
+            <ul class="sa-hbars">
+              @for (bar of departmentBars(); track bar.label) {
+                <li class="sa-hbar" tabindex="0"
+                    (mouseenter)="showTip($event, bar.label, [bar.value + (bar.value === 1 ? ' employee' : ' employees')])"
+                    (mousemove)="showTip($event, bar.label, [bar.value + (bar.value === 1 ? ' employee' : ' employees')])"
+                    (focus)="showTip($event, bar.label, [bar.value + (bar.value === 1 ? ' employee' : ' employees')])"
+                    (mouseleave)="hideTip()" (blur)="hideTip()">
+                  <span class="sa-hbar__label">{{ bar.label }}</span>
+                  <span class="sa-hbar__track">
+                    <span class="sa-hbar__fill" [style.width.%]="pct(bar.value, departmentMax())"></span>
+                  </span>
+                  <span class="sa-hbar__value">{{ bar.value }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <!-- Workforce demographics -->
+      @if (can(rules.demographics) && !loading() && (genderSegments().length || ageBars().length)) {
+        <section class="sa-card" aria-labelledby="sa-demo-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-demo-title" class="sa-card__title">Workforce profile</h2>
+              <p class="sa-card__sub">Based on employee profiles</p>
+            </div>
+          </div>
+          <div class="sa-split">
+            @if (genderSegments().length) {
+              <div>
+                <h3 class="sa-mini-title">Gender</h3>
+                <div class="sa-segbar sa-segbar--thin" role="img" aria-label="Gender split">
+                  @for (seg of genderSegments(); track seg.key) {
+                    <span class="sa-segbar__seg" tabindex="0"
+                          [style.width.%]="segmentWidth(genderSegments(), seg)"
+                          [style.background]="'var(' + seg.colorVar + ')'"
+                          (mouseenter)="showTip($event, seg.label, [seg.value + '%'])"
+                          (mousemove)="showTip($event, seg.label, [seg.value + '%'])"
+                          (focus)="showTip($event, seg.label, [seg.value + '%'])"
+                          (mouseleave)="hideTip()" (blur)="hideTip()"></span>
+                  }
+                </div>
+                <ul class="sa-legend">
+                  @for (seg of genderSegments(); track seg.key) {
+                    <li>
+                      <span class="sa-legend__swatch" [style.background]="'var(' + seg.colorVar + ')'"></span>
+                      <span class="sa-legend__label">{{ seg.label }}</span>
+                      <span class="sa-legend__value">{{ seg.value }}%</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+            @if (ageBars().length) {
+              <div>
+                <h3 class="sa-mini-title">Age groups</h3>
+                <ul class="sa-hbars sa-hbars--compact">
+                  @for (bar of ageBars(); track bar.label) {
+                    <li class="sa-hbar" tabindex="0"
+                        (mouseenter)="showTip($event, bar.label, [bar.value + '% of employees'])"
+                        (mousemove)="showTip($event, bar.label, [bar.value + '% of employees'])"
+                        (focus)="showTip($event, bar.label, [bar.value + '% of employees'])"
+                        (mouseleave)="hideTip()" (blur)="hideTip()">
+                      <span class="sa-hbar__label">{{ bar.label }}</span>
+                      <span class="sa-hbar__track"><span class="sa-hbar__fill" [style.width.%]="bar.value"></span></span>
+                      <span class="sa-hbar__value">{{ bar.value }}%</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Payroll -->
+      @if (can(rules.payroll)) {
+        <section class="sa-card" aria-labelledby="sa-pay-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-pay-title" class="sa-card__title">Payroll</h2>
+              <p class="sa-card__sub">
+                @if (hrOverview()?.latestPayrollRun?.periodName) {
+                  Latest run: {{ hrOverview()!.latestPayrollRun.periodName }}
+                  · {{ hrOverview()!.latestPayrollRun.isFullyCompleted ? 'Completed' : 'In progress' }}
+                } @else { Basic salary paid per period }
+              </p>
+            </div>
+            <a routerLink="/payroll" class="sa-link">Open payroll</a>
+          </div>
+          @if (!payrollBars().length) {
+            <div class="sa-empty">
+              <mat-icon aria-hidden="true">payments</mat-icon>
+              <p>Run your first payroll to see salary trends here.</p>
+            </div>
+          } @else {
+            <div class="sa-columns" role="img" aria-label="Basic salary by payroll period">
+              @for (bar of payrollBars(); track bar.label) {
+                <div class="sa-column" tabindex="0"
+                     (mouseenter)="showTip($event, bar.label, bar.detail ?? [])"
+                     (mousemove)="showTip($event, bar.label, bar.detail ?? [])"
+                     (focus)="showTip($event, bar.label, bar.detail ?? [])"
+                     (mouseleave)="hideTip()" (blur)="hideTip()">
+                  <span class="sa-column__value">{{ compact(bar.value) }}</span>
+                  <span class="sa-column__track"><span class="sa-column__fill" [style.height.%]="pct(bar.value, payrollMax())"></span></span>
+                  <span class="sa-column__label">{{ bar.label }}</span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      <!-- Expenses -->
+      @if (can(rules.expenses)) {
+        <section class="sa-card" aria-labelledby="sa-exp-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-exp-title" class="sa-card__title">Expense claims</h2>
+              <p class="sa-card__sub">Total claimed per month ({{ currency() }})</p>
+            </div>
+            <a routerLink="/expense" class="sa-link">View claims</a>
+          </div>
+          @if (!expenseBars().length) {
+            <div class="sa-empty">
+              <mat-icon aria-hidden="true">receipt_long</mat-icon>
+              <p>No expense claims yet.</p>
+            </div>
+          } @else {
+            <div class="sa-columns" role="img" aria-label="Expense claims by month">
+              @for (bar of expenseBars(); track bar.label) {
+                <div class="sa-column" tabindex="0"
+                     (mouseenter)="showTip($event, bar.label, [money(bar.value)])"
+                     (mousemove)="showTip($event, bar.label, [money(bar.value)])"
+                     (focus)="showTip($event, bar.label, [money(bar.value)])"
+                     (mouseleave)="hideTip()" (blur)="hideTip()">
+                  <span class="sa-column__value">{{ compact(bar.value) }}</span>
+                  <span class="sa-column__track"><span class="sa-column__fill" [style.height.%]="pct(bar.value, expenseMax())"></span></span>
+                  <span class="sa-column__label">{{ bar.label }}</span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+
+    <!-- ── Side column ──────────────────────────────────────────────────── -->
+    <aside class="sa-col sa-col--side">
+
+      <!-- Plan & usage -->
+      @if (plan() && !isPersonal()) {
+        <section class="sa-card sa-plan" aria-labelledby="sa-plan-title">
+          <div class="sa-card__head">
+            <div>
+              <h2 id="sa-plan-title" class="sa-card__title">{{ planName() }} plan</h2>
+              <p class="sa-card__sub">
+                <span class="sa-status" [class.sa-status--good]="planStatus() === 'active' || planStatus() === 'trial'"
+                      [class.sa-status--critical]="planStatus() === 'expired' || planStatus() === 'cancelled'">
+                  <mat-icon aria-hidden="true">{{ planStatus() === 'expired' ? 'error' : 'check_circle' }}</mat-icon>
+                  {{ planStatus() | titlecase }}
+                </span>
+                @if (plan()!.trialEndsAt) { · trial ends {{ plan()!.trialEndsAt | date: 'd MMM' }} }
+                @else if (plan()!.endDate) { · renews {{ plan()!.endDate | date: 'd MMM' }} }
+              </p>
+            </div>
+          </div>
+
+          @if (seats(); as s) {
+            <div class="sa-usage">
+              <div class="sa-usage__row">
+                <span>Seats</span>
+                <span class="sa-usage__num">{{ s.used }}@if (s.max) { / {{ s.max }} }</span>
+              </div>
+              @if (s.max) {
+                <div class="sa-meter" [class.sa-meter--warn]="s.pct >= 80">
+                  <span class="sa-meter__fill" [style.width.%]="s.pct"></span>
+                </div>
+              }
+            </div>
+          }
+          @if (aiUsage(); as ai) {
+            <div class="sa-usage">
+              <div class="sa-usage__row">
+                <span>AI assistant this month</span>
+                <span class="sa-usage__num">{{ ai.used }}@if (ai.limit) { / {{ ai.limit }} }</span>
+              </div>
+              @if (ai.limit) {
+                <div class="sa-meter" [class.sa-meter--warn]="ai.pct >= 80">
+                  <span class="sa-meter__fill" [style.width.%]="ai.pct"></span>
+                </div>
+              }
+            </div>
+          }
+
+          @if (includedModules().length) {
+            <div class="sa-modules">
+              @for (m of includedModules(); track m) { <span class="sa-chip">{{ m }}</span> }
+            </div>
+          }
+
+          @if (can(rules.billing)) {
+            <a routerLink="/subscription" class="sa-link sa-plan__link">Manage subscription</a>
+          }
+        </section>
+      }
+
+      <!-- Pending approvals -->
+      @if (pendingItems().length && !loading()) {
+        <section class="sa-card" aria-labelledby="sa-pend-title">
+          <h2 id="sa-pend-title" class="sa-card__title">Approvals</h2>
+          <ul class="sa-list">
+            @for (item of pendingItems(); track item.label) {
+              <li>
+                <a [routerLink]="item.route" class="sa-list__row">
+                  <span class="sa-list__icon" [ngClass]="'tone-' + item.tone"><mat-icon aria-hidden="true">{{ item.icon }}</mat-icon></span>
+                  <span class="sa-list__text">{{ item.label }}</span>
+                  <span class="sa-badge" [class.sa-badge--zero]="!item.count">{{ item.count }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <!-- Upcoming holidays -->
+      @if (can(rules.holidays)) {
+        <section class="sa-card" aria-labelledby="sa-hol-title">
+          <div class="sa-card__head">
+            <h2 id="sa-hol-title" class="sa-card__title">Upcoming holidays</h2>
+            <a routerLink="/holidays" class="sa-link">Calendar</a>
+          </div>
+          @if (loading()) {
+            <div class="sa-skeleton sa-skeleton--rows"></div>
+          } @else if (!upcomingHolidays().length) {
+            <div class="sa-empty sa-empty--compact">
+              <p>No upcoming holidays.</p>
+              @if (!isPersonal()) { <a routerLink="/holidays" class="sa-link">Add holidays</a> }
+            </div>
+          } @else {
+            <ul class="sa-list">
+              @for (h of upcomingHolidays(); track h.holidayId) {
+                <li class="sa-list__row">
+                  <span class="sa-date tone-rose">
+                    <span class="sa-date__m">{{ h.holidayDate | date: 'MMM' }}</span>
+                    <span class="sa-date__d">{{ h.holidayDate | date: 'd' }}</span>
+                  </span>
+                  <span class="sa-list__text">
+                    <span class="sa-list__title">{{ h.holidayName }}</span>
+                    <span class="sa-list__meta">{{ daysUntil(h.holidayDate) }}@if (h.isHalfDay) { · half day }</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <!-- Latest hires -->
+      @if (can(rules.hires) && hires().length) {
+        <section class="sa-card" aria-labelledby="sa-hire-title">
+          <div class="sa-card__head">
+            <h2 id="sa-hire-title" class="sa-card__title">Recent hires</h2>
+            <a routerLink="/jobs" class="sa-link">Recruitment</a>
+          </div>
+          <ul class="sa-list">
+            @for (h of hires().slice(0, 4); track h.jobApplyId) {
+              <li class="sa-list__row">
+                <span class="sa-avatar" [ngClass]="'tone-' + avatarTones[$index % avatarTones.length]" aria-hidden="true">{{ h.candidateName.charAt(0) }}</span>
+                <span class="sa-list__text">
+                  <span class="sa-list__title">{{ h.candidateName }}</span>
+                  <span class="sa-list__meta">{{ h.jobRoleName }}</span>
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <!-- Latest news -->
+      @if (can(rules.news)) {
+        <section class="sa-card" aria-labelledby="sa-news-title">
+          <div class="sa-card__head">
+            <h2 id="sa-news-title" class="sa-card__title">Company news</h2>
+            <a routerLink="/news" class="sa-link">All news</a>
+          </div>
+          @if (loading()) {
+            <div class="sa-skeleton sa-skeleton--rows"></div>
+          } @else if (!latestNews().length) {
+            <div class="sa-empty sa-empty--compact">
+              <p>Nothing published yet.</p>
+              @if (!isPersonal()) { <a routerLink="/news" class="sa-link">Write an update</a> }
+            </div>
+          } @else {
+            <ul class="sa-list">
+              @for (n of latestNews(); track n.newsId) {
+                <li class="sa-list__row">
+                  <span class="sa-list__icon tone-indigo"><mat-icon aria-hidden="true">article</mat-icon></span>
+                  <span class="sa-list__text">
+                    <span class="sa-list__title">{{ n.title }}</span>
+                    <span class="sa-list__meta">{{ n.category }} · {{ (n.publishedAt || n.createdAt) | date: 'd MMM' }}</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </aside>
+  </div>
+
+  <!-- Shared chart tooltip -->
+  @if (tooltip(); as tip) {
+    <div class="sa-tooltip" role="tooltip" [style.left.px]="tip.x" [style.top.px]="tip.y">
+      <strong>{{ tip.title }}</strong>
+      @for (line of tip.lines; track line) { <span>{{ line }}</span> }
+    </div>
+  }
+</section>
