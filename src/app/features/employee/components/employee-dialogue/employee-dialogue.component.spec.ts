@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EmployeeDialogueComponent } from './employee-dialogue.component';
@@ -8,7 +9,8 @@ describe('EmployeeDialogueComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EmployeeDialogueComponent]
+      imports: [EmployeeDialogueComponent],
+      providers: [...provideTestDefaults({ employee: { firstName: 'Ali', lastName: 'Khan' }, viewOnly: true })]
     })
     .compileComponents();
 

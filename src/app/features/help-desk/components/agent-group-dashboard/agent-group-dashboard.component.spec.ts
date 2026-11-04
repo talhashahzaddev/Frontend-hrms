@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AgentGroupDashboardComponent } from './agent-group-dashboard.component';
@@ -8,7 +9,8 @@ describe('AgentGroupDashboardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AgentGroupDashboardComponent]
+      imports: [AgentGroupDashboardComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

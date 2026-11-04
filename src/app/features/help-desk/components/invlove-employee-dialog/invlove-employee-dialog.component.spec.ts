@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { InvloveEmployeeDialogComponent } from './invlove-employee-dialog.component';
@@ -8,7 +9,8 @@ describe('InvloveEmployeeDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InvloveEmployeeDialogComponent]
+      imports: [InvloveEmployeeDialogComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

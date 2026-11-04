@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NewsDashbaordComponent } from './news-dashbaord.component';
@@ -8,7 +9,8 @@ describe('NewsDashbaordComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NewsDashbaordComponent]
+      imports: [NewsDashbaordComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

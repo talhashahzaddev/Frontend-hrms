@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppraisalCycleFormComponent } from './appraisal-cycle-form.component';
@@ -8,7 +9,8 @@ describe('AppraisalCycleFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppraisalCycleFormComponent]
+      imports: [AppraisalCycleFormComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

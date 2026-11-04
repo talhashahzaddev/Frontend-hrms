@@ -250,7 +250,7 @@
             </mat-form-field>
           </div>
 
-          <div class="field-group">
+          <div class="field-group" *ngIf="taxCategoriesAvailable">
             <label class="field-label">Tax Category</label>
             <mat-form-field appearance="outline" class="mat-field-plain">
               <mat-label></mat-label>

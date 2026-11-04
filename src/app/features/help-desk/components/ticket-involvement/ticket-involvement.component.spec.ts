@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TicketInvolvementComponent } from './ticket-involvement.component';
@@ -8,7 +9,8 @@ describe('TicketInvolvementComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TicketInvolvementComponent]
+      imports: [TicketInvolvementComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateAgentGroupDialogComponent } from './create-agent-group-dialog.component';
@@ -8,7 +9,8 @@ describe('CreateAgentGroupDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateAgentGroupDialogComponent]
+      imports: [CreateAgentGroupDialogComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

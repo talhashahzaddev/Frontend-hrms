@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/auth.models';
+import { TenantEntitlementService } from '../../../core/services/tenant-entitlement.service';
 
 export interface GeoFenceDto {
   geoFenceId: string;
@@ -125,7 +126,9 @@ export interface SaveFaceDescriptorRequest {
 export class GeoFenceService {
   private readonly api = `${environment.apiUrl}/GeoFence`;
 
-  constructor(private http: HttpClient) {}
+  private readonly attendanceApi = `${environment.apiUrl}/Attendance`;
+
+  constructor(private http: HttpClient, private entitlements: TenantEntitlementService) {}
 
   // ── Geo-Fence CRUD ──────────────────────────────────────────────
 
@@ -207,10 +210,31 @@ export class GeoFenceService {
   // ── Geo Clock In/Out ────────────────────────────────────────────
 
   geoClock(request: GeoClockInRequest): Observable<GeoClockInResponse> {
+    // Plans without geo-fencing can't use the GeoFence API, so use the plain attendance clock instead.
+    if (!this.entitlements.isEnabled('geo_fencing')) {
+      return this.basicClock(request);
+    }
     return this.http.post<ApiResponse<GeoClockInResponse>>(`${this.api}/clock`, request).pipe(
       map(r => {
         if (!r.success) throw new Error(r.message || 'Clock failed');
         return r.data!;
+      })
+    );
+  }
+
+  private basicClock(request: GeoClockInRequest): Observable<GeoClockInResponse> {
+    const location = request.latitude != null && request.longitude != null
+      ? { latitude: request.latitude, longitude: request.longitude }
+      : undefined;
+    const body = { action: request.action, notes: request.notes, location };
+    const url = `${this.attendanceApi}/${request.action === 'in' ? 'clock-in' : 'clock-out'}`;
+
+    return this.http.post<ApiResponse<{ success: boolean; message: string }>>(url, body).pipe(
+      map(r => {
+        const ok = r.success && r.data?.success !== false;
+        const message = r.data?.message || r.message || '';
+        if (!ok) throw new Error(message || 'Clock failed');
+        return { success: true, locationStatus: 'not_checked', message };
       })
     );
   }

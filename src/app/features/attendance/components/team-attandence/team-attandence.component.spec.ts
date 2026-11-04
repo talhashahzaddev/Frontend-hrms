@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TeamAttandenceComponent } from './team-attandence.component';
@@ -8,7 +9,8 @@ describe('TeamAttandenceComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TeamAttandenceComponent]
+      imports: [TeamAttandenceComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

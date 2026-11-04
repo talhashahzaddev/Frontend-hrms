@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ViewDepartmentDetailsComponent } from './view-department-details.component';
@@ -8,7 +9,8 @@ describe('ViewDepartmentDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ViewDepartmentDetailsComponent]
+      imports: [ViewDepartmentDetailsComponent],
+      providers: [...provideTestDefaults({ department: { departmentId: 'd-1', departmentName: 'IT', isActive: true }, managers: [] })]
     })
     .compileComponents();
 

@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TimeTrackerComponent } from './time-tracker.component';
@@ -8,7 +9,8 @@ describe('TimeTrackerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeTrackerComponent]
+      imports: [TimeTrackerComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

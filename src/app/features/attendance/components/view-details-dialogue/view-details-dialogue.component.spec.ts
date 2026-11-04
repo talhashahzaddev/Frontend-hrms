@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ViewDetailsDialogueComponent } from './view-details-dialogue.component';
@@ -8,7 +9,8 @@ describe('ViewDetailsDialogueComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ViewDetailsDialogueComponent]
+      imports: [ViewDetailsDialogueComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

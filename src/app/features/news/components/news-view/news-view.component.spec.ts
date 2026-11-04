@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NewsViewComponent } from './news-view.component';
@@ -8,7 +9,8 @@ describe('NewsViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NewsViewComponent]
+      imports: [NewsViewComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

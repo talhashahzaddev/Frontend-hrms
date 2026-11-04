@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SkillMatrixComponent } from './skill-matrix.component';
@@ -8,7 +9,8 @@ describe('SkillMatrixComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SkillMatrixComponent]
+      imports: [SkillMatrixComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

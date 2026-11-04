@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AttendanceCalendarComponent } from './attendance-calendar';
@@ -8,7 +9,8 @@ describe('AttendanceCalendar', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AttendanceCalendarComponent]
+      imports: [AttendanceCalendarComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

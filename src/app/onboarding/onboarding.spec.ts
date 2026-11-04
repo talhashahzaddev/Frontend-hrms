@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Onboarding } from './onboarding.component';
@@ -8,7 +9,8 @@ describe('Onboarding', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Onboarding]
+      imports: [Onboarding],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

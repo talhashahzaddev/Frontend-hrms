@@ -10,7 +10,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { Subject, takeUntil, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -73,6 +74,9 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   // Check if position dropdown should be disabled
+  /** False when Payroll isn't available, so the Tax Category field is hidden. */
+  taxCategoriesAvailable = true;
+
   get isPositionDisabled(): boolean {
     return !this.employeeForm.get('departmentId')?.value;
   }
@@ -220,7 +224,13 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     const requests: any[] = [
       this.employeeService.getDepartments(),
       this.employeeService.getPositions(),
-      this.payrollService.getActiveTaxCategories()
+      // Tax categories belong to Payroll. If the plan or role doesn't include it, the form still works without them.
+      this.payrollService.getActiveTaxCategories().pipe(
+        catchError(() => {
+          this.taxCategoriesAvailable = false;
+          return of([] as TaxCategoryDto[]);
+        })
+      )
     ];
 
     if (this.isEditMode && this.employeeId) {
