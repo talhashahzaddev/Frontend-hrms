@@ -194,4 +194,17 @@ describe('SuperAdminDashboardComponent', () => {
       expect(fixture.nativeElement.textContent).not.toContain('Starter plan');
     });
   });
+
+  it('hides data cards when the API does not have them (older backend)', () => {
+    create(starterPlan(), k => k !== 'Subscription', 'personal');
+    http.match(r => r.url.includes('/Dashboard/')).forEach(r => r.flush({}, { status: 404, statusText: 'Not Found' }));
+    http.match(() => true).forEach(r => r.flush({ success: true, data: [] }));
+    fixture.detectChanges();
+
+    const text: string = fixture.nativeElement.textContent;
+    expect(text).not.toContain('My leave balance');
+    expect(text).not.toContain('Attendance today');
+    expect(text).not.toContain('Leave days left');
+    expect(fixture.componentInstance.quickActions().length).toBeGreaterThan(0);
+  });
 });
