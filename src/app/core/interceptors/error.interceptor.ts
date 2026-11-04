@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, timer } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { NotificationService } from '@core/services/notification.service';
@@ -15,7 +15,12 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
-      retry(this.shouldRetry(request) ? 1 : 0),
+      // Retry a GET once, but only for network/server errors; 4xx answers won't change on retry.
+      retry({
+        count: this.shouldRetry(request) ? 1 : 0,
+        delay: (error: HttpErrorResponse) =>
+          error.status === 0 || error.status >= 500 ? timer(0) : throwError(() => error)
+      }),
       catchError((error: HttpErrorResponse) => {
         this.handleHttpError(error, request);
         return throwError(() => error);
@@ -46,8 +51,12 @@ export class ErrorInterceptor implements HttpInterceptor {
 
       case 403:
         errorMessage = 'You do not have permission to perform this action.';
-        this.notificationService.permissionDenied();
-        // Only navigate to 403 page for non-API 403 (e.g. route guard). For API 403, stay on current page and show toast.
+        // A 403 on a GET is a page quietly loading data the user's role or plan doesn't include;
+        // the page should just not show that section. Only warn when the user tried to do something.
+        if (!this.isReadRequest(request)) {
+          this.notificationService.permissionDenied();
+        }
+        // Only navigate to 403 page for non-API 403 (e.g. route guard). For API 403, stay on current page.
         if (!this.isApiCall(error.url)) {
           this.router.navigate(['/403']);
         }
@@ -128,6 +137,10 @@ export class ErrorInterceptor implements HttpInterceptor {
     }
 
     return null;
+  }
+
+  private isReadRequest(request?: HttpRequest<any>): boolean {
+    return request?.method === 'GET' || request?.method === 'HEAD';
   }
 
   private shouldRetry(request: HttpRequest<any>): boolean {
