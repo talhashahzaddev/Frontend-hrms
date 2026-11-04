@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppraisalsComponent } from './appraisals.component';
@@ -8,7 +9,8 @@ describe('AppraisalsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppraisalsComponent]
+      imports: [AppraisalsComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

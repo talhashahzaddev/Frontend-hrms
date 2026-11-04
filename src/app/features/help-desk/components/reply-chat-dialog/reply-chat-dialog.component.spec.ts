@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ReplyChatDialogComponent } from './reply-chat-dialog.component';
@@ -8,7 +9,8 @@ describe('ReplyChatDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReplyChatDialogComponent]
+      imports: [ReplyChatDialogComponent],
+      providers: [...provideTestDefaults({ ticket: { ticketid: 't-1', ticketTitle: 'Laptop', assignedEmployees: [] }, senderId: 'u-1', senderEmail: 'a@test.com' })]
     })
     .compileComponents();
 

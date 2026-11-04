@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TicketCategoryComponent } from './ticket-category.component';
@@ -8,7 +9,8 @@ describe('TicketCategoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TicketCategoryComponent]
+      imports: [TicketCategoryComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

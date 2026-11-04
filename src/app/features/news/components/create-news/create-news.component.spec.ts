@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateNewsComponent } from './create-news.component';
@@ -8,7 +9,8 @@ describe('CreateNewsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateNewsComponent]
+      imports: [CreateNewsComponent],
+      providers: [...provideTestDefaults()]
     })
       .compileComponents();
 

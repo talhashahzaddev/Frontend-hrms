@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateShiftComponent } from './create-shift.component';
@@ -8,7 +9,8 @@ describe('CreateShiftComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateShiftComponent]
+      imports: [CreateShiftComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

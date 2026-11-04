@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EmployeeEditComponent } from './employee-edit.component';
@@ -8,7 +9,8 @@ describe('EmployeeEditComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EmployeeEditComponent]
+      imports: [EmployeeEditComponent],
+      providers: [...provideTestDefaults({ employee: { firstName: 'Ali', lastName: 'Khan' } })]
     })
     .compileComponents();
 

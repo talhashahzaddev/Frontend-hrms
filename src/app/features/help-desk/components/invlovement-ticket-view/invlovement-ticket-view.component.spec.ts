@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { InvlovementTicketViewComponent } from './invlovement-ticket-view.component';
@@ -8,7 +9,8 @@ describe('InvlovementTicketViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InvlovementTicketViewComponent]
+      imports: [InvlovementTicketViewComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 

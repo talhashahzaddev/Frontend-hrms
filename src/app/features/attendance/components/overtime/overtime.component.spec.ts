@@ -1,3 +1,4 @@
+import { provideTestDefaults } from 'src/testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OvertimeComponent } from './overtime.component';
@@ -8,7 +9,8 @@ describe('OvertimeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OvertimeComponent]
+      imports: [OvertimeComponent],
+      providers: [...provideTestDefaults()]
     })
     .compileComponents();
 
