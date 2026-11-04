@@ -146,7 +146,7 @@
           <span class="sa-kpi__hint">{{ pendingTotal() ? 'Needs your review' : 'All caught up' }}</span>
         </div>
       }
-      @if (can(rules.hires)) {
+      @if (can(rules.hires) && hrOverview()) {
         <a class="sa-kpi tone-orange" routerLink="/jobs">
           <span class="sa-kpi__icon"><mat-icon>work_outline</mat-icon></span>
           <span class="sa-kpi__label">Open positions</span>
@@ -162,7 +162,7 @@
   <div class="sa-grid">
     <div class="sa-col sa-col--main">
 
-      @if (showMe()) {
+      @if (showMe() && (loading() || me())) {
         <!-- My leave balance -->
         @if (can({ feature: 'leave_management' })) {
           <section class="sa-card" aria-labelledby="sa-myleave-title">
@@ -229,7 +229,7 @@
       }
 
       <!-- Attendance today -->
-      @if (can(rules.attendance)) {
+      @if (can(rules.attendance) && (loading() || team())) {
         <section class="sa-card" aria-labelledby="sa-att-title">
           <div class="sa-card__head">
             <div>
@@ -381,7 +381,7 @@
       }
 
       <!-- Payroll -->
-      @if (can(rules.payroll)) {
+      @if (can(rules.payroll) && (loading() || hrStats())) {
         <section class="sa-card" aria-labelledby="sa-pay-title">
           <div class="sa-card__head">
             <div>
@@ -419,7 +419,7 @@
       }
 
       <!-- Expenses -->
-      @if (can(rules.expenses)) {
+      @if (can(rules.expenses) && (loading() || hrStats())) {
         <section class="sa-card" aria-labelledby="sa-exp-title">
           <div class="sa-card__head">
             <div>
