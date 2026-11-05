@@ -1,6 +1,6 @@
 /**
  * Vercel / CI: set API_URL before `ng build` to override the Blitz API URL.
- * Example: API_URL=https://briskpeople.blitz.cloud/api
+ * Example: API_URL=https://briskpeople.prod.page/api
  */
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 
-const configuredApiUrl = process.env.API_URL?.trim() || 'https://briskpeople.blitz.cloud/api';
+const configuredApiUrl = process.env.API_URL?.trim() || 'https://briskpeople.prod.page/api';
 const parsedApiUrl = new URL(configuredApiUrl);
 if (!['http:', 'https:'].includes(parsedApiUrl.protocol) || !parsedApiUrl.pathname.replace(/\/+$/, '').endsWith('/api')) {
   throw new Error('API_URL must be an HTTP(S) URL ending in /api.');

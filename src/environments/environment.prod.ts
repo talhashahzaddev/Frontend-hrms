@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-apiUrl: 'https://briskpeople.blitz.cloud/api',
+apiUrl: 'https://briskpeople.prod.page/api',
   baseDomain: 'briskpeople.com',
   apiKey: '',
   appName: 'HRMS Frontend',
