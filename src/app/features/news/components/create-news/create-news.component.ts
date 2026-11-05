@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Employee } from '@/app/core/models/employee.models';
 import { PerformanceService } from '@/app/features/performance/services/performance.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, filter, take, takeUntil } from 'rxjs';
 import { NotificationService } from '@/app/core/services/notification.service';
 import { NewsService } from '../../services/news.services';
 import { AuthService } from '@/app/core/services/auth.service';
@@ -123,6 +123,7 @@ quillConfig = {
     // Check for edit mode via route param
     const newsId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!newsId;
+    this.redirectIfNotAllowed();
     if (this.isEditMode) {
       this.isLoading = true;
       this.newsService.getNewsById(newsId!).subscribe({
@@ -276,6 +277,18 @@ quillConfig = {
 
   hasPermission(actionKey: string): boolean {
     return this.authService.hasMenuPermission('News', 'Create News', actionKey);
+  }
+
+  /** Same rule as the API: creating needs Create_News_Button, editing needs Edit_News_Button. */
+  private redirectIfNotAllowed(): void {
+    const requiredKey = this.isEditMode ? 'Edit_News_Button' : 'Create_News_Button';
+    this.authService.permissions$
+      .pipe(filter(p => !!p), take(1))
+      .subscribe(() => {
+        if (!this.authService.hasPermissionByActionKey(requiredKey)) {
+          this.router.navigate(['/403']);
+        }
+      });
   }
 
   onCancel() {

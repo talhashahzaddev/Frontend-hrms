@@ -253,7 +253,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       featureKey: 'news',
       children: [
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard', menuName: 'News', subMenuName: 'New Dashboard' },
-        { label: 'Create News', icon: 'add_circle', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'Create News' }
+        { label: 'Create News', icon: 'add_circle', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'Create News', anyOfActionKeys: ['Create_News_Button'] }
 
       ]
     },

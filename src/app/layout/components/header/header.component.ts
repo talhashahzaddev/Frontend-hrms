@@ -278,7 +278,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     { name: 'Create News', route: '/news/create-news', icon: 'edit', category: 'News',
       keywords: ['create news', 'post news', 'write announcement', 'new article'],
-      menuName: 'News', subMenuName: 'Create News' },
+      menuName: 'News', subMenuName: 'Create News', anyOfActionKeys: ['Create_News_Button'] },
 
     // ─── Help Desk ───────────────────────────────────────────────
     { name: 'Tickets Dashboard', route: '/help-desk/tickets', icon: 'confirmation_number', category: 'Help Desk',
