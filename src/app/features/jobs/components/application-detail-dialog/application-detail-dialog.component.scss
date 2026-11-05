@@ -336,14 +336,14 @@
       margin: 0;
       font-size: 13px;
       font-weight: 700;
-      color: #1f2937;
+      color: #1e293b;
     }
 
     .ats-exp-company,
     .ats-edu-inst {
       margin: 1px 0 0;
       font-size: 12px;
-      color: #6b7280;
+      color: #64748b;
     }
   }
 }
@@ -359,8 +359,8 @@
 .ats-answer-card {
   border-radius: 8px;
   padding: 12px 14px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
 
   &.answer-pass {
     border-color: rgba(16, 185, 129, 0.3);
@@ -381,7 +381,7 @@
     .ats-answer-q {
       font-size: 12px;
       font-weight: 700;
-      color: #1f2937;
+      color: #1e293b;
       line-height: 1.4;
     }
 
@@ -406,7 +406,7 @@
     .ats-answer-expected {
       margin: 0 0 4px;
       font-size: 12px;
-      color: #374151;
+      color: #334155;
     }
   }
 }

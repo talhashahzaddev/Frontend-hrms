@@ -45,8 +45,8 @@
 /* ═══ Queue Row ════════════════════════════════════════════════════════════════ */
 .ts-queue-row { display: grid; grid-template-columns: 32px 36px 1fr 140px 80px 80px 72px; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--ts-border); border-top: none; background: var(--ts-card); cursor: pointer; transition: background 0.12s, box-shadow 0.12s; min-height: 48px; }
 .ts-queue-row:last-child { border-radius: 0 0 var(--ts-radius) var(--ts-radius); }
-.ts-queue-row:hover { background: #F9FAFB; }
-.ts-queue-row.expanded { background: #F9FAFB; box-shadow: inset 0 0 0 1px var(--ts-primary-light); }
+.ts-queue-row:hover { background: #f8fafc; }
+.ts-queue-row.expanded { background: #f8fafc; box-shadow: inset 0 0 0 1px var(--ts-primary-light); }
 .ts-queue-row.selected { background: var(--ts-primary-bg); }
 .ts-queue-row.flagged { border-left: 3px solid var(--ts-warning); }
 .ts-queue-row.comfortable { padding: 14px 16px; min-height: 64px; }
@@ -63,7 +63,7 @@
 .ts-chip-ot { background: #FEF3C7; color: #92400E; }
 .ts-chip-late { background: #FEE2E2; color: #991B1B; }
 .ts-chip-leave { background: #D1FAE5; color: #065F46; }
-.ts-chip-mixed { background: #F3F4F6; color: #374151; }
+.ts-chip-mixed { background: #f1f5f9; color: #334155; }
 .ts-change-extra { font-size: 11px; color: var(--ts-text-subtle); margin-left: 2px; }
 .ts-risk-badge { display: flex; align-items: center; }
 .ts-badge-flag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--ts-radius-full); background: #FEF3C7; color: #92400E; font-size: 11px; font-weight: 600; }
@@ -78,7 +78,7 @@
 .ts-action-btn.reject:hover { background: var(--ts-danger-bg); border-color: var(--ts-danger); }
 
 /* ═══ Inline Expand ════════════════════════════════════════════════════════════ */
-.ts-inline-expand { grid-column: 1 / -1; padding: 16px 16px 16px 56px; background: #F9FAFB; border: 1px solid var(--ts-border); border-top: none; animation: slideDown 0.15s ease; }
+.ts-inline-expand { grid-column: 1 / -1; padding: 16px 16px 16px 56px; background: #f8fafc; border: 1px solid var(--ts-border); border-top: none; animation: slideDown 0.15s ease; }
 .ts-compare-grid { margin-bottom: var(--ts-space-3); }
 .ts-compare-row { display: grid; grid-template-columns: 90px 1fr 24px 1fr; align-items: center; gap: var(--ts-space-2); padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--ts-border-light); }
 .ts-compare-row:last-child { border-bottom: none; }
@@ -108,7 +108,7 @@
 .ts-btn-outline-light { padding: 7px 16px; border-radius: var(--ts-radius); border: 1px solid rgba(255,255,255,0.4); background: transparent; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.12s; }
 .ts-btn-outline-light:hover { background: rgba(255,255,255,0.1); border-color: white; }
 .ts-btn-solid-light { padding: 7px 16px; border-radius: var(--ts-radius); border: none; background: white; color: #1E3A5F; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.12s; }
-.ts-btn-solid-light:hover { background: #F3F4F6; }
+.ts-btn-solid-light:hover { background: #f1f5f9; }
 .ts-btn-solid-light:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ═══ Quick Reject Popover ═════════════════════════════════════════════════════ */
@@ -125,7 +125,7 @@
 .ts-qr-hint { font-size: 11px; color: var(--ts-text-subtle); margin-top: 4px; margin-bottom: var(--ts-space-3); }
 .ts-qr-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .ts-btn-cancel { padding: 6px 14px; border-radius: var(--ts-radius); border: 1px solid var(--ts-border); background: var(--ts-card); color: var(--ts-text-secondary); font-size: 13px; cursor: pointer; transition: all 0.12s; }
-.ts-btn-cancel:hover { background: #F9FAFB; }
+.ts-btn-cancel:hover { background: #f8fafc; }
 .ts-btn-reject { padding: 6px 14px; border-radius: var(--ts-radius); border: none; background: var(--ts-danger); color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.12s; }
 .ts-btn-reject:hover { background: #B91C1C; }
 .ts-btn-reject:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -142,7 +142,7 @@
 @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
 .ts-review-header { padding: 20px 24px; border-bottom: 1px solid var(--ts-border); flex-shrink: 0; position: relative; }
 .ts-review-close { position: absolute; top: 16px; right: 20px; width: 32px; height: 32px; border-radius: var(--ts-radius); border: none; background: none; color: var(--ts-text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.12s; font-size: 16px; }
-.ts-review-close:hover { background: #F3F4F6; color: var(--ts-text); }
+.ts-review-close:hover { background: #f1f5f9; color: var(--ts-text); }
 .ts-review-title-row { display: flex; align-items: center; gap: var(--ts-space-3); margin-bottom: var(--ts-space-3); }
 .ts-review-emp-name { font-size: 18px; font-weight: 600; color: var(--ts-text); }
 .ts-review-subtitle { font-size: 13px; color: var(--ts-text-muted); }

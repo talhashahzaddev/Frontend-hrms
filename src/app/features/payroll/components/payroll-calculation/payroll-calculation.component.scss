@@ -4,8 +4,8 @@ $card-bg: #ffffff;
 $border-color: #e2e8f0;
 $title-color: #0f172a;
 $subtitle-color: #64748b;
-$primary-color: #004ac6;
-$primary-hover: #003ba3;
+$primary-color: #2563eb;
+$primary-hover: #1d4ed8;
 
 :host {
     display: block;
@@ -69,7 +69,7 @@ $primary-hover: #003ba3;
                 transition: all 0.2s;
 
                 &.active {
-                    color: #004ac6;
+                    color: #2563eb;
                     background: #fff;
                     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
                 }
@@ -161,7 +161,7 @@ $primary-hover: #003ba3;
             &:focus {
                 background-color: #ffffff;
                 border-color: $primary-color;
-                box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
             }
         }
     }
@@ -373,12 +373,12 @@ $primary-hover: #003ba3;
                 background-color: $primary-color;
                 color: #ffffff;
                 border: none;
-                box-shadow: 0 4px 14px rgba(0, 74, 198, 0.2);
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
 
                 &:hover {
                     background-color: $primary-hover;
                     transform: translateY(-1px);
-                    box-shadow: 0 6px 20px rgba(0, 74, 198, 0.3);
+                    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
                 }
 
                 &:disabled {

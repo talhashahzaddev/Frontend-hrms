@@ -420,7 +420,7 @@
         &.submitted   .dot { background: #38bdf8; }
         &.pending     .dot { background: #f59e0b; }
         &.in-progress .dot { background: #a855f7; }
-        &.untouched   .dot { background: #d1d5db; }
+        &.untouched   .dot { background: #cbd5e1; }
       }
     }
   }
@@ -478,7 +478,7 @@
       cursor: pointer;
       padding: 3px 4px;
       border-radius: 5px;
-      color: #4b5563;
+      color: #475569;
       transition: background 0.12s;
       flex-shrink: 0;
       white-space: nowrap;
@@ -498,7 +498,7 @@
         width: 14px;
         height: 14px;
         line-height: 14px;
-        color: #9ca3af;
+        color: #94a3b8;
       }
     }
 
@@ -513,7 +513,7 @@
       color: #b0b7c3;
       flex-shrink: 0;
       mat-icon { font-size: 14px; width: 14px; height: 14px; line-height: 14px; }
-      &:hover { color: #374151; }
+      &:hover { color: #334155; }
     }
 
     .result-count {
@@ -710,7 +710,7 @@
     background: #f1f3f6;
     padding: 1px 6px;
     border-radius: 8px;
-    color: #6b7280;
+    color: #64748b;
     margin-left: 8px;
   }
 
@@ -765,9 +765,9 @@
     }
 
     &.status-untouched {
-      background: var(--gray-100, #f3f4f6);
-      border: 2px solid var(--gray-300, #d1d5db);
-      mat-icon { color: var(--gray-500, #6b7280); }
+      background: var(--gray-100, #f1f5f9);
+      border: 2px solid var(--gray-300, #cbd5e1);
+      mat-icon { color: var(--gray-500, #64748b); }
     }
 
     &.status-in-progress {

@@ -3,16 +3,16 @@ $brand-blue: #1D7DFC;
 $brand-blue-hover: #0364e2;
 $brand-blue-light: #EFF6FF;
 
-$bg-body: #F9FAFB;
+$bg-body: #f8fafc;
 $bg-card: #FFFFFF;
 
-$text-primary: #111827;
-$text-secondary: #4B5563;
-$text-muted: #9CA3AF;
-$text-label: #374151;
+$text-primary: #0f172a;
+$text-secondary: #475569;
+$text-muted: #94a3b8;
+$text-label: #334155;
 
-$border: #D1D5DB;
-$border-light: #E5E7EB;
+$border: #cbd5e1;
+$border-light: #e2e8f0;
 $border-radius: 8px;
 
 @mixin shadow-sm {
@@ -114,7 +114,7 @@ $border-radius: 8px;
     cursor: pointer;
 
     &:hover {
-        background: #E5E7EB;
+        background: #e2e8f0;
     }
 }
 
@@ -305,7 +305,7 @@ $border-radius: 8px;
             color: $text-muted;
             font-weight: 400;
             margin-left: 4px;
-            color: #9CA3AF;
+            color: #94a3b8;
         }
     }
 
@@ -485,7 +485,7 @@ $border-radius: 8px;
         border-top-left-radius: $border-radius;
         border-top-right-radius: $border-radius;
         border-color: $border !important;
-        background: #F9FAFB;
+        background: #f8fafc;
         overflow-x: auto;
     }
 

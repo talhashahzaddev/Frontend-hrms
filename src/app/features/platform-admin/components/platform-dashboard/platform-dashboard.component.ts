@@ -105,7 +105,7 @@ export class PlatformDashboardComponent implements OnInit, OnDestroy {
     const d = this.dashboard;
 
     this.kpiCards = [
-      { label: 'Total Organizations', value: d.totalOrganizations, icon: 'business', color: '#3f51b5', route: '/platform-admin/organizations' },
+      { label: 'Total Organizations', value: d.totalOrganizations, icon: 'business', color: '#2563eb', route: '/platform-admin/organizations' },
       { label: 'New Org This Month', value: d.newOrganizationsThisMonth, icon: 'trending_up', color: '#4caf50' },
       { label: 'Total Employees', value: d.totalActiveEmployees, icon: 'people', color: '#2196f3' },
       { label: 'Active Subscriptions', value: d.activeSubscriptions, icon: 'card_membership', color: '#ff9800' },

@@ -12,7 +12,7 @@
 }
 
 .loan-rejection-modal {
-  color: #191c1e;
+  color: #0f172a;
   font-family: 'Inter', 'Public Sans', sans-serif;
 
   .modal-header {
@@ -57,7 +57,7 @@
     button {
       border: 0;
       background: transparent;
-      color: #434655;
+      color: #475569;
       cursor: pointer;
       border-radius: 0.4rem;
       width: 2rem;
@@ -74,7 +74,7 @@
 
     p {
       margin: 0;
-      color: #434655;
+      color: #475569;
       line-height: 1.5;
       font-size: 0.93rem;
     }
@@ -132,7 +132,7 @@
 
     .btn-cancel {
       background: transparent;
-      color: #004ac6;
+      color: #2563eb;
 
       &:hover {
         background: rgba(37, 99, 235, 0.1);

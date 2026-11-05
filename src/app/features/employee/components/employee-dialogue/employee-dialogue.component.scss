@@ -110,12 +110,12 @@
     font-weight: 600;
     padding: 0.25rem 0.625rem;
     border-radius: 2rem;
-    color: #374151;
+    color: #334155;
 
     .pill-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
     &.pill-active { background-color: #dcfce7; color: #166534; .pill-dot { background: #22c55e; } }
-    &.pill-inactive { background-color: #f1f5f9; color: #64748b; .pill-dot { background: #9ca3af; } }
+    &.pill-inactive { background-color: #f1f5f9; color: #64748b; .pill-dot { background: #94a3b8; } }
     &.pill-deleted { background-color: #fee2e2; color: #991b1b; .pill-dot { background: #ef4444; } }
   }
 
@@ -214,7 +214,7 @@
           line-height: 1.4;
           word-break: break-word;
 
-          &.code { font-family: 'Fira Code', 'Courier New', monospace; font-size: 0.8125rem; color: #374151; }
+          &.code { font-family: 'Fira Code', 'Courier New', monospace; font-size: 0.8125rem; color: #334155; }
           &.salary { font-size: 0.9375rem; font-weight: 600; color: #0f172a; }
         }
 

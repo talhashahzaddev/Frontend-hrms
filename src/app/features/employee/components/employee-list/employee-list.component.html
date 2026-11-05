@@ -116,8 +116,7 @@
 
     <!-- Loading Spinner -->
     <div *ngIf="isLoading" class="loading-state">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading employees...</p>
+      <app-skeleton variant="table" [rows]="8" [columns]="7" label="Loading employees"></app-skeleton>
     </div>
 
     <!-- Employee Table -->

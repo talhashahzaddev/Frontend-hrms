@@ -669,7 +669,7 @@
                 <mat-select formControlName="skillId" [disabled]="!addMySkillForm.get('category')?.value" placeholder="Select Skill">
                   <mat-option *ngFor="let sk of filteredSkillsForAdd" [value]="sk.skillId" [disabled]="isAlreadyAdded(sk.skillId)">
                     {{ sk.skillName }}
-                    <span *ngIf="isAlreadyAdded(sk.skillId)" style="color:#9ca3af; font-size:12px;"> — Added</span>
+                    <span *ngIf="isAlreadyAdded(sk.skillId)" style="color:#94a3b8; font-size:12px;"> — Added</span>
                   </mat-option>
                   <mat-option *ngIf="filteredSkillsForAdd.length === 0" disabled>No skills in this category</mat-option>
                 </mat-select>

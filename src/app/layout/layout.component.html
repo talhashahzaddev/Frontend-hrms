@@ -6,13 +6,14 @@
     <mat-sidenav
       #drawer
       class="sidenav"
+      [class.is-collapsed]="sidebarCollapsed && !isHandset"
       [mode]="sidenavMode"
       [opened]="sidenavOpened"
       [fixedInViewport]="isHandset"
       fixedTopGap="0"
       (closedStart)="onSidenavClosed()">
       
-      <app-sidebar (menuItemClick)="isHandset && drawer.close()"></app-sidebar>
+      <app-sidebar [collapsed]="sidebarCollapsed && !isHandset" (menuItemClick)="isHandset && drawer.close()"></app-sidebar>
     </mat-sidenav>
 
     <!-- Main Content Area -->
@@ -21,6 +22,7 @@
       <!-- Header -->
       <app-header 
         [isHandset]="isHandset"
+        [sidebarCollapsed]="sidebarCollapsed"
         (menuToggle)="onMenuToggle()">
       </app-header>
 

@@ -30,7 +30,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 type DatePreset = '' | 'this_week' | 'this_month' | '3_month' | '6_month' | 'this_year';
 
 const CATEGORY_COLORS = [
-  '#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#3b82f6',
+  '#2563eb', '#1e3a8a', '#f59e0b', '#10b981', '#ef4444', '#3b82f6',
   '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
 ];
 
@@ -111,8 +111,8 @@ export class ExpenseReportComponent implements OnInit, OnDestroy {
     datasets: [{
       label: 'Cost',
       data: [],
-      borderColor: '#667eea',
-      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+      borderColor: '#2563eb',
+      backgroundColor: 'rgba(37, 99, 235, 0.1)',
       tension: 0.4,
       fill: true
     }]
@@ -133,7 +133,7 @@ export class ExpenseReportComponent implements OnInit, OnDestroy {
     datasets: [{
       label: 'Cost',
       data: [],
-      backgroundColor: '#667eea'
+      backgroundColor: '#2563eb'
     }]
   };
   barChartOptions: ChartConfiguration['options'] = {
@@ -378,7 +378,7 @@ export class ExpenseReportComponent implements OnInit, OnDestroy {
   }
 
   getColor(categoryId: string): string {
-    return this.categoryColors.get(categoryId) ?? '#9ca3af';
+    return this.categoryColors.get(categoryId) ?? '#94a3b8';
   }
 
   get totalCost(): number {
@@ -411,8 +411,8 @@ export class ExpenseReportComponent implements OnInit, OnDestroy {
       datasets: [{
         label: 'Cost',
         data,
-        borderColor: '#667eea',
-        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.1)',
         tension: 0.4,
         fill: true
       }]
@@ -424,7 +424,7 @@ export class ExpenseReportComponent implements OnInit, OnDestroy {
     const data = this.barChartData.map((d) => d.cost);
     this.barChartDataConfig = {
       labels,
-      datasets: [{ label: 'Cost', data, backgroundColor: '#667eea' }]
+      datasets: [{ label: 'Cost', data, backgroundColor: '#2563eb' }]
     };
   }
 }

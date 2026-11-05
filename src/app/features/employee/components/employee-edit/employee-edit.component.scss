@@ -86,7 +86,7 @@
 
     &::-webkit-scrollbar { width: 4px; }
     &::-webkit-scrollbar-track { background: transparent; }
-    &::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   }
 
   // ─── Form ─────────────────────────────────────────────────
@@ -134,13 +134,13 @@
         margin: 0 0 1px;
         font-size: 13px;
         font-weight: 700;
-        color: #111827;
+        color: #0f172a;
       }
 
       .section-sub {
         margin: 0;
         font-size: 11.5px;
-        color: #9ca3af;
+        color: #94a3b8;
         font-weight: 400;
       }
     }
@@ -171,7 +171,7 @@
           .mdc-notched-outline__leading,
           .mdc-notched-outline__notch,
           .mdc-notched-outline__trailing {
-            border-color: #e5e7eb !important;
+            border-color: #e2e8f0 !important;
           }
 
           .mat-mdc-form-field-flex { padding: 0 12px; }
@@ -179,19 +179,19 @@
 
           input, textarea {
             font-size: 13px;
-            color: #111827;
+            color: #0f172a;
             font-weight: 500;
           }
 
           .mat-mdc-select-value {
             font-size: 13px;
-            color: #111827;
+            color: #0f172a;
             font-weight: 500;
           }
 
           .mat-mdc-form-field-label, label {
             font-size: 12.5px;
-            color: #6b7280;
+            color: #64748b;
           }
 
           &:hover {
@@ -218,10 +218,10 @@
             .mdc-notched-outline__trailing { border-color: #ef4444 !important; }
           }
 
-          .mat-datepicker-toggle button mat-icon { color: #9ca3af; }
+          .mat-datepicker-toggle button mat-icon { color: #94a3b8; }
 
           mat-error { font-size: 11.5px; font-weight: 500; color: #dc2626; }
-          mat-hint { font-size: 11.5px; color: #9ca3af; }
+          mat-hint { font-size: 11.5px; color: #94a3b8; }
         }
       }
 
@@ -257,11 +257,11 @@
             .mat-mdc-text-field-wrapper { background: #f8f9fc; border-radius: 8px !important; }
             .mdc-notched-outline__leading,
             .mdc-notched-outline__notch,
-            .mdc-notched-outline__trailing { border-color: #e5e7eb !important; }
+            .mdc-notched-outline__trailing { border-color: #e2e8f0 !important; }
             .mat-mdc-form-field-flex { padding: 0 12px; }
             .mat-mdc-form-field-infix { padding: 10px 0 !important; min-height: unset; }
-            input { font-size: 13px; color: #111827; font-weight: 500; }
-            label { font-size: 12.5px; color: #6b7280; }
+            input { font-size: 13px; color: #0f172a; font-weight: 500; }
+            label { font-size: 12.5px; color: #64748b; }
 
             &:hover {
               .mat-mdc-text-field-wrapper { background: white; }
@@ -396,7 +396,7 @@
       display: inline-block;
       width: 1px;
       height: 20px;
-      background: #e5e7eb;
+      background: #e2e8f0;
       margin: 0 10px 0 8px;
       flex-shrink: 0;
       align-self: center;
@@ -425,7 +425,7 @@
     .mat-mdc-select-trigger .opt-code {
       font-size: 12.5px;
       font-weight: 600;
-      color: #374151;
+      color: #334155;
     }
   }
 }
@@ -433,7 +433,7 @@
 ::ng-deep .country-panel {
   border-radius: 12px !important;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14) !important;
-  border: 1px solid #e5e7eb !important;
+  border: 1px solid #e2e8f0 !important;
   min-width: 320px !important;
   max-width: 360px !important;
   max-height: 380px !important;
@@ -455,7 +455,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 
     mat-icon {
-      color: #9ca3af;
+      color: #94a3b8;
       font-size: 18px;
       width: 18px;
       height: 18px;
@@ -469,11 +469,11 @@
       background: transparent;
       font-size: 13.5px;
       font-family: 'Inter', 'DM Sans', sans-serif;
-      color: #111827;
+      color: #0f172a;
       font-weight: 400;
 
       &::placeholder {
-        color: #9ca3af;
+        color: #94a3b8;
         font-weight: 400;
       }
     }
@@ -532,7 +532,7 @@
     .opt-name {
       flex: 1;
       font-weight: 500;
-      color: #111827;
+      color: #0f172a;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;

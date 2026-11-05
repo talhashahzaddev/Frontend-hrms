@@ -3,10 +3,10 @@
 $brand-blue: #1D7DFC;
 $bg-body: #F8F9FB;
 $bg-card: #FFFFFF;
-$text-primary: #111827;
-$text-secondary: #6B7280;
-$text-body: #4B5563;
-$border: #E5E7EB;
+$text-primary: #0f172a;
+$text-secondary: #64748b;
+$text-body: #475569;
+$border: #e2e8f0;
 
 // Mixins
 @mixin shadow-sm {
@@ -102,7 +102,7 @@ $border: #E5E7EB;
     cursor: pointer;
 
     &:hover {
-        background: #E5E7EB;
+        background: #e2e8f0;
     }
 }
 
@@ -136,7 +136,7 @@ $border: #E5E7EB;
     }
 
     .separator {
-        color: #D1D5DB;
+        color: #cbd5e1;
     }
 
     .current {
@@ -258,7 +258,7 @@ $border: #E5E7EB;
 .btn-secondary {
     background-color: #FFF;
     color: $text-primary;
-    border: 1px solid #D1D5DB;
+    border: 1px solid #cbd5e1;
     padding: 12px 20px;
     border-radius: 8px;
     font-weight: 600;
@@ -271,7 +271,7 @@ $border: #E5E7EB;
     gap: 8px;
 
     &:hover {
-        background-color: #F9FAFB;
+        background-color: #f8fafc;
     }
 
     mat-icon {
@@ -406,7 +406,7 @@ $border: #E5E7EB;
         gap: 16px;
 
         mat-icon {
-            color: #9CA3AF;
+            color: #94a3b8;
             font-size: 22px;
             width: 22px;
             height: 22px;
@@ -472,7 +472,7 @@ $border: #E5E7EB;
         font-size: 64px;
         width: 64px;
         height: 64px;
-        color: #D1D5DB;
+        color: #cbd5e1;
         margin-bottom: 24px;
     }
 

@@ -64,7 +64,7 @@ $slate-900: #0f172a;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #004ac6;
+        background-color: #2563eb;
         color: white;
         padding: 0.625rem 1.25rem;
         border-radius: 0.5rem;
@@ -72,10 +72,10 @@ $slate-900: #0f172a;
         font-weight: 700;
         border: none;
         cursor: pointer;
-        box-shadow: 0 10px 15px -3px rgba(0, 74, 198, 0.2);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
         transition: all 0.2s;
 
-        &:hover { background-color: rgba(0, 74, 198, 0.9); }
+        &:hover { background-color: rgba(37, 99, 235, 0.9); }
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
     }
@@ -200,9 +200,9 @@ $slate-900: #0f172a;
     .loading-state {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
-      padding: 5rem 2rem;
+      padding: 1rem 1.25rem 1.5rem;
       color: $slate-500;
 
       mat-spinner { margin-bottom: 1rem; }
@@ -310,7 +310,7 @@ $slate-900: #0f172a;
       &.status-inactive { background-color: $slate-100; color: $slate-500; }
     }
 
-    .no-value { font-size: 0.8125rem; color: #d1d5db; font-style: italic; }
+    .no-value { font-size: 0.8125rem; color: #cbd5e1; font-style: italic; }
 
     // Action Cell
     .action-cell {
@@ -356,7 +356,7 @@ $slate-900: #0f172a;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #004ac6;
+        background-color: #2563eb;
         color: white;
         padding: 0.625rem 1.25rem;
         border-radius: 0.5rem;
@@ -366,7 +366,7 @@ $slate-900: #0f172a;
         cursor: pointer;
         transition: all 0.2s;
 
-        &:hover { background-color: rgba(0, 74, 198, 0.9); }
+        &:hover { background-color: rgba(37, 99, 235, 0.9); }
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
     }
@@ -394,10 +394,10 @@ $slate-900: #0f172a;
         height: 38px !important;
         min-height: 38px !important;
         font-size: 13.5px !important;
-        color: #374151;
+        color: #334155;
 
         &:hover { background: #f5f6fa !important; }
-        mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #6b7280; }
+        mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #64748b; }
 
         &.danger-action { color: #dc2626 !important; mat-icon { color: #dc2626 !important; } &:hover { background: #fff5f5 !important; } }
         &.warning-action { color: #d97706 !important; mat-icon { color: #d97706 !important; } &:hover { background: #fffbeb !important; } }

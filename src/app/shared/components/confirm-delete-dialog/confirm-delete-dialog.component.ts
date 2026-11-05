@@ -57,7 +57,7 @@ export interface ConfirmDeleteData {
       margin: 0 0 12px;
       font-size: 17px;
       font-weight: 700;
-      color: #111827;
+      color: #0f172a;
       letter-spacing: -0.2px;
     }
 
@@ -70,13 +70,13 @@ export interface ConfirmDeleteData {
     .cdd-message {
       margin: 0;
       font-size: 14px;
-      color: #4b5563;
+      color: #475569;
       line-height: 1.65;
       font-weight: 400;
     }
 
     .cdd-message strong {
-      color: #111827;
+      color: #0f172a;
       font-weight: 600;
     }
 
@@ -93,14 +93,14 @@ export interface ConfirmDeleteData {
       border-radius: 8px !important;
       font-size: 13.5px !important;
       font-weight: 500 !important;
-      color: #374151 !important;
-      border-color: #d1d5db !important;
+      color: #334155 !important;
+      border-color: #cbd5e1 !important;
       transition: background 0.15s ease, border-color 0.15s ease !important;
     }
 
     .cdd-cancel:hover {
-      background: #f9fafb !important;
-      border-color: #9ca3af !important;
+      background: #f8fafc !important;
+      border-color: #94a3b8 !important;
     }
 
     .cdd-confirm {

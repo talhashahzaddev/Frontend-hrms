@@ -431,7 +431,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
         // For rejected leaves, use gray
         if (event.status.toLowerCase() === 'rejected') {
-            return '#e5e7eb';
+            return '#e2e8f0';
         }
 
         // Use the event color with reduced opacity (hex to rgba)
@@ -443,7 +443,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
             return `rgba(${r}, ${g}, ${b}, 0.15)`; // 15% opacity
         }
 
-        return '#f3f4f6'; // Default gray
+        return '#f1f5f9'; // Default gray
     }
 
     getTransparentColor(color: string | undefined): string {

@@ -1,6 +1,6 @@
 .time-tracking-container.payroll-result-page {
   width: 100%;
-  color: #0b1c30;
+  color: #0f172a;
   background-color: #f8fafc;
   padding: 2rem;
   font-family: 'Public Sans', 'Inter', sans-serif;
@@ -54,7 +54,7 @@
         transition: all 0.2s;
 
         &.active {
-          color: #004ac6;
+          color: #2563eb;
           background: #fff;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
@@ -125,8 +125,8 @@
 
         &:focus {
           background-color: #fff;
-          border-color: #004ac6;
-          box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
       }
 
@@ -159,8 +159,8 @@
 
           &:focus {
             background-color: #fff;
-            border-color: #004ac6;
-            box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
           }
         }
       }
@@ -197,12 +197,12 @@
         }
 
         .apply-btn {
-          background-color: #004ac6;
+          background-color: #2563eb;
           color: #fff;
 
           &:not(:disabled):hover {
-            background-color: #003ba3;
-            box-shadow: 0 4px 12px rgba(0, 74, 198, 0.25);
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
           }
         }
 
@@ -282,13 +282,13 @@
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(to bottom right, rgba(0, 74, 198, 0.05), transparent);
+          background: linear-gradient(to bottom right, rgba(37, 99, 235, 0.05), transparent);
           pointer-events: none;
         }
 
-        .icon-wrapper { background-color: #004ac6; color: #fff; }
-        .label { color: #004ac6; }
-        .value { color: #004ac6; }
+        .icon-wrapper { background-color: #2563eb; color: #fff; }
+        .label { color: #2563eb; }
+        .value { color: #2563eb; }
       }
 
       .icon-wrapper {
@@ -374,11 +374,11 @@
             border-bottom: 1px solid #e2e8f0;
             background-color: #f8fafc;
             
-            &.col-emp { color: #004ac6; background-color: #f0f9ff; }
+            &.col-emp { color: #2563eb; background-color: #f0f9ff; }
             &.col-earn { color: #ea580c; background-color: #fff7ed; }
             &.col-deduct { color: #ef4444; background-color: #fef2f2; }
-            &.col-contrib { color: #004ac6; background-color: #f0f9ff; }
-            &.col-net { color: #004ac6; background-color: #eff6ff; }
+            &.col-contrib { color: #2563eb; background-color: #f0f9ff; }
+            &.col-net { color: #2563eb; background-color: #eff6ff; }
           }
           
           tr.header-row th {
@@ -394,7 +394,7 @@
             &.text-center { text-align: center; }
             &.font-semibold { color: #0f172a; font-weight: 700; }
             &.text-error { color: #ef4444; }
-            &.text-primary { color: #004ac6; }
+            &.text-primary { color: #2563eb; }
           }
         }
 
@@ -434,7 +434,7 @@
               
               &.text-error { color: #ef4444; }
               &.font-semibold { font-weight: 600; color: #0f172a; }
-              &.font-bold.text-primary { font-weight: 700; color: #004ac6; }
+              &.font-bold.text-primary { font-weight: 700; color: #2563eb; }
 
               .employee-info {
                 display: flex;
@@ -465,7 +465,7 @@
 
                   &.expanded {
                     background: #dbeafe;
-                    color: #004ac6;
+                    color: #2563eb;
                   }
 
                   &:hover {
@@ -511,7 +511,7 @@
                   transition: all 0.2s;
                   
                   &:hover {
-                    color: #004ac6;
+                    color: #2563eb;
                     background-color: #f0f9ff;
                   }
                   
@@ -599,9 +599,9 @@
           }
 
           &.active {
-            background-color: #004ac6;
+            background-color: #2563eb;
             color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0, 74, 198, 0.2);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
           }
 
           &.disabled {
@@ -641,7 +641,7 @@
       color: #0f172a;
 
       mat-icon {
-        color: #004ac6;
+        color: #2563eb;
         font-size: 1.25rem;
         width: 1.25rem;
         height: 1.25rem;
@@ -685,7 +685,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #004ac6;
+      color: #2563eb;
     }
 
     .detail-records {

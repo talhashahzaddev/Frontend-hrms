@@ -47,7 +47,7 @@
       font-size: 13px;
       min-width: auto;
       padding: 5px 10px;
-      color: #1976d2;
+      color: #2563eb;
       text-transform: none;
       font-weight: 500;
 
@@ -75,7 +75,7 @@
           content: "";
           width: 8px;
           height: 8px;
-          background-color: #1976d2;
+          background-color: #2563eb;
           border-radius: 50%;
           position: absolute;
           left: 10px;
@@ -91,7 +91,7 @@
       .notification-icon {
         margin-right: 14px;
         font-size: 26px;
-        color: #1976d2;
+        color: #2563eb;
         flex-shrink: 0;
       }
 
@@ -146,7 +146,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 
             &.mat-primary {
-              background-color: #1976d2;
+              background-color: #2563eb;
               color: #fff;
 
               &:hover {

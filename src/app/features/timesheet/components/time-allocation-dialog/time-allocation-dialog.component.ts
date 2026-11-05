@@ -48,7 +48,7 @@ interface AllocationRow {
     <div class="dialog-body">
       @if (loading()) {
         <div style="display: flex; justify-content: center; padding: 40px;">
-          <p style="color: #6b7280;">Loading allocations...</p>
+          <p style="color: #64748b;">Loading allocations...</p>
         </div>
       } @else {
         <!-- Summary -->
@@ -79,7 +79,7 @@ interface AllocationRow {
                   <span class="ts-badge" [ngClass]="'ts-' + day.status.replace('_', '-')">{{ day.status | titlecase }}</span>
                 </div>
                 <div class="ts-day-hours-info">
-                  <span style="color: #6b7280; font-size: 13px;">{{ day.totalHours }}h worked</span>
+                  <span style="color: #64748b; font-size: 13px;">{{ day.totalHours }}h worked</span>
                   <span class="ts-day-allocated" [ngClass]="getDayAllocationClass(day)">
                     {{ getDayAllocatedHours(day) }}h allocated
                   </span>
@@ -105,7 +105,7 @@ interface AllocationRow {
 
                       <label class="ts-billable-toggle">
                         <input type="checkbox" [(ngModel)]="row.isBillable" />
-                        <span style="color: #374151; font-size: 12px;">Billable</span>
+                        <span style="color: #334155; font-size: 12px;">Billable</span>
                       </label>
 
                       <input type="text" [(ngModel)]="row.description" class="ts-alloc-desc" placeholder="Notes (optional)" />

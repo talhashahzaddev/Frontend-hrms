@@ -70,7 +70,7 @@ export interface GoalDetailsDialogData {
               <div class="assign-field-group">
                 <label class="field-label">Status</label>
                 <div class="readonly-value" style="display:flex; align-items:center; gap:6px;">
-                  <span class="status-indicator" [ngStyle]="{'background': data.goal.isActive ? '#22c55e' : '#9ca3af', 'width': '8px', 'height': '8px', 'border-radius': '50%', 'display': 'inline-block'}"></span>
+                  <span class="status-indicator" [ngStyle]="{'background': data.goal.isActive ? '#22c55e' : '#94a3b8', 'width': '8px', 'height': '8px', 'border-radius': '50%', 'display': 'inline-block'}"></span>
                   {{ data.goal.isActive ? 'Active' : 'Inactive' }}
                 </div>
               </div>

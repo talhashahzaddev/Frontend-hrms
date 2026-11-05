@@ -57,8 +57,7 @@
 
     <!-- Loading Spinner -->
     <div *ngIf="isLoading" class="loading-state">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading positions...</p>
+      <app-skeleton variant="table" [rows]="6" [columns]="5" label="Loading positions"></app-skeleton>
     </div>
 
     <!-- Position Table -->

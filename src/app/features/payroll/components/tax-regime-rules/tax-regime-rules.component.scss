@@ -1,6 +1,6 @@
 .tax-regime-rules-container {
   width: 100%;
-  color: #0b1c30;
+  color: #0f172a;
   background-color: #f8fafc;
   padding: 2rem;
   font-family: 'Public Sans', 'Inter', sans-serif;
@@ -36,7 +36,7 @@
       background: transparent;
       border: none;
       cursor: pointer;
-      color: #191c1e;
+      color: #0f172a;
       transition: background-color 0.2s;
 
       &:hover {
@@ -57,14 +57,14 @@
         font-family: 'Manrope', inherit;
         font-size: 1.5rem;
         font-weight: 700;
-        color: #191c1e;
+        color: #0f172a;
         letter-spacing: -0.025em;
         margin: 0;
         margin-bottom: 0.25rem;
       }
 
       .subtitle {
-        color: #434655;
+        color: #475569;
         font-size: 0.875rem;
         margin: 0;
       }
@@ -72,7 +72,7 @@
   }
 
   .create-rule-btn {
-    background: linear-gradient(to bottom right, #004ac6, #2563eb);
+    background: linear-gradient(to bottom right, #2563eb, #2563eb);
     color: #ffffff;
     padding: 0.625rem 1.5rem;
     border-radius: 0.5rem;
@@ -83,7 +83,7 @@
     gap: 0.5rem;
     border: none;
     cursor: pointer;
-    box-shadow: 0 20px 40px rgba(0, 74, 198, 0.06);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.06);
     transition: transform 0.1s;
 
     &:active {
@@ -119,8 +119,8 @@
       transition: all 0.2s ease;
 
       &.active {
-        color: #004ac6;
-        border-bottom-color: #004ac6;
+        color: #2563eb;
+        border-bottom-color: #2563eb;
       }
 
       &:hover:not(.active) {
@@ -203,8 +203,8 @@
         .rule-icon-box {
           width: 2.5rem;
           height: 2.5rem;
-          background-color: rgba(0, 74, 198, 0.08);
-          color: #004ac6;
+          background-color: rgba(37, 99, 235, 0.08);
+          color: #2563eb;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -336,7 +336,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: #434655;
+      color: #475569;
       font-size: 0.8125rem;
 
       p { margin: 0; }

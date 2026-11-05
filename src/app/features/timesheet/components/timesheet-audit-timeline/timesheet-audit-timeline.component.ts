@@ -116,7 +116,7 @@ export class TimesheetAuditTimelineComponent implements OnInit {
     'ReopenRequested':     { icon: 'pi-undo',                  iconClass: '', label: 'Reopen Requested', colorVar: '#D97706' },
   };
 
-  private defaultConfig = { icon: 'pi-info-circle', iconClass: '', label: 'Action', colorVar: '#6B7280' };
+  private defaultConfig = { icon: 'pi-info-circle', iconClass: '', label: 'Action', colorVar: '#64748b' };
 
   constructor(private api: TimesheetService) {}
 

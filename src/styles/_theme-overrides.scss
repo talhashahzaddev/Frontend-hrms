@@ -1,0 +1,252 @@
+// ═══ Component polish — Angular Material, PrimeNG, Toastr ═════════════════════
+// Only design tokens and visual properties (color, radius, shadow, type) are set
+// here, so page styles still win and no component changes size or behaviour.
+
+html {
+  // ── Buttons ──
+  --mat-button-filled-container-shape: 8px;
+  --mat-button-outlined-container-shape: 8px;
+  --mat-button-protected-container-shape: 8px;
+  --mat-button-text-container-shape: 8px;
+  --mat-button-tonal-container-shape: 8px;
+  --mat-button-filled-label-text-weight: 600;
+  --mat-button-outlined-label-text-weight: 600;
+  --mat-button-protected-label-text-weight: 600;
+  --mat-button-text-label-text-weight: 600;
+  --mat-button-tonal-label-text-weight: 600;
+  --mat-button-filled-label-text-tracking: 0;
+  --mat-button-outlined-label-text-tracking: 0;
+  --mat-button-protected-label-text-tracking: 0;
+  --mat-button-text-label-text-tracking: 0;
+  --mat-button-tonal-label-text-tracking: 0;
+  --mat-button-outlined-outline-color: #cbd5e1;
+  --mat-button-protected-container-elevation-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --mat-button-protected-hover-container-elevation-shadow: 0 4px 12px -4px rgba(37, 99, 235, 0.45);
+  --mat-button-protected-focus-container-elevation-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  --mat-button-protected-pressed-container-elevation-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+
+  // ── Form fields ──
+  --mat-form-field-outlined-container-shape: 8px;
+  --mat-form-field-outlined-outline-color: #cbd5e1;
+  --mat-form-field-outlined-hover-outline-color: #94a3b8;
+  --mat-form-field-outlined-focus-outline-color: #2563eb;
+  --mat-form-field-outlined-label-text-color: #64748b;
+  --mat-form-field-outlined-input-text-color: #0f172a;
+  --mat-form-field-filled-container-shape: 8px;
+  --mat-form-field-filled-container-color: #f8fafc;
+  --mat-select-enabled-trigger-text-color: #0f172a;
+  --mat-select-enabled-arrow-color: #64748b;
+  --mat-select-panel-background-color: #ffffff;
+  --mat-select-container-elevation-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px #e2e8f0;
+
+  // ── Cards & surfaces ──
+  --mat-card-elevated-container-shape: 12px;
+  --mat-card-outlined-container-shape: 12px;
+  --mat-card-outlined-outline-color: #e2e8f0;
+  --mat-card-elevated-container-elevation: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --mat-expansion-container-shape: 12px;
+
+  // ── Dialogs ──
+  --mat-dialog-container-shape: 16px;
+  --mat-dialog-container-elevation-shadow: 0 24px 64px -16px rgba(15, 23, 42, 0.32);
+  --mat-dialog-subhead-color: #0f172a;
+  --mat-dialog-subhead-weight: 600;
+  --mat-dialog-subhead-tracking: -0.01em;
+  --mat-dialog-supporting-text-color: #334155;
+
+  // ── Menus & tooltips ──
+  --mat-menu-container-shape: 10px;
+  --mat-menu-container-elevation-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px #e2e8f0;
+  --mat-menu-item-label-text-color: #334155;
+  --mat-menu-item-label-text-size: 14px;
+  --mat-menu-item-label-text-weight: 500;
+  --mat-menu-item-icon-color: #64748b;
+  --mat-menu-divider-color: #f1f5f9;
+  --mat-tooltip-container-color: #0f172a;
+  --mat-tooltip-container-shape: 6px;
+  --mat-tooltip-supporting-text-size: 12px;
+  --mat-tooltip-supporting-text-weight: 500;
+
+  // ── Tables & paginator ──
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-header-headline-size: 12px;
+  --mat-table-header-headline-weight: 600;
+  --mat-table-header-headline-tracking: 0.04em;
+  --mat-table-row-item-label-text-color: #334155;
+  --mat-table-row-item-label-text-size: 14px;
+  --mat-table-row-item-outline-color: #f1f5f9;
+  --mat-paginator-container-text-color: #64748b;
+  --mat-paginator-enabled-icon-color: #334155;
+  --mat-paginator-disabled-icon-color: #cbd5e1;
+
+  // ── Tabs ──
+  --mat-tab-active-label-text-color: #2563eb;
+  --mat-tab-active-hover-label-text-color: #1d4ed8;
+  --mat-tab-active-focus-label-text-color: #1d4ed8;
+  --mat-tab-inactive-label-text-color: #64748b;
+  --mat-tab-inactive-hover-label-text-color: #0f172a;
+  --mat-tab-active-indicator-height: 2px;
+  --mat-tab-divider-color: #e2e8f0;
+  --mat-tab-label-text-weight: 600;
+  --mat-tab-label-text-tracking: 0;
+
+  // ── Chips, toggles, snackbars ──
+  --mat-chip-container-shape-radius: 999px;
+  --mat-chip-outline-color: #e2e8f0;
+  --mat-chip-label-text-weight: 500;
+  --mat-checkbox-unselected-icon-color: #94a3b8;
+  --mat-snack-bar-container-shape: 10px;
+  --mat-snack-bar-container-color: #0f172a;
+  --mat-datepicker-calendar-container-shape: 12px;
+  --mat-datepicker-calendar-container-elevation-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px #e2e8f0;
+}
+
+// Material tables: tinted header, uppercase micro-labels, soft row hover
+.mat-mdc-table {
+  .mat-mdc-header-row {
+    background: #f8fafc;
+  }
+
+  .mat-mdc-header-cell {
+    text-transform: uppercase;
+    border-bottom-color: #e2e8f0;
+  }
+
+  .mat-mdc-row {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+}
+
+.mat-mdc-paginator {
+  border-top: 1px solid #f1f5f9;
+}
+
+// Dialog title spacing and a divider above the actions
+.mat-mdc-dialog-container {
+  .mat-mdc-dialog-title {
+    font-size: 18px;
+  }
+
+  .mat-mdc-dialog-actions {
+    gap: 8px;
+  }
+}
+
+// Menus: rounded inner items
+.mat-mdc-menu-panel .mat-mdc-menu-content {
+  padding: 6px;
+
+  .mat-mdc-menu-item {
+    border-radius: 6px;
+    min-height: 40px;
+  }
+}
+
+.mat-mdc-select-panel {
+  padding: 6px !important;
+
+  .mat-mdc-option {
+    border-radius: 6px;
+  }
+}
+
+// Form-field error and hint text
+.mat-mdc-form-field-error {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+// Required asterisk in brand danger color
+.mat-mdc-form-field-required-marker,
+.mdc-floating-label--required::after {
+  color: #dc2626;
+}
+
+// ── PrimeNG (lara-light-blue) ──
+.p-component {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-calendar .p-inputtext {
+  border-radius: 8px;
+  border-color: #cbd5e1;
+
+  &:enabled:focus,
+  &.p-focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  }
+}
+
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-color: #e2e8f0;
+  }
+
+  .p-datatable-tbody > tr > td {
+    border-color: #f1f5f9;
+    color: #334155;
+  }
+}
+
+.p-button.p-button-outlined,
+.p-button.p-button-text {
+  background: transparent;
+  color: #2563eb;
+}
+
+.p-button.p-button-secondary,
+.p-button.p-button-outlined.p-button-secondary {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.p-button.p-button-danger {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+// ── Toastr ──
+#toast-container > div {
+  border-radius: 10px;
+  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.35);
+  opacity: 1;
+  font-size: 14px;
+  padding: 14px 16px 14px 50px;
+  background-position: 16px center;
+
+  &:hover {
+    box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.45);
+  }
+}
+
+#toast-container > .toast-success { background-color: #15803d; }
+#toast-container > .toast-error { background-color: #b91c1c; }
+#toast-container > .toast-warning { background-color: #b45309; }
+#toast-container > .toast-info { background-color: #1d4ed8; }
+
+.toast-title {
+  font-weight: 600;
+}
+
+// ── Focus visibility for keyboard users ──
+a:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}

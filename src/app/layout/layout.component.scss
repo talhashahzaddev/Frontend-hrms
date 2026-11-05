@@ -1,25 +1,30 @@
-// Layout Container Styles (Hubstaff-inspired)
+// Layout shell: navy sidebar + light content canvas
 .layout-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--gray-50);
+  background: var(--hr-bg);
 }
 
 .sidenav-container {
   flex: 1;
-  background: var(--gray-50);
+  background: var(--hr-bg);
 }
 
 // Sidebar Styles
 .sidenav {
-  width: 280px;
-  background: white;
-  border-right: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
+  width: var(--hr-sidebar-w, 272px);
+  background: #172554;
+  border-right: 0;
+  box-shadow: none;
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.is-collapsed {
+    width: var(--hr-sidebar-rail-w, 76px);
+  }
 
   @media (max-width: 959px) {
-    width: 250px !important;
+    width: 280px !important;
     max-width: 85vw !important; /* Ensure it leaves space on very small screens */
   }
 
@@ -34,7 +39,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--gray-50);
+  background: var(--hr-bg);
   overflow: visible;
   /* prevent header shadow clipping (“half box” effect) */
 }
@@ -44,7 +49,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 0;
-  background: var(--gray-50);
+  background: var(--hr-bg);
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -78,8 +83,7 @@
 // Responsive Design
 @media (max-width: 768px) {
   .sidenav {
-    width: 100%;
-    max-width: 320px;
+    max-width: 85vw;
   }
 
   .content-wrapper {
@@ -162,7 +166,7 @@
   position: relative;
   transform-origin: top left;
   overflow: visible !important; // Critical: Allow content to expand when zoomed
-  min-height: calc(100vh - 72px); // Subtract header height
+  min-height: calc(100vh - 64px); // Subtract header height
   
   // Smooth zoom transition
   transition: zoom 0.2s cubic-bezier(0.4, 0, 0.2, 1);

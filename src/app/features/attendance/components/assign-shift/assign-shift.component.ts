@@ -408,7 +408,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getAvatarBg(emp: any): string {
-    const colors = ['#F44336','#E91E63','#9C27B0','#3F51B5','#2196F3','#03A9F4','#009688','#4CAF50','#8BC34A','#FF9800','#795548','#607D8B'];
+    const colors = ['#F44336','#E91E63','#9C27B0','#2563eb','#2196F3','#03A9F4','#009688','#4CAF50','#8BC34A','#FF9800','#795548','#607D8B'];
     const key = (emp?.employeeId || emp?.email || emp?.fullName || emp?.employeeCode || '').toString();
     if (!key) return colors[0];
     let hash = 0;

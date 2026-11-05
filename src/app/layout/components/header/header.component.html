@@ -1,54 +1,58 @@
 <mat-toolbar class="header-toolbar">
 
-  <!-- Mobile Menu Button -->
-  <button mat-icon-button class="menu-button" *ngIf="isHandset" (click)="onMenuToggle()" aria-label="Toggle navigation">
-    <mat-icon>menu</mat-icon>
-  </button>
+  <!-- Left: navigation toggle + breadcrumbs -->
+  <div class="header-left">
+    <button mat-icon-button class="menu-button" (click)="onMenuToggle()"
+      [attr.aria-label]="isHandset ? 'Open navigation' : (sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')"
+      [matTooltip]="isHandset ? '' : (sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')">
+      <mat-icon>{{ isHandset || sidebarCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+    </button>
 
-  <!-- Logo/Brand -->
-  <div class="brand" [class.mobile]="isHandset">
-    <div class="logo">
-      <mat-icon class="logo-icon">business</mat-icon>
-      <span class="brand-text" [class.hidden]="isHandset">HRMS</span>
-    </div>
+    <nav class="breadcrumbs" aria-label="Breadcrumb" *ngIf="breadcrumbs.length">
+      <a routerLink="/dashboard" class="crumb crumb-home" aria-label="Dashboard">
+        <mat-icon>home</mat-icon>
+      </a>
+      <ng-container *ngFor="let crumb of breadcrumbs; let last = last">
+        <mat-icon class="crumb-sep" aria-hidden="true">chevron_right</mat-icon>
+        <span class="crumb" [class.current]="last" [attr.aria-current]="last ? 'page' : null">{{ crumb }}</span>
+      </ng-container>
+    </nav>
   </div>
 
-  <!-- Spacer -->
   <span class="spacer"></span>
 
-  <!-- Header Actions -->
+  <!-- Right: actions -->
   <div class="header-actions">
 
-    <!-- Search Section -->
+    <!-- Global search -->
     <div class="search-container">
-      <!-- Toolbar search icon -->
-      <button mat-icon-button class="search-trigger-button" *ngIf="!isSearchOpen" matTooltip="Search"
-        aria-label="Search" (click)="toggleSearch()">
+      <button type="button" class="search-pill" *ngIf="!isSearchOpen" (click)="toggleSearch()" aria-label="Search (Ctrl+K)">
         <mat-icon>search</mat-icon>
+        <span class="search-pill-text">Search pages…</span>
+        <kbd class="search-kbd">Ctrl K</kbd>
       </button>
 
-      <!-- Search input with enhanced styling -->
       <div class="header-search" *ngIf="isSearchOpen">
         <div class="search-input-wrapper">
           <mat-icon class="search-icon">search</mat-icon>
           <input #searchInput type="text" placeholder="Search pages, attendance, leave, performance..."
             class="search-input" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)"
-            (keydown.enter)="onSearch()" (blur)="onSearchBlur()" />
+            (keydown.enter)="onSearch()" (blur)="onSearchBlur()" aria-label="Search pages" />
           <button mat-icon-button class="search-close-button" (click)="toggleSearch()" matTooltip="Close search"
             aria-label="Close search">
             <mat-icon>close</mat-icon>
           </button>
         </div>
 
-        <!-- Enhanced dropdown suggestions -->
         <div class="search-suggestions" *ngIf="searchQuery.trim()">
           <div class="suggestion-item" *ngFor="let item of filteredItems" (mousedown)="goToSection(item)"
             (click)="goToSection(item)">
-            <mat-icon class="suggestion-icon">{{ item.icon || 'arrow_forward' }}</mat-icon>
+            <span class="suggestion-icon-wrap"><mat-icon class="suggestion-icon">{{ item.icon || 'arrow_forward' }}</mat-icon></span>
             <div class="suggestion-info">
               <span class="suggestion-text">{{ item.name }}</span>
               <span class="suggestion-category" *ngIf="item.category">{{ item.category }}</span>
             </div>
+            <mat-icon class="suggestion-go" aria-hidden="true">north_east</mat-icon>
           </div>
           <div class="no-results" *ngIf="filteredItems.length === 0">
             <mat-icon class="no-results-icon">search_off</mat-icon>
@@ -58,11 +62,12 @@
       </div>
     </div>
 
+    <!-- Zoom -->
     <div class="zoom-dropdown">
-      <button mat-button class="zoom-trigger" [matMenuTriggerFor]="zoomMenu" matTooltip="Zoom" aria-label="Zoom">
-        <mat-icon class="zoom-icon">zoom_in</mat-icon>
+      <button mat-button class="zoom-trigger" [matMenuTriggerFor]="zoomMenu" matTooltip="Display size" aria-label="Zoom">
+        <mat-icon class="zoom-icon">text_fields</mat-icon>
         <span class="zoom-label">{{ scalePercent }}%</span>
-        <mat-icon class="arrow-icon">arrow_drop_down</mat-icon>
+        <mat-icon class="arrow-icon">expand_more</mat-icon>
       </button>
     </div>
     <mat-menu #zoomMenu="matMenu" class="zoom-menu">
@@ -75,51 +80,54 @@
       </button>
     </mat-menu>
 
-
     <!-- Notifications -->
-   <!-- Notifications -->
-<div class="notification-container" #notificationContainer>
-  <button mat-icon-button
-          class="action-button notification-button"
-          [class.has-notifications]="notificationCount > 0"
-          (click)="onNotificationsClick()"
-          matTooltip="Notifications"
-          aria-label="Notifications">
-    <mat-icon [matBadge]="notificationCount"
-              [matBadgeHidden]="notificationCount === 0"
-              matBadgeColor="warn"
-              matBadgeSize="small">
-      notifications
-    </mat-icon>
-  </button>
+    <div class="notification-container" #notificationContainer>
+      <button mat-icon-button
+              class="action-button notification-button"
+              [class.has-notifications]="notificationCount > 0"
+              (click)="onNotificationsClick()"
+              matTooltip="Notifications"
+              aria-label="Notifications">
+        <mat-icon [matBadge]="notificationCount > 99 ? '99+' : notificationCount"
+                  [matBadgeHidden]="notificationCount === 0"
+                  matBadgeColor="warn"
+                  matBadgeSize="small">
+          notifications
+        </mat-icon>
+      </button>
 
-  <!-- Notification Dialog -->
-  <app-notification-dialogue
-    [isOpen]="isNotificationOpen"
-    (unreadCountChange)="notificationCount = $event"
-    (close)="closeNotifications()">
-  </app-notification-dialogue>
-</div>
+      <app-notification-dialogue
+        [isOpen]="isNotificationOpen"
+        (unreadCountChange)="notificationCount = $event"
+        (close)="closeNotifications()">
+      </app-notification-dialogue>
+    </div>
 
-    <!-- User Menu -->
-    <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
-      <div class="user-avatar-pic">
+    <span class="header-divider" aria-hidden="true"></span>
+
+    <!-- Profile -->
+    <button type="button" class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
+      <span class="user-avatar-pic">
         <p-avatar *ngIf="profilePreviewUrl; else initials" [image]="profilePreviewUrl" shape="circle"
           styleClass="user-avatar-large-content">
         </p-avatar>
-
         <ng-template #initials>
           <p-avatar [label]="getUserInitials()" shape="circle" styleClass="user-avatar-large-content">
           </p-avatar>
         </ng-template>
-      </div>
-      <div class="user-status-indicator"></div>
+        <span class="user-status-indicator"></span>
+      </span>
+      <span class="user-trigger-text">
+        <span class="user-trigger-name">{{ getUserDisplayName() }}</span>
+        <span class="user-trigger-role">{{ currentUser?.roleName }}</span>
+      </span>
+      <mat-icon class="user-trigger-caret">expand_more</mat-icon>
     </button>
 
   </div>
 
   <!-- User Menu -->
-  <mat-menu #userMenu="matMenu" class="user-menu">
+  <mat-menu #userMenu="matMenu" class="user-menu" xPosition="before">
     <div class="user-menu-header">
       <div class="user-info">
         <div class="user-avatar-large">
@@ -158,9 +166,8 @@
       <span>Update Profile</span>
     </a>
 
-    <a mat-menu-item [routerLink]="['/change-password']" (click)="onSettingsClick()"
-      >
-      <mat-icon>settings</mat-icon>
+    <a mat-menu-item [routerLink]="['/change-password']" (click)="onSettingsClick()">
+      <mat-icon>lock</mat-icon>
       <span>Change Password</span>
     </a>
 

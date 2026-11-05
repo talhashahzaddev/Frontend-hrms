@@ -1,6 +1,6 @@
 .time-tracking-container.loans-advances-page {
   width: 100%;
-  color: #0b1c30;
+  color: #0f172a;
   background-color: #f8fafc;
   padding: 2rem;
   font-family: 'Public Sans', 'Inter', sans-serif;
@@ -73,7 +73,7 @@
       }
 
       .add-btn {
-        background-color: #004ac6;
+        background-color: #2563eb;
         color: #ffffff;
         padding: 0.75rem 1.25rem;
         border-radius: 0.625rem;
@@ -84,13 +84,13 @@
         align-items: center;
         gap: 0.5rem;
         cursor: pointer;
-        box-shadow: 0 4px 14px rgba(0, 74, 198, 0.2);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
         transition: all 0.2s ease;
 
         &:hover {
           transform: translateY(-1px);
-          background-color: #003ba3;
-          box-shadow: 0 6px 20px rgba(0, 74, 198, 0.3);
+          background-color: #1d4ed8;
+          box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
         }
 
         &:active {
@@ -128,8 +128,8 @@
       transition: all 0.2s ease;
 
       &.active {
-        color: #004ac6;
-        border-bottom-color: #004ac6;
+        color: #2563eb;
+        border-bottom-color: #2563eb;
       }
 
       &:hover:not(.active) {
@@ -420,11 +420,11 @@
         }
 
         .apply-btn {
-          background: #004ac6;
+          background: #2563eb;
           color: #ffffff;
 
           &:hover:not(:disabled) {
-            background: #003ba3;
+            background: #1d4ed8;
           }
         }
 
@@ -444,7 +444,7 @@
 
     .add-btn-wrap {
       .add-btn {
-        background: #004ac6;
+        background: #2563eb;
         color: #ffffff;
         border: none;
         border-radius: 0.6rem;
@@ -456,10 +456,10 @@
         align-items: center;
         gap: 0.4rem;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 74, 198, 0.22);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
 
         &:hover {
-          background: #003ba3;
+          background: #1d4ed8;
         }
 
         mat-icon {
@@ -498,7 +498,7 @@
         height: 2.3rem;
         border-radius: 50%;
         border: 3px solid #e2e8f0;
-        border-top-color: #004ac6;
+        border-top-color: #2563eb;
         animation: spin 0.8s linear infinite;
       }
 
@@ -596,7 +596,7 @@
         }
 
         &.active {
-          background: #004ac6;
+          background: #2563eb;
           color: #ffffff;
         }
 

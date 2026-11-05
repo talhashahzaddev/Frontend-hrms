@@ -1,83 +1,132 @@
-<div class="sidebar-container">
-  
-  <!-- Sidebar Header -->
+<div class="sidebar-container" [class.is-collapsed]="collapsed">
+
+  <!-- Brand / organization -->
   <div class="sidebar-header">
     <div class="organization-info">
-      <div class="org-logo">
-        <mat-icon class="org-icon">business</mat-icon>
+      <div class="org-logo" aria-hidden="true">
+        <mat-icon class="org-icon">corporate_fare</mat-icon>
       </div>
-      <div class="org-details" *ngIf="currentUser">
-        <div class="org-name">{{ currentUser.organizationName }}</div>
-        <div class="user-role">{{ currentUser.roleName }}</div>
+      <div class="org-details" *ngIf="!collapsed">
+        <div class="org-name" [title]="currentUser?.organizationName || 'HRMS'">{{ currentUser?.organizationName || 'HRMS' }}</div>
+        <div class="org-sub">HR workspace</div>
       </div>
     </div>
   </div>
 
-  <!-- Navigation Menu -->
-  <nav class="sidebar-nav">
-    <mat-nav-list class="nav-list">
-      <mat-accordion class="nav-accordion" [multi]="false">
-        <!-- Menu Items -->
-        <ng-container *ngFor="let item of getFilteredMenuItems()">
-          
-          <!-- Single Menu Item (No Children) -->
-          <a mat-list-item [disableRipple]="true"
-            *ngIf="!item.children || item.children.length === 0"
-            class="nav-item"
-            [class.active]="isActiveItem(item)"
-            [routerLink]="item.route"
-            (click)="onMenuItemClick(item)"
-            role="menuitem">
-            
-            <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
-            <span matListItemTitle class="nav-label">{{ item.label }}</span>
-            
-            <span matListItemMeta *ngIf="item.badge && item.badge > 0" 
-                  class="nav-badge">
-              {{ item.badge }}
-            </span>
-          </a>
+  <!-- Navigation -->
+  <nav class="sidebar-nav" aria-label="Main navigation">
 
-          <!-- Expandable Menu Item (With Children) -->
-          <div *ngIf="item.children && item.children.length > 0" class="nav-group">
-            
-            <mat-expansion-panel 
-              class="nav-expansion-panel"
-              hideToggle>
-              
-              <mat-expansion-panel-header class="nav-group-header">
-                <mat-panel-title class="nav-group-title">
-                  <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
-                  <span class="nav-label">{{ item.label }}</span>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              
-              <!-- Sub Menu Items -->
-              <div class="nav-sub-items">
-                <mat-list class="sub-nav-list">
-                  <a mat-list-item
-                    [disableRipple]="true"
-                    *ngFor="let child of getFilteredChildren(item.children)"
-                    class="nav-sub-item"
-                    [class.active]="isActiveItem(child)"
-                    [routerLink]="child.route"
-                    (click)="onMenuItemClick(child, item)"
-                    role="menuitem">
-                    
-                    <mat-icon matListItemIcon class="nav-sub-icon">{{ child.icon }}</mat-icon>
-                    <span matListItemTitle class="nav-sub-label">{{ child.label }}</span>
-                    
-                    <span matListItemMeta *ngIf="child.badge && child.badge > 0" 
-                          class="nav-badge">
-                      {{ child.badge }}
-                    </span>
-                  </a>
-                </mat-list>
-              </div>
-            </mat-expansion-panel>
-          </div>
+    <!-- Expanded: grouped sections with accordion sub-menus -->
+    <mat-nav-list class="nav-list" *ngIf="!collapsed">
+      <mat-accordion class="nav-accordion" [multi]="false">
+        <ng-container *ngFor="let section of getMenuSections(); trackBy: trackSection">
+          <div class="nav-section-label">{{ section.label }}</div>
+
+          <ng-container *ngFor="let item of section.items; trackBy: trackItem">
+
+            <!-- Single item -->
+            <a mat-list-item [disableRipple]="true"
+              *ngIf="!item.children || item.children.length === 0"
+              class="nav-item"
+              [class.active]="isActiveItem(item)"
+              [routerLink]="item.route"
+              (click)="onMenuItemClick(item)"
+              role="menuitem">
+              <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+              <span matListItemTitle class="nav-label">{{ item.label }}</span>
+              <span matListItemMeta *ngIf="item.badge && item.badge > 0" class="nav-badge">{{ item.badge }}</span>
+            </a>
+
+            <!-- Group with children -->
+            <div *ngIf="item.children && item.children.length > 0" class="nav-group"
+              [class.has-active]="isGroupContainsActive(item)">
+              <mat-expansion-panel class="nav-expansion-panel" hideToggle #panel="matExpansionPanel"
+                [expanded]="isParentActive(item)">
+                <mat-expansion-panel-header class="nav-group-header">
+                  <mat-panel-title class="nav-group-title">
+                    <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                    <span class="nav-label">{{ item.label }}</span>
+                    <mat-icon class="nav-chevron" [class.open]="panel.expanded">expand_more</mat-icon>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="nav-sub-items">
+                  <mat-list class="sub-nav-list">
+                    <a mat-list-item
+                      [disableRipple]="true"
+                      *ngFor="let child of getFilteredChildren(item.children); trackBy: trackItem"
+                      class="nav-sub-item"
+                      [class.active]="isActiveItem(child)"
+                      [routerLink]="child.route"
+                      (click)="onMenuItemClick(child, item)"
+                      role="menuitem">
+                      <mat-icon matListItemIcon class="nav-sub-icon">{{ child.icon }}</mat-icon>
+                      <span matListItemTitle class="nav-sub-label">{{ child.label }}</span>
+                      <span matListItemMeta *ngIf="child.badge && child.badge > 0" class="nav-badge">{{ child.badge }}</span>
+                    </a>
+                  </mat-list>
+                </div>
+              </mat-expansion-panel>
+            </div>
+          </ng-container>
         </ng-container>
       </mat-accordion>
     </mat-nav-list>
+
+    <!-- Collapsed: icon rail, groups open as flyout menus -->
+    <div class="nav-rail" *ngIf="collapsed">
+      <ng-container *ngFor="let section of getMenuSections(); let first = first; trackBy: trackSection">
+        <div class="rail-divider" *ngIf="!first" aria-hidden="true"></div>
+        <ng-container *ngFor="let item of section.items; trackBy: trackItem">
+          <a *ngIf="!item.children || item.children.length === 0"
+            class="rail-item"
+            [class.active]="isActiveItem(item)"
+            [routerLink]="item.route"
+            (click)="onMenuItemClick(item)"
+            [matTooltip]="item.label"
+            matTooltipPosition="right"
+            [attr.aria-label]="item.label">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </a>
+          <button *ngIf="item.children && item.children.length > 0"
+            type="button"
+            class="rail-item"
+            [class.active]="isGroupContainsActive(item)"
+            [matMenuTriggerFor]="railMenu"
+            [matMenuTriggerData]="{ item: item }"
+            [matTooltip]="item.label"
+            matTooltipPosition="right"
+            [attr.aria-label]="item.label">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </button>
+        </ng-container>
+      </ng-container>
+    </div>
   </nav>
+
+  <!-- Signed-in user -->
+  <div class="sidebar-footer" *ngIf="currentUser">
+    <a class="user-card" routerLink="/profile" (click)="menuItemClick.emit()"
+      [matTooltip]="collapsed ? getUserDisplayName() : ''" matTooltipPosition="right">
+      <span class="user-avatar" aria-hidden="true">{{ getUserInitials() }}</span>
+      <span class="user-text" *ngIf="!collapsed">
+        <span class="user-name">{{ getUserDisplayName() }}</span>
+        <span class="user-role">{{ currentUser.roleName }}</span>
+      </span>
+    </a>
+  </div>
 </div>
+
+<mat-menu #railMenu="matMenu" xPosition="after" [overlapTrigger]="true" class="rail-menu">
+  <ng-template matMenuContent let-item="item">
+    <div class="rail-menu-title">{{ item.label }}</div>
+    <a mat-menu-item
+      *ngFor="let child of getFilteredChildren(item.children); trackBy: trackItem"
+      [class.rail-menu-active]="isActiveItem(child)"
+      [routerLink]="child.route"
+      (click)="onMenuItemClick(child, item)">
+      <mat-icon>{{ child.icon }}</mat-icon>
+      <span>{{ child.label }}</span>
+    </a>
+  </ng-template>
+</mat-menu>

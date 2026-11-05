@@ -1,0 +1,255 @@
+// ═══ HRMS UI kit — reusable building blocks ═══════════════════════════════════
+// Plain CSS classes so any page (Material or PrimeNG based) can use them.
+//   .hr-page            page container with the standard width and gutters
+//   .hr-card            white surface; .hr-card__head / __title / __body
+//   .hr-btn             button; --primary --secondary --ghost --danger --sm --icon
+//   .hr-input           text input / select / textarea
+//   .hr-field           label + control + hint/error wrapper (.is-required)
+//   .hr-toolbar         search + filters row above a list
+//   .hr-table-wrap      scroll container that keeps wide tables usable on phones
+//   .hr-badge           status pill; --success --warning --danger --info --neutral
+//   .hr-skeleton        shimmering placeholder block while data loads
+//   .hr-grid            responsive auto-fit grid (cards, KPI tiles)
+
+.hr-page {
+  width: 100%;
+  max-width: var(--hr-content-max);
+  margin: 0 auto;
+  padding: 24px 28px 40px;
+
+  @media (max-width: 1024px) { padding: 20px 20px 32px; }
+  @media (max-width: 640px) { padding: 16px 16px 28px; }
+}
+
+// ── Cards ──
+.hr-card {
+  background: var(--hr-card);
+  border: 1px solid var(--hr-border);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--hr-border-soft);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--hr-text);
+  }
+
+  &__sub {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--hr-text-muted);
+  }
+
+  &__body { padding: 20px; }
+}
+
+// ── Buttons ──
+.hr-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--hr-control-h);
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--hr-radius);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s var(--hr-ease), border-color 0.15s var(--hr-ease), box-shadow 0.15s var(--hr-ease);
+
+  .mat-icon, mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:focus-visible { outline: none; box-shadow: var(--hr-focus); }
+  &:disabled, &[aria-disabled='true'] { opacity: 0.55; cursor: not-allowed; }
+
+  &--primary {
+    background: var(--hr-blue);
+    color: #fff;
+    box-shadow: var(--hr-shadow-xs);
+    &:hover:not(:disabled) { background: var(--hr-blue-hover); }
+  }
+
+  &--secondary {
+    background: #fff;
+    color: var(--hr-text-2);
+    border-color: var(--hr-border);
+    box-shadow: var(--hr-shadow-xs);
+    &:hover:not(:disabled) { background: var(--hr-bg); border-color: #cbd5e1; }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--hr-text-2);
+    &:hover:not(:disabled) { background: var(--hr-border-soft); }
+  }
+
+  &--danger {
+    background: var(--hr-danger);
+    color: #fff;
+    &:hover:not(:disabled) { background: #b91c1c; }
+  }
+
+  &--sm { min-height: 32px; padding: 0 12px; font-size: 13px; }
+  &--icon { width: var(--hr-control-h); padding: 0; }
+}
+
+// ── Inputs ──
+.hr-input {
+  width: 100%;
+  min-height: var(--hr-control-h);
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--hr-radius);
+  background: #fff;
+  color: var(--hr-text);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.15s var(--hr-ease), box-shadow 0.15s var(--hr-ease);
+
+  &::placeholder { color: var(--hr-text-subtle); }
+  &:hover { border-color: #94a3b8; }
+  &:focus { outline: none; border-color: var(--hr-blue); box-shadow: var(--hr-focus); }
+  &:disabled { background: var(--hr-bg); color: var(--hr-text-muted); cursor: not-allowed; }
+  &.is-invalid { border-color: var(--hr-danger); }
+}
+
+textarea.hr-input { min-height: 96px; resize: vertical; line-height: 1.5; }
+
+.hr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  > label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--hr-text-2);
+  }
+
+  &.is-required > label::after {
+    content: ' *';
+    color: var(--hr-danger);
+  }
+
+  .hr-hint { font-size: 12px; color: var(--hr-text-muted); }
+  .hr-error { font-size: 12px; font-weight: 500; color: var(--hr-danger); }
+}
+
+// ── Toolbar (search + filters) ──
+.hr-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--hr-border-soft);
+
+  .hr-toolbar__search {
+    position: relative;
+    flex: 1 1 260px;
+    max-width: 360px;
+
+    .hr-input { padding-left: 36px; }
+
+    mat-icon, .mat-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--hr-text-subtle);
+      pointer-events: none;
+    }
+  }
+
+  .hr-toolbar__spacer { flex: 1; }
+
+  @media (max-width: 640px) {
+    padding: 12px 16px;
+    .hr-toolbar__search { max-width: none; }
+  }
+}
+
+// ── Tables ──
+.hr-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  > table { min-width: 640px; }
+}
+
+// ── Badges ──
+.hr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: var(--hr-border-soft);
+  color: var(--hr-text-2);
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.85;
+  }
+
+  &--plain::before { display: none; }
+  &--success { background: var(--hr-success-soft); color: var(--hr-success-ink); }
+  &--warning { background: var(--hr-warning-soft); color: var(--hr-warning-ink); }
+  &--danger { background: var(--hr-danger-soft); color: var(--hr-danger-ink); }
+  &--info { background: var(--hr-info-soft); color: var(--hr-info-ink); }
+  &--neutral { background: var(--hr-border-soft); color: var(--hr-text-2); }
+}
+
+// ── Skeletons ──
+.hr-skeleton {
+  display: block;
+  min-height: 12px;
+  border-radius: var(--hr-radius-sm);
+  background: linear-gradient(90deg, #eef2f7 0%, #f8fafc 50%, #eef2f7 100%);
+  background-size: 200% 100%;
+  animation: hr-shimmer 1.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+
+@keyframes hr-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+// ── Grid ──
+.hr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 16px;
+}
+
+// Tabular figures for numbers in tables and tiles
+.hr-num { font-variant-numeric: tabular-nums; }

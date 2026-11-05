@@ -11,9 +11,9 @@
 // $color-bg: #f5f6fa;
 // $color-surface: #ffffff;
 // $color-border: #e9eaf0;
-// $color-text: #111827;
-// $color-text-secondary: #6b7280;
-// $color-text-muted: #9ca3af;
+// $color-text: #0f172a;
+// $color-text-secondary: #64748b;
+// $color-text-muted: #94a3b8;
 
 // // Status tokens
 // $color-success: #10b981;
@@ -148,9 +148,9 @@ $color-primary-light: rgba(29, 78, 216, 0.1);
 $color-bg:            #f5f6fa;
 $color-surface:       #ffffff;
 $color-border:        #e9eaf0;
-$color-text:          #111827;
-$color-text-secondary:#6b7280;
-$color-text-muted:    #9ca3af;
+$color-text:          #0f172a;
+$color-text-secondary:#64748b;
+$color-text-muted:    #94a3b8;
 
 $color-success:       #10b981;
 $color-warning:       #f59e0b;
@@ -161,12 +161,12 @@ $indigo-mid:          #2563eb;
 $indigo-dark:         #4f46e5;
 $indigo-light:        #eef2ff;
 $violet:              #2563eb;
-$slate-900:           #111827;
-$slate-700:           #374151;
-$slate-600:           #6b7280;
-$slate-500:           #9ca3af;
-$slate-400:           #d1d5db;
-$slate-300:           #e5e7eb;
+$slate-900:           #0f172a;
+$slate-700:           #334155;
+$slate-600:           #64748b;
+$slate-500:           #94a3b8;
+$slate-400:           #cbd5e1;
+$slate-300:           #e2e8f0;
 $slate-200:           #f0f1f5;
 $slate-100:           #f5f6fa;
 $slate-50:            #fafafa;
@@ -500,7 +500,7 @@ $red-border:          #fecaca;
   }
 
   &.status-default {
-    background: #f9fafb;
+    background: #f8fafc;
     color: $slate-600;
     border-color: $slate-300;
   }

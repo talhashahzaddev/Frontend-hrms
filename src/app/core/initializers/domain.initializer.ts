@@ -50,7 +50,7 @@ function showDomainErrorPage(subdomain: string, message: string): void {
       justify-content: center;
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
       color: white;
       padding: 20px;
       text-align: center;

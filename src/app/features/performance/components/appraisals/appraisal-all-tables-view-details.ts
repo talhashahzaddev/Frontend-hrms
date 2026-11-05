@@ -207,7 +207,7 @@ import { MatChipsModule } from '@angular/material/chips';
     }
 
     .active-star { color: #f59e0b; }
-    .inactive-star { color: #e5e7eb; }
+    .inactive-star { color: #e2e8f0; }
 
     .status-completed { background-color: #10b981 !important; color: white !important; }
     .status-submitted { background-color: #3b82f6 !important; color: white !important; }

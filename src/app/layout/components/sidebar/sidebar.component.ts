@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { Subject, takeUntil, filter } from 'rxjs';
@@ -8,6 +8,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 
 // Services
 import { AuthService } from '@core/services/auth.service';
@@ -33,6 +34,22 @@ interface MenuItem {
   exact?: boolean;
 }
 
+interface MenuSection {
+  label: string;
+  items: MenuItem[];
+}
+
+/** Sidebar grouping: top-level menu label → section heading (display only). */
+const MENU_SECTIONS: { label: string; items: string[] }[] = [
+  { label: 'Overview', items: ['Dashboard'] },
+  { label: 'People', items: ['Employee Management', 'Onboarding'] },
+  { label: 'Time & Attendance', items: ['Attendance', 'Timesheet', 'Leave Management'] },
+  { label: 'Finance', items: ['Payroll', 'Expense', 'Assets Management'] },
+  { label: 'Talent', items: ['Performance', 'Jobs'] },
+  { label: 'Workspace', items: ['News', 'Help Desk', 'AI Assistant'] },
+  { label: 'Administration', items: ['Settings', 'Subscription & Billing'] }
+];
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -42,12 +59,15 @@ interface MenuItem {
     MatListModule,
     MatIconModule,
     MatExpansionModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit, OnDestroy {
+  /** Desktop icon-rail mode: icons only, groups open as flyout menus. */
+  @Input() collapsed = false;
   @Output() menuItemClick = new EventEmitter<void>();
 
   currentUser: User | null = null;
@@ -98,7 +118,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts', featureKey: 'shifts_overtime' },
-        { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime', featureKey: 'shifts_overtime' },
+        { label: 'Overtime', icon: 'more_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime', featureKey: 'shifts_overtime' },
 
         {
           label: 'Geo-Fences',
@@ -186,7 +206,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       menuName: 'Assets Management',
       featureKey: 'assets_management',
       children: [
-        { label: 'Types of Assets', icon: 'folder-tree', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
+        { label: 'Types of Assets', icon: 'category', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
         { label: 'Assets', icon: 'add_box', route: '/assets/create', menuName: 'Assets Management', subMenuName: 'Assets' }
       ]
     },
@@ -228,12 +248,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       label: 'News',
-      icon: 'event_available',
+      icon: 'campaign',
       menuName: 'News',
       featureKey: 'news',
       children: [
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard', menuName: 'News', subMenuName: 'New Dashboard' },
-        { label: 'Create News', icon: 'plus-circle', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'Create News' }
+        { label: 'Create News', icon: 'add_circle', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'Create News' }
 
       ]
     },
@@ -526,6 +546,37 @@ export class SidebarComponent implements OnInit, OnDestroy {
       
       return true;
     });
+  }
+
+  /** Visible menu items grouped under section headings; unknown items fall into "More". */
+  getMenuSections(): MenuSection[] {
+    const visible = this.getFilteredMenuItems();
+    const sections: MenuSection[] = MENU_SECTIONS
+      .map(s => ({ label: s.label, items: visible.filter(i => s.items.includes(i.label)) }))
+      .filter(s => s.items.length > 0);
+    const grouped = new Set(MENU_SECTIONS.flatMap(s => s.items));
+    const rest = visible.filter(i => !grouped.has(i.label));
+    if (rest.length) sections.push({ label: 'More', items: rest });
+    return sections;
+  }
+
+  trackSection(_: number, section: MenuSection): string {
+    return section.label;
+  }
+
+  trackItem(_: number, item: MenuItem): string {
+    return `${item.route || ''}|${item.label}`;
+  }
+
+  getUserInitials(): string {
+    const first = this.currentUser?.firstName?.charAt(0) ?? '';
+    const last = this.currentUser?.lastName?.charAt(0) ?? '';
+    return (first + last).toUpperCase() || 'U';
+  }
+
+  getUserDisplayName(): string {
+    if (!this.currentUser) return '';
+    return `${this.currentUser.firstName ?? ''} ${this.currentUser.lastName ?? ''}`.trim();
   }
 
   getFilteredChildren(children: MenuItem[]): MenuItem[] {

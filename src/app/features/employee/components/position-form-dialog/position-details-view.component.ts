@@ -154,7 +154,7 @@ export interface ViewPositionData {
   margin: 0 0 3px;
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   letter-spacing: -0.2px;
   line-height: 1.2;
   white-space: nowrap;
@@ -165,7 +165,7 @@ export interface ViewPositionData {
 .header-sub {
   margin: 0;
   font-size: 12px;
-  color: #9ca3af;
+  color: #94a3b8;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -189,7 +189,7 @@ export interface ViewPositionData {
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
-  color: #4b5563;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -197,13 +197,13 @@ export interface ViewPositionData {
   font-size: 15px;
   width: 15px;
   height: 15px;
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .strip-divider {
   width: 1px;
   height: 13px;
-  background: #e5e7eb;
+  background: #e2e8f0;
   flex-shrink: 0;
 }
 
@@ -236,7 +236,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
   border-bottom: 1px solid #f0f0f0;
   font-size: 13px;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   letter-spacing: -0.1px;
   background: #ffffff;
 }
@@ -245,7 +245,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
   width: 4px;
   height: 16px;
   border-radius: 2px;
-  background: #111827;
+  background: #0f172a;
   flex-shrink: 0;
 }
 
@@ -287,7 +287,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 .cell-label {
   font-size: 10.5px;
   font-weight: 600;
-  color: #9ca3af;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.7px;
   line-height: 1;
@@ -296,7 +296,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 .cell-value {
   font-size: 13.5px;
   font-weight: 500;
-  color: #111827;
+  color: #0f172a;
   line-height: 1.4;
   word-break: break-word;
 }
@@ -318,8 +318,8 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
   border-radius: 7px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  color: #374151 !important;
-  border-color: #d1d5db !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
   transition: all 0.15s ease !important;
   display: flex;
   align-items: center;
@@ -327,7 +327,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 }
 
 .btn-close mat-icon { font-size: 15px; width: 15px; height: 15px; }
-.btn-close:hover { background: #f3f4f6 !important; border-color: #9ca3af !important; }
+.btn-close:hover { background: #f1f5f9 !important; border-color: #94a3b8 !important; }
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 600px) {

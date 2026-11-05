@@ -2,7 +2,7 @@
   padding: 0;
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 24px 44px rgba(0, 74, 198, 0.14);
+  box-shadow: 0 24px 44px rgba(37, 99, 235, 0.14);
 }
 
 .payslip-view-dialog-panel .mdc-dialog__surface {
@@ -15,7 +15,7 @@
   max-height: 92vh;
   overflow: auto;
   background: #ffffff;
-  color: #111827;
+  color: #0f172a;
   font-family: 'Inter', 'Public Sans', sans-serif;
 
   .modal-header {
@@ -132,7 +132,7 @@
       small {
         display: block;
         margin-top: 0.18rem;
-        color: #6b7280;
+        color: #64748b;
         font-size: 0.69rem;
       }
     }
@@ -198,7 +198,7 @@
       font-size: 0.85rem;
 
       span {
-        color: #374151;
+        color: #334155;
       }
 
       strong {
@@ -215,7 +215,7 @@
     .total-box {
       margin-top: 0.68rem;
       border-radius: 0.58rem;
-      background: #e5e7eb;
+      background: #e2e8f0;
       padding: 0.7rem 0.75rem;
       display: flex;
       align-items: center;
@@ -261,11 +261,11 @@
         }
 
         span {
-          color: #6b7280;
+          color: #64748b;
         }
 
         strong {
-          color: #1f2937;
+          color: #1e293b;
           font-weight: 700;
         }
       }
@@ -295,7 +295,7 @@
   .payable-bar {
     margin-top: auto;
     padding: 1rem 1.35rem;
-    background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -347,7 +347,7 @@
 }
 
 .tone-default {
-  color: #111827;
+  color: #0f172a;
 }
 
 .tone-primary {

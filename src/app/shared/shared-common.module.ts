@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { LocalizedTimePipe } from './pipes/localized-time.pipe';
 import { LocalizedDatePipe } from './pipes/localized-date.pipe';
 import { LocalizedDateTimePipe } from './pipes/localized-date-time.pipe';
+import { SkeletonComponent } from './components/skeleton/skeleton.component';
 
 /**
  * Bundles Angular's CommonModule with the app's localization pipes so every
@@ -19,13 +20,15 @@ import { LocalizedDateTimePipe } from './pipes/localized-date-time.pipe';
     CommonModule,
     LocalizedTimePipe,
     LocalizedDatePipe,
-    LocalizedDateTimePipe
+    LocalizedDateTimePipe,
+    SkeletonComponent
   ],
   exports: [
     CommonModule,
     LocalizedTimePipe,
     LocalizedDatePipe,
-    LocalizedDateTimePipe
+    LocalizedDateTimePipe,
+    SkeletonComponent
   ]
 })
 export class SharedCommonModule {}

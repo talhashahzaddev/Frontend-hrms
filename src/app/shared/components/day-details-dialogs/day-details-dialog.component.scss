@@ -6,7 +6,7 @@
 }
 
 .dialog-header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #2563eb, #1e3a8a);
     color: white;
     padding: 16px 24px;
     display: flex;
@@ -58,14 +58,14 @@ mat-dialog-content {
     label {
         font-size: 11px;
         font-weight: 700;
-        color: #9ca3af;
+        color: #94a3b8;
         letter-spacing: 0.5px;
     }
 
     span {
         font-size: 15px;
         font-weight: 500;
-        color: #1f2937;
+        color: #1e293b;
     }
 }
 
@@ -100,12 +100,12 @@ mat-dialog-content {
             align-items: center;
             font-size: 11px;
             font-weight: 700;
-            color: #667eea;
+            color: #2563eb;
         }
 
         strong {
             font-size: 16px;
-            color: #111827;
+            color: #0f172a;
             padding-left: 20px;
         }
 
@@ -130,11 +130,11 @@ mat-dialog-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #f9fafb;
+        background: #f8fafc;
         padding: 12px;
         border-radius: 8px;
         margin-bottom: 8px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
 
         .time {
             display: flex;
@@ -142,13 +142,13 @@ mat-dialog-content {
             align-items: center;
             font-size: 13px;
             font-weight: 500;
-            color: #374151;
+            color: #334155;
 
             mat-icon {
                 font-size: 16px;
                 width: 16px;
                 height: 16px;
-                color: #9ca3af;
+                color: #94a3b8;
             }
         }
 
@@ -156,7 +156,7 @@ mat-dialog-content {
             font-size: 16px;
             width: 16px;
             height: 16px;
-            color: #d1d5db;
+            color: #cbd5e1;
         }
     }
 }

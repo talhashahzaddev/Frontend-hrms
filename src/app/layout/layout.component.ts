@@ -45,7 +45,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
   isHandset = false;
   sidenavMode: 'side' | 'over' | 'push' = 'side';
   sidenavOpened = true;
-  
+  /** Desktop only: sidebar shrinks to an icon rail. Remembered per browser. */
+  sidebarCollapsed = LayoutComponent.readCollapsed();
+
   isAiAssistantPage = false;
   
   private destroy$ = new Subject<void>();
@@ -90,9 +92,20 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   onMenuToggle(): void {
+    if (!this.isHandset) {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+      try { localStorage.setItem(LayoutComponent.collapsedKey, this.sidebarCollapsed ? '1' : '0'); } catch { /* storage unavailable */ }
+      return;
+    }
     if (this.drawer) {
       this.drawer.toggle();
     }
+  }
+
+  private static readonly collapsedKey = 'hrms.sidebarCollapsed';
+
+  private static readCollapsed(): boolean {
+    try { return localStorage.getItem(LayoutComponent.collapsedKey) === '1'; } catch { return false; }
   }
 
   onSidenavClosed(): void {

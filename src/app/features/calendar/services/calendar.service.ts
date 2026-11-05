@@ -182,7 +182,7 @@ export class CalendarService {
             case 'late': return '#f59e0b'; // Amber
             case 'leave':
             case 'on_leave': return '#2563eb'; // Blue
-            default: return '#6b7280'; // Gray
+            default: return '#64748b'; // Gray
         }
     }
 
@@ -190,8 +190,8 @@ export class CalendarService {
         switch (status) {
             case 'approved': return '#2563eb'; // Blue (distinct from green)
             case 'pending': return '#0891b2'; // Cyan (distinct from all others)
-            case 'rejected': return '#4b5563'; // Dark Gray (distinct from red)
-            default: return '#6b7280'; // Gray
+            case 'rejected': return '#475569'; // Dark Gray (distinct from red)
+            default: return '#64748b'; // Gray
         }
     }
 }

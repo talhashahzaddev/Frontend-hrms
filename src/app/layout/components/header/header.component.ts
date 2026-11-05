@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { Subject, filter, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef, HostListener } from '@angular/core';
 import { SharedCommonModule } from '@shared/shared-common.module';
@@ -460,6 +460,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // ⭐ ADD THIS FOR DROPDOWN ⭐
   isNotificationOpen = false;
 
+  /** Desktop sidebar state, only used for the toggle icon and label. */
+  @Input() sidebarCollapsed = false;
+
+  /** Labels after the home icon, e.g. ['Leave', 'My Leaves']. */
+  breadcrumbs: string[] = [];
+
+  private readonly moduleLabels: Record<string, string> = {
+    dashboard: 'Dashboard', employees: 'Employees', attendance: 'Attendance', timesheet: 'Timesheet',
+    leave: 'Leave', holidays: 'Holidays', calendar: 'Calendar', assets: 'Assets', performance: 'Performance',
+    news: 'News', jobs: 'Jobs', payroll: 'Payroll', expense: 'Expense', 'help-desk': 'Help Desk',
+    subscription: 'Subscription', settings: 'Settings', profile: 'Profile', 'change-password': 'Account',
+    onboarding: 'Onboarding', 'ai-assistant': 'AI Assistant', career: 'Careers'
+  };
   constructor(
     private employeeService: EmployeeService,
     private authService: AuthService,
@@ -495,6 +508,50 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.serverNotificationService.loadNotifications(user.userId);
     }
 
+    this.breadcrumbs = this.buildBreadcrumbs(this.router.url);
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd), takeUntil(this.destroy$))
+      .subscribe(e => { this.breadcrumbs = this.buildBreadcrumbs(e.urlAfterRedirects); });
+  }
+
+  /** Ctrl/Cmd+K opens search, Escape closes it. */
+  @HostListener('document:keydown', ['$event'])
+  onGlobalKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      if (!this.isSearchOpen) this.toggleSearch();
+    } else if (event.key === 'Escape' && this.isSearchOpen) {
+      this.searchQuery = '';
+      this.filteredItems = [];
+      this.isSearchOpen = false;
+    }
+  }
+
+  /** Module label + page name (from the search index when the route is known). */
+  private buildBreadcrumbs(url: string): string[] {
+    // '/employees/list' is the same page as '/employees'
+    const path = (url || '').split(/[?#]/)[0].replace(/\/+$/, '').replace(/\/list$/, '');
+    const segments = path.split('/').filter(Boolean);
+    if (!segments.length) return [];
+
+    const module = this.moduleLabels[segments[0]] ?? this.titleize(segments[0]);
+    const known = this.allSearchItems.find(i => i.route === path);
+    if (segments.length === 1) {
+      return known && known.name !== module ? [module, known.name] : [module];
+    }
+    if (known) return [module, known.name];
+
+    const isId = (s: string) => /^[0-9a-f-]{8,}$/i.test(s) || /^\d+$/.test(s);
+    const page = [...segments.slice(1)].reverse().find(s => !isId(s));
+    return [module, page ? this.titleize(page) : 'Details'];
+  }
+
+  private titleize(segment: string): string {
+    return segment
+      .split('-')
+      .filter(Boolean)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
   }
 
   ngOnDestroy(): void {

@@ -242,7 +242,7 @@ export interface AssignGoalPayload {
     }
 
     .employee-search-box.open {
-      border-color: #3f51b5;
+      border-color: #2563eb;
       background: #fff;
       box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.1);
       border-radius: 8px 8px 0 0;
@@ -296,7 +296,7 @@ export interface AssignGoalPayload {
 
     /* ── Dropdown Panel ──────────────────────────────────── */
     .employee-dropdown-panel {
-      border: 1.5px solid #3f51b5;
+      border: 1.5px solid #2563eb;
       border-top: none;
       border-radius: 0 0 8px 8px;
       background: #fff;
@@ -653,7 +653,7 @@ export class AssignGoalsDialogComponent implements OnInit, OnDestroy {
   }
 
   getAvatarBg(emp: any): string {
-    const colors = ['#F44336', '#E91E63', '#9C27B0', '#3F51B5', '#2196F3', '#03A9F4', '#009688', '#4CAF50', '#8BC34A', '#FF9800', '#795548', '#607D8B'];
+    const colors = ['#F44336', '#E91E63', '#9C27B0', '#2563eb', '#2196F3', '#03A9F4', '#009688', '#4CAF50', '#8BC34A', '#FF9800', '#795548', '#607D8B'];
     const key = (emp?.employeeId || emp?.email || emp?.fullName || emp?.employeeCode || '').toString();
     if (!key) return colors[0];
     let hash = 0;

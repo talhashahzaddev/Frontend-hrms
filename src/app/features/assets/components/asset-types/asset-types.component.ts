@@ -61,7 +61,7 @@ export class AssetTypesComponent implements OnInit {
   pageSizeOptions = [10, 25, 50];
 
   private gradients = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%)',
     'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',

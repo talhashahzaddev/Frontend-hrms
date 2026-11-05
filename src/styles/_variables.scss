@@ -1,5 +1,58 @@
-// ═══ Design Tokens — aligned with Attendance module (blue #2563eb / slate) ═══
+// ═══ Design Tokens — HRMS enterprise palette (navy #172554 / royal blue #2563eb / slate) ═══
 :root {
+  // Brand
+  --hr-navy: #172554;
+  --hr-navy-2: #1e3a8a;
+  --hr-navy-3: #0f1a3d;
+  --hr-blue: #2563eb;
+  --hr-blue-hover: #1d4ed8;
+  --hr-blue-soft: #eff6ff;
+  --hr-blue-ring: rgba(37, 99, 235, 0.18);
+  --hr-gradient: linear-gradient(135deg, #172554 0%, #1e3a8a 45%, #2563eb 100%);
+
+  // Surfaces & text
+  --hr-bg: #f8fafc;
+  --hr-card: #ffffff;
+  --hr-border: #e2e8f0;
+  --hr-border-soft: #f1f5f9;
+  --hr-text: #0f172a;
+  --hr-text-2: #334155;
+  --hr-text-muted: #64748b;
+  --hr-text-subtle: #94a3b8;
+
+  // Semantic
+  --hr-success: #16a34a;
+  --hr-success-soft: #dcfce7;
+  --hr-success-ink: #166534;
+  --hr-warning: #d97706;
+  --hr-warning-soft: #fef3c7;
+  --hr-warning-ink: #92400e;
+  --hr-danger: #dc2626;
+  --hr-danger-soft: #fee2e2;
+  --hr-danger-ink: #991b1b;
+  --hr-info: #2563eb;
+  --hr-info-soft: #dbeafe;
+  --hr-info-ink: #1e40af;
+
+  // Shape & depth
+  --hr-radius-sm: 6px;
+  --hr-radius: 8px;
+  --hr-radius-lg: 12px;
+  --hr-radius-xl: 16px;
+  --hr-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --hr-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --hr-shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --hr-shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.18);
+  --hr-focus: 0 0 0 3px rgba(37, 99, 235, 0.18);
+
+  // Controls & layout
+  --hr-control-h: 40px;
+  --hr-header-h: 64px;
+  --hr-sidebar-w: 272px;
+  --hr-sidebar-rail-w: 76px;
+  --hr-content-max: 1600px;
+  --hr-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
   // Primary
   --ts-primary: #2563eb;
   --ts-primary-light: #2563eb;
@@ -41,16 +94,16 @@
   --ts-space-12: 48px;
 
   // Radius
-  --ts-radius-sm: 4px;
-  --ts-radius: 6px;
-  --ts-radius-lg: 8px;
-  --ts-radius-xl: 12px;
+  --ts-radius-sm: 6px;
+  --ts-radius: 8px;
+  --ts-radius-lg: 12px;
+  --ts-radius-xl: 16px;
   --ts-radius-full: 9999px;
 
   // Shadows
-  --ts-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --ts-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --ts-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --ts-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --ts-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --ts-shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.18);
 
   // Status colors
   --ts-status-draft: #64748b;
@@ -62,8 +115,8 @@
   --ts-status-locked: #DC2626;
   --ts-status-archived: #94a3b8;
 
-  --ts-header-height: 56px;
-  --ts-sidebar-width: 260px;
+  --ts-header-height: 64px;
+  --ts-sidebar-width: 264px;
 }
 
 // Timesheet pages + employee grid + MatDialog hosts

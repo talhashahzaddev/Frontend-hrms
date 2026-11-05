@@ -39,7 +39,7 @@
         justify-content: center;
         background: transparent;
         border: none;
-        color: #191c1e;
+        color: #0f172a;
         cursor: pointer;
         transition: background-color 0.2s;
 
@@ -48,7 +48,7 @@
         }
 
         &:focus-visible {
-          outline: 2px solid #004ac6;
+          outline: 2px solid #2563eb;
           outline-offset: 2px;
         }
 
@@ -84,7 +84,7 @@
       border-radius: 0.625rem;
       height: 2.6rem;
       padding: 0 1.2rem;
-      background: #004ac6;
+      background: #2563eb;
       color: #ffffff;
       font-weight: 700;
       font-size: 0.875rem;
@@ -93,13 +93,13 @@
       justify-content: center;
       gap: 0.45rem;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 74, 198, 0.2);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
       transition: all 0.2s ease;
 
       &:hover {
         transform: translateY(-1px);
-        background: #003ba3;
-        box-shadow: 0 6px 20px rgba(0, 74, 198, 0.3);
+        background: #1d4ed8;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
       }
 
       mat-icon {

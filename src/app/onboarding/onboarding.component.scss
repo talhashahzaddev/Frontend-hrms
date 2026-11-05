@@ -638,7 +638,7 @@ $bg: #f8fafc;
   gap: 16px;
   margin: 0 28px 20px;
   padding: 14px 18px;
-  background: #f9fafb;
+  background: #f8fafc;
   border: 1.5px solid $border;
   border-radius: 12px;
   transition: border-color 0.2s, background 0.2s;
@@ -805,7 +805,7 @@ $bg: #f8fafc;
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #d1d5db;
+  background-color: #cbd5e1;
   transition: 0.25s ease;
   border-radius: 26px;
 
@@ -1143,7 +1143,7 @@ input:checked + .slider::before { transform: translateX(22px); }
 
 .policy-accept {
   padding: 16px 18px;
-  background: #f9fafb;
+  background: #f8fafc;
   border-radius: 10px;
   border: 1px solid $border;
 }
@@ -1164,7 +1164,7 @@ input:checked + .slider::before { transform: translateX(22px); }
     flex: 1;
     font-size: 13px;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

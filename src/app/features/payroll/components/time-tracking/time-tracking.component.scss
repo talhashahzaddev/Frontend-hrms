@@ -1,6 +1,6 @@
 .time-tracking-container {
   width: 100%;
-  color: #0b1c30;
+  color: #0f172a;
   background-color: #f8fafc;
   padding: 2rem;
   font-family: 'Public Sans', 'Inter', sans-serif;
@@ -103,8 +103,8 @@
       }
 
       &.active {
-        color: #004ac6;
-        border-bottom-color: #004ac6;
+        color: #2563eb;
+        border-bottom-color: #2563eb;
         font-weight: 700;
       }
 
@@ -116,8 +116,8 @@
         border-radius: 9999px;
 
         &.active-badge {
-          background-color: rgba(0, 74, 198, 0.1);
-          color: #004ac6;
+          background-color: rgba(37, 99, 235, 0.1);
+          color: #2563eb;
         }
       }
     }
@@ -282,8 +282,8 @@
             &::placeholder { color: #94a3b8; }
 
             &:focus {
-              border-color: #004ac6;
-              box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.15);
+              border-color: #2563eb;
+              box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
             }
           }
         }
@@ -313,8 +313,8 @@
           }
 
           &:focus {
-            border-color: #004ac6;
-            box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
           }
         }
 
@@ -352,13 +352,13 @@
           }
 
           .apply-btn {
-            background-color: #004ac6;
+            background-color: #2563eb;
             color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 74, 198, 0.2);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 
             &:not(:disabled):hover {
-              background-color: #003ba3;
-              box-shadow: 0 6px 14px rgba(0, 74, 198, 0.3);
+              background-color: #1d4ed8;
+              box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
             }
           }
 
@@ -386,7 +386,7 @@
         }
 
         .add-btn {
-          background-color: #004ac6;
+          background-color: #2563eb;
           color: #ffffff;
           padding: 0.625rem 1.25rem;
           border-radius: 0.5rem;
@@ -398,7 +398,7 @@
           gap: 0.5rem;
           border: none;
           cursor: pointer;
-          box-shadow: 0 10px 15px -3px rgba(0, 74, 198, 0.2);
+          box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
           transition: all 0.2s;
 
           @media (max-width: 639px) {
@@ -406,7 +406,7 @@
           }
 
           &:hover {
-            background-color: rgba(0, 74, 198, 0.9);
+            background-color: rgba(37, 99, 235, 0.9);
           }
 
           mat-icon {
@@ -570,8 +570,8 @@
                 }
 
                 &.hover-primary:hover {
-                  color: #004ac6;
-                  background-color: rgba(0, 74, 198, 0.05);
+                  color: #2563eb;
+                  background-color: rgba(37, 99, 235, 0.05);
                 }
 
                 &.hover-danger:hover {
@@ -629,7 +629,7 @@
           }
 
           &.active {
-            background-color: #004ac6;
+            background-color: #2563eb;
             color: #ffffff;
             font-weight: 700;
           }

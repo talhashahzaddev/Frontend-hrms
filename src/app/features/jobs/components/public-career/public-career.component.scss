@@ -1,11 +1,11 @@
 @use "sass:color";
 // Font and basic vars
 $brand-blue: #1D7DFC;
-$bg-body: #F9FAFB;
+$bg-body: #f8fafc;
 $bg-card: #FFFFFF;
-$text-primary: #111827;
-$text-secondary: #6B7280;
-$border: #E5E7EB;
+$text-primary: #0f172a;
+$text-secondary: #64748b;
+$border: #e2e8f0;
 
 // Mixins
 @mixin shadow-sm {
@@ -106,7 +106,7 @@ $border: #E5E7EB;
   cursor: pointer;
 
   &:hover {
-    background: #E5E7EB;
+    background: #e2e8f0;
   }
 }
 
@@ -353,7 +353,7 @@ $border: #E5E7EB;
   transition: all 0.2s;
 
   &:hover {
-    background-color: #F9FAFB;
+    background-color: #f8fafc;
     color: $text-primary;
   }
 }

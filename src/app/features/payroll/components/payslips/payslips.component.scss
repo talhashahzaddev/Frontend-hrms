@@ -1,6 +1,6 @@
 .time-tracking-container {
   width: 100%;
-  color: #0b1c30;
+  color: #0f172a;
   background-color: #f8fafc;
   padding: 2rem;
   font-family: 'Public Sans', 'Inter', sans-serif;
@@ -30,7 +30,7 @@
         transition: all 0.2s;
 
         &.active {
-          color: #004ac6;
+          color: #2563eb;
           background: #fff;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
@@ -125,8 +125,8 @@
           transition: border-color 0.2s, box-shadow 0.2s;
 
           &:focus {
-            border-color: #004ac6;
-            box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
           }
         }
 
@@ -162,11 +162,11 @@
           }
 
           .apply-btn {
-            background-color: #004ac6;
+            background-color: #2563eb;
             color: #fff;
 
             &:not(:disabled):hover {
-              background-color: #003ba3;
+              background-color: #1d4ed8;
             }
           }
 
@@ -269,8 +269,8 @@
                 }
 
                 &.hover-primary:hover {
-                  color: #004ac6;
-                  background-color: rgba(0, 74, 198, 0.05);
+                  color: #2563eb;
+                  background-color: rgba(37, 99, 235, 0.05);
                 }
               }
             }
@@ -323,7 +323,7 @@
           }
 
           &.active {
-            background-color: #004ac6;
+            background-color: #2563eb;
             color: #ffffff;
             font-weight: 700;
           }

@@ -15,7 +15,7 @@
   max-height: 92vh;
   overflow: auto;
   background: #ffffff;
-  color: #111827;
+  color: #0f172a;
   font-family: 'Inter', 'Public Sans', sans-serif;
 
   header {
@@ -105,7 +105,7 @@
         border: 1px solid #d9e0ea;
         border-radius: 0.55rem;
         background: #ffffff;
-        color: #111827;
+        color: #0f172a;
         font-size: 0.86rem;
         padding: 0 0.65rem;
         outline: none;
@@ -191,7 +191,7 @@
             gap: 0.5rem;
             font-size: 0.88rem;
             font-weight: 600;
-            color: #111827;
+            color: #0f172a;
 
             input {
               width: 1rem;
@@ -214,7 +214,7 @@
       align-items: center;
       gap: 0.5rem;
       font-size: 0.9rem;
-      color: #1f2937;
+      color: #1e293b;
 
       input {
         width: 1rem;
@@ -253,9 +253,9 @@
     }
 
     .primary-btn {
-      background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
       color: #ffffff;
-      box-shadow: 0 8px 16px rgba(0, 74, 198, 0.24);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.24);
 
       &:hover {
         filter: brightness(1.02);

@@ -202,7 +202,7 @@ export interface PositionEmployeesViewData {
   margin: 0 0 3px;
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   letter-spacing: -0.2px;
   line-height: 1.2;
 }
@@ -210,7 +210,7 @@ export interface PositionEmployeesViewData {
 .header-sub {
   margin: 0;
   font-size: 12px;
-  color: #9ca3af;
+  color: #94a3b8;
   font-weight: 500;
 }
 
@@ -231,7 +231,7 @@ export interface PositionEmployeesViewData {
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
-  color: #4b5563;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -239,13 +239,13 @@ export interface PositionEmployeesViewData {
   font-size: 15px;
   width: 15px;
   height: 15px;
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .strip-divider {
   width: 1px;
   height: 13px;
-  background: #e5e7eb;
+  background: #e2e8f0;
   flex-shrink: 0;
 }
 
@@ -276,7 +276,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
   justify-content: center;
   gap: 10px;
   padding: 48px 20px;
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .empty-state mat-icon { font-size: 36px; width: 36px; height: 36px; }
@@ -305,7 +305,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 .table-head span {
   font-size: 10.5px;
   font-weight: 700;
-  color: #9ca3af;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   white-space: nowrap;
@@ -340,7 +340,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 .emp-name {
   font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -350,7 +350,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 .emp-code {
   font-size: 10.5px;
   font-weight: 500;
-  color: #9ca3af;
+  color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -360,7 +360,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 .cell-value {
   font-size: 12.5px;
   font-weight: 500;
-  color: #374151;
+  color: #334155;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -386,8 +386,8 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 
 .pill-active  { color: #166534; }
 .pill-active .pill-dot  { background: #22c55e; }
-.pill-inactive { color: #374151; }
-.pill-inactive .pill-dot { background: #9ca3af; }
+.pill-inactive { color: #334155; }
+.pill-inactive .pill-dot { background: #94a3b8; }
 .pill-deleted  { color: #991b1b; }
 .pill-deleted .pill-dot  { background: #ef4444; }
 
@@ -408,8 +408,8 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
   border-radius: 7px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  color: #374151 !important;
-  border-color: #d1d5db !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
   transition: all 0.15s ease !important;
   display: flex;
   align-items: center;
@@ -417,7 +417,7 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
 }
 
 .btn-close mat-icon { font-size: 15px; width: 15px; height: 15px; }
-.btn-close:hover { background: #f3f4f6 !important; border-color: #9ca3af !important; }
+.btn-close:hover { background: #f1f5f9 !important; border-color: #94a3b8 !important; }
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 600px) {
@@ -452,8 +452,8 @@ mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius
     margin-bottom: 3px;
   }
 
-  .col-email::before { content: 'Email: '; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
-  .col-date::before  { content: 'Hired: '; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .col-email::before { content: 'Email: '; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .col-date::before  { content: 'Hired: '; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
 
   .col-status { margin-top: 4px; }
 

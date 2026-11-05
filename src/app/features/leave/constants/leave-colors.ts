@@ -10,7 +10,7 @@ export interface ColorOption {
 //   { name: 'Pink', value: '#e91e63' },
 //   { name: 'Purple', value: '#9c27b0' },
 //   { name: 'Deep Purple', value: '#673ab7' },
-//   { name: 'Indigo', value: '#3f51b5' },
+//   { name: 'Indigo', value: '#2563eb' },
 //   { name: 'Blue', value: '#2196f3' },
 //   { name: 'Light Blue', value: '#03a9f4' },
 //   { name: 'Cyan', value: '#00bcd4' },

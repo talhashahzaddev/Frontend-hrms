@@ -126,7 +126,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   justify-content: space-between;
   align-items: center;
   padding: 24px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
   color: white;
 }
 
@@ -192,13 +192,13 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 .meta-label {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #4b5563;
+  color: #475569;
 }
 
 .meta-value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #374151;
+  color: #334155;
 }
 
 /* Chips */
@@ -220,8 +220,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 }
 
 .news-status-chip.draft {
-  background: #e5e7eb;
-  color: #374151;
+  background: #e2e8f0;
+  color: #334155;
 }
 
 /* --- IMAGE CHANGES START HERE --- */
@@ -265,13 +265,13 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   font-size: 1.05rem;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #111827;
+  color: #0f172a;
 }
 
 .news-description {
   font-size: 0.95rem;
   line-height: 1.75;
-  color: #374151;
+  color: #334155;
   white-space: pre-wrap;
 }
 
@@ -280,7 +280,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 .news-dialog-actions {
   padding: 20px 28px;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
