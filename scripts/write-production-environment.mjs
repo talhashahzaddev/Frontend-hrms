@@ -26,10 +26,10 @@ function resolveApiUrl(raw) {
     return DEFAULT_API_URL;
   }
   const path = url.pathname.replace(/\/+$/, '');
-  url.pathname = path.endsWith('/api') ? path : `${path}/api`;
-  url.search = '';
-  url.hash = '';
-  return url.toString().replace(/\/+$/, '');
+  if (path.endsWith('/api')) return `${url.origin}${path}`;
+  // Any other path (e.g. "/index.html") is not the API: use the host's /api.
+  console.warn(`API_URL path "${url.pathname}" does not end in /api; using ${url.origin}/api`);
+  return `${url.origin}/api`;
 }
 
 const normalizedApiUrl = resolveApiUrl(process.env.API_URL?.trim());
