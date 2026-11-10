@@ -2,7 +2,8 @@
 
   <!-- Left: navigation toggle + breadcrumbs -->
   <div class="header-left">
-    <button mat-icon-button class="menu-button" (click)="onMenuToggle()"
+    <!-- Phones only: opens the navigation drawer. On desktop the sidebar has its own collapse control. -->
+    <button mat-icon-button class="menu-button" *ngIf="isHandset" (click)="onMenuToggle()"
       [attr.aria-label]="isHandset ? 'Open navigation' : (sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')"
       [matTooltip]="isHandset ? '' : (sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar')">
       <mat-icon>{{ isHandset || sidebarCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
@@ -13,7 +14,7 @@
         <mat-icon>home</mat-icon>
       </a>
       <ng-container *ngFor="let crumb of breadcrumbs; let last = last">
-        <mat-icon class="crumb-sep" aria-hidden="true">chevron_right</mat-icon>
+        <span class="crumb-sep" aria-hidden="true">/</span>
         <span class="crumb" [class.current]="last" [attr.aria-current]="last ? 'page' : null">{{ crumb }}</span>
       </ng-container>
     </nav>

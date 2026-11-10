@@ -4,8 +4,8 @@
   align-items: center;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e2e8f0;
+  backdrop-filter: none;
+  border-bottom: 1px solid var(--hr-border);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -18,9 +18,9 @@
     .icon-wrapper {
       width: 2.5rem;
       height: 2.5rem;
-      background: #eff6ff;
-      color: #2563eb;
-      border-radius: 0.75rem;
+      background: var(--hr-navy-soft);
+      color: var(--hr-navy);
+      border-radius: var(--hr-radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -34,14 +34,14 @@
 
     .title {
       font-size: 1.125rem;
-      font-weight: 700;
-      color: #0f172a;
+      font-weight: 600;
+      color: var(--hr-text);
       margin: 0;
     }
 
     .subtitle {
       font-size: 0.8125rem;
-      color: #64748b;
+      color: var(--hr-text-muted);
       margin: 0.125rem 0 0 0;
     }
   }
@@ -49,10 +49,10 @@
   .close-btn {
     width: 2rem;
     height: 2rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     border: none;
     background: transparent;
-    color: #64748b;
+    color: var(--hr-text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -60,8 +60,8 @@
     transition: all 0.2s;
 
     &:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+      background: var(--hr-border-soft);
+      color: var(--hr-text);
     }
 
     mat-icon {
@@ -97,10 +97,10 @@
       label {
         font-size: 0.8125rem;
         font-weight: 600;
-        color: #475569;
+        color: var(--hr-text-2);
 
         .required {
-          color: #ef4444;
+          color: var(--hr-danger);
         }
       }
 
@@ -110,22 +110,22 @@
       select {
         width: 100%;
         padding: 0.625rem 0.875rem;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
+        background: var(--hr-surface-2);
+        border: 1px solid var(--hr-border);
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
-        color: #0f172a;
+        color: var(--hr-text);
         outline: none;
         transition: all 0.2s;
         font-family: inherit;
 
         &::placeholder {
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
         }
 
         &:focus {
-          border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+          border-color: var(--hr-navy);
+          box-shadow: none;
           background: white;
         }
       }
@@ -149,7 +149,7 @@
           right: 0.75rem;
           top: 50%;
           transform: translateY(-50%);
-          color: #64748b;
+          color: var(--hr-text-muted);
           pointer-events: none;
           font-size: 1.25rem;
           width: 1.25rem;
@@ -166,7 +166,7 @@
           left: 0.75rem;
           top: 50%;
           transform: translateY(-50%);
-          color: #64748b;
+          color: var(--hr-text-muted);
           font-size: 1.125rem;
           width: 1.125rem;
           height: 1.125rem;
@@ -184,7 +184,7 @@
 
       .error-msg {
         font-size: 0.75rem;
-        color: #ef4444;
+        color: var(--hr-danger);
         font-weight: 500;
         margin-top: 0.125rem;
       }
@@ -197,13 +197,13 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-top: 1px solid var(--hr-border);
+  background: var(--hr-surface-2);
 
   button {
     height: 2.5rem;
     padding: 0 1.25rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
@@ -223,23 +223,23 @@
 
   .cancel-btn {
     background: white;
-    border-color: #e2e8f0;
-    color: #475569;
+    border-color: var(--hr-border);
+    color: var(--hr-text-2);
 
     &:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+      background: var(--hr-border-soft);
+      color: var(--hr-text);
     }
   }
 
   .submit-btn {
-    background: #2563eb;
+    background: var(--hr-navy);
     color: white;
     min-width: 120px;
 
     &:hover:not(:disabled) {
-      background: #1d4ed8;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+      background: var(--hr-navy-hover);
+      box-shadow: var(--hr-shadow-md);
     }
 
     &:disabled {

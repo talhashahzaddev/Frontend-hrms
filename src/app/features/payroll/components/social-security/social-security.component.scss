@@ -19,7 +19,7 @@
   .content-card {
     .compact-table {
       .cell-main {
-        font-weight: 700;
+        font-weight: 600;
         color: var(--text-primary);
       }
 
@@ -44,9 +44,9 @@
           gap: 0.4rem;
           height: 2.2rem;
           padding: 0 1rem;
-          border-radius: 0.6rem;
+          border-radius: var(--hr-radius-lg);
           font-size: 0.85rem;
-          font-weight: 700;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
 
@@ -58,27 +58,27 @@
         }
 
         .approve-btn {
-          background: #059669;
+          background: var(--hr-success);
           color: #ffffff;
           border: none;
-          box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+          box-shadow: var(--hr-shadow-md);
 
           &:hover {
-            background: #047857;
+            background: var(--hr-success-ink);
             transform: translateY(-1px);
-            box-shadow: 0 6px 14px rgba(5, 150, 105, 0.3);
+            box-shadow: var(--hr-shadow-md);
           }
         }
 
         .reject-btn {
           background: #ffffff;
-          color: #ef4444;
-          border: 1px solid #fee2e2;
+          color: var(--hr-danger);
+          border: 1px solid var(--hr-danger-soft);
           font-weight: 600;
 
           &:hover {
-            background: #fef2f2;
-            border-color: #fecaca;
+            background: var(--hr-danger-soft);
+            border-color: var(--hr-danger-soft);
           }
         }
       }

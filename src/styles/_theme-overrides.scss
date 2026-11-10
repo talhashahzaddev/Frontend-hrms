@@ -19,110 +19,110 @@ html {
   --mat-button-protected-label-text-tracking: 0;
   --mat-button-text-label-text-tracking: 0;
   --mat-button-tonal-label-text-tracking: 0;
-  --mat-button-outlined-outline-color: #cbd5e1;
-  --mat-button-protected-container-elevation-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-  --mat-button-protected-hover-container-elevation-shadow: 0 4px 12px -4px rgba(37, 99, 235, 0.45);
-  --mat-button-protected-focus-container-elevation-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
-  --mat-button-protected-pressed-container-elevation-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --mat-button-outlined-outline-color: var(--hr-border-strong);
+  --mat-button-protected-container-elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --mat-button-protected-hover-container-elevation-shadow: 0 4px 12px -4px rgba(37, 82, 208, 0.45);
+  --mat-button-protected-focus-container-elevation-shadow: 0 0 0 3px rgba(37, 82, 208, 0.18);
+  --mat-button-protected-pressed-container-elevation-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 
   // ── Form fields ──
   --mat-form-field-outlined-container-shape: 8px;
-  --mat-form-field-outlined-outline-color: #cbd5e1;
-  --mat-form-field-outlined-hover-outline-color: #94a3b8;
-  --mat-form-field-outlined-focus-outline-color: #2563eb;
-  --mat-form-field-outlined-label-text-color: #64748b;
-  --mat-form-field-outlined-input-text-color: #0f172a;
+  --mat-form-field-outlined-outline-color: var(--hr-border-strong);
+  --mat-form-field-outlined-hover-outline-color: var(--hr-text-subtle);
+  --mat-form-field-outlined-focus-outline-color: var(--hr-navy);
+  --mat-form-field-outlined-label-text-color: var(--hr-text-muted);
+  --mat-form-field-outlined-input-text-color: var(--hr-text);
   --mat-form-field-filled-container-shape: 8px;
-  --mat-form-field-filled-container-color: #f8fafc;
-  --mat-select-enabled-trigger-text-color: #0f172a;
-  --mat-select-enabled-arrow-color: #64748b;
+  --mat-form-field-filled-container-color: var(--hr-surface-2);
+  --mat-select-enabled-trigger-text-color: var(--hr-text);
+  --mat-select-enabled-arrow-color: var(--hr-text-muted);
   --mat-select-panel-background-color: #ffffff;
-  --mat-select-container-elevation-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px #e2e8f0;
+  --mat-select-container-elevation-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--hr-border);
 
   // ── Cards & surfaces ──
   --mat-card-elevated-container-shape: 12px;
   --mat-card-outlined-container-shape: 12px;
-  --mat-card-outlined-outline-color: #e2e8f0;
-  --mat-card-elevated-container-elevation: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --mat-card-outlined-outline-color: var(--hr-border);
+  --mat-card-elevated-container-elevation: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
   --mat-expansion-container-shape: 12px;
 
   // ── Dialogs ──
   --mat-dialog-container-shape: 16px;
-  --mat-dialog-container-elevation-shadow: 0 24px 64px -16px rgba(15, 23, 42, 0.32);
-  --mat-dialog-subhead-color: #0f172a;
+  --mat-dialog-container-elevation-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.32);
+  --mat-dialog-subhead-color: var(--hr-text);
   --mat-dialog-subhead-weight: 600;
   --mat-dialog-subhead-tracking: -0.01em;
-  --mat-dialog-supporting-text-color: #334155;
+  --mat-dialog-supporting-text-color: var(--hr-text-2);
 
   // ── Menus & tooltips ──
   --mat-menu-container-shape: 10px;
-  --mat-menu-container-elevation-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px #e2e8f0;
-  --mat-menu-item-label-text-color: #334155;
+  --mat-menu-container-elevation-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--hr-border);
+  --mat-menu-item-label-text-color: var(--hr-text-2);
   --mat-menu-item-label-text-size: 14px;
   --mat-menu-item-label-text-weight: 500;
-  --mat-menu-item-icon-color: #64748b;
-  --mat-menu-divider-color: #f1f5f9;
-  --mat-tooltip-container-color: #0f172a;
+  --mat-menu-item-icon-color: var(--hr-text-muted);
+  --mat-menu-divider-color: var(--hr-border-soft);
+  --mat-tooltip-container-color: var(--hr-text);
   --mat-tooltip-container-shape: 6px;
   --mat-tooltip-supporting-text-size: 12px;
   --mat-tooltip-supporting-text-weight: 500;
 
   // ── Tables & paginator ──
-  --mat-table-header-headline-color: #64748b;
+  --mat-table-header-headline-color: var(--hr-text-muted);
   --mat-table-header-headline-size: 12px;
   --mat-table-header-headline-weight: 600;
   --mat-table-header-headline-tracking: 0.04em;
-  --mat-table-row-item-label-text-color: #334155;
+  --mat-table-row-item-label-text-color: var(--hr-text-2);
   --mat-table-row-item-label-text-size: 14px;
-  --mat-table-row-item-outline-color: #f1f5f9;
-  --mat-paginator-container-text-color: #64748b;
-  --mat-paginator-enabled-icon-color: #334155;
-  --mat-paginator-disabled-icon-color: #cbd5e1;
+  --mat-table-row-item-outline-color: var(--hr-border-soft);
+  --mat-paginator-container-text-color: var(--hr-text-muted);
+  --mat-paginator-enabled-icon-color: var(--hr-text-2);
+  --mat-paginator-disabled-icon-color: var(--hr-border-strong);
 
   // ── Tabs ──
-  --mat-tab-active-label-text-color: #2563eb;
-  --mat-tab-active-hover-label-text-color: #1d4ed8;
-  --mat-tab-active-focus-label-text-color: #1d4ed8;
-  --mat-tab-inactive-label-text-color: #64748b;
-  --mat-tab-inactive-hover-label-text-color: #0f172a;
+  --mat-tab-active-label-text-color: var(--hr-navy);
+  --mat-tab-active-hover-label-text-color: var(--hr-navy-hover);
+  --mat-tab-active-focus-label-text-color: var(--hr-navy-hover);
+  --mat-tab-inactive-label-text-color: var(--hr-text-muted);
+  --mat-tab-inactive-hover-label-text-color: var(--hr-text);
   --mat-tab-active-indicator-height: 2px;
-  --mat-tab-divider-color: #e2e8f0;
+  --mat-tab-divider-color: var(--hr-border);
   --mat-tab-label-text-weight: 600;
   --mat-tab-label-text-tracking: 0;
 
   // ── Chips, toggles, snackbars ──
   --mat-chip-container-shape-radius: 999px;
-  --mat-chip-outline-color: #e2e8f0;
+  --mat-chip-outline-color: var(--hr-border);
   --mat-chip-label-text-weight: 500;
-  --mat-checkbox-unselected-icon-color: #94a3b8;
+  --mat-checkbox-unselected-icon-color: var(--hr-text-subtle);
   --mat-snack-bar-container-shape: 10px;
-  --mat-snack-bar-container-color: #0f172a;
+  --mat-snack-bar-container-color: var(--hr-text);
   --mat-datepicker-calendar-container-shape: 12px;
-  --mat-datepicker-calendar-container-elevation-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px #e2e8f0;
+  --mat-datepicker-calendar-container-elevation-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--hr-border);
 }
 
 // Material tables: tinted header, uppercase micro-labels, soft row hover
 .mat-mdc-table {
   .mat-mdc-header-row {
-    background: #f8fafc;
+    background: var(--hr-surface-2);
   }
 
   .mat-mdc-header-cell {
     text-transform: uppercase;
-    border-bottom-color: #e2e8f0;
+    border-bottom-color: var(--hr-border);
   }
 
   .mat-mdc-row {
     transition: background-color 0.15s ease;
 
     &:hover {
-      background: #f8fafc;
+      background: var(--hr-surface-2);
     }
   }
 }
 
 .mat-mdc-paginator {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--hr-border-soft);
 }
 
 // Dialog title spacing and a divider above the actions
@@ -141,7 +141,7 @@ html {
   padding: 6px;
 
   .mat-mdc-menu-item {
-    border-radius: 6px;
+    border-radius: var(--hr-radius);
     min-height: 40px;
   }
 }
@@ -150,7 +150,7 @@ html {
   padding: 6px !important;
 
   .mat-mdc-option {
-    border-radius: 6px;
+    border-radius: var(--hr-radius);
   }
 }
 
@@ -163,7 +163,7 @@ html {
 // Required asterisk in brand danger color
 .mat-mdc-form-field-required-marker,
 .mdc-floating-label--required::after {
-  color: #dc2626;
+  color: var(--hr-danger);
 }
 
 // ── PrimeNG (lara-light-blue) ──
@@ -175,69 +175,69 @@ html {
 .p-dropdown,
 .p-multiselect,
 .p-calendar .p-inputtext {
-  border-radius: 8px;
-  border-color: #cbd5e1;
+  border-radius: var(--hr-radius);
+  border-color: var(--hr-border-strong);
 
   &:enabled:focus,
   &.p-focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    border-color: var(--hr-navy);
+    box-shadow: none;
   }
 }
 
 .p-datatable {
   .p-datatable-thead > tr > th {
-    background: #f8fafc;
-    color: #64748b;
+    background: var(--hr-surface-2);
+    color: var(--hr-text-muted);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border-color: #e2e8f0;
+    border-color: var(--hr-border);
   }
 
   .p-datatable-tbody > tr > td {
-    border-color: #f1f5f9;
-    color: #334155;
+    border-color: var(--hr-border-soft);
+    color: var(--hr-text-2);
   }
 }
 
 .p-button.p-button-outlined,
 .p-button.p-button-text {
   background: transparent;
-  color: #2563eb;
+  color: var(--hr-navy);
 }
 
 .p-button.p-button-secondary,
 .p-button.p-button-outlined.p-button-secondary {
   background: #ffffff;
-  border-color: #cbd5e1;
-  color: #334155;
+  border-color: var(--hr-border-strong);
+  color: var(--hr-text-2);
 }
 
 .p-button.p-button-danger {
-  background: #dc2626;
-  border-color: #dc2626;
+  background: var(--hr-danger);
+  border-color: var(--hr-danger);
 }
 
 // ── Toastr ──
 #toast-container > div {
-  border-radius: 10px;
-  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.35);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-lg);
   opacity: 1;
   font-size: 14px;
   padding: 14px 16px 14px 50px;
   background-position: 16px center;
 
   &:hover {
-    box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.45);
+    box-shadow: var(--hr-shadow-lg);
   }
 }
 
-#toast-container > .toast-success { background-color: #15803d; }
-#toast-container > .toast-error { background-color: #b91c1c; }
-#toast-container > .toast-warning { background-color: #b45309; }
-#toast-container > .toast-info { background-color: #1d4ed8; }
+#toast-container > .toast-success { background-color: var(--hr-success-ink); }
+#toast-container > .toast-error { background-color: var(--hr-danger-ink); }
+#toast-container > .toast-warning { background-color: var(--hr-warning-ink); }
+#toast-container > .toast-info { background-color: var(--hr-navy-hover); }
 
 .toast-title {
   font-weight: 600;
@@ -247,6 +247,19 @@ html {
 a:focus-visible,
 button:focus-visible,
 [role='button']:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--hr-navy);
   outline-offset: 2px;
+}
+
+// ── PrimeNG (lara-light-blue ships #3B82F6 as primary) ──
+:root {
+  --primary-color: var(--hr-navy);
+  --primary-color-text: #ffffff;
+  --focus-ring: 0 0 0 2px rgba(37, 82, 208, 0.3);
+}
+
+.p-avatar {
+  background: var(--hr-navy-soft);
+  color: var(--hr-navy);
+  font-weight: 600;
 }

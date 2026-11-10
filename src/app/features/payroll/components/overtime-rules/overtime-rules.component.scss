@@ -1,7 +1,7 @@
 .overtime-rules-container {
   width: 100%;
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: var(--hr-text);
+  background-color: var(--hr-surface-2);
   padding: 2rem;
   font-family: 'Public Sans', 'Inter', sans-serif;
   min-height: 100vh;
@@ -30,14 +30,14 @@
       top: 0;
       width: 2.5rem;
       height: 2.5rem;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       display: flex;
       align-items: center;
       justify-content: center;
       background: transparent;
       border: none;
       cursor: pointer;
-      color: #0f172a;
+      color: var(--hr-text);
       transition: background-color 0.2s;
 
       &:hover {
@@ -57,15 +57,15 @@
       .title {
         font-family: 'Manrope', inherit;
         font-size: 1.5rem; // 24px
-        font-weight: 700;
-        color: #0f172a;
+        font-weight: 600;
+        color: var(--hr-text);
         letter-spacing: -0.025em;
         margin: 0;
         margin-bottom: 0.25rem;
       }
 
       .subtitle {
-        color: #475569;
+        color: var(--hr-text-2);
         font-size: 0.875rem; // 14px
         margin: 0;
       }
@@ -73,10 +73,10 @@
   }
 
   .create-rule-btn {
-    background: linear-gradient(to bottom right, #2563eb, #2563eb);
+    background: var(--hr-navy);
     color: #ffffff;
     padding: 0.625rem 1.5rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     font-size: 0.875rem;
     font-weight: 600;
     display: flex;
@@ -84,7 +84,7 @@
     gap: 0.5rem;
     border: none;
     cursor: pointer;
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.06);
+    box-shadow: var(--hr-shadow-lg);
     transition: transform 0.1s;
 
     &:active {
@@ -102,8 +102,8 @@
     width: 100%;
     // margin: 0 auto;
     background-color: #ffffff;
-    border-radius: 0.75rem;
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.06);
+    border-radius: var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-lg);
     outline: 1px solid rgba(195, 198, 215, 0.15);
     overflow: hidden;
 
@@ -125,20 +125,20 @@
       th {
         padding: 1rem 1.5rem;
         font-size: 0.75rem;
-        font-weight: 700;
-        color: #94a3b8;
+        font-weight: 600;
+        color: var(--hr-text-subtle);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--hr-border-soft);
       }
 
       tbody {
         .table-row {
           transition: background-color 0.2s;
-          border-bottom: 1px solid #f1f5f9;
+          border-bottom: 1px solid var(--hr-border-soft);
 
           &:hover {
-            background-color: #eff6ff;
+            background-color: var(--hr-navy-soft);
           }
 
           &.inactive-row {
@@ -148,11 +148,11 @@
           td {
             padding: 1rem 1.5rem;
             font-size: 0.875rem;
-            color: #475569;
+            color: var(--hr-text-2);
 
             &.font-semibold {
               font-weight: 600;
-              color: #334155;
+              color: var(--hr-text-2);
             }
 
             .badge {
@@ -161,13 +161,13 @@
               padding: 0.25rem 0.625rem;
               border-radius: 9999px;
               font-size: 0.625rem;
-              font-weight: 700;
+              font-weight: 600;
               text-transform: uppercase;
               letter-spacing: 0.05em;
 
               &.type-regular {
-                background-color: #dbeafe;
-                color: #1d4ed8;
+                background-color: var(--hr-navy-soft);
+                color: var(--hr-navy-hover);
               }
 
               &.type-holiday {
@@ -176,25 +176,25 @@
               }
 
               &.type-weekend {
-                background-color: #e2e8f0;
-                color: #475569;
+                background-color: var(--hr-border);
+                color: var(--hr-text-2);
               }
 
               &.status-active {
-                background-color: #dbeafe;
-                color: #1d4ed8;
+                background-color: var(--hr-navy-soft);
+                color: var(--hr-navy-hover);
               }
 
               &.status-inactive {
-                background-color: #e2e8f0;
-                color: #64748b;
+                background-color: var(--hr-border);
+                color: var(--hr-text-muted);
               }
             }
 
             .highlight-val {
               font-size: 0.875rem;
               font-weight: 600;
-              color: #334155;
+              color: var(--hr-text-2);
             }
           }
         }
@@ -220,7 +220,7 @@
           height: 36px !important;
           padding: 8px !important;
           margin-left: 0.25rem;
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
           display: inline-flex !important;
           align-items: center !important;
           justify-content: center !important;
@@ -242,14 +242,14 @@
           }
 
           &.hover-primary:hover {
-            color: #2563eb;
-            background-color: rgba(37, 99, 235, 0.05);
+            color: var(--hr-navy);
+            background-color: rgba(37, 82, 208, 0.05);
             cursor: pointer;
           }
 
           &.hover-danger:hover {
-            color: #ef4444;
-            background-color: rgba(239, 68, 68, 0.05);
+            color: var(--hr-danger);
+            background-color: rgba(180, 35, 24, 0.05);
             cursor: pointer;
           }
 
@@ -267,7 +267,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: #475569;
+      color: var(--hr-text-2);
       font-size: 0.8125rem; // 13px
 
       p {
@@ -287,17 +287,17 @@
           padding: 0;
 
           &.text-primary {
-            color: #2563eb;
+            color: var(--hr-navy);
             font-weight: 600;
             
             &:hover { text-decoration: underline; }
           }
 
           &.text-muted {
-            color: #475569;
+            color: var(--hr-text-2);
             transition: color 0.2s;
 
-            &:hover { color: #2563eb; }
+            &:hover { color: var(--hr-navy); }
           }
         }
 
@@ -311,6 +311,6 @@
   }
 
   .text-muted {
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
   }
 }

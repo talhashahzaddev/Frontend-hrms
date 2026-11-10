@@ -1,12 +1,12 @@
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-900: #0f172a;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$slate-50: #f7f8fa;
+$slate-100: #edeff2;
+$slate-200: #dde1e6;
+$slate-400: #8b929b;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-900: #1f2328;
 
 :host {
   display: block;
@@ -37,7 +37,7 @@ $slate-900: #0f172a;
     .icon-box {
       width: 3rem;
       height: 3rem;
-      border-radius: 0.75rem;
+      border-radius: var(--hr-radius-lg);
       background-color: rgba($primary, 0.1);
       color: $primary;
       display: flex;
@@ -49,7 +49,7 @@ $slate-900: #0f172a;
 
     .page-title {
       font-size: 1.75rem;
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
       line-height: 1.25;
       color: $slate-900;
@@ -82,7 +82,7 @@ $slate-900: #0f172a;
   background: white;
   color: $slate-600;
   border: 1px solid $slate-200;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -116,17 +116,17 @@ $slate-900: #0f172a;
 .health-card {
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   padding: 14px 18px;
   display: flex;
   align-items: flex-start;
   gap: 12px;
   flex-wrap: wrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
   transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--hr-shadow-md);
     transform: translateY(-2px);
   }
 }
@@ -134,7 +134,7 @@ $slate-900: #0f172a;
 .health-icon {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,10 +142,10 @@ $slate-900: #0f172a;
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
-  &.green { background: rgba(34, 197, 94, 0.1); mat-icon { color: #22c55e; } }
-  &.teal { background: rgba(37, 99, 235, 0.1); mat-icon { color: $primary; } }
-  &.red { background: rgba(239, 68, 68, 0.1); mat-icon { color: #ef4444; } }
-  &.purple { background: rgba(37, 99, 235, 0.1); mat-icon { color: $primary; } }
+  &.green { background: rgba(46, 125, 79, 0.1); mat-icon { color: var(--hr-success); } }
+  &.teal { background: rgba(37, 82, 208, 0.1); mat-icon { color: $primary; } }
+  &.red { background: rgba(180, 35, 24, 0.1); mat-icon { color: var(--hr-danger); } }
+  &.purple { background: rgba(37, 82, 208, 0.1); mat-icon { color: $primary; } }
 }
 
 .health-info {
@@ -156,7 +156,7 @@ $slate-900: #0f172a;
 
 .health-value {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 600;
   color: $slate-900;
 }
 
@@ -188,7 +188,7 @@ $slate-900: #0f172a;
   flex-wrap: wrap;
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1rem 1.5rem;
 }
 
@@ -198,7 +198,7 @@ $slate-900: #0f172a;
   gap: 8px;
   background: $slate-50;
   border: 1px solid $slate-200;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   padding: 0 12px;
   flex: 1;
   max-width: 300px;
@@ -208,7 +208,7 @@ $slate-900: #0f172a;
 
   &:focus-within {
     border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    box-shadow: none;
     background: white;
   }
 }
@@ -260,15 +260,15 @@ $slate-900: #0f172a;
   color: $slate-500;
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
 }
 
 .table-wrap {
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 .mon-table {
@@ -282,7 +282,7 @@ $slate-900: #0f172a;
       padding: 1rem 1.5rem;
       text-align: left;
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 600;
       color: $slate-500;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -316,7 +316,7 @@ $slate-900: #0f172a;
   background: rgba($primary, 0.1);
   color: $primary;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,7 +340,7 @@ $slate-900: #0f172a;
   flex: 1;
   height: 6px;
   background: $slate-100;
-  border-radius: 3px;
+  border-radius: var(--hr-radius);
   min-width: 60px;
 }
 .compliance-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }

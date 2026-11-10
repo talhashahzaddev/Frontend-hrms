@@ -35,13 +35,13 @@
 .error-container {
   text-align: center;
   padding: 60px 0;
-  color: #999;
+  color: var(--hr-text-subtle);
 
   mat-icon {
     font-size: 48px;
     width: 48px;
     height: 48px;
-    color: #e0e0e0;
+    color: var(--hr-border);
   }
 
   p {
@@ -62,7 +62,7 @@
 }
 
 .info-card {
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
 
   mat-card-header {
     padding: 16px 20px 8px;
@@ -71,7 +71,7 @@
   mat-card-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--hr-text-2);
   }
 
   mat-card-content {
@@ -93,15 +93,15 @@
   .info-value {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #333;
+    color: var(--hr-text-2);
   }
 }
 
 .plan-badge {
-  color: #2563eb !important;
-  background: #e8eaf6;
+  color: var(--hr-navy) !important;
+  background: var(--hr-navy-soft);
   padding: 2px 10px;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   font-size: 0.85rem;
 }
 
@@ -109,7 +109,7 @@
   font-size: 0.78rem;
   font-weight: 600;
   padding: 3px 10px;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   text-transform: capitalize;
   display: inline-block;
 }
@@ -118,7 +118,7 @@
   font-size: 0.78rem;
   font-weight: 600;
   padding: 3px 10px;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   display: inline-block;
 }
 
@@ -136,17 +136,17 @@
   .metric-value {
     display: block;
     font-size: 1.8rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #1a1a2e;
     line-height: 1.2;
 
-    &.success { color: #4caf50; }
-    &.warn { color: #f44336; }
+    &.success { color: var(--hr-success); }
+    &.warn { color: var(--hr-danger); }
   }
 
   .metric-label {
     font-size: 0.8rem;
-    color: #999;
+    color: var(--hr-text-subtle);
     margin-top: 4px;
     display: block;
   }
@@ -154,7 +154,7 @@
 
 // History table
 .table-card {
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
 
   mat-card-content {
     padding: 0 !important;
@@ -192,7 +192,7 @@
 .entitlement-alert {
   padding: 12px 16px;
   margin-bottom: 14px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
 
   &.error { color: #a4262c; background: #fde7e9; }
   &.success { color: #176b3a; background: #e5f5ec; }
@@ -207,7 +207,7 @@
   flex-wrap: wrap;
   gap: 12px 24px;
   padding: 8px 0 20px;
-  color: #555;
+  color: var(--hr-text-2);
 }
 
 .custom-plan-form {
@@ -217,7 +217,7 @@
   h3, h4 { margin: 0 0 8px; color: #263238; }
   h3 { font-size: 1.1rem; }
   h4 { font-size: 0.95rem; }
-  .form-hint { margin: 0 0 16px; color: #777; font-size: 0.85rem; }
+  .form-hint { margin: 0 0 16px; color: var(--hr-text-muted); font-size: 0.85rem; }
 }
 
 .custom-plan-fields {
@@ -233,7 +233,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: #555;
+  color: var(--hr-text-2);
   font-size: 0.82rem;
   font-weight: 500;
 
@@ -243,7 +243,7 @@
     min-height: 38px;
     padding: 8px 10px;
     border: 1px solid #cfd8dc;
-    border-radius: 5px;
+    border-radius: var(--hr-radius);
     background: #fff;
     color: #263238;
     font: inherit;
@@ -259,8 +259,8 @@
 .feature-group {
   padding: 14px;
   border: 1px solid #e5e9ec;
-  border-radius: 8px;
-  background: #fafbfc;
+  border-radius: var(--hr-radius);
+  background: var(--hr-surface-2);
 }
 
 .feature-row {
@@ -283,23 +283,23 @@
   color: #424b50;
   font-size: 0.86rem;
 
-  input { accent-color: #2563eb; }
+  input { accent-color: var(--hr-navy); }
 }
 
 .custom-plan-diff {
   margin: 20px 0;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   background: #f5f7fa;
 
-  p { margin: 4px 0 0; color: #777; font-size: 0.85rem; }
+  p { margin: 4px 0 0; color: var(--hr-text-muted); font-size: 0.85rem; }
 }
 
 .diff-chip {
   display: inline-block;
   margin: 4px 6px 0 0;
   padding: 5px 9px;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   font-size: 0.76rem;
 
   &.added { color: #176b3a; background: #dff3e7; }

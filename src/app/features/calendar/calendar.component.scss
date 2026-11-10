@@ -2,30 +2,30 @@
 @use '../performance/styles/performance-shared' as pm;
 
 :host {
-    --primary-color: #2563eb;
-    --text-color: #0f172a;
-    --text-muted: #64748b;
-    --border-color: #e2e8f0;
+    --primary-color: var(--hr-navy);
+    --text-color: var(--hr-text);
+    --text-muted: var(--hr-text-muted);
+    --border-color: var(--hr-border);
     --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
     
     // Status Colors
-    --status-present: #22c55e;
-    --status-absent: #ef4444;
-    --status-late: #f97316;
-    --status-pending: #64748b;
+    --status-present: var(--hr-success);
+    --status-absent: var(--hr-danger);
+    --status-late: var(--hr-warning);
+    --status-pending: var(--hr-text-muted);
 }
 
 // Override material form field for filter
 ::ng-deep .mat-mdc-text-field-wrapper {
     background: white !important;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
 }
 
 // ==========================================
 // Calendar Grid
 // ==========================================
 .calendar-card {
-    border-radius: 16px;
+    border-radius: var(--hr-radius-xl);
     box-shadow: var(--card-shadow);
     border: none;
     overflow: hidden;
@@ -35,7 +35,7 @@
 .calendar-header-row {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: #f8fafc;
+    background: var(--hr-surface-2);
     border-bottom: 1px solid var(--border-color);
 
     .day-header {
@@ -66,15 +66,15 @@
     transition: all 0.2s ease;
 
     &:hover {
-        background: #fafafa;
+        background: var(--hr-surface-2);
         z-index: 2;
     }
 
     &.other-month {
-        background: #f8fafc;
+        background: var(--hr-surface-2);
 
         .day-number {
-            color: #cbd5e1;
+            color: var(--hr-border-strong);
         }
     }
 
@@ -90,7 +90,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+            box-shadow: var(--hr-shadow-sm);
         }
     }
 
@@ -99,11 +99,7 @@
     }
 
     &.has-holiday {
-        background: repeating-linear-gradient(45deg,
-                #fff,
-                #fff 10px,
-                #fdf2f8 10px,
-                #fdf2f8 20px);
+        background: #fff;
     }
 
     .day-number {
@@ -132,7 +128,7 @@
             align-items: center;
             gap: 4px;
             padding: 4px 8px;
-            border-radius: 20px;
+            border-radius: var(--hr-radius-xl);
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
@@ -144,18 +140,18 @@
 
             // Dynamic colors based on class
             &.status-present {
-                background: #dcfce7;
-                color: #166534;
+                background: var(--hr-success-soft);
+                color: var(--hr-success-ink);
             }
 
             &.status-absent {
-                background: #fee2e2;
-                color: #991b1b;
+                background: var(--hr-danger-soft);
+                color: var(--hr-danger-ink);
             }
 
             &.status-late {
-                background: #fef9c3;
-                color: #854d0e;
+                background: var(--hr-warning-soft);
+                color: var(--hr-warning-ink);
             }
         }
 
@@ -175,14 +171,14 @@
 
         .event-badge {
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: var(--hr-radius);
             font-size: 11px;
             font-weight: 500;
             cursor: pointer;
             border-left: 3px solid transparent;
-            background: #eff6ff;
-            color: #1e3a8a;
-            border-left-color: #3b82f6;
+            background: var(--hr-navy-soft);
+            color: var(--hr-navy-hover);
+            border-left-color: var(--hr-navy);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -199,10 +195,10 @@
             }
 
             &.badge-holiday {
-                background: #fdf2f8;
+                background: var(--hr-navy-soft);
                 color: #be185d;
-                border-left-color: #db2777;
-                font-weight: 700;
+                border-left-color: var(--hr-navy);
+                font-weight: 600;
             }
         }
 
@@ -396,7 +392,7 @@
                 width: 8px;
                 height: 8px;
                 border-radius: 50%;
-                background: #3b82f6; // Default dot color
+                background: var(--hr-navy); // Default dot color
 
                 .badge-text,
                 .status-icon {
@@ -406,7 +402,7 @@
                 // Hide text
 
                 &.badge-holiday {
-                    background: #db2777;
+                    background: var(--hr-navy);
                 }
             }
 

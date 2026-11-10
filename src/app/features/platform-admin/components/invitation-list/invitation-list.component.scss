@@ -15,14 +15,14 @@
 
 .page-title {
   font-size: 1.75rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-weight: 600;
+  color: var(--hr-text);
   margin: 0 0 4px;
 }
 
 .page-subtitle {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
   margin: 0;
 }
 
@@ -61,16 +61,16 @@
 
 .loading-text {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
   margin: 0;
 }
 
 // Table
 .table-container {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 .invitations-table {
@@ -85,37 +85,37 @@
 
 .name {
   font-weight: 500;
-  color: #1e293b;
+  color: var(--hr-text);
 }
 
 // Status badges
 .status-badge {
   display: inline-block;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: var(--hr-radius-xl);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
 }
 
 .status-completed {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--hr-success-soft);
+  color: var(--hr-success);
 }
 
 .status-pending {
-  background: #fef9c3;
-  color: #ca8a04;
+  background: var(--hr-warning-soft);
+  color: var(--hr-warning);
 }
 
 .status-expired {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--hr-danger-soft);
+  color: var(--hr-danger);
 }
 
 // Actions
 .delete-btn {
-  color: #dc2626;
+  color: var(--hr-danger);
 }
 
 // Empty state
@@ -139,25 +139,25 @@
   font-size: 48px;
   width: 48px;
   height: 48px;
-  color: #cbd5e1;
+  color: var(--hr-border-strong);
 }
 
 .empty-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--hr-text-2);
   margin: 0;
 }
 
 .empty-subtitle {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--hr-text-subtle);
   margin: 0;
 }
 
 // Paginator
 .mat-mdc-paginator {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--hr-border);
 }
 
 // Responsive

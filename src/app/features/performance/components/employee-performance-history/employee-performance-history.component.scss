@@ -99,7 +99,7 @@
         gap: 4px;
 
         mat-icon {
-          color: #ffc107;
+          color: var(--hr-warning);
         }
       }
     }
@@ -128,17 +128,17 @@
       }
 
       .gap-severity-high {
-        background-color: #f44336;
+        background-color: var(--hr-danger);
         color: white;
       }
 
       .gap-severity-medium {
-        background-color: #ff9800;
+        background-color: var(--hr-warning);
         color: white;
       }
 
       .gap-severity-low {
-        background-color: #4caf50;
+        background-color: var(--hr-success);
         color: white;
       }
     }
@@ -155,7 +155,7 @@
         width: 64px;
         height: 64px;
         margin-bottom: 16px;
-        color: #4caf50;
+        color: var(--hr-success);
       }
     }
   }

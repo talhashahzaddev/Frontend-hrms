@@ -1,156 +1,132 @@
-// ═══ Super Admin dashboard ═══════════════════════════════════════════════
-// Tokens follow the app's slate/blue design (styles/_variables.scss).
-// Chart colors are the validated categorical + status steps (light & dark).
+// ═══ Dashboard — light corporate (Phase 2) ════════════════════════════════
+// White bordered surfaces on a light grey canvas, one blue accent, grey line
+// icons. Status colors appear only where they carry meaning (attendance,
+// plan status, items waiting). See docs/UI_REDESIGN.md.
 
 :host {
   display: block;
-  --sa-bg: transparent;
-  --sa-card: #ffffff;
-  --sa-border: #e2e8f0;
-  --sa-border-soft: #f1f5f9;
-  --sa-text: #0f172a;
-  --sa-text-2: #475569;
-  --sa-text-3: #64748b;
-  --sa-primary: #2563eb;
-  --sa-primary-hover: #1d4ed8;
-  --sa-primary-soft: #eff6ff;
-  --sa-track: #eef2f7;
-  --sa-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --sa-shadow-hover: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --sa-card: var(--hr-card);
+  --sa-border: var(--hr-border);
+  --sa-border-soft: var(--hr-border-soft);
+  --sa-text: var(--hr-text);
+  --sa-text-2: var(--hr-text-2);
+  --sa-text-3: var(--hr-text-muted);
+  --sa-primary: var(--hr-primary);
+  --sa-primary-hover: var(--hr-primary-hover);
+  --sa-primary-soft: var(--hr-primary-soft);
+  --sa-track: #edf0f4;
 
-  // Data colors
-  --sa-series-1: #2a78d6;
-  --sa-series-2: #eb6834;
-  --sa-series-3: #1baf7a;
-  --sa-good: #0ca30c;
-  --sa-warning: #fab219;
-  --sa-critical: #d03b3b;
-  --sa-good-text: #15803d;
-  --sa-critical-text: #b91c1c;
-  --sa-warning-soft: #fef3c7;
-  --sa-warning-text: #92400e;
+  // Data colors: accent + its tints + grey; status colors are muted
+  --sa-series-1: var(--hr-primary);
+  --sa-series-2: var(--hr-primary-muted);
+  --sa-series-3: var(--hr-border-strong);
+  --sa-good: #3a8f5c;
+  --sa-warning: #c8962c;
+  --sa-critical: #c0443a;
+  --sa-good-text: var(--hr-success-ink);
+  --sa-critical-text: var(--hr-danger-ink);
+  --sa-warning-soft: var(--hr-warning-soft);
+  --sa-warning-text: var(--hr-warning-ink);
 }
 
-// ── Accent tones (decorative: icons, tiles, avatars — not chart data) ────
-// Each sets --tone (icon/accent ink, AA on white), --tone-soft (chip fill) and --tone-tint (tile wash).
-.tone-blue   { --tone: #2563eb; --tone-soft: #dbeafe; --tone-tint: #eff6ff; }
-.tone-indigo { --tone: #4f46e5; --tone-soft: #e0e7ff; --tone-tint: #eef2ff; }
-.tone-violet { --tone: #7c3aed; --tone-soft: #ede9fe; --tone-tint: #f5f3ff; }
-.tone-rose   { --tone: #e11d48; --tone-soft: #ffe4e6; --tone-tint: #fff1f2; }
-.tone-orange { --tone: #ea580c; --tone-soft: #ffedd5; --tone-tint: #fff7ed; }
-.tone-amber  { --tone: #b45309; --tone-soft: #fef3c7; --tone-tint: #fffbeb; }
-.tone-green  { --tone: #15803d; --tone-soft: #dcfce7; --tone-tint: #f0fdf4; }
-.tone-teal   { --tone: #0f766e; --tone-soft: #ccfbf1; --tone-tint: #f0fdfa; }
+// Accent "tones" from the component are retired: every icon is a quiet grey line icon.
+.tone-blue, .tone-indigo, .tone-violet, .tone-rose,
+.tone-orange, .tone-amber, .tone-green, .tone-teal {
+  --tone: var(--hr-text-muted);
+  --tone-soft: var(--hr-surface-2);
+  --tone-tint: transparent;
+}
 
-// The rest of the app is light-only today (no theme toggle is exposed), so the dashboard
-// stays light too. Everything above is a token: a dark theme only needs to redefine them.
+// Thin outlined icons, matching the sidebar
+@mixin line-icon($size: 20px) {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  font-size: $size;
+  width: $size;
+  height: $size;
+  line-height: 1;
+}
 
 .sa {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 28px;
+  padding: 24px;
   color: var(--sa-text);
   display: flex;
   flex-direction: column;
   gap: 20px;
 
+  mat-icon { @include line-icon(20px); }
+
   @media (max-width: 640px) { padding: 16px; gap: 16px; }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────
+// ── Page header (replaces the dark banner) ───────────────────────────────
 .sa-hero {
-  position: relative;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 26px 28px;
-  border-radius: 18px;
-  color: #fff;
-  background:
-    radial-gradient(60% 120% at 100% 0%, rgba(96, 165, 250, 0.45) 0, transparent 60%),
-    radial-gradient(40% 80% at 70% 120%, rgba(37, 99, 235, 0.55) 0, transparent 60%),
-    linear-gradient(120deg, #0f1a3d 0%, #172554 40%, #1e3a8a 75%, #1d4ed8 100%);
-  box-shadow: 0 18px 40px -20px rgba(23, 37, 84, 0.7);
-
-  // Fine grid texture
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 28px 28px;
-    mask-image: linear-gradient(90deg, transparent 0%, #000 60%);
-    pointer-events: none;
-  }
-
-  > * { position: relative; z-index: 1; }
-
-  @media (max-width: 640px) { padding: 20px; border-radius: 14px; }
 }
 
 .sa-eyebrow {
   margin: 0 0 4px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--sa-text-3);
 }
 
 .sa-title {
   margin: 0;
-  color: #fff;
-  font-size: 26px;
-  line-height: 1.25;
-  font-weight: 650;
+  color: var(--sa-text);
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 600;
   letter-spacing: -0.01em;
 
-  @media (max-width: 640px) { font-size: 22px; }
+  @media (max-width: 640px) { font-size: 20px; }
 }
 
 .sa-subtitle {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--sa-text-3);
 }
 
 .sa-clock {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 8px 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(6px);
-  color: #fff;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--sa-border);
+  border-radius: 8px;
+  background: var(--sa-card);
+  color: var(--sa-text);
 
   &__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--hr-border-strong);
     flex: none;
   }
-  &--on &__dot { background: #4ade80; box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.3); }
+  &--on &__dot { background: var(--sa-good); }
 
-  &__text { display: flex; flex-direction: column; line-height: 1.2; }
+  &__text { display: flex; flex-direction: column; line-height: 1.25; }
   &__label { font-size: 13px; font-weight: 600; }
-  &__meta { font-size: 12px; color: rgba(255, 255, 255, 0.75); }
-
-  .sa-btn--primary { background: #fff; color: #1e3a8a; &:hover:not(:disabled) { background: #dbeafe; } }
-  .sa-btn--ghost { color: #fff; border-color: rgba(255, 255, 255, 0.5); &:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); } }
-  .sa-btn:focus-visible { outline-color: #fff; }
+  &__meta { font-size: 12px; color: var(--sa-text-3); }
 }
 
 // ── Buttons & links ───────────────────────────────────────────────────────
 .sa-btn {
   appearance: none;
   border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 7px 14px;
+  border-radius: 6px;
+  height: 36px;
+  padding: 0 14px;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -159,10 +135,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 
   &:disabled { opacity: 0.6; cursor: default; }
-  &:focus-visible { outline: 2px solid var(--sa-primary); outline-offset: 2px; }
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 1px; }
 
   &--primary {
     background: var(--sa-primary);
@@ -170,27 +146,27 @@
     &:hover:not(:disabled) { background: var(--sa-primary-hover); }
   }
   &--ghost {
-    background: transparent;
-    color: var(--sa-primary);
+    background: var(--sa-card);
+    color: var(--sa-text-2);
     border-color: var(--sa-border);
-    &:hover:not(:disabled) { background: var(--sa-primary-soft); }
+    &:hover:not(:disabled) { background: var(--hr-shell-hover); border-color: var(--hr-border-strong); color: var(--sa-text); }
   }
 }
 
 .sa-link {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--sa-primary);
   text-decoration: none;
   white-space: nowrap;
   &:hover { text-decoration: underline; }
-  &:focus-visible { outline: 2px solid var(--sa-primary); outline-offset: 2px; border-radius: 4px; }
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 2px; border-radius: 4px; }
 }
 
-// ── Quick actions ─────────────────────────────────────────────────────────
+// ── Quick actions: white outlined buttons ─────────────────────────────────
 .sa-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -198,39 +174,36 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
-  border-radius: 10px;
+  height: 40px;
+  padding: 0 14px 0 12px;
+  border-radius: 8px;
   border: 1px solid var(--sa-border);
   background: var(--sa-card);
-  color: var(--sa-text);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--sa-text-2);
+  font-size: 13.5px;
+  font-weight: 500;
   text-decoration: none;
-  box-shadow: var(--sa-shadow);
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
 
-  padding-left: 8px;
+  mat-icon { @include line-icon(20px); color: var(--sa-text-3); }
 
-  mat-icon {
-    font-size: 18px; width: 30px; height: 30px; line-height: 30px; text-align: center;
-    border-radius: 8px;
-    color: var(--tone, var(--sa-primary));
-    background: var(--tone-soft, var(--sa-primary-soft));
+  &:hover {
+    border-color: var(--hr-border-strong);
+    background: var(--hr-shell-hover);
+    color: var(--sa-text);
+    mat-icon { color: var(--sa-primary); }
   }
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 1px; }
 
-  &:hover { border-color: var(--tone, var(--sa-primary)); box-shadow: var(--sa-shadow-hover); transform: translateY(-1px); }
-  &:focus-visible { outline: 2px solid var(--sa-primary); outline-offset: 2px; }
-
-  @media (max-width: 640px) { flex: 1 1 calc(50% - 5px); justify-content: center; }
+  @media (max-width: 640px) { flex: 1 1 calc(50% - 4px); justify-content: center; }
 }
 
 // ── Cards ─────────────────────────────────────────────────────────────────
 .sa-card {
   background: var(--sa-card);
   border: 1px solid var(--sa-border);
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: var(--sa-shadow);
+  border-radius: 8px;
+  padding: 20px;
   min-width: 0;
 
   &__head {
@@ -241,9 +214,10 @@
     margin-bottom: 16px;
   }
   &__title {
-    margin: 0; font-size: 15px; font-weight: 650; color: var(--sa-text);
-    display: flex; align-items: center; gap: 8px;
-    &::before { content: ''; width: 4px; height: 16px; border-radius: 2px; background: linear-gradient(#2563eb, #172554); flex: none; }
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--sa-text);
   }
   &__sub { margin: 2px 0 0; font-size: 13px; color: var(--sa-text-3); }
 
@@ -253,30 +227,31 @@
 .sa-mini-title {
   margin: 0 0 10px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--sa-text-3);
 }
 
-// ── Setup ─────────────────────────────────────────────────────────────────
+// ── Setup checklist ───────────────────────────────────────────────────────
 .sa-setup {
   &__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-  &__count { font-size: 13px; font-weight: 600; color: var(--sa-text-2); white-space: nowrap; }
+  &__count { font-size: 13px; font-weight: 500; color: var(--sa-text-3); white-space: nowrap; }
   &__list {
     list-style: none;
     margin: 14px 0 0;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 8px 20px;
+    gap: 8px 24px;
 
     li {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 14px;
-      mat-icon { font-size: 20px; width: 20px; height: 20px; color: var(--sa-text-3); }
+      color: var(--sa-text-2);
+      mat-icon { color: var(--hr-border-strong); }
       .sa-link { margin-left: auto; }
       &.is-done { color: var(--sa-text-3); mat-icon { color: var(--sa-good); } }
     }
@@ -286,8 +261,8 @@
 // ── KPI tiles ─────────────────────────────────────────────────────────────
 .sa-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 
   @media (max-width: 480px) { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
@@ -297,59 +272,49 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 18px;
-  min-height: 118px;
-  overflow: hidden;
+  padding: 18px 20px;
+  min-height: 116px;
   background: var(--sa-card);
   border: 1px solid var(--sa-border);
-  border-radius: 14px;
-  box-shadow: var(--sa-shadow);
+  border-radius: 8px;
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition: border-color 0.15s;
 
-  // Soft tone glow in the corner
-  &::before {
-    content: '';
-    position: absolute;
-    top: -40px;
-    right: -40px;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--tone-tint, transparent) 0%, transparent 70%);
-    pointer-events: none;
-  }
+  &[href]:hover { border-color: var(--hr-border-strong); }
+  &[href]:hover &__value { color: var(--sa-primary); }
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 1px; }
 
-  > * { position: relative; }
-
-  &[href]:hover { border-color: #cbd5e1; box-shadow: var(--sa-shadow-hover); transform: translateY(-1px); }
-  &:focus-visible { outline: 2px solid var(--sa-primary); outline-offset: 2px; }
-
+  // Quiet grey icon in the corner — no colored chip
   &__icon {
     position: absolute;
     top: 16px;
     right: 16px;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
     display: grid;
     place-items: center;
-    position: absolute !important;
-    background: var(--tone-soft, var(--sa-primary-soft));
-    color: var(--tone, var(--sa-primary));
-    mat-icon { font-size: 19px; width: 19px; height: 19px; }
+    color: var(--sa-text-3);
+    mat-icon { @include line-icon(22px); }
   }
-  &__label { font-size: 13px; font-weight: 500; color: var(--sa-text-3); padding-right: 44px; }
-  &__value { font-size: 30px; font-weight: 700; color: var(--sa-text); margin-top: 4px; line-height: 1.15; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  &__label { font-size: 14px; font-weight: 500; color: var(--sa-text-3); padding-right: 32px; }
+  &__value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--sa-text);
+    margin-top: 6px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.15s;
+  }
   &__hint { font-size: 12px; color: var(--sa-text-3); margin-top: auto; }
 
-  &--attention { border-color: #fcd34d; }
+  // Something needs attention: a thin warning rule on the left, nothing louder
+  &--attention { box-shadow: inset 3px 0 0 var(--sa-warning); }
 
   @media (max-width: 480px) {
     padding: 14px;
-    min-height: 104px;
-    &__value { font-size: 24px; }
+    min-height: 100px;
+    &__value { font-size: 22px; }
     &__icon { display: none; }
     &__label { padding-right: 0; }
   }
@@ -383,20 +348,20 @@
 // ── Segmented bar (one whole split into parts) ────────────────────────────
 .sa-segbar {
   display: flex;
-  gap: 2px;                     // surface gap between segments
-  height: 14px;
-  border-radius: 7px;
+  gap: 2px;
+  height: 12px;
+  border-radius: 3px;
   overflow: hidden;
   background: var(--sa-track);
 
-  &--thin { height: 10px; }
+  &--thin { height: 8px; }
 
   &__seg {
     min-width: 6px;
     height: 100%;
     cursor: default;
-    transition: filter 0.15s;
-    &:hover, &:focus { filter: brightness(1.08); outline: none; }
+    transition: opacity 0.15s;
+    &:hover, &:focus { opacity: 0.85; outline: none; }
   }
 }
 
@@ -409,10 +374,10 @@
   gap: 10px 20px;
 
   li { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-  mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--sa-text-3); }
-  &__swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  mat-icon { @include line-icon(16px); color: var(--sa-text-3); }
+  &__swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
   &__label { color: var(--sa-text-2); }
-  &__value { font-weight: 650; color: var(--sa-text); font-variant-numeric: tabular-nums; }
+  &__value { font-weight: 600; color: var(--sa-text); font-variant-numeric: tabular-nums; }
 }
 
 // ── Horizontal bars ───────────────────────────────────────────────────────
@@ -422,7 +387,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 
   &--compact .sa-hbar { grid-template-columns: 72px minmax(0, 1fr) 40px; }
 }
@@ -434,10 +399,10 @@
   gap: 12px;
   padding: 6px 8px;
   margin: 0 -8px;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: default;
 
-  &:hover, &:focus { background: var(--sa-border-soft); outline: none; }
+  &:hover, &:focus { background: var(--hr-surface-2); outline: none; }
 
   &__label {
     font-size: 13px;
@@ -446,17 +411,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  &__track { height: 12px; display: block; }
+  &__track { height: 10px; display: block; }
   &__fill {
     display: block;
     height: 100%;
     min-width: 4px;
     max-width: 100%;
     background: var(--sa-series-1);
-    border-radius: 0 4px 4px 0;   // square at the baseline, rounded data-end
+    border-radius: 0 2px 2px 0;
     transition: width 0.4s ease;
   }
-  &__value { font-size: 13px; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
+  &__value { font-size: 13px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
 }
 
 // ── Columns ───────────────────────────────────────────────────────────────
@@ -476,18 +441,18 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: default;
 
-  &:hover, &:focus { background: var(--sa-border-soft); outline: none; }
+  &:hover, &:focus { background: var(--hr-surface-2); outline: none; }
 
-  &__value { font-size: 12px; font-weight: 650; color: var(--sa-text-2); font-variant-numeric: tabular-nums; }
+  &__value { font-size: 12px; font-weight: 600; color: var(--sa-text-2); font-variant-numeric: tabular-nums; }
   &__track { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
   &__fill {
     width: min(24px, 60%);
     min-height: 3px;
     background: var(--sa-series-1);
-    border-radius: 4px 4px 0 0;
+    border-radius: 2px 2px 0 0;
     transition: height 0.4s ease;
   }
   &__label {
@@ -505,32 +470,32 @@
 .sa-status {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-weight: 600;
+  gap: 4px;
+  font-weight: 500;
   color: var(--sa-text-2);
-  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+  mat-icon { @include line-icon(15px); }
   &--good { color: var(--sa-good-text); }
   &--critical { color: var(--sa-critical-text); }
 }
 
 .sa-usage {
-  margin-top: 14px;
+  margin-top: 16px;
   &__row { display: flex; justify-content: space-between; font-size: 13px; color: var(--sa-text-2); margin-bottom: 6px; }
-  &__num { font-weight: 650; color: var(--sa-text); font-variant-numeric: tabular-nums; }
+  &__num { font-weight: 600; color: var(--sa-text); font-variant-numeric: tabular-nums; }
 }
 
 .sa-meter {
-  height: 8px;
-  border-radius: 4px;
-  background: var(--sa-primary-soft);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--sa-track);
   overflow: hidden;
 
   &__fill {
     display: block;
     height: 100%;
     min-width: 4px;
-    border-radius: 4px;
-    background: linear-gradient(90deg, #172554, #2563eb);
+    border-radius: 3px;
+    background: var(--sa-primary);
     transition: width 0.4s ease;
   }
   &--warn &__fill { background: var(--sa-warning); }
@@ -545,9 +510,9 @@
 
 .sa-chip {
   font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--sa-border-soft);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--hr-surface-2);
   color: var(--sa-text-2);
   border: 1px solid var(--sa-border);
 }
@@ -573,49 +538,63 @@
     text-decoration: none;
   }
   a.sa-list__row:hover .sa-list__text { color: var(--sa-primary); }
-  a.sa-list__row:focus-visible { outline: 2px solid var(--sa-primary); outline-offset: 2px; border-radius: 6px; }
+  a.sa-list__row:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 2px; border-radius: 6px; }
 
+  // Bordered square with a grey line icon
   &__icon {
     width: 32px;
     height: 32px;
-    border-radius: 9px;
+    border-radius: 6px;
     flex: none;
     display: grid;
     place-items: center;
-    background: var(--tone-soft, var(--sa-primary-soft));
-    color: var(--tone, var(--sa-primary));
-    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    border: 1px solid var(--sa-border);
+    background: var(--sa-card);
+    color: var(--sa-text-3);
+    mat-icon { @include line-icon(18px); }
   }
-  &__text { display: flex; flex-direction: column; min-width: 0; flex: 1; font-size: 14px; }
-  &__title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  &__text { display: flex; flex-direction: column; min-width: 0; flex: 1; font-size: 14px; color: var(--sa-text); }
+  &__title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   &__meta { font-size: 12px; color: var(--sa-text-3); }
 }
 
+// Count of items waiting: amber only when there is something to do
 .sa-badge {
   min-width: 26px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 1px 8px;
+  border-radius: 4px;
   text-align: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   background: var(--sa-warning-soft);
   color: var(--sa-warning-text);
   font-variant-numeric: tabular-nums;
 
-  &--zero { background: var(--sa-border-soft); color: var(--sa-text-3); }
+  &--zero { background: var(--hr-surface-2); color: var(--sa-text-3); }
 }
 
+// Calendar-style date block, no colored band
 .sa-date {
-  width: 42px;
+  width: 44px;
   flex: none;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid var(--sa-border);
   text-align: center;
   overflow: hidden;
   line-height: 1.1;
+  background: var(--sa-card);
 
-  &__m { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 3px 0; background: var(--tone, var(--sa-primary)); color: #fff; }
-  &__d { display: block; font-size: 16px; font-weight: 700; padding: 3px 0 4px; }
+  &__m {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 0 2px;
+    color: var(--sa-primary);
+    background: transparent;
+  }
+  &__d { display: block; font-size: 16px; font-weight: 600; padding: 0 0 4px; color: var(--sa-text); }
 }
 
 .sa-avatar {
@@ -625,10 +604,11 @@
   flex: none;
   display: grid;
   place-items: center;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 13px;
-  background: var(--tone-soft, var(--sa-primary-soft));
-  color: var(--tone, var(--sa-primary));
+  background: var(--sa-primary-soft);
+  color: var(--sa-primary);
+  border: 1px solid var(--hr-primary-border);
 }
 
 // ── Empty & loading states ────────────────────────────────────────────────
@@ -643,41 +623,35 @@
   font-size: 14px;
 
   p { margin: 0; max-width: 360px; }
-  mat-icon { font-size: 28px; width: 28px; height: 28px; color: var(--sa-text-3); opacity: 0.7; }
+  mat-icon { @include line-icon(28px); color: var(--hr-text-subtle); }
 
   &--compact { padding: 8px 0; align-items: flex-start; text-align: left; gap: 6px; }
 }
 
+// Loading placeholders pulse softly (no shimmer gradient)
 .sa-skeleton {
-  position: relative;
-  overflow: hidden;
   background: var(--sa-track);
-  border-radius: 14px;
+  border-radius: 8px;
   border-color: transparent;
   box-shadow: none;
+  animation: sa-pulse 1.4s ease-in-out infinite;
 
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-    animation: sa-shimmer 1.3s infinite;
-  }
-
-  &--bar { height: 14px; border-radius: 7px; }
-  &--rows { height: 96px; border-radius: 10px; }
+  &--bar { height: 12px; border-radius: 3px; }
+  &--rows { height: 96px; border-radius: 6px; }
 }
 
-@keyframes sa-shimmer { 100% { transform: translateX(100%); } }
+@keyframes sa-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .sa-skeleton::after { animation: none; }
+  .sa-skeleton { animation: none; }
   .sa-hbar__fill, .sa-column__fill, .sa-meter__fill { transition: none; }
-  .sa-kpi, .sa-action { transition: none; &:hover { transform: none; } }
+  .sa-kpi, .sa-action { transition: none; }
 }
 
-// ── Tooltip ───────────────────────────────────────────────────────────────
+// ── Tooltip (floating, so it may lift) ────────────────────────────────────
 .sa-tooltip {
   position: fixed;
   z-index: 1000;
@@ -687,23 +661,23 @@
   flex-direction: column;
   gap: 2px;
   padding: 8px 10px;
-  border-radius: 8px;
-  background: #0f172a;
-  color: #f8fafc;
+  border-radius: 6px;
+  background: var(--hr-text);
+  color: #fff;
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+  box-shadow: var(--hr-shadow-md);
 
-  strong { font-size: 12px; font-weight: 650; }
-  span { color: #cbd5e1; }
+  strong { font-size: 12px; font-weight: 600; }
+  span { color: var(--hr-border-strong); }
 }
 
 // ── Personal view: leave balance rows ─────────────────────────────────────
 .sa-hbar__track--bg {
   background: var(--sa-track);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 2px 2px 0;
 }
 .sa-hbar__value--wide { width: auto; white-space: nowrap; }
-.sa-hbar__of { font-weight: 500; color: var(--sa-text-3); }
+.sa-hbar__of { font-weight: 400; color: var(--sa-text-3); }
 .sa-hbars:has(.sa-hbar__value--wide) .sa-hbar { grid-template-columns: minmax(90px, 160px) minmax(0, 1fr) 64px; }

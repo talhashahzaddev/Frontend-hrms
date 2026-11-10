@@ -1,12 +1,12 @@
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-900: #0f172a;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$slate-50: #f7f8fa;
+$slate-100: #edeff2;
+$slate-200: #dde1e6;
+$slate-400: #8b929b;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-900: #1f2328;
 
 :host {
   display: block;
@@ -35,9 +35,9 @@ $slate-900: #0f172a;
     .icon-box {
       width: 3rem;
       height: 3rem;
-      border-radius: 0.75rem;
+      border-radius: var(--hr-radius-lg);
       background-color: rgba($primary, 0.1);
-      color: #ef4444;
+      color: var(--hr-danger);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -47,7 +47,7 @@ $slate-900: #0f172a;
 
     .page-title {
       font-size: 1.75rem;
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
       line-height: 1.25;
       color: $slate-900;
@@ -71,16 +71,16 @@ $slate-900: #0f172a;
 .summary-card {
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   padding: 14px 18px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
   transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--hr-shadow-md);
     transform: translateY(-2px);
   }
 
@@ -89,18 +89,18 @@ $slate-900: #0f172a;
     height: 24px;
     font-size: 24px;
     padding: 8px;
-    border-radius: 10px;
+    border-radius: var(--hr-radius-lg);
   }
 
-  &.red mat-icon { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-  &.orange mat-icon { color: #f97316; background: rgba(249, 115, 22, 0.1); }
-  &.green mat-icon { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+  &.red mat-icon { color: var(--hr-danger); background: rgba(180, 35, 24, 0.1); }
+  &.orange mat-icon { color: var(--hr-warning); background: rgba(249, 115, 22, 0.1); }
+  &.green mat-icon { color: var(--hr-success); background: rgba(46, 125, 79, 0.1); }
 }
 
 .summary-val {
   font-size: 22px;
   color: $slate-900;
-  font-weight: 700;
+  font-weight: 600;
   display: block;
 }
 
@@ -119,7 +119,7 @@ $slate-900: #0f172a;
   margin-bottom: 1rem;
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1rem 1.5rem;
 }
 
@@ -147,7 +147,7 @@ $slate-900: #0f172a;
 .search-wrap {
   height: 40px;
   border: 1px solid $slate-200;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   background: $slate-50;
 }
 
@@ -160,20 +160,20 @@ $slate-900: #0f172a;
 
   &:focus {
     border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    box-shadow: none;
     background: white;
   }
 }
 
 .btn-apply {
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   height: 40px;
   padding: 0 1.25rem;
   background: $primary;
   color: white;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 
@@ -196,7 +196,7 @@ $slate-900: #0f172a;
 
   &:focus-within {
     border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    box-shadow: none;
     background: white;
   }
 }
@@ -219,9 +219,9 @@ $slate-900: #0f172a;
 .v-table-wrap {
   background: white;
   border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 .v-table {
@@ -237,7 +237,7 @@ $slate-900: #0f172a;
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      font-weight: 700;
+      font-weight: 600;
       color: $slate-500;
     }
   }
@@ -255,7 +255,7 @@ $slate-900: #0f172a;
   transition: background-color 0.2s;
 
   &:hover { background: rgba($slate-50, 0.8); }
-  &.expanded { background: #eff6ff; }
+  &.expanded { background: var(--hr-navy-soft); }
 }
 
 .emp-cell {
@@ -277,7 +277,7 @@ $slate-900: #0f172a;
   justify-content: center;
   background: rgba($primary, 0.1);
   color: $primary;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .emp-name {
@@ -292,11 +292,11 @@ $slate-900: #0f172a;
 }
 
 .distance-badge {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
+  background: rgba(180, 35, 24, 0.1);
+  color: var(--hr-danger);
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.75rem;
 }
 
@@ -304,21 +304,21 @@ $slate-900: #0f172a;
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
 
-  &.action-blocked { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
-  &.action-warning { background: rgba(249, 115, 22, 0.1); color: #ea580c; }
-  &.action-escalated { background: rgba(37, 99, 235, 0.1); color: $primary; }
+  &.action-blocked { background: rgba(180, 35, 24, 0.1); color: var(--hr-danger); }
+  &.action-warning { background: rgba(249, 115, 22, 0.1); color: var(--hr-warning); }
+  &.action-escalated { background: rgba(37, 82, 208, 0.1); color: $primary; }
 }
 
 .resolved-chip {
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
 
-  &.resolved { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
-  &.open { background: rgba(249, 115, 22, 0.1); color: #ea580c; }
+  &.resolved { background: rgba(46, 125, 79, 0.1); color: var(--hr-success); }
+  &.open { background: rgba(249, 115, 22, 0.1); color: var(--hr-warning); }
 }
 
 .detail-row td { background: $slate-50; }
@@ -335,7 +335,7 @@ $slate-900: #0f172a;
   margin: 0 0 10px;
   color: $slate-600;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: flex;
@@ -362,7 +362,7 @@ $slate-900: #0f172a;
   font-size: 0.875rem;
   font-weight: 600;
 
-  &.red { color: #dc2626; }
+  &.red { color: var(--hr-danger); }
 }
 
 .empty-state {
@@ -374,7 +374,7 @@ $slate-900: #0f172a;
   color: $slate-500;
 
   mat-icon {
-    color: #22c55e;
+    color: var(--hr-success);
     font-size: 3.5rem;
     width: 3.5rem;
     height: 3.5rem;

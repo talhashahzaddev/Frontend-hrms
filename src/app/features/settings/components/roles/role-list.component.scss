@@ -6,34 +6,34 @@
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--hr-border);
   flex-wrap: wrap;
 
   .rl-search-wrapper {
     display: flex;
     align-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    background: var(--hr-surface-2);
+    border: 1px solid var(--hr-border);
+    border-radius: var(--hr-radius);
     padding: 0 12px;
     height: 38px;
     gap: 8px;
     min-width: 280px;
     transition: border-color 0.15s;
 
-    &:focus-within { border-color: #2563eb; }
+    &:focus-within { border-color: var(--hr-navy); }
 
-    mat-icon { font-size: 18px; color: #94a3b8; flex-shrink: 0; }
+    mat-icon { font-size: 18px; color: var(--hr-text-subtle); flex-shrink: 0; }
 
     input {
       border: none;
       background: transparent;
       outline: none;
       font-size: 0.875rem;
-      color: #0f172a;
+      color: var(--hr-text);
       flex: 1;
 
-      &::placeholder { color: #94a3b8; }
+      &::placeholder { color: var(--hr-text-subtle); }
     }
   }
 
@@ -41,16 +41,16 @@
 
   .rl-record-count {
     font-size: 0.8125rem;
-    color: #64748b;
+    color: var(--hr-text-muted);
     font-weight: 600;
   }
 
   .filter-clear-btn {
     height: 38px;
-    border-radius: 8px !important;
+    border-radius: var(--hr-radius) !important;
     font-size: 0.8125rem !important;
-    color: #64748b !important;
-    border-color: #e2e8f0 !important;
+    color: var(--hr-text-muted) !important;
+    border-color: var(--hr-border) !important;
 
     mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
@@ -73,8 +73,8 @@
   .rl-role-icon {
     width: 36px;
     height: 36px;
-    border-radius: 9px;
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-radius: var(--hr-radius);
+    background: var(--hr-navy);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,13 +83,13 @@
     mat-icon { color: white; font-size: 18px; width: 18px; height: 18px; }
   }
 
-  .rl-role-name { font-size: 0.875rem; font-weight: 700; color: #0f172a; }
+  .rl-role-name { font-size: 0.875rem; font-weight: 700; color: var(--hr-text); }
   .rl-role-system {
     display: flex;
     align-items: center;
     gap: 3px;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
     font-weight: 500;
     margin-top: 2px;
   }
@@ -97,7 +97,7 @@
 
 .rl-description {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
   max-width: 300px;
   display: block;
   overflow: hidden;
@@ -105,36 +105,36 @@
   white-space: nowrap;
 }
 
-.rl-date-cell { color: #64748b; font-size: 0.8125rem; white-space: nowrap; }
+.rl-date-cell { color: var(--hr-text-muted); font-size: 0.8125rem; white-space: nowrap; }
 
 // Action menu
 ::ng-deep .mat-mdc-menu-panel {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  border: 1px solid #e2e8f0 !important;
+  border-radius: var(--hr-radius-lg) !important;
+  box-shadow: var(--hr-shadow-lg) !important;
+  border: 1px solid var(--hr-border) !important;
   min-width: 180px !important;
 
   .mat-mdc-menu-content {
     padding: 6px !important;
 
     .mat-mdc-menu-item {
-      border-radius: 6px !important;
+      border-radius: var(--hr-radius) !important;
       height: 38px !important;
       min-height: 38px !important;
       font-size: 0.875rem !important;
-      color: #334155 !important;
+      color: var(--hr-text-2) !important;
 
-      &:hover { background: #f8fafc !important; }
+      &:hover { background: var(--hr-surface-2) !important; }
 
-      mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #64748b; }
+      mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: var(--hr-text-muted); }
 
       &.danger-action {
-        color: #dc2626 !important;
-        mat-icon { color: #dc2626 !important; }
-        &:hover { background: #fef2f2 !important; }
+        color: var(--hr-danger) !important;
+        mat-icon { color: var(--hr-danger) !important; }
+        &:hover { background: var(--hr-danger-soft) !important; }
       }
     }
 
-    mat-divider { margin: 4px 0 !important; border-color: #e2e8f0 !important; }
+    mat-divider { margin: 4px 0 !important; border-color: var(--hr-border) !important; }
   }
 }

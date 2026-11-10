@@ -5,11 +5,11 @@
 		.empty-state {
 			grid-column: 1 / -1;
 			background: #ffffff;
-			border: 1px dashed #cbd5e1;
-			border-radius: 0.75rem;
+			border: 1px dashed var(--hr-border-strong);
+			border-radius: var(--hr-radius-lg);
 			padding: 2rem 1rem;
 			text-align: center;
-			color: #64748b;
+			color: var(--hr-text-muted);
 			font-size: 0.92rem;
 			font-weight: 600;
 		}
@@ -35,18 +35,18 @@
 
 	.status-pill {
 		&.status-disbursed {
-			background: #dbeafe;
-			color: #1d4ed8;
+			background: var(--hr-navy-soft);
+			color: var(--hr-navy-hover);
 		}
 
 		&.status-rejected {
-			background: #fee2e2;
-			color: #991b1b;
+			background: var(--hr-danger-soft);
+			color: var(--hr-danger-ink);
 		}
 
 		&.status-deducted {
-			background: #dcfce7;
-			color: #166534;
+			background: var(--hr-success-soft);
+			color: var(--hr-success-ink);
 		}
 	}
 }

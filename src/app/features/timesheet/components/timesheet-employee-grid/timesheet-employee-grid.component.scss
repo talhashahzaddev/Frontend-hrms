@@ -8,7 +8,7 @@
   width: 100%;
   height: calc(100vh - var(--ts-header-height, 56px));
   overflow: hidden;
-  background: #f8fafc;
+  background: var(--hr-surface-2);
   font-family: 'Inter', sans-serif;
   box-sizing: border-box;
 }
@@ -40,8 +40,8 @@
 
 .emp-panel-title {
   font-size: 1.125rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 600;
+  color: var(--hr-text);
   margin: 0 0 0.25rem;
   line-height: 1.3;
 }
@@ -96,7 +96,7 @@
   border-radius: var(--ts-radius);
   font-size: 13px;
   color: var(--ts-text);
-  background: #f8fafc;
+  background: var(--hr-surface-2);
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
 
@@ -104,7 +104,7 @@
   &:focus {
     outline: none;
     border-color: var(--ts-border-focus);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: none;
     background: var(--ts-card);
   }
 }
@@ -148,7 +148,7 @@
   transition: background 0.15s ease;
   position: relative;
 
-  &:hover { background: #eff6ff; }
+  &:hover { background: var(--hr-navy-soft); }
 
   &.active {
     background: var(--ts-primary-bg-light);
@@ -166,7 +166,7 @@
   justify-content: center;
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: var(--hr-text-2);
   flex-shrink: 0;
 }
 
@@ -330,11 +330,11 @@
 
   &:hover {
     border-color: var(--ts-primary-light);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+    box-shadow: var(--hr-shadow-md);
   }
 
   &.weekend {
-    background: #f8fafc;
+    background: var(--hr-surface-2);
     border-style: dashed;
   }
 
@@ -352,7 +352,7 @@
 
 .day-number {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ts-text);
   line-height: 1;
 }
@@ -375,17 +375,17 @@
   align-self: flex-start;
   margin-bottom: 6px;
 
-  &.badge-present  { background: #DCFCE7; color: #16A34A; }
-  &.badge-leave    { background: #DBEAFE; color: #2563EB; }
-  &.badge-absent   { background: #FEE2E2; color: #DC2626; }
-  &.badge-half-day { background: #FEF3C7; color: #D97706; }
-  &.badge-late     { background: #FEF3C7; color: #D97706; }
+  &.badge-present  { background: var(--hr-success-soft); color: var(--hr-success); }
+  &.badge-leave    { background: var(--hr-navy-soft); color: var(--hr-navy); }
+  &.badge-absent   { background: var(--hr-danger-soft); color: var(--hr-danger); }
+  &.badge-half-day { background: var(--hr-warning-soft); color: var(--hr-warning); }
+  &.badge-late     { background: var(--hr-warning-soft); color: var(--hr-warning); }
   &.badge-weekend  { background: var(--ts-border-light); color: var(--ts-text-subtle); }
 }
 
 .day-hours {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ts-text);
   margin-bottom: 4px;
 }
@@ -407,8 +407,8 @@
   i { font-size: 9px; }
 }
 
-.day-in  { color: #16A34A; }
-.day-out { color: #DC2626; }
+.day-in  { color: var(--hr-success); }
+.day-out { color: var(--hr-danger); }
 
 /* ═══ OT / LATE BADGES ═════════════════════════════════════════════════════════ */
 .day-badges {
@@ -425,8 +425,8 @@
   padding: 1px 6px;
   white-space: nowrap;
 
-  &.ot   { background: #FEF3C7; color: #D97706; }
-  &.late { background: #FEE2E2; color: #DC2626; }
+  &.ot   { background: var(--hr-warning-soft); color: var(--hr-warning); }
+  &.late { background: var(--hr-danger-soft); color: var(--hr-danger); }
 }
 
 /* ═══ PENDING / OVERRIDE DOTS ══════════════════════════════════════════════════ */
@@ -443,7 +443,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  color: #16a34a;
+  color: var(--hr-success);
 }
 
 .day-rejected-dot {
@@ -451,7 +451,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  color: #dc2626;
+  color: var(--hr-danger);
 }
 
 .day-override-dot {
@@ -488,7 +488,7 @@
 
 .detail-empty-icon {
   font-size: 48px;
-  color: #cbd5e1;
+  color: var(--hr-border-strong);
 }
 
 .detail-empty-text {
@@ -526,7 +526,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: var(--hr-border-soft);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
   border-radius: var(--ts-radius-lg);

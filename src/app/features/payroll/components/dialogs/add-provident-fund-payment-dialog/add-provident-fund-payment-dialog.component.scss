@@ -1,19 +1,19 @@
 .provident-fund-payment-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 0.95rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 20, 60, 0.16);
+  box-shadow: var(--hr-shadow-lg);
 }
 
 .provident-fund-payment-dialog-panel .mdc-dialog__surface {
-  border-radius: 0.95rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
 }
 
 .provident-fund-payment-dialog-container {
   width: 100%;
   background: #ffffff;
-  color: #0f172a;
+  color: var(--hr-text);
   font-family: 'Public Sans', 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
@@ -23,12 +23,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--hr-border);
 
     h2 {
       margin: 0;
       font-size: 1.2rem;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.02em;
     }
 
@@ -36,9 +36,9 @@
       width: 2rem;
       height: 2rem;
       border: none;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       background: transparent;
-      color: #64748b;
+      color: var(--hr-text-muted);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -46,8 +46,8 @@
       transition: all 0.2s ease;
 
       &:hover {
-        color: #1e293b;
-        background: #f1f5f9;
+        color: var(--hr-text);
+        background: var(--hr-border-soft);
       }
 
       mat-icon {
@@ -80,8 +80,8 @@
         display: block;
         margin-bottom: 0.4rem;
         font-size: 11px;
-        font-weight: 700;
-        color: #64748b;
+        font-weight: 600;
+        color: var(--hr-text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
@@ -89,10 +89,10 @@
       .form-control {
         width: 100%;
         min-height: 2.7rem;
-        border-radius: 0.55rem;
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
-        color: #0f172a;
+        border-radius: var(--hr-radius);
+        border: 1px solid var(--hr-border);
+        background: var(--hr-surface-2);
+        color: var(--hr-text);
         font-size: 0.875rem;
         padding: 0 0.75rem;
         box-sizing: border-box;
@@ -101,8 +101,8 @@
 
         &:focus {
           background: #ffffff;
-          border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+          border-color: var(--hr-navy);
+          box-shadow: none;
         }
 
         &.align-right {
@@ -112,9 +112,9 @@
 
       select.form-control {
         appearance: none;
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #475569;
+        background-color: var(--hr-surface-2);
+        border: 1px solid var(--hr-border);
+        color: var(--hr-text-2);
         font-weight: 500;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
         background-position: right 0.625rem center;
@@ -123,7 +123,7 @@
         padding-right: 2.25rem;
 
         &:hover {
-          border-color: #cbd5e1;
+          border-color: var(--hr-border-strong);
         }
       }
     }
@@ -131,7 +131,7 @@
     .field-error {
       margin: 0.4rem 0 0;
       font-size: 0.76rem;
-      color: #b91c1c;
+      color: var(--hr-danger-ink);
       line-height: 1.35;
     }
   }
@@ -141,33 +141,33 @@
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--hr-border);
     background: rgba(248, 250, 252, 0.5);
 
     button {
       height: 2.45rem;
-      border-radius: 0.55rem;
+      border-radius: var(--hr-radius);
       border: none;
       font-size: 0.875rem;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
       padding: 0 1.2rem;
     }
 
     .cancel-btn {
-      color: #2563eb;
+      color: var(--hr-navy);
       background: transparent;
 
       &:hover {
-        background: rgba(37, 99, 235, 0.1);
+        background: rgba(37, 82, 208, 0.1);
       }
     }
 
     .save-btn {
       color: #ffffff;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
+      background: var(--hr-navy);
+      box-shadow: var(--hr-shadow-md);
 
       &:hover {
         filter: brightness(0.98);

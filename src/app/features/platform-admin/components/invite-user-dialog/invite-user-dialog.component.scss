@@ -9,11 +9,11 @@
   gap: 8px;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--hr-text);
   margin: 0;
 
   mat-icon {
-    color: #6366f1;
+    color: var(--hr-navy);
   }
 }
 
@@ -23,7 +23,7 @@
 
 .dialog-subtitle {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
   margin: 0 0 20px;
   line-height: 1.5;
 }
@@ -43,10 +43,10 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  color: #dc2626;
+  background: var(--hr-danger-soft);
+  border: 1px solid var(--hr-danger-soft);
+  border-radius: var(--hr-radius);
+  color: var(--hr-danger);
   font-size: 0.85rem;
   margin-top: 8px;
 

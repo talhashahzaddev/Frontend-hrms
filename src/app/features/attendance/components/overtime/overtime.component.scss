@@ -142,45 +142,45 @@
 // Overtime Management — Unified with KRA Management Design System
 // ══════════════════════════════════════════════════════════════════════
 
-$color-primary:       #2563eb;
-$color-primary-dark:  #4f46e5;
-$color-primary-light: rgba(29, 78, 216, 0.1);
+$color-primary:       #2552d0;
+$color-primary-dark:  #2552d0;
+$color-primary-light: rgba(37, 82, 208, 0.1);
 $color-bg:            #f5f6fa;
 $color-surface:       #ffffff;
 $color-border:        #e9eaf0;
-$color-text:          #0f172a;
-$color-text-secondary:#64748b;
-$color-text-muted:    #94a3b8;
+$color-text:          #1f2328;
+$color-text-secondary:#5f6670;
+$color-text-muted:    #8b929b;
 
-$color-success:       #10b981;
-$color-warning:       #f59e0b;
-$color-error:         #ef4444;
+$color-success:       #2e7d4f;
+$color-warning:       #9a6700;
+$color-error:         #b42318;
 
-$indigo:              #4f46e5;
-$indigo-mid:          #2563eb;
-$indigo-dark:         #4f46e5;
-$indigo-light:        #eef2ff;
-$violet:              #2563eb;
-$slate-900:           #0f172a;
-$slate-700:           #334155;
-$slate-600:           #64748b;
-$slate-500:           #94a3b8;
-$slate-400:           #cbd5e1;
-$slate-300:           #e2e8f0;
+$indigo:              #2552d0;
+$indigo-mid:          #2552d0;
+$indigo-dark:         #2552d0;
+$indigo-light:        #eef3fd;
+$violet:              #2552d0;
+$slate-900:           #1f2328;
+$slate-700:           #3d434b;
+$slate-600:           #5f6670;
+$slate-500:           #8b929b;
+$slate-400:           #c4c9d0;
+$slate-300:           #dde1e6;
 $slate-200:           #f0f1f5;
 $slate-100:           #f5f6fa;
-$slate-50:            #fafafa;
+$slate-50:            #f7f8fa;
 $slate-25:            #fafbff;
 $white:               #ffffff;
-$green-bg:            #f0fdf4;
-$green-text:          #16a34a;
-$green-border:        #bbf7d0;
-$yellow-bg:           #fffbeb;
-$yellow-text:         #d97706;
-$yellow-border:       #fde68a;
-$red-bg:              #fef2f2;
-$red-text:            #dc2626;
-$red-border:          #fecaca;
+$green-bg:            #eaf3ee;
+$green-text:          #2e7d4f;
+$green-border:        #eaf3ee;
+$yellow-bg:           #fbf3e0;
+$yellow-text:         #9a6700;
+$yellow-border:       #fbf3e0;
+$red-bg:              #fbeae9;
+$red-text:            #b42318;
+$red-border:          #fbeae9;
 
 // ─── Host ──────────────────────────────────────────────────────────────────
 :host {
@@ -191,7 +191,7 @@ $red-border:          #fecaca;
 .overtime-management-container {
   padding: 2rem;
   width: 100%;
-  background: #f8fafc;
+  background: var(--hr-surface-2);
   min-height: 100vh;
   font-family: 'Inter', 'DM Sans', sans-serif;
   display: flex;
@@ -218,15 +218,15 @@ $red-border:          #fecaca;
   .header-icon {
     width: 3rem;
     height: 3rem;
-    border-radius: 0.75rem;
-    background: rgba(37, 99, 235, 0.1);
+    border-radius: var(--hr-radius-lg);
+    background: rgba(37, 82, 208, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 
     mat-icon {
-      color: #2563eb;
+      color: var(--hr-navy);
       font-size: 28px;
       width: 28px;
       height: 28px;
@@ -236,7 +236,7 @@ $red-border:          #fecaca;
   .page-title {
     margin: 0 0 2px;
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-900;
     letter-spacing: -0.3px;
   }
@@ -256,24 +256,24 @@ $red-border:          #fecaca;
 
 // ─── Primary Button ────────────────────────────────────────────────────────
 .btn-primary {
-  background: #2563eb;
+  background: var(--hr-navy);
   color: $white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   padding: 0 1.25rem;
   height: 42px;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: var(--hr-shadow-md);
   transition: all 0.2s ease;
 
   &:hover {
-    background: #1d4ed8;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    background: var(--hr-navy-hover);
+    box-shadow: var(--hr-shadow-md);
     transform: translateY(-1px);
   }
 
@@ -290,7 +290,7 @@ $red-border:          #fecaca;
   display: flex;
   gap: 4px;
   background: $white;
-  border-radius: 12px 12px 0 0;
+  border-radius: var(--hr-radius-lg) var(--hr-radius-lg) 0 0;
   padding: 12px 16px 0;
   border-bottom: 1px solid $color-border;
   margin-bottom: 0;
@@ -303,7 +303,7 @@ $red-border:          #fecaca;
   padding: 9px 18px;
   border: none;
   background: transparent;
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--hr-radius) var(--hr-radius) 0 0;
   font-size: 13.5px;
   font-weight: 500;
   color: $slate-600;
@@ -340,9 +340,9 @@ $red-border:          #fecaca;
     padding: 0 6px;
     background: $color-primary-light;
     color: $indigo-mid;
-    border-radius: 10px;
+    border-radius: var(--hr-radius-lg);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
   }
 }
 
@@ -361,9 +361,9 @@ $red-border:          #fecaca;
 // ─── Section Card ──────────────────────────────────────────────────────────
 .section-card {
   background: $white;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid $slate-300;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--hr-shadow-lg);
   overflow: hidden;
 }
 
@@ -374,7 +374,7 @@ $red-border:          #fecaca;
   h3 {
     margin: 0 0 4px;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-900;
   }
 }
@@ -410,7 +410,7 @@ $red-border:          #fecaca;
       padding: 0 20px;
       height: 44px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.7px;
       color: $slate-500;
@@ -474,9 +474,9 @@ $red-border:          #fecaca;
 .status-badge {
   display: inline-block;
   padding: 3px 9px;
-  border-radius: 5px;
+  border-radius: var(--hr-radius);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: 1px solid;
@@ -500,7 +500,7 @@ $red-border:          #fecaca;
   }
 
   &.status-default {
-    background: #f8fafc;
+    background: var(--hr-surface-2);
     color: $slate-600;
     border-color: $slate-300;
   }
@@ -510,7 +510,7 @@ $red-border:          #fecaca;
 .action-btn {
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   width: 32px;
   height: 32px;
   display: inline-flex;
@@ -561,15 +561,15 @@ $red-border:          #fecaca;
 // ─── mat-menu Overrides ────────────────────────────────────────────────────
 ::ng-deep {
   .mat-mdc-menu-panel {
-    border-radius: 10px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    border-radius: var(--hr-radius-lg) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
     border: 1px solid $slate-200 !important;
     font-family: 'Inter', sans-serif !important;
     min-width: 160px !important;
   }
 
   .mat-mdc-menu-item {
-    border-radius: 6px !important;
+    border-radius: var(--hr-radius) !important;
     margin: 1px 0 !important;
     height: 38px !important;
     min-height: 38px !important;
@@ -643,8 +643,8 @@ $red-border:          #fecaca;
       align-items: center;
       justify-content: center;
       padding: 28px 24px;
-      background: linear-gradient(180deg, rgba(99,102,241,0.03), rgba(245,246,255,0.6));
-      border: 1px dashed rgba(99,102,241,0.12);
+      background: rgba(37, 82, 208,0.03);
+      border: 1px dashed rgba(37, 82, 208,0.12);
       min-height: 120px;
     }
 
@@ -662,10 +662,10 @@ $red-border:          #fecaca;
       mat-icon.empty-icon {
         font-size: 36px !important;
         color: $indigo-mid;
-        background: rgba(99,102,241,0.07);
-        border-radius: 10px;
+        background: rgba(37, 82, 208,0.07);
+        border-radius: var(--hr-radius-lg);
         padding: 8px;
-        box-shadow: 0 6px 18px rgba(79,70,229,0.06);
+        box-shadow: var(--hr-shadow-lg);
       }
 
       .empty-text {
@@ -686,10 +686,10 @@ $red-border:          #fecaca;
     > div {
       background: $slate-50;
       padding: 10px 12px;
-      border-radius: 8px;
+      border-radius: var(--hr-radius);
       font-size: 13px;
       color: $slate-700;
-      box-shadow: 0 2px 6px rgba(16,24,40,0.03);
+      box-shadow: var(--hr-shadow-md);
     }
   }
 

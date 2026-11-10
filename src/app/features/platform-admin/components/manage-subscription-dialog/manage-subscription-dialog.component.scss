@@ -6,7 +6,7 @@ h2[mat-dialog-title] {
   margin: 0;
 
   mat-icon {
-    color: #2563eb;
+    color: var(--hr-navy);
   }
 }
 
@@ -23,7 +23,7 @@ mat-dialog-content {
 
 .current-sub {
   background: #f8f9ff;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   padding: 12px 16px;
   margin-bottom: 16px;
 }
@@ -41,7 +41,7 @@ mat-dialog-content {
   .sub-value {
     font-size: 0.85rem;
     font-weight: 500;
-    color: #333;
+    color: var(--hr-text-2);
   }
 }
 
@@ -49,9 +49,9 @@ mat-dialog-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff8e1;
+  background: var(--hr-warning-soft);
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   margin-bottom: 16px;
   font-size: 0.85rem;
   color: #f57f17;
@@ -68,9 +68,9 @@ mat-dialog-content {
   align-items: center;
   gap: 8px;
   background: #fdecea;
-  color: #b71c1c;
+  color: var(--hr-danger-ink);
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   margin-bottom: 16px;
   font-size: 0.85rem;
 
@@ -103,9 +103,9 @@ mat-dialog-content {
   align-items: flex-start;
   gap: 8px;
   background: #fce4ec;
-  color: #c62828;
+  color: var(--hr-danger-ink);
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   margin-bottom: 12px;
   font-size: 0.82rem;
   line-height: 1.4;

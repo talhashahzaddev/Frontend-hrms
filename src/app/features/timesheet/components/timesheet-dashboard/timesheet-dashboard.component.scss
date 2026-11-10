@@ -54,13 +54,13 @@
   .ts-stat-icon {
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 0.625rem;
+    border-radius: var(--hr-radius-lg);
     font-size: 1rem;
   }
 
   .ts-stat-value {
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
   }
 
@@ -69,7 +69,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #64748b;
+    color: var(--hr-text-muted);
   }
 
   .ts-stat-trend {
@@ -104,7 +104,7 @@
   }
 
   .p-dropdown-label.p-placeholder {
-    color: #64748b;
+    color: var(--hr-text-muted);
   }
 
   // Room for chevron (and clear icon when selected)
@@ -123,11 +123,11 @@
     margin-top: 0 !important;
     width: 1.25rem;
     height: 1.25rem;
-    color: #94a3b8 !important;
+    color: var(--hr-text-subtle) !important;
     z-index: 1;
 
     &:hover {
-      color: #64748b !important;
+      color: var(--hr-text-muted) !important;
     }
   }
 
@@ -147,7 +147,7 @@
 
 .ts-util-fill {
   height: 6px;
-  border-radius: 3px;
+  border-radius: var(--hr-radius);
   min-width: 4px;
   flex: 1;
 }
@@ -165,15 +165,15 @@
     font-weight: 600 !important;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border-bottom: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    color: #64748b !important;
+    border-bottom: 1px solid var(--hr-border) !important;
+    background: var(--hr-surface-2) !important;
+    color: var(--hr-text-muted) !important;
   }
 
   .p-datatable-tbody > tr > td {
     padding: 0.625rem 0.875rem !important;
     font-size: 0.8125rem !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid var(--hr-border-soft) !important;
     vertical-align: middle;
   }
 
@@ -182,33 +182,33 @@
   }
 
   .p-datatable-tbody > tr:hover > td {
-    background: #f8fafc !important;
+    background: var(--hr-surface-2) !important;
   }
 
   .ts-cell-dept {
     font-weight: 600;
-    color: #1e293b;
+    color: var(--hr-text);
     font-size: 0.8125rem;
 
     .pi {
-      color: #94a3b8;
+      color: var(--hr-text-subtle);
       margin-right: 0.375rem;
       font-size: 0.75rem;
     }
   }
 
   .ts-cell-muted {
-    color: #64748b;
+    color: var(--hr-text-muted);
     font-size: 0.8125rem;
   }
 
   .ts-cell-period {
     font-weight: 500;
-    color: #334155;
+    color: var(--hr-text-2);
     font-size: 0.8125rem;
 
     .pi {
-      color: #cbd5e1;
+      color: var(--hr-border-strong);
       margin-right: 0.375rem;
       font-size: 0.75rem;
     }
@@ -224,8 +224,8 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.1875rem 0.5rem;
-    background: #f8fafc;
-    border-radius: 0.375rem;
+    background: var(--hr-surface-2);
+    border-radius: var(--hr-radius);
     font-size: 0.75rem;
     font-weight: 500;
 
@@ -237,35 +237,35 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.1875rem 0.5rem;
-    background: #eff6ff;
-    color: #2563eb;
-    border-radius: 0.375rem;
+    background: var(--hr-navy-soft);
+    color: var(--hr-navy);
+    border-radius: var(--hr-radius);
     font-size: 0.75rem;
     font-weight: 600;
-    border: 1px solid #dbeafe;
+    border: 1px solid var(--hr-navy-soft);
 
     .pi { font-size: 0.6875rem; }
   }
 
   .ts-hours-val {
     font-weight: 600;
-    color: #334155;
+    color: var(--hr-text-2);
     font-size: 0.8125rem;
 
     .ts-hours-unit {
       font-weight: 400;
-      color: #94a3b8;
+      color: var(--hr-text-subtle);
       font-size: 0.75rem;
     }
   }
 
   .ts-emp-count {
-    color: #64748b;
+    color: var(--hr-text-muted);
     font-size: 0.8125rem;
 
     .pi {
       margin-right: 0.375rem;
-      color: #cbd5e1;
+      color: var(--hr-border-strong);
       font-size: 0.75rem;
     }
   }
@@ -273,7 +273,7 @@
   .ts-empty-row td {
     text-align: center;
     padding: 2rem !important;
-    color: #94a3b8 !important;
+    color: var(--hr-text-subtle) !important;
     font-size: 0.8125rem !important;
   }
 }

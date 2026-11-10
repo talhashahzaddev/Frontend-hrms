@@ -16,7 +16,7 @@
   overflow: hidden;
 
   .ts-card-header {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--hr-border);
     margin-bottom: 16px;
   }
 
@@ -32,31 +32,31 @@
     align-items: center;
 
     .label {
-      color: #64748b;
+      color: var(--hr-text-muted);
       font-size: 0.9rem;
     }
 
     .value {
       font-weight: 500;
-      color: #1e293b;
+      color: var(--hr-text);
     }
 
     .plan-name {
       font-weight: 600;
-      color: #3b82f6;
+      color: var(--hr-navy);
     }
 
     .billing-badge {
       padding: 4px 12px;
-      border-radius: 20px;
+      border-radius: var(--hr-radius-xl);
       font-size: 0.8rem;
       font-weight: 600;
-      background: #e0f2fe;
-      color: #0284c7;
+      background: var(--hr-navy-soft);
+      color: var(--hr-navy);
 
       &.annual {
-        background: #dcfce7;
-        color: #16a34a;
+        background: var(--hr-success-soft);
+        color: var(--hr-success);
       }
     }
 
@@ -69,19 +69,19 @@
 
       .label {
         font-size: 1.1rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-weight: 600;
+        color: var(--hr-text);
       }
 
       .value {
         font-size: 1.3rem;
-        font-weight: 700;
-        color: #3b82f6;
+        font-weight: 600;
+        color: var(--hr-navy);
 
         small {
           font-size: 0.7rem;
           font-weight: 400;
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
         }
       }
     }
@@ -97,7 +97,7 @@
   overflow: hidden;
 
   .ts-card-header {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--hr-border);
     margin-bottom: 16px;
   }
 }
@@ -114,30 +114,30 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border: 2px solid var(--hr-border);
+  border-radius: var(--hr-radius-lg);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: #93c5fd;
-    background: #f0f9ff;
+    border-color: var(--hr-navy-muted);
+    background: var(--hr-navy-soft);
   }
 
   &.selected {
-    border-color: #3b82f6;
-    background: #eff6ff;
-    box-shadow: 0 0 0 1px #3b82f6;
+    border-color: var(--hr-navy);
+    background: var(--hr-navy-soft);
+    box-shadow: none;
   }
 
   .gateway-radio {
     .radio-icon {
-      color: #cbd5e1;
+      color: var(--hr-border-strong);
     }
   }
 
   &.selected .gateway-radio .radio-icon {
-    color: #3b82f6;
+    color: var(--hr-navy);
   }
 
   .gateway-icon {
@@ -146,20 +146,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
-    border-radius: 12px;
+    background: var(--hr-border-soft);
+    border-radius: var(--hr-radius-lg);
 
     mat-icon {
       font-size: 24px;
-      color: #475569;
+      color: var(--hr-text-2);
     }
   }
 
   &.selected .gateway-icon {
-    background: #dbeafe;
+    background: var(--hr-navy-soft);
 
     mat-icon {
-      color: #3b82f6;
+      color: var(--hr-navy);
     }
   }
 
@@ -170,13 +170,13 @@
       margin: 0 0 4px;
       font-size: 0.95rem;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--hr-text);
     }
 
     p {
       margin: 0;
       font-size: 0.8rem;
-      color: #64748b;
+      color: var(--hr-text-muted);
     }
   }
 }
@@ -186,7 +186,7 @@
   height: 52px;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,7 +203,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #64748b;
+  color: var(--hr-text-muted);
   font-size: 0.8rem;
 
   mat-icon {
@@ -217,10 +217,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: var(--hr-border-soft);
+  color: var(--hr-text-2);
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -228,9 +228,9 @@
   transition: all 0.2s ease;
   
   &:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
-    border-color: #cbd5e1;
+    background-color: var(--hr-border);
+    color: var(--hr-text);
+    border-color: var(--hr-border-strong);
   }
   
   mat-icon {

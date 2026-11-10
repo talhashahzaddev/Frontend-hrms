@@ -3,20 +3,20 @@
 }
 
 :root {
-  --primary-50: #eff6ff;
-  --primary-400: #60a5fa;
-  --primary-600: #2563eb;
-  --primary-700: #1d4ed8;
-  --purple-50: #f5f3ff;
+  --primary-50: var(--hr-navy-soft);
+  --primary-400: var(--hr-navy-muted);
+  --primary-600: var(--hr-navy);
+  --primary-700: var(--hr-navy-hover);
+  --purple-50: var(--hr-navy-soft);
   --gray-25: #fdfdfd;
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
+  --gray-50: var(--hr-surface-2);
+  --gray-100: var(--hr-border-soft);
+  --gray-200: var(--hr-border);
+  --gray-300: var(--hr-border-strong);
+  --gray-500: var(--hr-text-muted);
+  --gray-600: var(--hr-text-2);
+  --gray-800: var(--hr-text);
+  --gray-900: var(--hr-text);
 }
 
 .register-container {
@@ -25,19 +25,17 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem 1rem;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.09) 0%, rgba(76, 29, 149, 0.08) 50%, var(--gray-50) 100%);
+  background: var(--hr-bg);
   overflow-y: auto;
 }
 
 .register-card {
   width: 100%;
   max-width: 760px;
-  border-radius: 1.5rem;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  border: 1px solid rgba(37, 99, 235, 0.12);
-  box-shadow: 0 20px 50px -25px rgba(37, 99, 235, 0.4);
+  border-radius: var(--hr-radius-xl);
+  background: #ffffff;
+  border: 1px solid var(--hr-border);
   overflow: visible;
-  animation: slideInUp 0.45s ease;
   display: flex;
   flex-direction: column;
 }
@@ -45,10 +43,10 @@
 .register-header {
   text-align: center;
   padding: 1.5rem 2rem 1.25rem;
-  background: linear-gradient(135deg, var(--primary-50), var(--purple-50));
-  border-bottom: 1px solid rgba(79, 70, 229, 0.14);
-  border-top-left-radius: 2rem;
-border-top-right-radius: 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--hr-border-soft);
+  border-top-left-radius: var(--hr-radius-xl);
+border-top-right-radius: var(--hr-radius-xl);
 }
 
 .logo {
@@ -61,26 +59,19 @@ border-top-right-radius: 2rem;
 
 .logo-icon {
   font-size: 2rem;
-  background: linear-gradient(90deg, #172554 0%, #2563eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 6px 14px rgba(37, 99, 235, 0.24));
+  color: var(--hr-primary);
 }
 
 .brand-title {
   font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  background: linear-gradient(90deg, #172554 0%, #2563eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--hr-primary);
 }
 
 .register-title {
   font-size: 1.6rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gray-900);
   margin-bottom: 0.3rem;
 }
@@ -133,30 +124,30 @@ border-top-right-radius: 2rem;
 }
 
 :host ::ng-deep .register-stepper .mat-step-header {
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 0.75rem 1rem;
   transition: background 0.2s ease;
 }
 
 :host ::ng-deep .register-stepper .mat-step-header:hover {
-  background: rgba(37, 99, 235, 0.05);
+  background: var(--hr-surface-2);
 }
 
 :host ::ng-deep .register-stepper .mat-step-icon {
-  background: rgba(37, 99, 235, 0.16);
-  color: var(--primary-700);
+  background: var(--hr-primary-soft);
+  color: var(--hr-primary);
   font-weight: 600;
 }
 
 :host ::ng-deep .register-stepper .mat-step-icon-selected,
 :host ::ng-deep .register-stepper .mat-step-icon-state-edit {
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  background: var(--hr-navy-hover);
   color: #fff;
 }
 
 :host ::ng-deep .register-stepper .mat-step-icon-state-done {
-  background: rgba(16, 185, 129, 0.16);
-  color: #047857;
+  background: rgba(46, 125, 79, 0.16);
+  color: var(--hr-success-ink);
 }
 
 :host ::ng-deep .register-stepper .mat-step-label,
@@ -181,7 +172,7 @@ border-top-right-radius: 2rem;
 
 .step-header h3 {
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gray-900);
   margin: 0 0 0.25rem;
 }
@@ -203,7 +194,7 @@ border-top-right-radius: 2rem;
 }
 
 :host ::ng-deep .form-field .mat-mdc-text-field-wrapper {
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 0 0.35rem;
   background: white;
   transition: border 0.2s ease;
@@ -212,14 +203,14 @@ border-top-right-radius: 2rem;
 :host ::ng-deep .form-field .mdc-notched-outline__leading,
 :host ::ng-deep .form-field .mdc-notched-outline__notch,
 :host ::ng-deep .form-field .mdc-notched-outline__trailing {
-  border-color: rgba(15, 23, 42, 0.12);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 :host ::ng-deep .form-field.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
 :host ::ng-deep .form-field.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
 :host ::ng-deep .form-field.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
-  border-color: rgba(99, 102, 241, 0.75);
-  border-width: 2px;
+  border-color: var(--hr-primary);
+  border-width: 1px;
 }
 
 :host ::ng-deep .form-field input.mat-mdc-input-element,
@@ -230,12 +221,13 @@ border-top-right-radius: 2rem;
 }
 
 :host ::ng-deep .form-field .mat-mdc-form-field-icon-prefix mat-icon {
-  color: var(--primary-600);
-  background: rgba(37, 99, 235, 0.12);
-  border-radius: 0.75rem;
-  padding: 0.4rem;
-  font-size: 1.3rem;
-  margin-right: 0.5rem;
+  color: var(--hr-text-subtle);
+  background: transparent;
+  padding: 0;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
 }
 
 :host ::ng-deep .form-field .mat-mdc-form-field-icon-suffix mat-icon,
@@ -246,9 +238,9 @@ border-top-right-radius: 2rem;
 
 .terms-section {
   grid-column: 1 / -1;
-  background: rgba(59, 130, 246, 0.07);
-  border: 1px solid rgba(59, 130, 246, 0.14);
-  border-radius: 0.75rem;
+  background: var(--hr-surface-2);
+  border: 1px solid var(--hr-border);
+  border-radius: var(--hr-radius-lg);
   padding: 0.85rem 1rem;
 }
 
@@ -274,13 +266,13 @@ border-top-right-radius: 2rem;
   align-items: center;
   gap: 0.85rem;
   padding-top: 1.25rem;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .back-button {
   min-width: 140px;
   height: 48px;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid var(--gray-300);
   color: var(--gray-600);
   font-weight: 600;
@@ -294,20 +286,19 @@ border-top-right-radius: 2rem;
 .next-button,
 .register-button {
   height: 48px;
-  border-radius: 0.75rem;
-  background: linear-gradient(90deg, #172554 0%, #2563eb 100%);
+  border-radius: var(--hr-radius-lg);
+  background: var(--hr-navy-hover);
   color: #fff;
   font-weight: 600;
   font-size: 1rem;
   gap: 0.5rem;
-  box-shadow: 0 4px 14px -2px rgba(59, 130, 246, 0.6);
+  box-shadow: var(--hr-shadow-md);
   transition: all 0.2s ease;
 }
 
 .next-button:hover,
 .register-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px -2px rgba(59, 130, 246, 0.75);
+  box-shadow: none;
 }
 
 .register-button[disabled] {
@@ -321,7 +312,7 @@ border-top-right-radius: 2rem;
 }
 
 .register-footer {
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding: 1.25rem 2rem;
   text-align: center;
   font-size: 0.9rem;
@@ -388,7 +379,7 @@ border-top-right-radius: 2rem;
   }
 
   .register-card {
-    border-radius: 1.25rem;
+    border-radius: var(--hr-radius-xl);
   }
 
   .register-header {
@@ -419,7 +410,7 @@ border-top-right-radius: 2rem;
   }
 
   .register-card {
-    border-radius: 1rem;
+    border-radius: var(--hr-radius-xl);
   }
 
   .register-header {

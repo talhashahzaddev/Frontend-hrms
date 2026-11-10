@@ -25,15 +25,15 @@
     }
 
     &.selected {
-      background: #dcfce7;
-      color: #16a34a;
-      border: 1px solid #bbf7d0;
+      background: var(--hr-success-soft);
+      color: var(--hr-success);
+      border: 1px solid var(--hr-success-soft);
     }
 
     &.available {
-      background: #eff6ff;
-      color: #2563eb;
-      border: 1px solid rgba(37, 99, 235, 0.15);
+      background: var(--hr-navy-soft);
+      color: var(--hr-navy);
+      border: 1px solid rgba(37, 82, 208, 0.15);
     }
   }
 }
@@ -48,7 +48,7 @@
       gap: 0.5rem;
       font-size: 0.875rem;
       font-weight: 600;
-      color: #64748b;
+      color: var(--hr-text-muted);
       margin: 0;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -57,11 +57,11 @@
         font-size: 1.125rem;
         width: 1.125rem;
         height: 1.125rem;
-        color: #2563eb;
+        color: var(--hr-navy);
       }
 
       &.muted mat-icon {
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
       }
     }
   }
@@ -78,20 +78,20 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border-radius: var(--hr-radius-lg);
+  border: 1px solid var(--hr-border);
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: rgba(37, 99, 235, 0.25);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 82, 208, 0.25);
+    box-shadow: var(--hr-shadow-md);
   }
 
   &.selected {
-    border-color: #16a34a;
-    background: rgba(22, 163, 74, 0.04);
+    border-color: var(--hr-success);
+    background: rgba(46, 125, 79, 0.04);
   }
 
   &.past {
@@ -109,13 +109,13 @@
     justify-content: center;
     width: 3.25rem;
     height: 3.25rem;
-    border-radius: 0.625rem;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: var(--hr-radius-lg);
+    background: var(--hr-navy);
     color: white;
 
     .day {
       font-size: 1.125rem;
-      font-weight: 700;
+      font-weight: 600;
       line-height: 1.1;
     }
 
@@ -127,7 +127,7 @@
     }
 
     &.past {
-      background: linear-gradient(135deg, #94a3b8, #64748b);
+      background: var(--hr-text-subtle);
     }
   }
 }
@@ -140,7 +140,7 @@
     margin: 0 0 0.25rem;
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--hr-text);
   }
 
   .holiday-meta {
@@ -151,7 +151,7 @@
 
     .day-of-week {
       font-size: 0.8125rem;
-      color: #64748b;
+      color: var(--hr-text-muted);
     }
 
     .half-day-chip,
@@ -162,24 +162,24 @@
     }
 
     .was-selected-chip {
-      background: #dcfce7 !important;
-      color: #16a34a !important;
+      background: var(--hr-success-soft) !important;
+      color: var(--hr-success) !important;
     }
   }
 
   .holiday-desc {
     margin: 0.125rem 0;
     font-size: 0.8125rem;
-    color: #64748b;
+    color: var(--hr-text-muted);
     line-height: 1.4;
   }
 
   .days-until {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
 
     .today {
-      color: #d97706;
+      color: var(--hr-warning);
       font-weight: 600;
     }
   }
@@ -204,19 +204,19 @@
 
   .btn-cancel-holiday {
     height: 42px !important;
-    border-radius: 0.5rem !important;
+    border-radius: var(--hr-radius) !important;
     font-weight: 600 !important;
-    color: #dc2626 !important;
-    border-color: #fecaca !important;
+    color: var(--hr-danger) !important;
+    border-color: var(--hr-danger-soft) !important;
 
     &:hover:not([disabled]) {
-      background: #fef2f2 !important;
+      background: var(--hr-danger-soft) !important;
     }
   }
 
   .past-label {
     font-size: 0.8125rem;
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
     font-style: italic;
     padding: 0 0.75rem;
   }

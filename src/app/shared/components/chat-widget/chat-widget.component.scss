@@ -1,12 +1,12 @@
 // Match Jobs module theme
-$primary: #2563eb;
-$primary-hover: rgba(37, 99, 235, 0.9);
-$primary-soft: rgba(37, 99, 235, 0.1);
-$slate-50: #f8fafc;
-$slate-200: #e2e8f0;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-900: #0f172a;
+$primary: #2552d0;
+$primary-hover: rgba(37, 82, 208, 0.9);
+$primary-soft: rgba(37, 82, 208, 0.1);
+$slate-50: #f7f8fa;
+$slate-200: #dde1e6;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-900: #1f2328;
 
 .chat-widget-container {
   position: fixed;
@@ -23,13 +23,13 @@ $slate-900: #0f172a;
 .chat-button {
   width: 58px;
   height: 58px;
-  border-radius: 16px;
+  border-radius: var(--hr-radius-xl);
   background: $primary;
   border: none;
   color: white;
   font-size: 22px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba($primary, 0.25);
+  box-shadow: var(--hr-shadow-md);
   transition: all 0.25s ease;
   display: flex;
   align-items: center;
@@ -38,7 +38,7 @@ $slate-900: #0f172a;
   &:hover {
     transform: translateY(-2px);
     background: $primary-hover;
-    box-shadow: 0 8px 16px rgba($primary, 0.3);
+    box-shadow: var(--hr-shadow-lg);
   }
 
   &:active {
@@ -58,8 +58,8 @@ $slate-900: #0f172a;
   height: 620px;
   max-height: calc(100vh - 110px);
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-md);
   border: 1px solid $slate-200;
   display: flex;
   flex-direction: column;
@@ -99,7 +99,7 @@ $slate-900: #0f172a;
 .header-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   background: rgba(255, 255, 255, 0.18);
   display: grid;
   place-items: center;
@@ -113,7 +113,7 @@ $slate-900: #0f172a;
   min-width: 0;
 
   .title {
-    font-weight: 700;
+    font-weight: 600;
     font-size: 15px;
     letter-spacing: -0.02em;
   }
@@ -132,8 +132,8 @@ $slate-900: #0f172a;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #34d399;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+  background: var(--hr-success);
+  box-shadow: none;
 }
 
 .header-actions {
@@ -148,7 +148,7 @@ $slate-900: #0f172a;
   color: white;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -193,13 +193,13 @@ $slate-900: #0f172a;
   .empty-icon {
     width: 56px;
     height: 56px;
-    border-radius: 12px;
+    border-radius: var(--hr-radius-lg);
     display: grid;
     place-items: center;
     background: $primary-soft;
     color: $primary;
     margin-bottom: 14px;
-    box-shadow: 0 12px 24px -12px rgba(2, 132, 199, 0.55);
+    box-shadow: var(--hr-shadow-lg);
 
     i {
       font-size: 24px;
@@ -208,7 +208,7 @@ $slate-900: #0f172a;
 
   .empty-title {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--gray-800);
     margin-bottom: 6px;
   }
@@ -234,8 +234,8 @@ $slate-900: #0f172a;
     .message-content {
       background: $primary;
       color: white;
-      border-radius: 12px 12px 4px 12px;
-      box-shadow: 0 4px 10px rgba($primary, 0.2);
+      border-radius: var(--hr-radius-lg) var(--hr-radius-lg) var(--hr-radius) var(--hr-radius-lg);
+      box-shadow: var(--hr-shadow-md);
     }
 
     .message-time {
@@ -249,7 +249,7 @@ $slate-900: #0f172a;
     .message-content {
       background: white;
       color: var(--gray-700);
-      border-radius: 16px 16px 16px 4px;
+      border-radius: var(--hr-radius-xl) var(--hr-radius-xl) var(--hr-radius-xl) var(--hr-radius);
       box-shadow: var(--shadow-sm);
       border: 1px solid rgba(226, 232, 240, 0.9);
     }
@@ -259,7 +259,7 @@ $slate-900: #0f172a;
 .message-avatar {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -288,7 +288,7 @@ $slate-900: #0f172a;
     background: white;
     color: $primary;
     border: 1px solid rgba($primary, 0.35);
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -372,7 +372,7 @@ $slate-900: #0f172a;
   gap: 8px;
   padding: 6px 6px 6px 14px;
   border: 1px solid $slate-200;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   background: $slate-50;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
@@ -404,7 +404,7 @@ $slate-900: #0f172a;
 .send-button {
   width: 38px;
   height: 38px;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   background: $primary;
   border: none;
   color: white;
@@ -414,7 +414,7 @@ $slate-900: #0f172a;
   justify-content: center;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba($primary, 0.2);
+  box-shadow: var(--hr-shadow-sm);
 
   &:not(:disabled):hover {
     background: $primary-hover;

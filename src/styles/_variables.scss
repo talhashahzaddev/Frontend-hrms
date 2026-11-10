@@ -1,88 +1,115 @@
-// ═══ Design Tokens — HRMS enterprise palette (navy #172554 / royal blue #2563eb / slate) ═══
+// ═══ Design Tokens — HRMS enterprise palette ════════════════════════════════
+// Corporate blue + white + neutral greys. Status colors are muted and used only for state.
+// See docs/UI_REDESIGN.md for the full standard. Token names are kept stable so
+// existing component styles pick up the new values automatically.
 :root {
-  // Brand
-  --hr-navy: #172554;
-  --hr-navy-2: #1e3a8a;
-  --hr-navy-3: #0f1a3d;
-  --hr-blue: #2563eb;
-  --hr-blue-hover: #1d4ed8;
-  --hr-blue-soft: #eff6ff;
-  --hr-blue-ring: rgba(37, 99, 235, 0.18);
-  --hr-gradient: linear-gradient(135deg, #172554 0%, #1e3a8a 45%, #2563eb 100%);
+  // Brand — corporate blue (single accent). All older names alias these.
+  --hr-primary: #2552d0;
+  --hr-primary-hover: #1e44ae;
+  --hr-primary-soft: #eef3fd;
+  --hr-primary-border: #ccdaf7;
+  --hr-primary-muted: #8fa8e3;
+  --hr-primary-ring: rgba(37, 82, 208, 0.2);
 
-  // Surfaces & text
-  --hr-bg: #f8fafc;
+  --hr-navy: var(--hr-primary);
+  --hr-navy-hover: var(--hr-primary-hover);
+  --hr-navy-soft: var(--hr-primary-soft);
+  --hr-navy-2: var(--hr-primary-hover);
+  --hr-navy-muted: var(--hr-primary-muted);
+  --hr-navy-3: #142036;
+  --hr-blue: var(--hr-primary);
+  --hr-blue-hover: var(--hr-primary-hover);
+  --hr-blue-soft: var(--hr-primary-soft);
+  --hr-blue-ring: var(--hr-primary-ring);
+  --hr-gradient: var(--hr-primary); // gradients retired: flat accent
+
+  // App shell — light, bordered (sidebar + top bar)
+  --hr-shell: #ffffff;
+  --hr-shell-hover: #f4f6f9;
+  --hr-shell-active: var(--hr-primary-soft);
+  --hr-shell-line: #e6e8ec;
+
+  // Surfaces & text (neutral greys)
+  --hr-bg: #f6f7f9;
   --hr-card: #ffffff;
-  --hr-border: #e2e8f0;
-  --hr-border-soft: #f1f5f9;
-  --hr-text: #0f172a;
-  --hr-text-2: #334155;
-  --hr-text-muted: #64748b;
-  --hr-text-subtle: #94a3b8;
+  --hr-surface-2: #f7f8fa;
+  --hr-border: #dde1e6;
+  --hr-border-strong: #c4c9d0;
+  --hr-border-soft: #edeff2;
+  --hr-text: #1f2328;
+  --hr-text-2: #3d434b;
+  --hr-text-muted: #5f6670;
+  --hr-text-subtle: #8b929b;
 
-  // Semantic
-  --hr-success: #16a34a;
-  --hr-success-soft: #dcfce7;
-  --hr-success-ink: #166534;
-  --hr-warning: #d97706;
-  --hr-warning-soft: #fef3c7;
-  --hr-warning-ink: #92400e;
-  --hr-danger: #dc2626;
-  --hr-danger-soft: #fee2e2;
-  --hr-danger-ink: #991b1b;
-  --hr-info: #2563eb;
-  --hr-info-soft: #dbeafe;
-  --hr-info-ink: #1e40af;
+  // Semantic (muted — status only)
+  --hr-success: #2e7d4f;
+  --hr-success-soft: #eaf3ee;
+  --hr-success-ink: #1f5c3a;
+  --hr-warning: #9a6700;
+  --hr-warning-soft: #fbf3e0;
+  --hr-warning-ink: #7a5200;
+  --hr-danger: #b42318;
+  --hr-danger-soft: #fbeae9;
+  --hr-danger-ink: #8a1c14;
+  --hr-info: var(--hr-primary);
+  --hr-info-soft: var(--hr-primary-soft);
+  --hr-info-ink: var(--hr-primary-hover);
 
-  // Shape & depth
-  --hr-radius-sm: 6px;
-  --hr-radius: 8px;
-  --hr-radius-lg: 12px;
-  --hr-radius-xl: 16px;
-  --hr-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --hr-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --hr-shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-  --hr-shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.18);
-  --hr-focus: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  // Shape & depth (flat: borders on resting surfaces, shadows only when floating)
+  --hr-radius-sm: 2px;
+  --hr-radius: 4px;
+  --hr-radius-lg: 6px;
+  --hr-radius-xl: 8px;
+  --hr-shadow-xs: none;
+  --hr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --hr-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --hr-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.14);
+  --hr-focus: 0 0 0 3px var(--hr-primary-ring);
+
+  // Typography
+  --hr-font: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --hr-fs-caption: 12px;
+  --hr-fs-small: 13px;
+  --hr-fs-body: 14px;
+  --hr-fs-section: 16px;
+  --hr-fs-title: 20px;
+  --hr-fs-kpi: 24px;
 
   // Controls & layout
-  --hr-control-h: 40px;
+  --hr-control-h: 36px;
   --hr-header-h: 64px;
-  --hr-sidebar-w: 272px;
-  --hr-sidebar-rail-w: 76px;
+  --hr-sidebar-w: 260px;
+  --hr-sidebar-rail-w: 72px;
   --hr-content-max: 1600px;
   --hr-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-  // Primary
-  --ts-primary: #2563eb;
-  --ts-primary-light: #2563eb;
-  --ts-primary-hover: #1d4ed8;
-  --ts-primary-bg: #eff6ff;
-  --ts-primary-bg-light: #f8fafc;
+  // ── Timesheet token family (mapped onto the same palette) ──
+  --ts-primary: var(--hr-primary);
+  --ts-primary-light: var(--hr-primary);
+  --ts-primary-hover: var(--hr-primary-hover);
+  --ts-primary-bg: var(--hr-primary-soft);
+  --ts-primary-bg-light: #f7f8fa;
 
-  // Semantic
-  --ts-success: #16A34A;
-  --ts-success-bg: #DCFCE7;
-  --ts-warning: #D97706;
-  --ts-warning-bg: #FEF3C7;
-  --ts-danger: #DC2626;
-  --ts-danger-bg: #FEE2E2;
+  --ts-success: #2e7d4f;
+  --ts-success-bg: #eaf3ee;
+  --ts-warning: #9a6700;
+  --ts-warning-bg: #fbf3e0;
+  --ts-danger: #b42318;
+  --ts-danger-bg: #fbeae9;
 
-  // Neutrals (slate palette)
-  --ts-bg: #f8fafc;
-  --ts-card: #FFFFFF;
-  --ts-border: #e2e8f0;
-  --ts-border-light: #f1f5f9;
-  --ts-border-focus: #2563eb;
+  --ts-bg: #f6f7f9;
+  --ts-card: #ffffff;
+  --ts-border: #dde1e6;
+  --ts-border-light: #edeff2;
+  --ts-border-focus: var(--hr-primary);
 
-  // Text
-  --ts-text: #0f172a;
-  --ts-text-secondary: #475569;
-  --ts-text-muted: #64748b;
-  --ts-text-subtle: #94a3b8;
-  --ts-text-inverse: #FFFFFF;
+  --ts-text: #1f2328;
+  --ts-text-secondary: #3d434b;
+  --ts-text-muted: #5f6670;
+  --ts-text-subtle: #8b929b;
+  --ts-text-inverse: #ffffff;
 
-  // Spacing (8px grid)
+  // Spacing (4px grid)
   --ts-space-1: 4px;
   --ts-space-2: 8px;
   --ts-space-3: 12px;
@@ -93,44 +120,42 @@
   --ts-space-10: 40px;
   --ts-space-12: 48px;
 
-  // Radius
-  --ts-radius-sm: 6px;
-  --ts-radius: 8px;
-  --ts-radius-lg: 12px;
-  --ts-radius-xl: 16px;
+  --ts-radius-sm: 2px;
+  --ts-radius: 4px;
+  --ts-radius-lg: 6px;
+  --ts-radius-xl: 8px;
   --ts-radius-full: 9999px;
 
-  // Shadows
-  --ts-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --ts-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
-  --ts-shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.18);
+  --ts-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ts-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --ts-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.14);
 
-  // Status colors
-  --ts-status-draft: #64748b;
-  --ts-status-inprogress: #2563eb;
-  --ts-status-submitted: #D97706;
-  --ts-status-underreview: #2563eb;
-  --ts-status-approved: #16A34A;
-  --ts-status-finalized: #16A34A;
-  --ts-status-locked: #DC2626;
-  --ts-status-archived: #94a3b8;
+  // Status colors (muted)
+  --ts-status-draft: #5f6670;
+  --ts-status-inprogress: var(--hr-primary);
+  --ts-status-submitted: #9a6700;
+  --ts-status-underreview: var(--hr-primary);
+  --ts-status-approved: #2e7d4f;
+  --ts-status-finalized: #2e7d4f;
+  --ts-status-locked: #b42318;
+  --ts-status-archived: #8b929b;
 
   --ts-header-height: 64px;
-  --ts-sidebar-width: 264px;
+  --ts-sidebar-width: 260px;
 }
 
-// Timesheet pages + employee grid + MatDialog hosts
+// Timesheet pages + employee grid + MatDialog hosts re-declare the family locally
 .ts-page-layout,
 .period-detail-layout,
 app-timesheet-correction-dialog,
 app-time-allocation-dialog {
-  --ts-primary: #2563eb;
-  --ts-primary-light: #2563eb;
-  --ts-primary-hover: #1d4ed8;
-  --ts-primary-bg: #eff6ff;
-  --ts-primary-bg-light: #f8fafc;
-  --ts-border-focus: #2563eb;
-  --ts-bg: #f8fafc;
-  --ts-border: #e2e8f0;
-  --ts-border-light: #f1f5f9;
+  --ts-primary: var(--hr-primary);
+  --ts-primary-light: var(--hr-primary);
+  --ts-primary-hover: var(--hr-primary-hover);
+  --ts-primary-bg: var(--hr-primary-soft);
+  --ts-primary-bg-light: #f7f8fa;
+  --ts-border-focus: var(--hr-primary);
+  --ts-bg: #f6f7f9;
+  --ts-border: #dde1e6;
+  --ts-border-light: #edeff2;
 }

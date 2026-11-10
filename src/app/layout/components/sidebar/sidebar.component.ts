@@ -68,7 +68,11 @@ const MENU_SECTIONS: { label: string; items: string[] }[] = [
 export class SidebarComponent implements OnInit, OnDestroy {
   /** Desktop icon-rail mode: icons only, groups open as flyout menus. */
   @Input() collapsed = false;
+  /** Show the collapse/expand control in the brand row (desktop only). */
+  @Input() showCollapseToggle = false;
   @Output() menuItemClick = new EventEmitter<void>();
+  /** Asks the layout to collapse or expand the sidebar. */
+  @Output() collapseToggle = new EventEmitter<void>();
 
   currentUser: User | null = null;
   activeRoute = '';

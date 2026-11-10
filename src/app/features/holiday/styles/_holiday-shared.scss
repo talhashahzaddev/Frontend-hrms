@@ -1,10 +1,10 @@
 // Holiday Module — aligned with Leave / Attendance / Timesheet (slate + blue #2563eb)
 @use '../../leave/styles/leave-shared';
 
-$hv-primary: #2563eb;
-$hv-border: #e2e8f0;
-$hv-surface: #f8fafc;
-$hv-text-secondary: #64748b;
+$hv-primary: #2552d0;
+$hv-border: #dde1e6;
+$hv-surface: #f7f8fa;
+$hv-text-secondary: #5f6670;
 
 /* ═══ Summary grid — flexible columns for 4–5 cards ═══════════════════════ */
 .ts-page-layout .statistics-cards {
@@ -13,10 +13,10 @@ $hv-text-secondary: #64748b;
 
 /* ═══ Summary stat icon colors ═══════════════════════════════════════════════ */
 .ts-page-layout .stat-card-holiday-total .stat-icon-wrapper { background: $hv-primary; }
-.ts-page-layout .stat-card-holiday-mandatory .stat-icon-wrapper { background: #16a34a; }
-.ts-page-layout .stat-card-holiday-restricted .stat-icon-wrapper { background: #d97706; }
-.ts-page-layout .stat-card-holiday-optional .stat-icon-wrapper { background: #7c3aed; }
-.ts-page-layout .stat-card-holiday-upcoming .stat-icon-wrapper { background: #2563eb; }
+.ts-page-layout .stat-card-holiday-mandatory .stat-icon-wrapper { background: var(--hr-success); }
+.ts-page-layout .stat-card-holiday-restricted .stat-icon-wrapper { background: var(--hr-warning); }
+.ts-page-layout .stat-card-holiday-optional .stat-icon-wrapper { background: var(--hr-navy); }
+.ts-page-layout .stat-card-holiday-upcoming .stat-icon-wrapper { background: var(--hr-navy); }
 
 .ts-page-layout .stat-card-holiday-upcoming .stat-value {
   font-size: 0.9375rem;
@@ -28,17 +28,17 @@ $hv-text-secondary: #64748b;
   display: flex;
   gap: 0.25rem;
   border: 1px solid $hv-border;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   padding: 0.125rem;
   background: #ffffff;
   flex-shrink: 0;
 
   button {
-    border-radius: 0.375rem;
+    border-radius: var(--hr-radius);
     color: $hv-text-secondary;
 
     &.active {
-      background: rgba(37, 99, 235, 0.1);
+      background: rgba(37, 82, 208, 0.1);
       color: $hv-primary;
     }
   }
@@ -52,7 +52,7 @@ $hv-text-secondary: #64748b;
 
   .date-day {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $hv-primary;
     min-width: 2rem;
     text-align: center;
@@ -65,7 +65,7 @@ $hv-text-secondary: #64748b;
     .date-month {
       font-size: 0.8125rem;
       font-weight: 500;
-      color: #334155;
+      color: var(--hr-text-2);
     }
 
     .date-weekday {
@@ -82,7 +82,7 @@ $hv-text-secondary: #64748b;
   .holiday-name {
     font-weight: 600;
     font-size: 0.875rem;
-    color: #0f172a;
+    color: var(--hr-text);
   }
 
   .holiday-desc {
@@ -98,38 +98,38 @@ $hv-text-secondary: #64748b;
 .ts-page-layout .type-badge {
   display: inline-block;
   padding: 0.25rem 0.625rem;
-  border-radius: 0.375rem;
+  border-radius: var(--hr-radius);
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 
   &.type-mandatory {
-    background: #dcfce7;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
+    background: var(--hr-success-soft);
+    color: var(--hr-success);
+    border: 1px solid var(--hr-success-soft);
   }
 
   &.type-restricted {
-    background: #fffbeb;
-    color: #d97706;
-    border: 1px solid #fde68a;
+    background: var(--hr-warning-soft);
+    color: var(--hr-warning);
+    border: 1px solid var(--hr-warning-soft);
   }
 
   &.type-optional {
-    background: #ede9fe;
-    color: #7c3aed;
-    border: 1px solid #ddd6fe;
+    background: var(--hr-navy-soft);
+    color: var(--hr-navy);
+    border: 1px solid var(--hr-navy-muted);
   }
 }
 
 .ts-page-layout .applicable-badge {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--hr-text-2);
 }
 
 .ts-page-layout .half-day-icon {
-  color: #d97706;
+  color: var(--hr-warning);
   font-size: 1.25rem;
   width: 1.25rem;
   height: 1.25rem;
@@ -138,33 +138,33 @@ $hv-text-secondary: #64748b;
 .ts-page-layout .status-badge {
   display: inline-block;
   padding: 0.1875rem 0.5rem;
-  border-radius: 0.375rem;
+  border-radius: var(--hr-radius);
   font-size: 0.6875rem;
   font-weight: 600;
 
   &.upcoming {
-    background: #eff6ff;
+    background: var(--hr-navy-soft);
     color: $hv-primary;
-    border: 1px solid rgba(37, 99, 235, 0.15);
+    border: 1px solid rgba(37, 82, 208, 0.15);
   }
 
   &.past {
-    background: #f1f5f9;
-    color: #94a3b8;
+    background: var(--hr-border-soft);
+    color: var(--hr-text-subtle);
     border: 1px solid $hv-border;
   }
 }
 
 .ts-page-layout .delete-action {
-  color: #dc2626 !important;
+  color: var(--hr-danger) !important;
 }
 
 /* ═══ Timeline view card ═════════════════════════════════════════════════════ */
 .ts-page-layout .timeline-card {
   background: #ffffff;
   border: 1px solid $hv-border;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
   padding: 1.25rem 1.5rem;
 }
 
@@ -178,7 +178,7 @@ $hv-text-secondary: #64748b;
   .month-header {
     font-size: 1rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--hr-text);
     margin: 0 0 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid $hv-border;
@@ -210,9 +210,9 @@ $hv-text-secondary: #64748b;
     position: absolute;
     left: -1.9375rem;
 
-    &.type-mandatory { background: #16a34a; }
-    &.type-restricted { background: #d97706; }
-    &.type-optional { background: #7c3aed; }
+    &.type-mandatory { background: var(--hr-success); }
+    &.type-restricted { background: var(--hr-warning); }
+    &.type-optional { background: var(--hr-navy); }
   }
 
   .timeline-content {
@@ -222,13 +222,13 @@ $hv-text-secondary: #64748b;
     flex: 1;
     background: $hv-surface;
     padding: 1rem;
-    border-radius: 0.75rem;
+    border-radius: var(--hr-radius-lg);
     border: 1px solid $hv-border;
     transition: box-shadow 0.2s, border-color 0.2s;
 
     &:hover {
-      border-color: rgba(37, 99, 235, 0.25);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+      border-color: rgba(37, 82, 208, 0.25);
+      box-shadow: var(--hr-shadow-md);
     }
   }
 
@@ -240,7 +240,7 @@ $hv-text-secondary: #64748b;
 
     .day {
       font-size: 1.375rem;
-      font-weight: 700;
+      font-weight: 600;
       color: $hv-primary;
     }
 
@@ -259,7 +259,7 @@ $hv-text-secondary: #64748b;
       font-weight: 600;
       display: block;
       margin-bottom: 0.25rem;
-      color: #0f172a;
+      color: var(--hr-text);
     }
 
     .timeline-meta {
@@ -270,7 +270,7 @@ $hv-text-secondary: #64748b;
 
     .half-day-tag {
       font-size: 0.6875rem;
-      color: #d97706;
+      color: var(--hr-warning);
       font-weight: 600;
     }
   }
@@ -299,11 +299,11 @@ $hv-text-secondary: #64748b;
       gap: 0.25rem;
       padding: 0.25rem 0.5rem 0.25rem 0.75rem;
       border-radius: 9999px;
-      background: #eff6ff;
+      background: var(--hr-navy-soft);
       color: $hv-primary;
       font-size: 0.75rem;
       font-weight: 600;
-      border: 1px solid rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 82, 208, 0.15);
 
       .chip-remove {
         font-size: 1rem;
@@ -321,7 +321,7 @@ $hv-text-secondary: #64748b;
     max-height: 12.5rem;
     overflow-y: auto;
     border: 1px solid $hv-border;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     margin-bottom: 0.5rem;
     background: #ffffff;
 
@@ -335,7 +335,7 @@ $hv-text-secondary: #64748b;
 
       &:hover { background: $hv-surface; }
 
-      &.selected { background: #eff6ff; }
+      &.selected { background: var(--hr-navy-soft); }
 
       .check-icon {
         font-size: 1.25rem;
@@ -351,7 +351,7 @@ $hv-text-secondary: #64748b;
         .emp-name {
           font-size: 0.8125rem;
           font-weight: 500;
-          color: #0f172a;
+          color: var(--hr-text);
         }
 
         .emp-dept {

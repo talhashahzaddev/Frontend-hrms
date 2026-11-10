@@ -3,14 +3,14 @@
 $brand-blue: #1D7DFC;
 $bg-body: #F8F9FB;
 $bg-card: #FFFFFF;
-$text-primary: #0f172a;
-$text-secondary: #64748b;
-$text-body: #475569;
-$border: #e2e8f0;
+$text-primary: #1f2328;
+$text-secondary: #5f6670;
+$text-body: #3d434b;
+$border: #dde1e6;
 
 // Mixins
 @mixin shadow-sm {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--hr-shadow-md);
 }
 
 * {
@@ -57,7 +57,7 @@ $border: #e2e8f0;
 .logo-box {
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     overflow: hidden;
 
     img {
@@ -68,7 +68,7 @@ $border: #e2e8f0;
 }
 
 .company-name {
-    font-weight: 700;
+    font-weight: 600;
     font-size: 18px;
     color: $text-primary;
 }
@@ -102,7 +102,7 @@ $border: #e2e8f0;
     cursor: pointer;
 
     &:hover {
-        background: #e2e8f0;
+        background: var(--hr-border);
     }
 }
 
@@ -136,7 +136,7 @@ $border: #e2e8f0;
     }
 
     .separator {
-        color: #cbd5e1;
+        color: var(--hr-border-strong);
     }
 
     .current {
@@ -162,7 +162,7 @@ $border: #e2e8f0;
 
 .job-title {
     font-size: 36px;
-    font-weight: 800;
+    font-weight: 600;
     color: $text-primary;
     margin: 0 0 16px;
     line-height: 1.2;
@@ -212,14 +212,14 @@ $border: #e2e8f0;
         border-radius: 9999px;
         font-size: 13px;
         font-weight: 600;
-        background: #EFF6FF;
+        background: var(--hr-navy-soft);
         color: $brand-blue;
         border: 1px solid rgba(29, 125, 252, 0.1);
     }
 
     .badge-active {
-        background: #ECFDF5;
-        color: #047857;
+        background: var(--hr-success-soft);
+        color: var(--hr-success-ink);
         border-color: rgba(4, 120, 87, 0.1);
     }
 }
@@ -240,7 +240,7 @@ $border: #e2e8f0;
     color: #FFF;
     border: none;
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
@@ -258,9 +258,9 @@ $border: #e2e8f0;
 .btn-secondary {
     background-color: #FFF;
     color: $text-primary;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--hr-border-strong);
     padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
@@ -271,7 +271,7 @@ $border: #e2e8f0;
     gap: 8px;
 
     &:hover {
-        background-color: #f8fafc;
+        background-color: var(--hr-surface-2);
     }
 
     mat-icon {
@@ -301,7 +301,7 @@ $border: #e2e8f0;
 
         h2 {
             font-size: 24px;
-            font-weight: 700;
+            font-weight: 600;
             color: $text-primary;
             margin: 0 0 20px;
         }
@@ -328,7 +328,7 @@ $border: #e2e8f0;
 
     ::ng-deep strong {
         color: $text-primary;
-        font-weight: 700;
+        font-weight: 600;
     }
 
     &.custom-list {
@@ -351,7 +351,7 @@ $border: #e2e8f0;
                 top: 4px;
                 width: 20px;
                 height: 20px;
-                background-color: #EFF6FF;
+                background-color: var(--hr-navy-soft);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -379,14 +379,14 @@ $border: #e2e8f0;
 
     .summary-card {
         background: $bg-card;
-        border-radius: 12px;
+        border-radius: var(--hr-radius-lg);
         padding: 32px;
         @include shadow-sm;
         border: 1px solid $border;
 
         h3 {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 600;
             color: $text-primary;
             margin: 0 0 24px;
             padding-bottom: 20px;
@@ -406,7 +406,7 @@ $border: #e2e8f0;
         gap: 16px;
 
         mat-icon {
-            color: #94a3b8;
+            color: var(--hr-text-subtle);
             font-size: 22px;
             width: 22px;
             height: 22px;
@@ -472,14 +472,14 @@ $border: #e2e8f0;
         font-size: 64px;
         width: 64px;
         height: 64px;
-        color: #cbd5e1;
+        color: var(--hr-border-strong);
         margin-bottom: 24px;
     }
 
     h2,
     h3 {
         font-size: 24px;
-        font-weight: 700;
+        font-weight: 600;
         color: $text-primary;
         margin: 0 0 12px;
     }
@@ -507,7 +507,7 @@ $border: #e2e8f0;
 
     .powered-by {
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 600;
         color: $text-secondary;
         letter-spacing: 0.12em;
     }
@@ -542,7 +542,7 @@ $border: #e2e8f0;
         align-items: center;
         justify-content: center;
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 600;
         text-decoration: none;
         color: #fff;
         background-color: $text-secondary;

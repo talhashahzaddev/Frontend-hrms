@@ -1,0 +1,412 @@
+// ═══ Auth shell — shared by login, forgot, reset, set-password (Phase 3) ═══
+// Light corporate split screen: soft grey illustration panel on the left,
+// white form panel on the right. Bordered inputs, one blue accent.
+// Each screen's component stylesheet does `@use '../../auth-shell';`
+// (rules compile inside that component, so encapsulation still applies).
+// See docs/UI_REDESIGN.md.
+
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #fff;
+  font-family: var(--hr-font);
+  color: var(--hr-text);
+}
+
+// ── Page: two columns ──────────────────────────────────────────────────
+.login-page,
+.forgot-page,
+.reset-page {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+// ── Left: illustration panel ───────────────────────────────────────────
+.left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 48px 56px;
+  background: #f4f6fa;
+  border-right: 1px solid var(--hr-shell-line);
+  position: relative;
+  overflow: hidden;
+}
+
+// The column border replaces the floating divider line
+.panel-divider { display: none; }
+
+.slideshow-images {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 300px;
+  flex-shrink: 0;
+}
+
+.slide-img {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+
+  &.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  &.prev { opacity: 0; transform: translateX(-24px); }
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+}
+
+.slideshow-text {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  min-height: 80px;
+}
+
+.slide-text-item {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+  pointer-events: none;
+
+  &.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+}
+
+.slide-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--hr-text);
+}
+
+.slide-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--hr-text-muted);
+}
+
+.slide-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--hr-border-strong);
+  cursor: pointer;
+  transition: width 0.25s ease, background-color 0.25s ease;
+
+  &.active {
+    width: 18px;
+    background: var(--hr-primary);
+  }
+}
+
+// ── Right: form panel ──────────────────────────────────────────────────
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px;
+  background: #fff;
+  overflow-y: auto;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+// Brand: logo + name in the accent color (no serif, no gradient text)
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.brand-logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--hr-primary);
+}
+
+.login-header {
+  margin-bottom: 28px;
+  width: 100%;
+  text-align: left;
+}
+
+.login-title {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--hr-text);
+}
+
+.login-subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--hr-text-muted);
+}
+
+// ── Form ───────────────────────────────────────────────────────────────
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--hr-text-2);
+
+  .required { margin-left: 2px; color: var(--hr-danger); }
+}
+
+.form-field {
+  width: 100%;
+}
+
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 24px;
+  width: 100%;
+}
+
+// Primary action
+.login-button {
+  width: 100%;
+  height: 44px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--hr-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+
+  &:hover:not(:disabled) { background: var(--hr-primary-hover); }
+  &:focus-visible { outline: none; box-shadow: var(--hr-focus); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-spinner {
+  flex-shrink: 0;
+  ::ng-deep circle { stroke: #fff !important; }
+}
+
+.signup-text {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  color: var(--hr-text-muted);
+}
+
+.signup-link {
+  margin-left: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--hr-primary);
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 2px; border-radius: 2px; }
+}
+
+.forgot-link {
+  min-width: 0;
+  padding: 0 4px !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--hr-primary) !important;
+}
+
+// Status notices
+.verification-notice {
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #ecd9a6;
+  border-radius: 6px;
+  background: var(--hr-warning-soft);
+  color: var(--hr-warning-ink);
+  text-align: left;
+
+  p { margin: 0 0 6px; font-size: 13px; line-height: 1.5; }
+  button { padding: 0 !important; color: var(--hr-primary) !important; font-weight: 500; }
+}
+
+// ── Material inputs: bordered 44px fields ──────────────────────────────
+:host ::ng-deep .form-field {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border: none !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 44px;
+    padding: 0 12px !important;
+    border: 1px solid var(--hr-border);
+    border-radius: 6px !important;
+    background: #fff !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  &:hover .mat-mdc-text-field-wrapper { border-color: var(--hr-border-strong); }
+
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    border-color: var(--hr-primary);
+    box-shadow: var(--hr-focus);
+  }
+
+  &.ng-invalid.ng-touched .mat-mdc-text-field-wrapper {
+    border-color: var(--hr-danger);
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 100%;
+    align-items: center;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: unset !important;
+    padding: 0 !important;
+    border-top: none !important;
+  }
+
+  .mdc-floating-label,
+  .mat-mdc-floating-label { display: none !important; }
+
+  input.mat-mdc-input-element {
+    padding: 0 !important;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--hr-text);
+    background: transparent;
+    caret-color: var(--hr-primary);
+
+    &::placeholder { color: var(--hr-text-subtle); }
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    min-height: 0;
+    padding: 0 !important;
+    margin-top: 4px !important;
+  }
+
+  .mat-mdc-form-field-error {
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--hr-danger);
+  }
+
+  .mat-mdc-form-field-icon-prefix mat-icon,
+  .mat-mdc-form-field-icon-suffix mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--hr-text-subtle);
+  }
+
+  // Show/hide password: a plain icon, no round ripple
+  .mat-mdc-form-field-icon-suffix button[mat-icon-button] {
+    --mdc-icon-button-state-layer-size: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    margin-right: -6px;
+    background: transparent !important;
+
+    .mat-mdc-button-persistent-ripple,
+    .mat-mdc-button-ripple,
+    .mat-ripple,
+    .mdc-icon-button__ripple { display: none !important; }
+
+    &:hover mat-icon { color: var(--hr-text-muted); }
+  }
+}
+
+:host ::ng-deep .remember-checkbox {
+  .mdc-form-field { font-size: 13px; color: var(--hr-text-2); }
+  .mdc-checkbox__background { border-radius: 3px; }
+}
+
+input::-ms-reveal,
+input::-ms-clear { display: none; }
+
+// ── Responsive: phones drop the illustration panel ─────────────────────
+@media (max-width: 860px) {
+  .left-panel { display: none; }
+  .right-panel { padding: 32px 24px; align-items: flex-start; }
+}

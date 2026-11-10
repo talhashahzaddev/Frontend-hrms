@@ -2,7 +2,7 @@
 
   <!-- Brand / organization -->
   <div class="sidebar-header">
-    <div class="organization-info">
+    <div class="organization-info" *ngIf="!collapsed || !showCollapseToggle">
       <div class="org-logo" aria-hidden="true">
         <mat-icon class="org-icon">corporate_fare</mat-icon>
       </div>
@@ -11,6 +11,15 @@
         <div class="org-sub">HR workspace</div>
       </div>
     </div>
+
+    <!-- Collapse / expand (desktop). In the rail it replaces the logo. -->
+    <button type="button" class="collapse-toggle" *ngIf="showCollapseToggle"
+      (click)="collapseToggle.emit()"
+      [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      [matTooltip]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      matTooltipPosition="right">
+      <mat-icon>{{ collapsed ? 'left_panel_open' : 'left_panel_close' }}</mat-icon>
+    </button>
   </div>
 
   <!-- Navigation -->
@@ -113,6 +122,7 @@
         <span class="user-name">{{ getUserDisplayName() }}</span>
         <span class="user-role">{{ currentUser.roleName }}</span>
       </span>
+      <mat-icon class="user-card-chevron" *ngIf="!collapsed" aria-hidden="true">chevron_right</mat-icon>
     </a>
   </div>
 </div>

@@ -7,17 +7,17 @@
   margin-top: 8px;
 }
 
-.att-file-icon { font-size: 1.25rem; color: #2563eb; flex-shrink: 0; }
+.att-file-icon { font-size: 1.25rem; color: var(--hr-navy); flex-shrink: 0; }
 
 .att-retry-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #2563eb;
+  color: var(--hr-navy);
   display: flex;
   align-items: center;
   padding: 0;
-  &:hover { color: #1d4ed8; }
+  &:hover { color: var(--hr-navy-hover); }
 }
 
 @keyframes spin {

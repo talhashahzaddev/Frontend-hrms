@@ -1,16 +1,16 @@
 // Attendance Module — shared dialog design system (create-shift reference)
-$ad-primary: #2563eb;
-$ad-primary-hover: #1d4ed8;
-$ad-text-primary: #0f172a;
-$ad-text-secondary: #64748b;
-$ad-text-label: #475569;
-$ad-text-muted: #94a3b8;
-$ad-border: #e2e8f0;
-$ad-border-hover: #94a3b8;
-$ad-surface: #f8fafc;
+$ad-primary: #2552d0;
+$ad-primary-hover: #1e44ae;
+$ad-text-primary: #1f2328;
+$ad-text-secondary: #5f6670;
+$ad-text-label: #3d434b;
+$ad-text-muted: #8b929b;
+$ad-border: #dde1e6;
+$ad-border-hover: #8b929b;
+$ad-surface: #f7f8fa;
 $ad-input-bg: #ffffff;
-$ad-danger: #dc2626;
-$ad-danger-bg: #fef2f2;
+$ad-danger: #b42318;
+$ad-danger-bg: #fbeae9;
 
 @mixin ad-scroll-host {
   display: flex;
@@ -28,10 +28,10 @@ $ad-danger-bg: #fef2f2;
     ::ng-deep #{$panel} .mat-mdc-dialog-container,
     ::ng-deep #{$panel} .mdc-dialog__surface {
       padding: 0 !important;
-      border-radius: 0.75rem !important;
+      border-radius: var(--hr-radius-lg) !important;
       overflow: hidden !important;
       max-height: 90vh !important;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+      box-shadow: var(--hr-shadow-lg) !important;
     }
 
     ::ng-deep #{$panel} .mdc-dialog__surface {
@@ -60,7 +60,7 @@ $ad-danger-bg: #fef2f2;
   border-bottom: 1px solid $ad-border;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
 
   .header-left,
   .title-section {
@@ -77,8 +77,8 @@ $ad-danger-bg: #fef2f2;
   .icon-wrapper {
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 0.75rem;
-    background: #eff6ff;
+    border-radius: var(--hr-radius-lg);
+    background: var(--hr-navy-soft);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,7 +101,7 @@ $ad-danger-bg: #fef2f2;
   .title {
     margin: 0;
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $ad-text-primary;
   }
 
@@ -150,7 +150,7 @@ $ad-danger-bg: #fef2f2;
   margin-bottom: 0.5rem;
   line-height: 1.4;
 
-  .required { color: #ef4444; margin-left: 2px; }
+  .required { color: var(--hr-danger); margin-left: 2px; }
 
   .field-hint {
     display: block;
@@ -169,7 +169,7 @@ $ad-danger-bg: #fef2f2;
   ::ng-deep {
     .mat-mdc-text-field-wrapper {
       background: $ad-input-bg !important;
-      border-radius: 0.5rem !important;
+      border-radius: var(--hr-radius) !important;
       padding: 0 !important;
       border: 1px solid $ad-border !important;
       transition: border-color 0.2s, box-shadow 0.2s;
@@ -211,7 +211,7 @@ $ad-danger-bg: #fef2f2;
 
   &.mat-focused ::ng-deep .mat-mdc-text-field-wrapper {
     border-color: $ad-primary !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: none;
   }
 }
 
@@ -236,7 +236,7 @@ $ad-danger-bg: #fef2f2;
     min-width: 100px;
     height: 2.5rem !important;
     line-height: 1 !important;
-    border-radius: 0.5rem !important;
+    border-radius: var(--hr-radius) !important;
     font-size: 0.875rem !important;
     font-weight: 600 !important;
     white-space: nowrap;
@@ -246,7 +246,7 @@ $ad-danger-bg: #fef2f2;
     padding: 0 1.25rem !important;
 
     &:hover {
-      background: #f1f5f9 !important;
+      background: var(--hr-border-soft) !important;
       color: $ad-text-primary !important;
     }
   }
@@ -263,7 +263,7 @@ $ad-danger-bg: #fef2f2;
     min-width: 100px;
     height: 2.5rem !important;
     line-height: 1 !important;
-    border-radius: 0.5rem !important;
+    border-radius: var(--hr-radius) !important;
     font-size: 0.875rem !important;
     font-weight: 600 !important;
     background: $ad-primary !important;
@@ -275,7 +275,7 @@ $ad-danger-bg: #fef2f2;
 
     &:hover:not([disabled]) {
       background: $ad-primary-hover !important;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
+      box-shadow: var(--hr-shadow-md) !important;
     }
 
     &[disabled] {
@@ -295,29 +295,29 @@ $ad-danger-bg: #fef2f2;
     background: $ad-danger !important;
 
     &:hover:not([disabled]) {
-      background: #b91c1c !important;
-      box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2) !important;
+      background: var(--hr-danger-ink) !important;
+      box-shadow: var(--hr-shadow-md) !important;
     }
   }
 }
 
 ::ng-deep .mat-mdc-select-panel {
-  border-radius: 0.625rem !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10) !important;
+  border-radius: var(--hr-radius-lg) !important;
+  box-shadow: var(--hr-shadow-lg) !important;
   border: 1px solid $ad-border !important;
 
   .mat-mdc-option {
-    border-radius: 0.375rem !important;
+    border-radius: var(--hr-radius) !important;
     margin: 2px 6px !important;
     font-size: 0.875rem !important;
     height: 40px !important;
     min-height: 40px !important;
 
-    &:hover { background: #eff6ff !important; }
+    &:hover { background: var(--hr-navy-soft) !important; }
 
     &.mat-mdc-option-active,
     &.mdc-list-item--selected {
-      background: #dbeafe !important;
+      background: var(--hr-navy-soft) !important;
       color: $ad-primary !important;
     }
   }
@@ -334,7 +334,7 @@ textarea.form-control {
   padding: 0.625rem 0.875rem;
   background: $ad-input-bg;
   border: 1px solid $ad-border;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   font-size: 0.875rem;
   color: $ad-text-primary;
   outline: none;
@@ -346,7 +346,7 @@ textarea.form-control {
 
   &:focus {
     border-color: $ad-primary;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: none;
   }
 }
 
@@ -382,8 +382,8 @@ textarea.form-control {
   display: flex;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: #eff6ff;
-  border-radius: 0.5rem;
+  background: var(--hr-navy-soft);
+  border-radius: var(--hr-radius);
   border-left: 4px solid $ad-primary;
 
   mat-icon, .info-icon { color: $ad-primary; flex-shrink: 0; }
@@ -399,7 +399,7 @@ textarea.form-control {
 .employee-info {
   background: $ad-input-bg;
   padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   border: 1px solid $ad-border;
   margin-bottom: 1rem;
 

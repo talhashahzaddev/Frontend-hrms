@@ -4,27 +4,27 @@
 // Filter Card (add after .page-header styles)
 .filter-card {
   margin-bottom: 24px;
-  border-radius: 16px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border-radius: var(--hr-radius-xl) !important;
+  box-shadow: var(--hr-shadow-md) !important;
   border: none !important;
   overflow: hidden;
   background: white;
 
   ::ng-deep mat-card-header {
     padding: 20px 24px 16px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
-    border-bottom: 1px solid #e2e8f0;
+    background: rgba(37, 82, 208, 0.05);
+    border-bottom: 1px solid var(--hr-border);
 
     mat-card-title {
       font-size: 18px;
-      font-weight: 700;
-      color: #1e293b;
+      font-weight: 600;
+      color: var(--hr-text);
       margin: 0 0 4px;
     }
 
     mat-card-subtitle {
       font-size: 14px;
-      color: #64748b;
+      color: var(--hr-text-muted);
       margin: 0;
     }
   }
@@ -54,7 +54,7 @@
         button {
           height: 48px;
           padding: 0 24px !important;
-          border-radius: 12px !important;
+          border-radius: var(--hr-radius-lg) !important;
           font-size: 15px !important;
           font-weight: 600 !important;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -64,13 +64,13 @@
           }
 
           &[color="primary"] {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+            background: var(--hr-navy) !important;
             color: white !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+            box-shadow: var(--hr-shadow-md) !important;
 
             &:hover:not(:disabled) {
               transform: translateY(-2px);
-              box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
+              box-shadow: var(--hr-shadow-lg) !important;
             }
           }
 
@@ -89,7 +89,7 @@
   .hint-text {
     margin-top: 8px;
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
     font-style: italic;
   }
 }
@@ -121,7 +121,7 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  background: #f8fafc;
+  background: var(--hr-surface-2);
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
 
@@ -139,9 +139,9 @@
       .icon-box {
         width: 3rem;
         height: 3rem;
-        border-radius: 0.75rem;
-        background-color: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+        border-radius: var(--hr-radius-lg);
+        background-color: rgba(37, 82, 208, 0.1);
+        color: var(--hr-navy);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -151,14 +151,14 @@
 
       .page-title {
         font-size: 1.75rem;
-        font-weight: 700;
+        font-weight: 600;
         margin: 0;
         line-height: 1.25;
-        color: #0f172a;
+        color: var(--hr-text);
       }
 
       .page-subtitle {
-        color: #64748b;
+        color: var(--hr-text-muted);
         font-size: 0.875rem;
         margin: 0;
       }
@@ -169,18 +169,18 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #2563eb;
+        background-color: var(--hr-navy);
         color: white;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
-        font-weight: 700;
+        font-weight: 600;
         border: none;
         cursor: pointer;
         transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        box-shadow: var(--hr-shadow-md);
 
-        &:hover:not(:disabled) { background-color: #1d4ed8; }
+        &:hover:not(:disabled) { background-color: var(--hr-navy-hover); }
         &:disabled { opacity: 0.6; cursor: not-allowed; }
 
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
@@ -196,8 +196,8 @@
     justify-content: center;
     padding: 80px 24px;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: var(--hr-radius-xl);
+    box-shadow: var(--hr-shadow-md);
 
     mat-spinner {
       margin-bottom: 24px;
@@ -205,7 +205,7 @@
 
     p {
       font-size: 16px;
-      color: #64748b;
+      color: var(--hr-text-muted);
       font-weight: 500;
     }
   }
@@ -218,40 +218,40 @@
     justify-content: center;
     padding: 80px 24px;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: var(--hr-radius-xl);
+    box-shadow: var(--hr-shadow-md);
     text-align: center;
 
     mat-icon {
       font-size: 120px;
       width: 120px;
       height: 120px;
-      color: #e2e8f0;
+      color: var(--hr-border);
       margin-bottom: 24px;
     }
 
     h3 {
       font-size: 24px;
-      font-weight: 700;
-      color: #334155;
+      font-weight: 600;
+      color: var(--hr-text-2);
       margin: 0 0 12px;
     }
 
     p {
       font-size: 16px;
-      color: #64748b;
+      color: var(--hr-text-muted);
       margin: 0 0 8px;
       max-width: 500px;
 
       strong {
-        color: #2563eb;
+        color: var(--hr-navy);
         font-weight: 600;
       }
     }
 
     .hint-text {
       font-size: 14px;
-      color: #94a3b8;
+      color: var(--hr-text-subtle);
       font-style: italic;
       margin-bottom: 24px;
     }
@@ -260,7 +260,7 @@
       margin-top: 16px;
       height: 48px;
       padding: 0 32px !important;
-      border-radius: 12px !important;
+      border-radius: var(--hr-radius-lg) !important;
       font-size: 15px !important;
       font-weight: 600 !important;
 
@@ -280,22 +280,22 @@
 
     .snapshot-card {
       max-width: none;
-      border-radius: 16px !important;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
-      border: 1px solid #e2e8f0 !important;
+      border-radius: var(--hr-radius-xl) !important;
+      box-shadow: var(--hr-shadow-md) !important;
+      border: 1px solid var(--hr-border) !important;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
       overflow: hidden;
 
       &:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-        border-color: #2563eb !important;
+        box-shadow: var(--hr-shadow-lg) !important;
+        border-color: var(--hr-navy) !important;
       }
 
       ::ng-deep mat-card-header {
         padding: 16px 20px !important;
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
-        border-bottom: 1px solid #e2e8f0;
+        background: rgba(37, 82, 208, 0.05);
+        border-bottom: 1px solid var(--hr-border);
 
         .snapshot-header-content {
           display: flex;
@@ -308,15 +308,15 @@
 
             .snapshot-name {
               font-size: 20px;
-              font-weight: 700;
-              color: #1e293b;
+              font-weight: 600;
+              color: var(--hr-text);
               margin: 0 0 6px;
               line-height: 1.3;
             }
 
             .snapshot-period {
               font-size: 14px;
-              color: #64748b;
+              color: var(--hr-text-muted);
               font-weight: 500;
               margin: 0;
               display: flex;
@@ -327,7 +327,7 @@
 
           .status-chip {
             height: 32px !important;
-            border-radius: 16px !important;
+            border-radius: var(--hr-radius-xl) !important;
             font-size: 13px !important;
             font-weight: 600 !important;
             padding: 0 14px !important;
@@ -342,13 +342,13 @@
             }
 
             &.status-draft {
-              background: #fef3c7 !important;
-              color: #92400e !important;
+              background: var(--hr-warning-soft) !important;
+              color: var(--hr-warning-ink) !important;
             }
 
             &.status-finalized {
-              background: #d1fae5 !important;
-              color: #065f46 !important;
+              background: var(--hr-success-soft) !important;
+              color: var(--hr-success-ink) !important;
             }
           }
         }
@@ -367,38 +367,38 @@
             align-items: center;
             gap: 10px;
             padding: 10px;
-            background: #f8fafc;
-            border-radius: 12px;
+            background: var(--hr-surface-2);
+            border-radius: var(--hr-radius-lg);
             transition: background 0.2s;
 
             &:hover {
-              background: #f1f5f9;
+              background: var(--hr-border-soft);
             }
 
             .stat-icon {
               font-size: 28px;
               width: 28px;
               height: 28px;
-              color: #64748b;
+              color: var(--hr-text-muted);
 
               &.attendance {
-                color: #2563eb;
+                color: var(--hr-navy);
               }
 
               &.present {
-                color: #10b981;
+                color: var(--hr-success);
               }
 
               &.absent {
-                color: #ef4444;
+                color: var(--hr-danger);
               }
 
               &.late {
-                color: #f59e0b;
+                color: var(--hr-warning);
               }
 
               &.hours {
-                color: #3b82f6;
+                color: var(--hr-navy);
               }
             }
 
@@ -409,14 +409,14 @@
 
               .stat-value {
                 font-size: 20px;
-                font-weight: 700;
-                color: #1e293b;
+                font-weight: 600;
+                color: var(--hr-text);
                 line-height: 1;
               }
 
               .stat-label {
                 font-size: 12px;
-                color: #64748b;
+                color: var(--hr-text-muted);
                 font-weight: 500;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
@@ -428,21 +428,21 @@
 
       ::ng-deep mat-card-actions {
         padding: 12px 20px !important;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--hr-border);
         background: white;
         display: flex;
         gap: 8px;
         justify-content: flex-end;
 
         button {
-          border-radius: 8px !important;
+          border-radius: var(--hr-radius) !important;
           font-size: 14px !important;
           font-weight: 600 !important;
           transition: all 0.2s !important;
 
           &[color="primary"] {
             &:hover {
-              background: rgba(37, 99, 235, 0.1) !important;
+              background: rgba(37, 82, 208, 0.1) !important;
             }
           }
 
@@ -497,14 +497,14 @@
   justify-content: center;
   padding: 80px 24px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: var(--hr-radius-xl);
+  box-shadow: var(--hr-shadow-md);
 
   mat-icon {
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
     margin-bottom: 16px;
   }
 
@@ -512,13 +512,13 @@
     margin: 0 0 8px;
     font-size: 20px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--hr-text);
   }
 
   p {
     margin: 0;
     font-size: 15px;
-    color: #64748b;
+    color: var(--hr-text-muted);
   }
 }
 
@@ -587,16 +587,16 @@
 /* -- Snapshot cards � clean minimalist redesign -- */
 .snap-card {
   background: #fff;
-  border-radius: 14px;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid #eef0f3;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  box-shadow: var(--hr-shadow-md);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.18s, transform 0.18s;
 
   &:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+    box-shadow: var(--hr-shadow-lg);
     transform: translateY(-2px);
   }
 
@@ -613,7 +613,7 @@
     .snap-month-icon {
       width: 38px;
       height: 38px;
-      border-radius: 10px;
+      border-radius: var(--hr-radius-lg);
       background: #f0f0fe;
       display: flex;
       align-items: center;
@@ -624,7 +624,7 @@
         font-size: 19px;
         width: 19px;
         height: 19px;
-        color: #2563eb;
+        color: var(--hr-navy);
       }
     }
 
@@ -637,8 +637,8 @@
 
       .snap-month {
         font-size: 13.5px;
-        font-weight: 700;
-        color: #0f172a;
+        font-weight: 600;
+        color: var(--hr-text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -661,13 +661,13 @@
       font-weight: 600;
       padding: 3px 9px;
       border-radius: 99px;
-      background: #fef3c7;
-      color: #b45309;
+      background: var(--hr-warning-soft);
+      color: var(--hr-warning-ink);
       letter-spacing: 0.02em;
 
       &.finalized {
-        background: #d1fae5;
-        color: #065f46;
+        background: var(--hr-success-soft);
+        color: var(--hr-success-ink);
       }
     }
   }
@@ -699,8 +699,8 @@
 
       .ss-val {
         font-size: 20px;
-        font-weight: 700;
-        color: #0f172a;
+        font-weight: 600;
+        color: var(--hr-text);
         line-height: 1;
 
         &.ss-name-val {
@@ -727,10 +727,10 @@
         word-break: break-word;
       }
 
-      &.accent-blue  .ss-val { color: #4f46e5; }
-      &.accent-green .ss-val { color: #059669; }
-      &.accent-red   .ss-val { color: #dc2626; }
-      &.accent-teal  .ss-val { color: #0891b2; }
+      &.accent-blue  .ss-val { color: var(--hr-navy); }
+      &.accent-green .ss-val { color: var(--hr-success); }
+      &.accent-red   .ss-val { color: var(--hr-danger); }
+      &.accent-teal  .ss-val { color: var(--hr-navy); }
     }
   }
 
@@ -740,14 +740,14 @@
     gap: 8px;
     padding: 14px 16px;
     justify-content: flex-end;
-    background: #fafafa;
+    background: var(--hr-surface-2);
 
     .snap-btn {
       display: inline-flex;
       align-items: center;
       gap: 4px;
       padding: 5px 12px;
-      border-radius: 7px;
+      border-radius: var(--hr-radius);
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -761,14 +761,14 @@
       &.outline {
         background: #fff;
         border: 1px solid #e4e6ea;
-        color: #334155;
+        color: var(--hr-text-2);
         &:hover { background: #f4f5f7; }
       }
 
       &.filled {
-        background: #0f172a;
+        background: var(--hr-text);
         color: #fff;
-        &:hover { background: #1e293b; }
+        &:hover { background: var(--hr-text); }
       }
     }
   }

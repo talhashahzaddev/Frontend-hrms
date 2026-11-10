@@ -1,12 +1,12 @@
 .calendar-wrapper {
   background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border-radius: var(--hr-radius-xl);
+  border: 1px solid var(--hr-border);
   padding: 24px;
   font-family: 'Inter', 'Roboto', sans-serif;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 /* ── Header ── */
@@ -19,8 +19,8 @@
 
 .cal-title {
   font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 600;
+  color: var(--hr-text);
   margin: 0;
 }
 
@@ -33,12 +33,12 @@
   width: 28px !important;
   height: 28px !important;
   line-height: 28px !important;
-  border-radius: 6px !important;
-  color: #64748b !important;
+  border-radius: var(--hr-radius) !important;
+  color: var(--hr-text-muted) !important;
 
   &:hover {
-    background: #f1f5f9 !important;
-    color: #0f172a !important;
+    background: var(--hr-border-soft) !important;
+    color: var(--hr-text) !important;
   }
 
   .mat-icon {
@@ -58,8 +58,8 @@
 .weekday {
   text-align: center;
   font-size: 10px;
-  font-weight: 700;
-  color: #94a3b8;
+  font-weight: 600;
+  color: var(--hr-text-subtle);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 4px 0;
@@ -91,11 +91,11 @@
   }
 
   &.is-today .day-number {
-    border: 2px solid #2563eb;
-    background: #eef2ff;
-    color: #4f46e5;
-    font-weight: 700;
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    border: 2px solid var(--hr-navy);
+    background: var(--hr-navy-soft);
+    color: var(--hr-navy);
+    font-weight: 600;
+    box-shadow: none;
   }
 }
 
@@ -109,12 +109,12 @@
   border-radius: 50%;
   font-size: 13px;
   font-weight: 500;
-  color: #1e293b;
+  color: var(--hr-text);
   border: 2px solid transparent;
   transition: background 0.15s ease;
 
   &:hover {
-    background: #f1f5f9;
+    background: var(--hr-border-soft);
   }
 }
 
@@ -126,13 +126,13 @@
   display: block;
   background: transparent;
 
-  &.dot-present  { background: #22c55e; }
-  &.dot-absent   { background: #ef4444; }
-  &.dot-late     { background: #f97316; }
-  &.dot-leave    { background: #3b82f6; }
-  &.dot-half     { background: #eab308; }
+  &.dot-present  { background: var(--hr-success); }
+  &.dot-absent   { background: var(--hr-danger); }
+  &.dot-late     { background: var(--hr-warning); }
+  &.dot-leave    { background: var(--hr-navy); }
+  &.dot-half     { background: var(--hr-warning); }
   &.dot-weekend  { background: transparent; }
-  &.dot-holiday  { background: #a855f7; }
+  &.dot-holiday  { background: var(--hr-navy); }
   &.dot-norecord { background: transparent; }
 }
 
@@ -140,7 +140,7 @@
 .cal-legend {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--hr-border-soft);
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -152,7 +152,7 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--hr-text-muted);
 }
 
 .dot {
@@ -162,9 +162,9 @@
   display: inline-block;
   flex-shrink: 0;
 
-  &.dot-present { background: #22c55e; }
-  &.dot-absent  { background: #ef4444; }
-  &.dot-late    { background: #f97316; }
-  &.dot-leave   { background: #3b82f6; }
-  &.dot-half    { background: #eab308; }
+  &.dot-present { background: var(--hr-success); }
+  &.dot-absent  { background: var(--hr-danger); }
+  &.dot-late    { background: var(--hr-warning); }
+  &.dot-leave   { background: var(--hr-navy); }
+  &.dot-half    { background: var(--hr-warning); }
 }

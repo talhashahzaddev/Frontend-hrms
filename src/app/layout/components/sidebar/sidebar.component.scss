@@ -1,13 +1,7 @@
-// ═══ Sidebar — deep navy navigation ════════════════════════════════════════
-$navy: #172554;
-$navy-deep: #0f1a3d;
-$blue: #2563eb;
-$ink: rgba(255, 255, 255, 0.92);
-$ink-2: rgba(255, 255, 255, 0.72);
-$ink-3: rgba(255, 255, 255, 0.5);
-$ink-4: rgba(255, 255, 255, 0.36);
-$hover: rgba(255, 255, 255, 0.07);
-$line: rgba(255, 255, 255, 0.08);
+// ═══ Sidebar — light corporate navigation ═══════════════════════════════════
+// White panel, thin borders, outlined grey icons; the active item is a soft
+// blue pill with a thin blue border. No gradients or shadows.
+// See docs/UI_REDESIGN.md.
 $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 :host {
@@ -15,64 +9,80 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
 }
 
+// Thin outlined line icons (Material Symbols is loaded in index.html)
+@mixin line-icon($size: 20px) {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  font-size: $size;
+  width: $size;
+  height: $size;
+  line-height: 1;
+}
+
 .sidebar-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(120% 60% at 0% 0%, rgba(37, 99, 235, 0.22) 0%, transparent 60%),
-    linear-gradient(180deg, $navy 0%, $navy-deep 100%);
-  color: $ink-2;
+  background: var(--hr-shell);
+  border-right: 1px solid var(--hr-shell-line);
+  color: var(--hr-text-2);
   overflow-x: hidden;
+  font-family: var(--hr-font);
 
-  // Material list tokens: neutral, we draw our own states
+  // Material list tokens: neutral, states drawn below
   --mat-list-list-item-one-line-container-height: 40px;
-  --mat-list-list-item-label-text-color: #{$ink-2};
-  --mat-list-list-item-hover-label-text-color: #{$ink};
-  --mat-list-list-item-focus-label-text-color: #{$ink};
-  --mat-list-list-item-leading-icon-color: #{$ink-3};
-  --mat-list-list-item-hover-leading-icon-color: #{$ink};
+  --mat-list-list-item-label-text-color: var(--hr-text-2);
+  --mat-list-list-item-hover-label-text-color: var(--hr-text);
+  --mat-list-list-item-focus-label-text-color: var(--hr-text);
+  --mat-list-list-item-leading-icon-color: var(--hr-text-muted);
+  --mat-list-list-item-hover-leading-icon-color: var(--hr-text);
   --mat-list-list-item-hover-state-layer-opacity: 0;
   --mat-list-list-item-focus-state-layer-opacity: 0;
-  --mat-list-list-item-container-shape: 8px;
+  --mat-list-list-item-container-shape: 6px;
+  // Material adds 16px gaps around list icons; our own spacing handles it so
+  // single items and expandable groups line up exactly.
+  --mat-list-list-item-leading-icon-start-space: 0;
+  --mat-list-list-item-leading-icon-end-space: 0;
+  --mat-list-list-item-leading-icon-size: 20px;
   --mat-expansion-header-hover-state-layer-color: transparent;
   --mat-expansion-header-focus-state-layer-color: transparent;
   --mat-expansion-container-background-color: transparent;
-  --mat-expansion-container-text-color: #{$ink-2};
+  --mat-expansion-container-text-color: var(--hr-text-2);
 }
 
 // ── Brand ──
 .sidebar-header {
-  height: 64px;
+  height: var(--hr-header-h);
   flex: none;
-  padding: 0 18px;
+  margin: 0 16px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid $line;
+  border-bottom: 1px solid var(--hr-shell-line);
 }
 
 .organization-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
 }
 
 .org-logo {
   flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #3b82f6 0%, $blue 55%, #1e40af 100%);
-  box-shadow: 0 6px 16px -6px rgba(37, 99, 235, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: var(--hr-primary-soft);
+  border: 1px solid var(--hr-primary-border);
 
   .org-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: #fff;
+    @include line-icon(20px);
+    color: var(--hr-primary);
   }
 }
 
@@ -80,20 +90,19 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 0;
 
   .org-name {
-    font-size: 14px;
-    font-weight: 650;
-    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--hr-primary);
     letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 188px;
-    text-transform: capitalize;
+    max-width: 180px;
   }
 
   .org-sub {
     font-size: 12px;
-    color: $ink-3;
+    color: var(--hr-text-subtle);
     margin-top: 1px;
   }
 }
@@ -103,16 +112,23 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 6px 0 16px;
+  padding: 4px 0 16px;
+  // Scrollbar stays invisible until the pointer is over the menu
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: stable;
 
   &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.14);
-    border-radius: 999px;
-    border: 0;
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  &:hover {
+    scrollbar-color: var(--hr-border-strong) transparent;
+    &::-webkit-scrollbar-thumb { background: var(--hr-border-strong); }
   }
 }
 
@@ -122,60 +138,66 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 .nav-section-label {
   padding: 18px 24px 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: $ink-4;
+  color: var(--hr-text-muted);
 }
 
 // ── Top-level item ──
 .nav-item {
-  margin: 1px 12px;
+  position: relative;
+  margin: 2px 12px;
   width: calc(100% - 24px) !important;
   padding: 0 12px;
   height: 40px;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.15s $ease, color 0.15s $ease;
+  transition: background-color 0.12s $ease, border-color 0.12s $ease, color 0.12s $ease;
 
   .nav-icon {
+    @include line-icon(20px);
     margin-right: 12px;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: $ink-3;
-    transition: color 0.15s $ease;
+    color: var(--hr-text-muted);
+    transition: color 0.12s $ease;
   }
 
   .nav-label {
-    font-size: 13.5px;
-    font-weight: 500;
-    color: $ink-2;
-    transition: color 0.15s $ease;
+    font-size: 14.5px;
+    font-weight: 400;
+    color: var(--hr-text-2);
+    transition: color 0.12s $ease;
   }
 
   &:hover {
-    background: $hover;
-    .nav-icon, .nav-label { color: $ink; }
+    background: var(--hr-shell-hover);
+    .nav-icon, .nav-label { color: var(--hr-text); }
   }
 
   &.active {
-    background: $blue;
-    box-shadow: 0 8px 20px -10px rgba(37, 99, 235, 0.9);
-    .nav-icon, .nav-label { color: #fff; }
-    .nav-label { font-weight: 600; }
+    background: var(--hr-primary-soft);
+    border-color: var(--hr-primary-border);
+    .nav-icon, .nav-label { color: var(--hr-primary); }
+    .nav-label { font-weight: 500; }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hr-primary-ring);
+    outline-offset: 0;
   }
 }
 
 .nav-badge {
-  background: #ef4444;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
+  background: var(--hr-primary-soft);
+  color: var(--hr-primary);
+  border: 1px solid var(--hr-primary-border);
+  font-size: 11px;
+  font-weight: 600;
   padding: 0 6px;
-  border-radius: 999px;
-  min-width: 18px;
+  border-radius: 4px;
+  min-width: 20px;
   height: 18px;
   display: inline-flex;
   align-items: center;
@@ -184,23 +206,24 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 // ── Groups ──
 .nav-group {
-  margin: 1px 12px;
+  margin: 2px 12px;
 
   ::ng-deep .mat-expansion-panel {
     background: transparent;
     box-shadow: none !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     color: inherit;
 
     .mat-expansion-panel-header {
       height: 40px !important;
       padding: 0 12px;
-      border-radius: 8px;
-      transition: background-color 0.15s $ease;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      transition: background-color 0.12s $ease;
 
-      &:hover { background: $hover !important; }
+      &:hover { background: var(--hr-shell-hover) !important; }
       &.cdk-keyboard-focused,
-      &.cdk-program-focused { background: $hover !important; }
+      &.cdk-program-focused { background: var(--hr-shell-hover) !important; }
 
       .mat-content { margin-right: 0; align-items: center; }
     }
@@ -208,9 +231,10 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     .mat-expansion-panel-body { padding: 0; }
   }
 
+  // A child is active: tint the parent's icon and label (the child carries the pill)
   &.has-active .nav-group-title {
-    .nav-icon { color: #93c5fd; }
-    .nav-label { color: #fff; font-weight: 600; }
+    .nav-icon { color: var(--hr-primary); }
+    .nav-label { color: var(--hr-text); font-weight: 500; }
   }
 }
 
@@ -222,28 +246,27 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   margin: 0;
 
   .nav-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: $ink-3;
-    transition: color 0.15s $ease;
+    @include line-icon(20px);
+    color: var(--hr-text-muted);
+    transition: color 0.12s $ease;
   }
 
   .nav-label {
     flex: 1;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: $ink-2;
+    min-width: 0;
+    font-size: 14.5px;
+    font-weight: 400;
+    color: var(--hr-text-2);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .nav-chevron {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    color: $ink-4;
+    @include line-icon(18px);
+    flex: none;
+    margin-left: -4px;
+    color: var(--hr-text-subtle);
     transition: transform 0.2s $ease;
 
     &.open { transform: rotate(180deg); }
@@ -251,15 +274,15 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-group:hover .nav-group-title {
-  .nav-icon, .nav-label { color: $ink; }
+  .nav-icon, .nav-label { color: var(--hr-text); }
 }
 
-// ── Sub items (with guide line) ──
+// ── Sub items (indented, with a faint guide line) ──
 .nav-sub-items {
   position: relative;
   margin: 2px 0 6px 21px;
-  padding-left: 11px;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 10px;
+  border-left: 1px solid var(--hr-shell-line);
 }
 
 .sub-nav-list {
@@ -269,51 +292,40 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 .nav-sub-item {
   position: relative;
   overflow: visible !important;
-  height: 36px !important;
+  height: 34px !important;
   margin: 1px 0;
   padding: 0 10px;
+  border: 1px solid transparent;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background-color 0.15s $ease;
+  transition: background-color 0.12s $ease, border-color 0.12s $ease;
 
   .nav-sub-icon {
-    font-size: 17px;
-    width: 17px;
-    height: 17px;
+    @include line-icon(18px);
     margin-right: 10px;
-    color: $ink-4;
-    transition: color 0.15s $ease;
+    color: var(--hr-text-subtle);
+    transition: color 0.12s $ease;
   }
 
   .nav-sub-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.64);
-    transition: color 0.15s $ease;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--hr-text-2);
+    transition: color 0.12s $ease;
   }
 
   &:hover {
-    background: $hover;
-    .nav-sub-icon, .nav-sub-label { color: $ink; }
+    background: var(--hr-shell-hover);
+    .nav-sub-icon, .nav-sub-label { color: var(--hr-text); }
   }
 
   &.active {
-    background: rgba(37, 99, 235, 0.32);
-    .nav-sub-icon { color: #93c5fd; }
-    .nav-sub-label { color: #fff; font-weight: 600; }
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: -12px;
-      top: 9px;
-      bottom: 9px;
-      width: 2px;
-      border-radius: 2px;
-      background: #60a5fa;
-    }
+    background: var(--hr-primary-soft);
+    border-color: var(--hr-primary-border);
+    .nav-sub-icon, .nav-sub-label { color: var(--hr-primary); }
+    .nav-sub-label { font-weight: 500; }
   }
 }
 
@@ -330,46 +342,45 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   width: 28px;
   height: 1px;
   margin: 8px 0;
-  background: $line;
+  background: var(--hr-shell-line);
 }
 
 .rail-item {
   appearance: none;
-  border: 0;
+  border: 1px solid transparent;
   background: transparent;
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  color: $ink-3;
+  color: var(--hr-text-muted);
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.15s $ease, color 0.15s $ease;
+  transition: background-color 0.12s $ease, color 0.12s $ease, border-color 0.12s $ease;
 
-  mat-icon { font-size: 21px; width: 21px; height: 21px; }
+  mat-icon { @include line-icon(22px); }
 
-  &:hover { background: $hover; color: $ink; }
-  &:focus-visible { outline: 2px solid #60a5fa; outline-offset: 1px; }
+  &:hover { background: var(--hr-shell-hover); color: var(--hr-text); }
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 0; }
 
   &.active {
-    background: $blue;
-    color: #fff;
-    box-shadow: 0 8px 20px -10px rgba(37, 99, 235, 0.9);
+    background: var(--hr-primary-soft);
+    border-color: var(--hr-primary-border);
+    color: var(--hr-primary);
   }
 }
 
 .is-collapsed {
-  .sidebar-header { padding: 0; justify-content: center; }
-  .sidebar-footer { padding: 10px 0; display: flex; justify-content: center; }
-  .user-card { padding: 4px; width: auto; }
+  .sidebar-header { margin: 0 12px; justify-content: center; }
+  .sidebar-footer { padding: 12px 0; display: flex; justify-content: center; }
+  .user-card { padding: 4px; width: auto; border-color: transparent; }
 }
 
 // ── User card ──
 .sidebar-footer {
   flex: none;
-  padding: 12px;
-  border-top: 1px solid $line;
+  padding: 16px;
 }
 
 .user-card {
@@ -377,40 +388,46 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--hr-shell-line);
+  border-radius: 8px;
+  background: #fff;
   text-decoration: none;
-  transition: background-color 0.15s $ease;
+  transition: background-color 0.12s $ease, border-color 0.12s $ease;
 
-  &:hover { background: $hover; }
+  &:hover {
+    background: var(--hr-shell-hover);
+    border-color: var(--hr-border);
+  }
 }
 
 .user-avatar {
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  color: #fff;
-  background: linear-gradient(135deg, #60a5fa 0%, $blue 100%);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+  color: var(--hr-primary);
+  background: var(--hr-primary-soft);
+  border: 1px solid var(--hr-primary-border);
 }
 
 .user-text {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
   line-height: 1.3;
 }
 
 .user-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: var(--hr-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -419,10 +436,20 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 .user-role {
   font-size: 12px;
-  color: $ink-3;
+  color: var(--hr-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.user-card-chevron {
+  @include line-icon(18px);
+  flex: none;
+  color: var(--hr-text-subtle);
+  padding: 3px;
+  box-sizing: content-box;
+  border: 1px solid var(--hr-shell-line);
+  border-radius: 4px;
 }
 
 // ── Flyout menu for the collapsed rail (renders in the overlay) ──
@@ -433,19 +460,22 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
   .rail-menu-title {
     padding: 8px 12px 6px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #94a3b8;
+    color: var(--hr-text-muted);
   }
 
-  .mat-mdc-menu-item .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  .mat-mdc-menu-item .mat-icon {
+    @include line-icon(20px);
+    color: var(--hr-text-muted);
+  }
 
   .rail-menu-active {
-    background: #eff6ff;
-    color: #1d4ed8;
-    .mat-icon { color: #2563eb; }
+    background: var(--hr-primary-soft);
+    color: var(--hr-primary);
+    .mat-icon { color: var(--hr-primary); }
   }
 }
 
@@ -455,4 +485,41 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 @media print {
   .sidebar-container { display: none; }
+}
+
+// ── Collapse / expand control (brand row) ──
+.sidebar-header {
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.collapse-toggle {
+  flex: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--hr-shell-line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--hr-text-muted);
+  cursor: pointer;
+  transition: background-color 0.12s $ease, color 0.12s $ease, border-color 0.12s $ease;
+
+  mat-icon { @include line-icon(20px); }
+
+  &:hover {
+    background: var(--hr-shell-hover);
+    border-color: var(--hr-border);
+    color: var(--hr-text);
+  }
+
+  &:focus-visible { outline: 2px solid var(--hr-primary-ring); outline-offset: 0; }
+}
+
+.is-collapsed .collapse-toggle {
+  width: 44px;
+  height: 40px;
 }

@@ -2,20 +2,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap');
 
 // Colors
-$primary: #2563EB;
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-300: #cbd5e1;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-700: #334155;
-$slate-800: #1e293b;
-$slate-900: #0f172a;
-$green-100: #dcfce7;
-$green-500: #22c55e;
-$green-700: #15803d;
+$primary: #2552d0;
+$slate-50: #f7f8fa;
+$slate-100: #edeff2;
+$slate-200: #dde1e6;
+$slate-300: #c4c9d0;
+$slate-400: #8b929b;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-700: #3d434b;
+$slate-800: #1f2328;
+$slate-900: #1f2328;
+$green-100: #eaf3ee;
+$green-500: #2e7d4f;
+$green-700: #1f5c3a;
 
 .bp-create-job-bg {
   font-family: 'Public Sans', sans-serif;
@@ -53,25 +53,25 @@ $green-700: #15803d;
   .bp-back-btn {
     background: $primary;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     padding: 8px;
     color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+    box-shadow: var(--hr-shadow-md);
     transition: all 0.2s;
     margin-top: 4px; // Align optically
 
     &:hover {
-      background: #1d4ed8; // deeper blue, same hover tone as primary button
+      background: var(--hr-navy-hover); // deeper blue, same hover tone as primary button
     }
   }
 
   h2.bp-page-title {
     font-size: 28px;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-900;
     line-height: 1.2;
     margin: 0 0 4px 0;
@@ -110,7 +110,7 @@ $green-700: #15803d;
   }
   &::-webkit-scrollbar-thumb {
     background-color: $slate-300;
-    border-radius: 10px;
+    border-radius: var(--hr-radius-lg);
   }
 }
 
@@ -134,7 +134,7 @@ $green-700: #15803d;
   }
   &::-webkit-scrollbar-thumb {
     background-color: $slate-300;
-    border-radius: 10px;
+    border-radius: var(--hr-radius-lg);
   }
 }
 
@@ -147,9 +147,9 @@ $green-700: #15803d;
 // Cards
 .bp-card {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid $slate-200;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
   overflow: hidden;
 }
 
@@ -165,7 +165,7 @@ $green-700: #15803d;
 
   h3 {
     margin: 0;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-800;
     font-size: 16px;
   }
@@ -231,7 +231,7 @@ $green-700: #15803d;
     width: 100%;
     box-sizing: border-box;
     border: 1px solid $slate-200;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     background: white;
     padding: 10px 12px;
     font-size: 14px;
@@ -242,7 +242,7 @@ $green-700: #15803d;
     &:focus {
       outline: none;
       border-color: $primary;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); // $primary/20
+      box-shadow: none;
     }
 
     &::placeholder {
@@ -250,7 +250,7 @@ $green-700: #15803d;
     }
 
     &.ng-invalid.ng-touched {
-      border-color: #ef4444; // red-500
+      border-color: var(--hr-danger); // red-500
     }
   }
 
@@ -260,7 +260,7 @@ $green-700: #15803d;
   }
 
   .error {
-    color: #ef4444; // red-500
+    color: var(--hr-danger); // red-500
     font-size: 12px;
     margin-top: 4px;
   }
@@ -278,7 +278,7 @@ $green-700: #15803d;
   h3 {
     margin: 0;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-800;
   }
 
@@ -287,7 +287,7 @@ $green-700: #15803d;
     background: $green-100;
     color: $green-700;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     border-radius: 9999px;
   }
@@ -304,7 +304,7 @@ $green-700: #15803d;
   h4 {
     margin: 0 0 4px 0;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-900;
   }
 
@@ -397,7 +397,7 @@ $green-700: #15803d;
   h4 {
     margin: 0 0 16px 0;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -406,14 +406,14 @@ $green-700: #15803d;
 
 .bp-quill-wrapper {
   border: 1px solid $slate-200;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
   background: white;
   transition: border-color 0.2s, box-shadow 0.2s;
 
   &:focus-within {
     border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    box-shadow: none;
   }
 
   .ql-toolbar.ql-snow {
@@ -421,7 +421,7 @@ $green-700: #15803d;
     border-bottom: 1px solid $slate-200 !important;
     background: $slate-50;
     padding: 10px 12px !important;
-    border-radius: 12px 12px 0 0;
+    border-radius: var(--hr-radius-lg) var(--hr-radius-lg) 0 0;
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
@@ -431,7 +431,7 @@ $green-700: #15803d;
     }
 
     button {
-      border-radius: 6px;
+      border-radius: var(--hr-radius);
       transition: background 0.2s;
       width: 32px !important;
       height: 32px !important;
@@ -521,7 +521,7 @@ $green-700: #15803d;
     border: 1px solid $slate-300;
     background: white;
     color: $slate-600;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -537,10 +537,10 @@ $green-700: #15803d;
     background: $primary;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     font-weight: 600;
     font-size: 14px;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2); // primary color shadow
+    box-shadow: var(--hr-shadow-md); // primary color shadow
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -548,7 +548,7 @@ $green-700: #15803d;
     transition: all 0.2s;
 
     &:hover:not([disabled]) {
-      background: #1d4ed8; // deeper blue
+      background: var(--hr-navy-hover); // deeper blue
     }
 
     &[disabled] {

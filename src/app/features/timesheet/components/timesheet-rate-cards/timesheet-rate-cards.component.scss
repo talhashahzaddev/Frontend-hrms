@@ -13,18 +13,18 @@
     font-weight: 600 !important;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border-bottom: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    color: #64748b !important;
+    border-bottom: 1px solid var(--hr-border) !important;
+    background: var(--hr-surface-2) !important;
+    color: var(--hr-text-muted) !important;
     white-space: nowrap;
   }
 
   .p-datatable-tbody > tr > td {
     padding: 0.625rem 0.875rem !important;
     font-size: 0.8125rem !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid var(--hr-border-soft) !important;
     vertical-align: middle;
-    color: #334155;
+    color: var(--hr-text-2);
   }
 
   .p-datatable-tbody > tr:last-child > td {
@@ -32,7 +32,7 @@
   }
 
   .p-datatable-tbody > tr:hover > td {
-    background: #f8fafc !important;
+    background: var(--hr-surface-2) !important;
   }
 
   // Remove striped / gridline defaults
@@ -44,8 +44,8 @@
   }
 
   &.p-datatable-gridlines .p-datatable-thead > tr > th {
-    background: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    background: var(--hr-surface-2) !important;
+    border-bottom: 1px solid var(--hr-border) !important;
   }
 
   .ts-col-num {
@@ -54,12 +54,12 @@
 
   .ts-cell-name {
     font-weight: 600;
-    color: #0f172a;
+    color: var(--hr-text);
     font-size: 0.8125rem;
   }
 
   .ts-cell-code {
-    color: #64748b;
+    color: var(--hr-text-muted);
     font-size: 0.8125rem;
     font-weight: 500;
   }
@@ -67,13 +67,13 @@
   .ts-cell-rate {
     text-align: right;
     font-weight: 600;
-    color: #334155;
+    color: var(--hr-text-2);
     font-size: 0.8125rem;
     font-variant-numeric: tabular-nums;
   }
 
   .ts-cell-date {
-    color: #64748b;
+    color: var(--hr-text-muted);
     font-size: 0.8125rem;
     white-space: nowrap;
   }
@@ -81,14 +81,14 @@
   .ts-empty-row td {
     text-align: center;
     padding: 2rem !important;
-    color: #94a3b8 !important;
+    color: var(--hr-text-subtle) !important;
     font-size: 0.8125rem !important;
   }
 
   .p-paginator {
     padding: 0.5rem 0.875rem !important;
-    border-top: 1px solid #f1f5f9;
-    background: #fafafa;
+    border-top: 1px solid var(--hr-border-soft);
+    background: var(--hr-surface-2);
     font-size: 0.8125rem;
 
     .p-paginator-element,

@@ -1,19 +1,19 @@
 .performance-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+  box-shadow: var(--hr-shadow-lg);
 }
 
 .performance-dialog-panel .mdc-dialog__surface {
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
 }
 
 .attendance-dialog-container {
   font-family: 'Public Sans', 'Inter', sans-serif;
   background-color: #ffffff;
   width: 100%;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -23,22 +23,22 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--hr-border);
 
     h2 {
-      color: #0f172a;
+      color: var(--hr-text);
       font-size: 1.125rem;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.025em;
       margin: 0;
       text-transform: capitalize;
     }
 
     .close-btn {
-      color: #94a3b8;
+      color: var(--hr-text-subtle);
       background: transparent;
       border: none;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       padding: 0.25rem;
       cursor: pointer;
       display: flex;
@@ -47,8 +47,8 @@
       transition: all 0.2s;
 
       &:hover {
-        color: #2563eb;
-        background-color: rgba(37, 99, 235, 0.1);
+        color: var(--hr-navy);
+        background-color: rgba(37, 82, 208, 0.1);
       }
       
       mat-icon {
@@ -71,8 +71,8 @@
       label {
         display: block;
         font-size: 11px;
-        font-weight: 700;
-        color: #64748b;
+        font-weight: 600;
+        color: var(--hr-text-muted);
         margin-bottom: 0.375rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -82,26 +82,26 @@
         width: 100%;
         height: 2.75rem;
         padding: 0 0.75rem;
-        border-radius: 0.5rem;
-        border: 1px solid #e2e8f0;
-        background-color: #f8fafc;
-        color: #0f172a;
+        border-radius: var(--hr-radius);
+        border: 1px solid var(--hr-border);
+        background-color: var(--hr-surface-2);
+        color: var(--hr-text);
         font-size: 0.875rem;
         outline: none;
         transition: all 0.2s;
         box-sizing: border-box;
 
         &:focus {
-          border-color: #2563eb;
-          box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+          border-color: var(--hr-navy);
+          box-shadow: none;
         }
 
         &[readonly] {
-          background-color: #f1f5f9;
-          color: #64748b;
+          background-color: var(--hr-border-soft);
+          color: var(--hr-text-muted);
           cursor: not-allowed;
           font-style: italic;
-          border-color: #f1f5f9;
+          border-color: var(--hr-border-soft);
         }
       }
 
@@ -122,7 +122,7 @@
           right: 0.75rem;
           top: 50%;
           transform: translateY(-50%);
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -145,7 +145,7 @@
 
   .dialog-footer {
     padding: 1rem 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--hr-border);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -157,15 +157,15 @@
       height: 2.5rem;
       font-size: 0.875rem;
       font-weight: 600;
-      color: #475569;
+      color: var(--hr-text-2);
       background: transparent;
       border: none;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       cursor: pointer;
       transition: color 0.2s;
 
       &:hover {
-        color: #0f172a;
+        color: var(--hr-text);
       }
     }
 
@@ -173,17 +173,17 @@
       padding: 0 1.5rem;
       height: 2.5rem;
       font-size: 0.875rem;
-      font-weight: 700;
+      font-weight: 600;
       color: #ffffff;
-      background-color: #2563eb;
+      background-color: var(--hr-navy);
       border: none;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       cursor: pointer;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+      box-shadow: var(--hr-shadow-md);
       transition: all 0.2s;
 
       &:hover {
-        background-color: rgba(37, 99, 235, 0.9);
+        background-color: rgba(37, 82, 208, 0.9);
       }
 
       &:active {

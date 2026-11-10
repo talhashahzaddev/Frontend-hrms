@@ -1,12 +1,12 @@
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-900: #0f172a;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$slate-50: #f7f8fa;
+$slate-100: #edeff2;
+$slate-200: #dde1e6;
+$slate-400: #8b929b;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-900: #1f2328;
 
 .manual-attendance-container {
   padding: 2rem;
@@ -31,7 +31,7 @@ $slate-900: #0f172a;
       .icon-box {
         width: 3rem;
         height: 3rem;
-        border-radius: 0.75rem;
+        border-radius: var(--hr-radius-lg);
         background-color: rgba($primary, 0.1);
         color: $primary;
         display: flex;
@@ -43,7 +43,7 @@ $slate-900: #0f172a;
 
       .page-title {
         font-size: 1.75rem;
-        font-weight: 700;
+        font-weight: 600;
         margin: 0;
         line-height: 1.25;
         color: $slate-900;
@@ -60,7 +60,7 @@ $slate-900: #0f172a;
   .filters-row {
     background: white;
     border: 1px solid $slate-200;
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-radius: var(--hr-radius-lg) var(--hr-radius-lg) 0 0;
     padding: 1rem 1.5rem;
     border-bottom: 1px solid $slate-200;
 
@@ -84,7 +84,7 @@ $slate-900: #0f172a;
 
       ::ng-deep .mat-mdc-text-field-wrapper {
         background: $slate-50;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
       }
 
       ::ng-deep .mdc-notched-outline__leading,
@@ -110,9 +110,9 @@ $slate-900: #0f172a;
       background-color: $primary;
       color: white;
       padding: 0.625rem 1.25rem;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       font-size: 0.875rem;
-      font-weight: 700;
+      font-weight: 600;
       border: none;
       cursor: pointer;
       height: 48px;
@@ -134,8 +134,8 @@ $slate-900: #0f172a;
 
     .edit-panel-header {
       padding: 1rem 1.5rem;
-      background: #eff6ff;
-      border-bottom: 1px solid #dbeafe;
+      background: var(--hr-navy-soft);
+      border-bottom: 1px solid var(--hr-navy-soft);
 
       .edit-panel-title {
         display: flex;
@@ -169,7 +169,7 @@ $slate-900: #0f172a;
           .cancel-btn {
             height: 2.5rem !important;
             padding: 0 1.25rem !important;
-            border-radius: 0.5rem !important;
+            border-radius: var(--hr-radius) !important;
             font-size: 0.875rem !important;
             font-weight: 600 !important;
             color: $slate-600 !important;
@@ -183,9 +183,9 @@ $slate-900: #0f172a;
             background-color: $primary;
             color: white;
             padding: 0.625rem 1.25rem;
-            border-radius: 0.5rem;
+            border-radius: var(--hr-radius);
             font-size: 0.875rem;
-            font-weight: 700;
+            font-weight: 600;
             border: none;
             cursor: pointer;
             height: 2.5rem;
@@ -203,8 +203,8 @@ $slate-900: #0f172a;
     background: white;
     border: 1px solid $slate-200;
     border-top: none;
-    border-radius: 0 0 0.75rem 0.75rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 var(--hr-radius-lg) var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-sm);
     overflow: hidden;
 
     .table-meta {
@@ -238,7 +238,7 @@ $slate-900: #0f172a;
       th {
         padding: 1rem 1.5rem;
         font-size: 0.75rem;
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-500;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -263,16 +263,16 @@ $slate-900: #0f172a;
     .badge {
       display: inline-flex;
       padding: 0.25rem 0.75rem;
-      border-radius: 2rem;
+      border-radius: var(--hr-radius-xl);
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: capitalize;
 
-      &.status-present { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
-      &.status-absent  { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
-      &.status-late    { background: rgba(249, 115, 22, 0.1); color: #ea580c; }
-      &.status-leave   { background: rgba(37, 99, 235, 0.1); color: $primary; }
-      &.status-half_day { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+      &.status-present { background: rgba(46, 125, 79, 0.1); color: var(--hr-success); }
+      &.status-absent  { background: rgba(180, 35, 24, 0.1); color: var(--hr-danger); }
+      &.status-late    { background: rgba(249, 115, 22, 0.1); color: var(--hr-warning); }
+      &.status-leave   { background: rgba(37, 82, 208, 0.1); color: $primary; }
+      &.status-half_day { background: rgba(37, 82, 208, 0.1); color: var(--hr-navy); }
     }
 
     .action-cell {

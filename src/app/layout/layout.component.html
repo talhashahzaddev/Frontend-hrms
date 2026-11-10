@@ -13,7 +13,11 @@
       fixedTopGap="0"
       (closedStart)="onSidenavClosed()">
       
-      <app-sidebar [collapsed]="sidebarCollapsed && !isHandset" (menuItemClick)="isHandset && drawer.close()"></app-sidebar>
+      <app-sidebar
+        [collapsed]="sidebarCollapsed && !isHandset"
+        [showCollapseToggle]="!isHandset"
+        (collapseToggle)="onMenuToggle()"
+        (menuItemClick)="isHandset && drawer.close()"></app-sidebar>
     </mat-sidenav>
 
     <!-- Main Content Area -->

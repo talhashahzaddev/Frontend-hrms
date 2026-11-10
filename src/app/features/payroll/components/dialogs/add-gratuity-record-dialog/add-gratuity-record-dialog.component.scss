@@ -1,13 +1,13 @@
 .gratuity-record-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 0.95rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 20, 60, 0.16);
+  box-shadow: var(--hr-shadow-lg);
   max-width: 95vw;
 }
 
 .gratuity-record-dialog-panel .mdc-dialog__surface {
-  border-radius: 0.95rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
   max-width: 95vw;
 }
@@ -15,19 +15,19 @@
 .gratuity-record-dialog {
   width: 100%;
   background: #ffffff;
-  color: #0f172a;
+  color: var(--hr-text);
 
   .dialog-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--hr-border);
 
     h2 {
       margin: 0;
       font-size: 1.2rem;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.02em;
     }
 
@@ -37,13 +37,13 @@
       border: none;
       border-radius: 999px;
       background: transparent;
-      color: #64748b;
+      color: var(--hr-text-muted);
       cursor: pointer;
       display: grid;
       place-items: center;
 
       &:hover {
-        background: #f1f5f9;
+        background: var(--hr-border-soft);
       }
     }
   }
@@ -73,10 +73,10 @@
 
     span {
       font-size: 0.72rem;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #64748b;
+      color: var(--hr-text-muted);
     }
 
     input,
@@ -84,9 +84,9 @@
       width: 100%;
       min-height: 2.7rem;
       border: 1px solid #dbe3ef;
-      border-radius: 0.7rem;
-      background: #f8fafc;
-      color: #0f172a;
+      border-radius: var(--hr-radius-lg);
+      background: var(--hr-surface-2);
+      color: var(--hr-text);
       font-size: 0.9rem;
       padding: 0.65rem 0.75rem;
       box-sizing: border-box;
@@ -94,9 +94,9 @@
 
       &:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: var(--hr-navy);
         background: #ffffff;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+        box-shadow: none;
       }
 
       &:disabled {
@@ -115,7 +115,7 @@
     .leading {
       position: absolute;
       left: 0.7rem;
-      color: #64748b;
+      color: var(--hr-text-muted);
       font-size: 1rem;
       width: 1rem;
       height: 1rem;
@@ -128,7 +128,7 @@
     .trailing {
       position: absolute;
       right: 0.65rem;
-      color: #94a3b8;
+      color: var(--hr-text-subtle);
       font-size: 1.05rem;
       width: 1.05rem;
       height: 1.05rem;
@@ -142,7 +142,7 @@
       cursor: pointer;
       padding-left: 2.2rem;
       padding-right: 2.1rem;
-      background: linear-gradient(180deg, #f8fbff 0%, #f4f8fd 100%);
+      background: #f8fbff;
     }
   }
 
@@ -154,7 +154,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    color: #2563eb;
+    color: var(--hr-navy);
     font-size: 0.76rem;
     margin-top: 0.15rem;
 
@@ -173,9 +173,9 @@
       left: 0.75rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #64748b;
+      color: var(--hr-text-muted);
       font-size: 0.72rem;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     input {
@@ -186,7 +186,7 @@
   .dialog-actions {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--hr-border);
     display: flex;
     justify-content: flex-end;
     gap: 0.6rem;
@@ -194,27 +194,27 @@
 
     .btn {
       border: none;
-      border-radius: 0.62rem;
+      border-radius: var(--hr-radius-lg);
       min-height: 2.45rem;
       padding: 0 1.1rem;
       font-size: 0.86rem;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
     }
 
     .ghost {
       background: transparent;
-      color: #334155;
+      color: var(--hr-text-2);
 
       &:hover {
-        background: #f1f5f9;
+        background: var(--hr-border-soft);
       }
     }
 
     .primary {
       color: #ffffff;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.26);
+      background: var(--hr-navy);
+      box-shadow: var(--hr-shadow-lg);
     }
   }
 }

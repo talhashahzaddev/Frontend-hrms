@@ -1,7 +1,7 @@
 // Team Leaves — aligned with Attendance / Timesheet
 @use '../../styles/leave-shared';
 
-$primary: #2563eb;
+$primary: #2552d0;
 
 .ts-page-layout {
   // Page shell padding/background comes from leave-shared → timesheet-shared
@@ -17,15 +17,15 @@ $primary: #2563eb;
       .page-title {
         margin: 0 0 4px;
         font-size: 26px;
-        font-weight: 700;
-        color: #0f172a;
+        font-weight: 600;
+        color: var(--hr-text);
         letter-spacing: -0.4px;
       }
 
       .page-subtitle {
         margin: 0;
         font-size: 14px;
-        color: #64748b;
+        color: var(--hr-text-muted);
         font-weight: 400;
       }
     }
@@ -34,14 +34,14 @@ $primary: #2563eb;
       .add-button {
         height: 42px;
         padding: 0 20px !important;
-        border-radius: 8px !important;
+        border-radius: var(--hr-radius) !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%) !important;
+        background: var(--hr-navy) !important;
         color: white !important;
         letter-spacing: 0.1px;
         transition: all 0.2s ease !important;
-        box-shadow: 0 2px 6px rgba(26, 31, 46, 0.2) !important;
+        box-shadow: var(--hr-shadow-md) !important;
 
         mat-icon {
           font-size: 18px;
@@ -52,19 +52,19 @@ $primary: #2563eb;
 
         &:hover {
           background: #2d3348 !important;
-          box-shadow: 0 4px 12px rgba(26, 31, 46, 0.3) !important;
+          box-shadow: var(--hr-shadow-md) !important;
         }
       }
 
       .upgrade-button {
         height: 42px;
         padding: 0 20px !important;
-        border-radius: 8px !important;
+        border-radius: var(--hr-radius) !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        background: #f59e0b !important;
+        background: var(--hr-warning) !important;
         color: white !important;
-        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25) !important;
+        box-shadow: var(--hr-shadow-md) !important;
         transition: all 0.2s ease !important;
 
         mat-icon {
@@ -72,15 +72,15 @@ $primary: #2563eb;
         }
 
         &:hover {
-          background: #d97706 !important;
+          background: var(--hr-warning) !important;
         }
 
         &.renew {
-          background: #ef4444 !important;
-          box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25) !important;
+          background: var(--hr-danger) !important;
+          box-shadow: var(--hr-shadow-md) !important;
 
           &:hover {
-            background: #dc2626 !important;
+            background: var(--hr-danger) !important;
           }
         }
       }
@@ -104,7 +104,7 @@ $primary: #2563eb;
     align-items: center;
     background: white;
     padding: 16px 20px;
-    border-radius: 12px 12px 0 0;
+    border-radius: var(--hr-radius-lg) var(--hr-radius-lg) 0 0;
     border-bottom: 1px solid #e9eaf0;
 
     .search-field,
@@ -115,13 +115,13 @@ $primary: #2563eb;
       ::ng-deep {
         .mat-mdc-text-field-wrapper {
           background: #f8f9fc;
-          border-radius: 8px !important;
+          border-radius: var(--hr-radius) !important;
         }
 
         .mdc-notched-outline__leading,
         .mdc-notched-outline__notch,
         .mdc-notched-outline__trailing {
-          border-color: #e2e8f0 !important;
+          border-color: var(--hr-border) !important;
         }
 
         .mat-mdc-form-field-flex {
@@ -137,11 +137,11 @@ $primary: #2563eb;
         .mat-mdc-form-field-label,
         input {
           font-size: 13px !important;
-          color: #334155;
+          color: var(--hr-text-2);
         }
 
         mat-icon {
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
           font-size: 18px;
           width: 18px;
           height: 18px;
@@ -151,7 +151,7 @@ $primary: #2563eb;
         &.mat-focused .mdc-notched-outline__leading,
         &.mat-focused .mdc-notched-outline__notch,
         &.mat-focused .mdc-notched-outline__trailing {
-          border-color: #2563eb !important;
+          border-color: var(--hr-navy) !important;
           border-width: 1.5px !important;
         }
       }
@@ -159,11 +159,11 @@ $primary: #2563eb;
 
     .clear-btn {
       height: 38px;
-      border-radius: 8px !important;
+      border-radius: var(--hr-radius) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
-      color: #64748b !important;
-      border-color: #e2e8f0 !important;
+      color: var(--hr-text-muted) !important;
+      border-color: var(--hr-border) !important;
       white-space: nowrap;
       flex-shrink: 0;
       transition: all 0.2s ease !important;
@@ -175,9 +175,9 @@ $primary: #2563eb;
       }
 
       &:not([disabled]):hover {
-        color: #334155 !important;
-        border-color: #cbd5e1 !important;
-        background: #f8fafc !important;
+        color: var(--hr-text-2) !important;
+        border-color: var(--hr-border-strong) !important;
+        background: var(--hr-surface-2) !important;
       }
 
       &[disabled] {
@@ -200,8 +200,8 @@ $primary: #2563eb;
       height: 42px;
       padding: 0 12px;
       background: #f8f9fc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
+      border: 1px solid var(--hr-border);
+      border-radius: var(--hr-radius);
       cursor: pointer;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
       user-select: none;
@@ -210,20 +210,20 @@ $primary: #2563eb;
         font-size: 18px;
         width: 18px;
         height: 18px;
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
         flex-shrink: 0;
       }
 
       .select-display-value {
         flex: 1;
         font-size: 13px;
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         &.selected-name {
-          color: #334155;
+          color: var(--hr-text-2);
           font-weight: 500;
         }
       }
@@ -232,7 +232,7 @@ $primary: #2563eb;
         font-size: 18px;
         width: 18px;
         height: 18px;
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
         transition: transform 0.2s ease;
         flex-shrink: 0;
       }
@@ -241,23 +241,23 @@ $primary: #2563eb;
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
         flex-shrink: 0;
         border-radius: 50%;
         transition: color 0.15s ease, background 0.15s ease;
         padding: 2px;
 
         &:hover {
-          color: #334155;
-          background: #e2e8f0;
+          color: var(--hr-text-2);
+          background: var(--hr-border);
         }
       }
     }
 
     &.open .employee-select-trigger {
-      border-color: #2563eb;
+      border-color: var(--hr-navy);
       border-width: 1.5px;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+      box-shadow: none;
       background: white;
 
       .select-arrow-icon {
@@ -276,9 +276,9 @@ $primary: #2563eb;
       left: 0;
       right: 0;
       background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--hr-border);
+      border-radius: var(--hr-radius-lg);
+      box-shadow: var(--hr-shadow-lg);
       z-index: 1000;
       overflow: hidden;
       animation: dropdownFadeIn 0.15s ease;
@@ -297,20 +297,20 @@ $primary: #2563eb;
       background: transparent;
       font-size: 13px;
       font-weight: 400;
-      color: #334155;
+      color: var(--hr-text-2);
       font-family: 'Inter', 'DM Sans', sans-serif;
       min-width: 0;
-      caret-color: #2563eb;
+      caret-color: var(--hr-navy);
 
       &::placeholder {
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
         font-weight: 400;
       }
     }
 
     .trigger-spinner {
       flex-shrink: 0;
-      ::ng-deep circle { stroke: #2563eb; }
+      ::ng-deep circle { stroke: var(--hr-navy); }
     }
 
     // ── Dropdown list ──
@@ -326,8 +326,8 @@ $primary: #2563eb;
         background: transparent;
       }
       &::-webkit-scrollbar-thumb {
-        background: #e2e8f0;
-        border-radius: 4px;
+        background: var(--hr-border);
+        border-radius: var(--hr-radius);
       }
     }
 
@@ -337,7 +337,7 @@ $primary: #2563eb;
       align-items: center;
       gap: 10px;
       padding: 8px 10px;
-      border-radius: 7px;
+      border-radius: var(--hr-radius);
       cursor: pointer;
       transition: background 0.12s ease;
 
@@ -346,11 +346,11 @@ $primary: #2563eb;
       }
 
       &.active {
-        background: #eef2ff;
+        background: var(--hr-navy-soft);
 
         .option-emp-code {
           background: #dde3ff;
-          border-color: #a5b4fc;
+          border-color: var(--hr-navy-muted);
         }
       }
 
@@ -358,8 +358,8 @@ $primary: #2563eb;
       .option-avatar {
         width: 34px;
         height: 34px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
+        border-radius: var(--hr-radius);
+        background: var(--hr-navy);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -370,12 +370,12 @@ $primary: #2563eb;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          border-radius: 8px;
+          border-radius: var(--hr-radius);
         }
 
         span {
           font-size: 11px;
-          font-weight: 700;
+          font-weight: 600;
           color: white;
           letter-spacing: 0.3px;
         }
@@ -392,7 +392,7 @@ $primary: #2563eb;
         .option-name {
           font-size: 13px;
           font-weight: 600;
-          color: #0f172a;
+          color: var(--hr-text);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -400,7 +400,7 @@ $primary: #2563eb;
 
         .option-email {
           font-size: 11.5px;
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -412,11 +412,11 @@ $primary: #2563eb;
       .option-emp-code {
         flex-shrink: 0;
         font-size: 10.5px;
-        font-weight: 700;
-        color: #2563eb;
-        background: #eef2ff;
-        border: 1px solid #c7d2fe;
-        border-radius: 5px;
+        font-weight: 600;
+        color: var(--hr-navy);
+        background: var(--hr-navy-soft);
+        border: 1px solid var(--hr-navy-muted);
+        border-radius: var(--hr-radius);
         padding: 3px 7px;
         letter-spacing: 0.4px;
         white-space: nowrap;
@@ -428,7 +428,7 @@ $primary: #2563eb;
         font-size: 15px;
         width: 15px;
         height: 15px;
-        color: #2563eb;
+        color: var(--hr-navy);
         flex-shrink: 0;
       }
     }
@@ -442,18 +442,18 @@ $primary: #2563eb;
       justify-content: center;
       gap: 6px;
       padding: 28px 16px;
-      color: #94a3b8;
+      color: var(--hr-text-subtle);
       font-size: 13px;
 
       mat-icon {
         font-size: 24px;
         width: 24px;
         height: 24px;
-        color: #cbd5e1;
+        color: var(--hr-border-strong);
       }
 
       ::ng-deep .mat-mdc-progress-spinner circle {
-        stroke: #2563eb;
+        stroke: var(--hr-navy);
       }
     }
 
@@ -477,9 +477,9 @@ $primary: #2563eb;
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #eef2ff;
+    background: var(--hr-navy-soft);
     padding: 10px 20px;
-    border-bottom: 1px solid #c7d2fe;
+    border-bottom: 1px solid var(--hr-navy-muted);
 
     .selection-info {
       display: flex;
@@ -487,7 +487,7 @@ $primary: #2563eb;
       gap: 6px;
       font-size: 13px;
       font-weight: 600;
-      color: #2563eb;
+      color: var(--hr-navy);
 
       mat-icon {
         font-size: 18px;
@@ -499,17 +499,17 @@ $primary: #2563eb;
     .bulk-divider {
       width: 1px;
       height: 20px;
-      background: #c7d2fe;
+      background: var(--hr-navy-muted);
     }
 
     .bulk-action-btn {
       height: 34px !important;
       padding: 0 14px !important;
-      border-radius: 6px !important;
+      border-radius: var(--hr-radius) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
-      color: #2563eb !important;
-      border-color: #c7d2fe !important;
+      color: var(--hr-navy) !important;
+      border-color: var(--hr-navy-muted) !important;
       background: white !important;
 
       mat-icon {
@@ -521,7 +521,7 @@ $primary: #2563eb;
 
       &:hover {
         background: #f0f0ff !important;
-        border-color: #a5b4fc !important;
+        border-color: var(--hr-navy-muted) !important;
       }
     }
   }
@@ -529,8 +529,8 @@ $primary: #2563eb;
   // ─── Table Card ───────────────────────────────────────────────
   .table-card {
     background: white;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+    border-radius: 0 0 var(--hr-radius-lg) var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-lg);
     overflow: hidden;
 
     .table-meta {
@@ -543,17 +543,17 @@ $primary: #2563eb;
       .total-count {
         font-size: 13px;
         font-weight: 600;
-        color: #64748b;
+        color: var(--hr-text-muted);
       }
 
       .export-btn {
         height: 34px !important;
         padding: 0 14px !important;
-        border-radius: 6px !important;
+        border-radius: var(--hr-radius) !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        color: #334155 !important;
-        border-color: #e2e8f0 !important;
+        color: var(--hr-text-2) !important;
+        border-color: var(--hr-border) !important;
 
         mat-icon {
           font-size: 16px;
@@ -563,8 +563,8 @@ $primary: #2563eb;
         }
 
         &:hover {
-          background: #f8fafc !important;
-          border-color: #cbd5e1 !important;
+          background: var(--hr-surface-2) !important;
+          border-color: var(--hr-border-strong) !important;
         }
       }
     }
@@ -581,11 +581,11 @@ $primary: #2563eb;
       p {
         margin: 0;
         font-size: 14px;
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
       }
 
       ::ng-deep .mat-mdc-progress-spinner circle {
-        stroke: #2563eb;
+        stroke: var(--hr-navy);
       }
     }
 
@@ -601,13 +601,13 @@ $primary: #2563eb;
 
           // Header
           .mat-mdc-header-row {
-            background: #fafafa;
+            background: var(--hr-surface-2);
             height: 44px;
 
             .mat-mdc-header-cell {
               font-size: 11px;
-              font-weight: 700;
-              color: #94a3b8;
+              font-weight: 600;
+              color: var(--hr-text-subtle);
               text-transform: uppercase;
               letter-spacing: 0.7px;
               border-bottom: 1px solid #f0f1f5;
@@ -622,18 +622,18 @@ $primary: #2563eb;
             transition: background 0.12s ease;
 
             &:hover {
-              background: #eff6ff;
+              background: var(--hr-navy-soft);
             }
 
             &.selected-row {
-              background: #eef2ff;
+              background: var(--hr-navy-soft);
             }
 
             .mat-mdc-cell {
               padding: 0 16px;
               border-bottom: 1px solid #f5f6fa;
               font-size: 13.5px;
-              color: #334155;
+              color: var(--hr-text-2);
             }
           }
         }
@@ -644,7 +644,7 @@ $primary: #2563eb;
           font-weight: 600;
           color: #000000;
           padding: 3px 7px;
-          border-radius: 4px;
+          border-radius: var(--hr-radius);
         }
 
         // Employee Info
@@ -656,8 +656,8 @@ $primary: #2563eb;
           .employee-avatar {
             width: 36px;
             height: 36px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
+            border-radius: var(--hr-radius);
+            background: var(--hr-navy);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -667,7 +667,7 @@ $primary: #2563eb;
             img {
               width: 100%;
               height: 100%;
-              border-radius: 8px;
+              border-radius: var(--hr-radius);
               object-fit: contain;
               object-position: center;
             }
@@ -684,14 +684,14 @@ $primary: #2563eb;
             .employee-name {
               font-size: 14px;
               font-weight: 600;
-              color: #0f172a;
+              color: var(--hr-text);
               margin-bottom: 1px;
               line-height: 1.3;
             }
 
             .employee-email {
               font-size: 12px;
-              color: #94a3b8;
+              color: var(--hr-text-subtle);
               line-height: 1.3;
             }
           }
@@ -701,27 +701,27 @@ $primary: #2563eb;
         .badge {
           display: inline-block;
           padding: 3px 10px;
-          border-radius: 5px;
+          border-radius: var(--hr-radius);
           font-size: 12.5px;
           font-weight: 500;
           white-space: nowrap;
         }
 
         .badge-dept {
-          background: #f0fdf4;
-          color: #15803d;
-          border: 1px solid #bbf7d0;
+          background: var(--hr-success-soft);
+          color: var(--hr-success-ink);
+          border: 1px solid var(--hr-success-soft);
         }
 
         .badge-pos {
-          background: #fff7ed;
-          color: #c2410c;
-          border: 1px solid #fed7aa;
+          background: var(--hr-warning-soft);
+          color: var(--hr-warning-ink);
+          border: 1px solid var(--hr-warning-soft);
         }
 
         // Date cell
         .date-cell {
-          color: #64748b !important;
+          color: var(--hr-text-muted) !important;
           font-size: 13px !important;
           white-space: nowrap;
         }
@@ -732,25 +732,25 @@ $primary: #2563eb;
           font-weight: 600 !important;
           height: 24px !important;
           min-height: 24px !important;
-          border-radius: 5px !important;
+          border-radius: var(--hr-radius) !important;
           padding: 0 8px !important;
 
           &.status-active {
-            background: #f0fdf4 !important;
-            color: #16a34a !important;
-            border: 1px solid #bbf7d0 !important;
+            background: var(--hr-success-soft) !important;
+            color: var(--hr-success) !important;
+            border: 1px solid var(--hr-success-soft) !important;
           }
 
           &.status-inactive {
-            background: #f8fafc !important;
-            color: #64748b !important;
-            border: 1px solid #e2e8f0 !important;
+            background: var(--hr-surface-2) !important;
+            color: var(--hr-text-muted) !important;
+            border: 1px solid var(--hr-border) !important;
           }
 
           &.status-deleted {
-            background: #fef2f2 !important;
-            color: #dc2626 !important;
-            border: 1px solid #fecaca !important;
+            background: var(--hr-danger-soft) !important;
+            color: var(--hr-danger) !important;
+            border: 1px solid var(--hr-danger-soft) !important;
           }
         }
 
@@ -758,7 +758,7 @@ $primary: #2563eb;
         .action-menu-btn {
           width: 32px !important;
           height: 32px !important;
-          border-radius: 12px !important;
+          border-radius: var(--hr-radius-lg) !important;
           color: #000000 !important;
 
           mat-icon {
@@ -775,8 +775,8 @@ $primary: #2563eb;
         .empty-icon {
           width: 72px;
           height: 72px;
-          border-radius: 16px;
-          background: #f1f5f9;
+          border-radius: var(--hr-radius-xl);
+          background: var(--hr-border-soft);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -786,7 +786,7 @@ $primary: #2563eb;
             font-size: 36px;
             width: 36px;
             height: 36px;
-            color: #cbd5e1;
+            color: var(--hr-border-strong);
           }
         }
 
@@ -794,19 +794,19 @@ $primary: #2563eb;
           margin: 0 0 8px;
           font-size: 18px;
           font-weight: 600;
-          color: #0f172a;
+          color: var(--hr-text);
         }
 
         p {
           margin: 0 0 24px;
           font-size: 14px;
-          color: #94a3b8;
+          color: var(--hr-text-subtle);
         }
 
         .add-first-employee {
           height: 40px;
           padding: 0 20px !important;
-          border-radius: 8px !important;
+          border-radius: var(--hr-radius) !important;
           font-weight: 600 !important;
           font-size: 14px !important;
           background: #1a1f2e !important;
@@ -823,14 +823,14 @@ $primary: #2563eb;
         .upgrade-button-empty {
           height: 40px;
           padding: 0 20px !important;
-          border-radius: 8px !important;
+          border-radius: var(--hr-radius) !important;
           font-weight: 600 !important;
           font-size: 14px !important;
-          background: #f59e0b !important;
+          background: var(--hr-warning) !important;
           color: white !important;
 
           &.renew {
-            background: #ef4444 !important;
+            background: var(--hr-danger) !important;
           }
 
           mat-icon {
@@ -842,8 +842,8 @@ $primary: #2563eb;
 
     // Pagination
     ::ng-deep mat-paginator {
-      background: #fafafa;
-      border-top: 1px solid #e2e8f0;
+      background: var(--hr-surface-2);
+      border-top: 1px solid var(--hr-border);
 
       .mat-mdc-paginator-container {
         display: flex;
@@ -865,7 +865,7 @@ $primary: #2563eb;
       .mat-mdc-paginator-range-label {
         white-space: nowrap;
         font-size: 13px;
-        color: #64748b;
+        color: var(--hr-text-muted);
       }
 
       .mat-mdc-paginator-navigation {
@@ -879,8 +879,8 @@ $primary: #2563eb;
 
   // ─── Action Menu ──────────────────────────────────────────────
   ::ng-deep .mat-mdc-menu-panel {
-    border-radius: 10px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    border-radius: var(--hr-radius-lg) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
     border: 1px solid #f0f1f5 !important;
     min-width: 180px !important;
 
@@ -888,12 +888,12 @@ $primary: #2563eb;
       padding: 6px !important;
 
       .mat-mdc-menu-item {
-        border-radius: 6px !important;
+        border-radius: var(--hr-radius) !important;
         margin: 1px 0 !important;
         height: 38px !important;
         min-height: 38px !important;
         font-size: 13.5px !important;
-        color: #334155;
+        color: var(--hr-text-2);
 
         &:hover {
           background: #f5f6fa !important;
@@ -904,30 +904,30 @@ $primary: #2563eb;
           font-size: 18px;
           width: 18px;
           height: 18px;
-          color: #64748b;
+          color: var(--hr-text-muted);
         }
 
         &.danger-action {
-          color: #dc2626 !important;
+          color: var(--hr-danger) !important;
 
           mat-icon {
-            color: #dc2626 !important;
+            color: var(--hr-danger) !important;
           }
 
           &:hover {
-            background: #fff5f5 !important;
+            background: var(--hr-danger-soft) !important;
           }
         }
 
         &.recover-action {
-          color: #16a34a !important;
+          color: var(--hr-success) !important;
 
           mat-icon {
-            color: #16a34a !important;
+            color: var(--hr-success) !important;
           }
 
           &:hover {
-            background: #f0fdf4 !important;
+            background: var(--hr-success-soft) !important;
           }
         }
       }
@@ -942,13 +942,13 @@ $primary: #2563eb;
   // ─── Checkbox styling ─────────────────────────────────────────
   ::ng-deep .mat-mdc-checkbox {
     .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background {
-      background-color: #2563eb !important;
-      border-color: #2563eb !important;
+      background-color: var(--hr-navy) !important;
+      border-color: var(--hr-navy) !important;
     }
 
     .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
-      background-color: #2563eb !important;
-      border-color: #2563eb !important;
+      background-color: var(--hr-navy) !important;
+      border-color: var(--hr-navy) !important;
     }
 
     .mdc-checkbox__ripple {
@@ -1108,7 +1108,7 @@ $primary: #2563eb;
     }
 
     .table-card {
-      border-radius: 0 0 10px 10px;
+      border-radius: 0 0 var(--hr-radius-lg) var(--hr-radius-lg);
 
       .table-meta {
         padding: 10px 14px;
@@ -1153,7 +1153,7 @@ $primary: #2563eb;
             .employee-avatar {
               width: 30px;
               height: 30px;
-              border-radius: 6px;
+              border-radius: var(--hr-radius);
               flex-shrink: 0;
 
               mat-icon {
@@ -1237,7 +1237,7 @@ $primary: #2563eb;
         .empty-icon {
           width: 56px;
           height: 56px;
-          border-radius: 12px;
+          border-radius: var(--hr-radius-lg);
           margin-bottom: 16px;
 
           mat-icon {

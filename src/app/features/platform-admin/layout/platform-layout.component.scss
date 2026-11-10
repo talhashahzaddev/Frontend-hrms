@@ -1,10 +1,10 @@
 $sidebar-width: 240px;
 $sidebar-collapsed-width: 64px;
 $topbar-height: 56px;
-$primary-dark: #1a237e;
+$primary-dark: #1e44ae;
 $sidebar-bg: #0d1137;
 $sidebar-text: rgba(255, 255, 255, 0.75);
-$sidebar-active: #2563eb;
+$sidebar-active: #2552d0;
 
 .platform-layout {
   display: flex;
@@ -54,7 +54,7 @@ $sidebar-active: #2563eb;
 
   .brand-text {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #fff;
   }
 
@@ -76,7 +76,7 @@ $sidebar-active: #2563eb;
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   color: $sidebar-text;
   text-decoration: none;
   cursor: pointer;
@@ -149,7 +149,7 @@ $sidebar-active: #2563eb;
   flex-shrink: 0;
 
   .menu-toggle {
-    color: #555;
+    color: var(--hr-text-2);
   }
 
   .topbar-spacer {
@@ -163,7 +163,7 @@ $sidebar-active: #2563eb;
   gap: 8px;
 
   .user-btn {
-    color: #555;
+    color: var(--hr-text-2);
 
     mat-icon {
       font-size: 28px;
@@ -181,7 +181,7 @@ $sidebar-active: #2563eb;
 
   strong {
     font-size: 0.9rem;
-    color: #333;
+    color: var(--hr-text-2);
   }
 
   .role-badge {
@@ -189,7 +189,7 @@ $sidebar-active: #2563eb;
     color: #fff;
     background: $primary-dark;
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: var(--hr-radius-lg);
     width: fit-content;
   }
 }

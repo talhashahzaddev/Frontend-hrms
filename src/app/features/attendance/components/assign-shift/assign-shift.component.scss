@@ -24,7 +24,7 @@
   z-index: 9999;
 
   &.has-error .employee-input-box {
-    border-color: #ef4444 !important;
+    border-color: var(--hr-danger) !important;
   }
 }
 
@@ -37,7 +37,7 @@
   padding: 0 14px;
   background: ad.$ad-input-bg;
   border: 1px solid ad.$ad-border;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   transition: all 0.2s ease;
   cursor: pointer;
 
@@ -83,7 +83,7 @@
 
 .select-all-text {
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
   color: ad.$ad-primary;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -98,8 +98,8 @@
   background: ad.$ad-input-bg;
   border: 1px solid ad.$ad-border;
   border-top: none;
-  border-radius: 0 0 0.5rem 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 var(--hr-radius) var(--hr-radius);
+  box-shadow: var(--hr-shadow-md);
   z-index: 99999;
   max-height: 280px;
   overflow: hidden;
@@ -126,7 +126,7 @@
   &:hover { background-color: ad.$ad-surface; }
 
   &.is-selected {
-    background-color: #eff6ff;
+    background-color: var(--hr-navy-soft);
 
     .employee-name {
       color: ad.$ad-primary;
@@ -151,7 +151,7 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -188,7 +188,7 @@
 
 .error-message {
   font-size: 0.75rem;
-  color: #ef4444;
+  color: var(--hr-danger);
   margin-top: 4px;
   display: block;
 }
@@ -196,9 +196,9 @@
 .selection-summary {
   margin-top: 4px;
   padding: 12px 16px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 0.75rem;
+  background: var(--hr-navy-soft);
+  border: 1px solid var(--hr-navy-muted);
+  border-radius: var(--hr-radius-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -214,10 +214,10 @@
     border: none;
     color: ad.$ad-primary;
     font-size: 0.6875rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
 
-    &:hover { color: #ef4444; }
+    &:hover { color: var(--hr-danger); }
   }
 }
 
@@ -225,14 +225,14 @@
   margin-top: 10px;
   padding: 10px;
   border: 1px solid ad.$ad-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   background: ad.$ad-input-bg;
 }
 
 .selected-fence-title {
   margin: 0 0 8px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: ad.$ad-text-label;
 }
 
@@ -244,13 +244,13 @@
 }
 
 .selected-fence-chip {
-  background: #eff6ff;
+  background: var(--hr-navy-soft);
   color: ad.$ad-primary;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--hr-navy-muted);
   border-radius: 999px;
   padding: 2px 8px;
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .selected-fence-empty {
@@ -263,7 +263,7 @@
 .selected-fence-map {
   width: 100%;
   height: 170px;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   overflow: hidden;
   border: 1px solid ad.$ad-border;
 }

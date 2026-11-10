@@ -2,34 +2,34 @@
 
 /* Root Variables */
 :root {
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
-  --secondary-color: #64748b;
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
-  --green-100: #dcfce7;
-  --green-500: #22c55e;
-  --green-600: #16a34a;
-  --green-700: #15803d;
-  --red-100: #fee2e2;
-  --red-500: #ef4444;
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
-  --amber-50: #fffbeb;
-  --amber-100: #fef3c7;
-  --amber-700: #b45309;
-  --indigo-50: #eff6ff;
-  --indigo-700: #1d4ed8;
-  --purple-100: #eff6ff;
-  --purple-700: #2563eb;
+  --primary-color: var(--hr-navy);
+  --primary-hover: var(--hr-navy-hover);
+  --secondary-color: var(--hr-text-muted);
+  --gray-50: var(--hr-surface-2);
+  --gray-100: var(--hr-border-soft);
+  --gray-200: var(--hr-border);
+  --gray-300: var(--hr-border-strong);
+  --gray-400: var(--hr-text-subtle);
+  --gray-500: var(--hr-text-muted);
+  --gray-600: var(--hr-text-2);
+  --gray-700: var(--hr-text-2);
+  --gray-800: var(--hr-text);
+  --gray-900: var(--hr-text);
+  --green-100: var(--hr-success-soft);
+  --green-500: var(--hr-success);
+  --green-600: var(--hr-success);
+  --green-700: var(--hr-success-ink);
+  --red-100: var(--hr-danger-soft);
+  --red-500: var(--hr-danger);
+  --red-600: var(--hr-danger);
+  --red-700: var(--hr-danger-ink);
+  --amber-50: var(--hr-warning-soft);
+  --amber-100: var(--hr-warning-soft);
+  --amber-700: var(--hr-warning-ink);
+  --indigo-50: var(--hr-navy-soft);
+  --indigo-700: var(--hr-navy-hover);
+  --purple-100: var(--hr-navy-soft);
+  --purple-700: var(--hr-navy);
 }
 
 /* Global Styles */
@@ -73,9 +73,9 @@ body {
     .icon-box {
       width: 3rem;
       height: 3rem;
-      border-radius: 0.75rem;
-      background-color: rgba(37, 99, 235, 0.1);
-      color: #2563eb;
+      border-radius: var(--hr-radius-lg);
+      background-color: rgba(37, 82, 208, 0.1);
+      color: var(--hr-navy);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -85,14 +85,14 @@ body {
 
     .page-title {
       font-size: 1.75rem;
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
       line-height: 1.25;
-      color: #0f172a;
+      color: var(--hr-text);
     }
 
     .page-subtitle {
-      color: #64748b;
+      color: var(--hr-text-muted);
       font-size: 0.875rem;
       margin: 0;
     }
@@ -103,8 +103,8 @@ body {
 .report-config-card {
   background: white;
   padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
   border: 1px solid var(--gray-100);
 }
 
@@ -116,7 +116,7 @@ body {
 
 .config-title {
   font-size: 1.125rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.025em;
   color: var(--gray-900);
   margin: 0;
@@ -254,16 +254,16 @@ button.generate-report-btn {
   background: var(--primary-color) !important;
   background-image: none !important;
   color: white !important;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0 1.25rem;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   border: none !important;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: var(--hr-shadow-md);
   white-space: nowrap;
   font-size: 0.875rem;
   height: 40px;
@@ -271,23 +271,23 @@ button.generate-report-btn {
   outline: none;
 
   &:hover:not(:disabled) {
-    background: #1d4ed8 !important;
+    background: var(--hr-navy-hover) !important;
     background-image: none !important;
     color: white !important;
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
     transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
-    background: #1e40af !important;
+    background: var(--hr-navy-hover) !important;
     background-image: none !important;
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+    box-shadow: var(--hr-shadow-md) !important;
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    box-shadow: none;
   }
 
   &:disabled {
@@ -306,8 +306,8 @@ button.generate-report-btn {
 /* Summary Strip */
 .summary-strip {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
   border: 1px solid var(--gray-100);
   overflow: hidden;
 }
@@ -348,7 +348,7 @@ button.generate-report-btn {
 
 .summary-label {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--gray-500);
@@ -356,7 +356,7 @@ button.generate-report-btn {
 
 .summary-value {
   font-size: 1.875rem;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--gray-900);
   line-height: 1;
 }
@@ -376,8 +376,8 @@ button.generate-report-btn {
 /* Table Card */
 .table-card {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
   border: 1px solid var(--gray-100);
   overflow: hidden;
 }
@@ -397,7 +397,7 @@ button.generate-report-btn {
 }
 
 .count-bold {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gray-700);
 }
 
@@ -409,7 +409,7 @@ button.generate-report-btn {
 .export-btn {
   padding: 0.5rem;
   border: 1px solid var(--gray-200);
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   background: white;
   color: var(--gray-600);
   cursor: pointer;
@@ -461,7 +461,7 @@ button.generate-report-btn {
 
 .table-scroll-area::-webkit-scrollbar-thumb {
   background: var(--gray-300);
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
 }
 
 .table-scroll-area::-webkit-scrollbar-thumb:hover {
@@ -490,7 +490,7 @@ button.generate-report-btn {
 .attendance-table th {
   padding: 1rem 1.5rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--gray-500);
@@ -506,7 +506,7 @@ button.generate-report-btn {
 }
 
 .attendance-table tbody tr:hover {
-  background-color: #eff6ff !important;
+  background-color: var(--hr-navy-soft) !important;
 }
 
 .attendance-table tbody tr.row-even {
@@ -574,7 +574,7 @@ button.generate-report-btn {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .status-badge.status-present {
@@ -636,7 +636,7 @@ button.generate-report-btn {
 .pagination-btn {
   padding: 0.5rem 1rem;
   border: 1px solid var(--gray-200);
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--gray-600);
@@ -667,7 +667,7 @@ button.generate-report-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--gray-600);
@@ -684,7 +684,7 @@ button.generate-report-btn {
 .page-number.active {
   background-color: var(--primary-color);
   color: white;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .page-dots {
@@ -695,8 +695,8 @@ button.generate-report-btn {
 /* No Report State */
 .no-report-state {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
   border: 1px solid var(--gray-100);
   padding: 5rem 2rem;
   text-align: center;
@@ -711,7 +711,7 @@ button.generate-report-btn {
 
 .no-report-title {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gray-900);
   margin: 0 0 0.75rem 0;
 }
@@ -748,7 +748,7 @@ button.generate-report-btn {
   .date-input-field .mat-mdc-text-field-wrapper,
   .filter-field .mat-mdc-text-field-wrapper {
     background: white !important;
-    border-radius: 8px !important;
+    border-radius: var(--hr-radius) !important;
     padding: 0 !important;
     overflow: visible !important;
   }
@@ -876,8 +876,8 @@ button.generate-report-btn {
      ============================================= */
 
   .mat-mdc-select-panel {
-    border-radius: 8px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    border-radius: var(--hr-radius) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
     margin-top: 8px !important;
     background: white !important;
     max-height: 300px !important;
@@ -888,7 +888,7 @@ button.generate-report-btn {
 
   /* Option styling - FULL TEXT VISIBLE */
   .mat-mdc-option {
-    border-radius: 6px !important;
+    border-radius: var(--hr-radius) !important;
     margin: 2px 8px !important;
     padding: 10px 12px !important;
     font-size: 0.875rem !important;
@@ -901,12 +901,12 @@ button.generate-report-btn {
   }
 
   .mat-mdc-option:hover {
-    background: rgba(37, 99, 235, 0.08) !important;
+    background: rgba(37, 82, 208, 0.08) !important;
   }
 
   .mat-mdc-option.mat-mdc-option-active,
   .mat-mdc-option.mdc-list-item--selected {
-    background: rgba(37, 99, 235, 0.12) !important;
+    background: rgba(37, 82, 208, 0.12) !important;
     color: var(--primary-color) !important;
     font-weight: 600 !important;
   }
@@ -927,8 +927,8 @@ button.generate-report-btn {
 
   /* Date Picker Panel */
   .mat-datepicker-popup {
-    border-radius: 12px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    border-radius: var(--hr-radius-lg) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
   }
 
   .mat-calendar {
@@ -945,7 +945,7 @@ button.generate-report-btn {
   }
 
   .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
-    background-color: rgba(37, 99, 235, 0.1) !important;
+    background-color: rgba(37, 82, 208, 0.1) !important;
   }
 
   /* Spinner */

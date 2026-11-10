@@ -1,15 +1,15 @@
 // News Dashboard Styles — Slate/Blue Design System
 
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$primary-light: #eff6ff;
-$success: #16a34a;
-$success-light: #dcfce7;
-$border: #e2e8f0;
-$surface: #f8fafc;
-$text: #0f172a;
-$text-secondary: #64748b;
-$text-muted: #94a3b8;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$primary-light: #eef3fd;
+$success: #2e7d4f;
+$success-light: #eaf3ee;
+$border: #dde1e6;
+$surface: #f7f8fa;
+$text: #1f2328;
+$text-secondary: #5f6670;
+$text-muted: #8b929b;
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 .ts-page-layout {
@@ -25,9 +25,9 @@ $text-muted: #94a3b8;
 // ── Card defaults ─────────────────────────────────────────────────────────────
 .ts-card {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid $border;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 // ── Filters Section ───────────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ $text-muted: #94a3b8;
 ::ng-deep .nd-mat-field {
   .mat-mdc-text-field-wrapper {
     background: #ffffff !important;
-    border-radius: 8px !important;
+    border-radius: var(--hr-radius) !important;
     padding: 0 16px !important;
     border: 1px solid $border !important;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -76,7 +76,7 @@ $text-muted: #94a3b8;
   &:hover .mat-mdc-text-field-wrapper { border-color: $text-muted !important; }
   &.mat-focused .mat-mdc-text-field-wrapper {
     border-color: $primary !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: none;
   }
 }
 
@@ -87,12 +87,12 @@ $text-muted: #94a3b8;
   gap: 6px;
   height: 42px !important;
   padding: 0 20px !important;
-  border-radius: 8px !important;
+  border-radius: var(--hr-radius) !important;
   font-size: 0.875rem !important;
   font-weight: 600 !important;
   background: $primary !important;
   color: #ffffff !important;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.28) !important;
+  box-shadow: var(--hr-shadow-sm) !important;
   border: none !important;
   cursor: pointer;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
@@ -106,11 +106,11 @@ $text-muted: #94a3b8;
   gap: 6px;
   height: 42px !important;
   padding: 0 20px !important;
-  border-radius: 8px !important;
+  border-radius: var(--hr-radius) !important;
   font-size: 0.875rem !important;
   font-weight: 600 !important;
   background: #ffffff !important;
-  color: #475569 !important;
+  color: var(--hr-text-2) !important;
   border: 1px solid $border !important;
   cursor: pointer;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
@@ -137,7 +137,7 @@ $text-muted: #94a3b8;
   border-spacing: 0;
 
   th.mat-mdc-header-cell {
-    background: #f8fafc;
+    background: var(--hr-surface-2);
     color: $text-secondary;
     font-size: 0.75rem;
     font-weight: 600;
@@ -154,7 +154,7 @@ $text-muted: #94a3b8;
   }
 
   .ts-row-hover:hover td {
-    background: #f1f5f9;
+    background: var(--hr-border-soft);
     cursor: pointer;
   }
 }
@@ -184,7 +184,7 @@ $text-muted: #94a3b8;
 .nd-visible-icon {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   background: $surface;
   border: 1px solid $border;
   display: flex;
@@ -200,7 +200,7 @@ $text-muted: #94a3b8;
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: var(--hr-radius-xl);
   font-size: 0.75rem;
   font-weight: 600;
   background: $surface;
@@ -217,15 +217,15 @@ $text-muted: #94a3b8;
     .ts-dot { background: $success; }
   }
   &.ts-chip-draft {
-    background: #f1f5f9;
+    background: var(--hr-border-soft);
   }
   &.ts-chip-announcement, &.ts-chip-company {
     background: $primary-light; border-color: transparent; color: $primary;
     .ts-dot { background: $primary; }
   }
   &.ts-chip-policy {
-    background: #fef3c7; border-color: transparent; color: #d97706;
-    .ts-dot { background: #d97706; }
+    background: var(--hr-warning-soft); border-color: transparent; color: var(--hr-warning);
+    .ts-dot { background: var(--hr-warning); }
   }
 }
 
@@ -240,7 +240,7 @@ $text-muted: #94a3b8;
   
   .ts-toggle-track {
     width: 36px; height: 20px; border-radius: 10px;
-    background: #cbd5e1;
+    background: var(--hr-border-strong);
     position: relative;
     transition: background 0.2s;
   }
@@ -266,26 +266,26 @@ $text-muted: #94a3b8;
 .ts-action-btn {
   width: 32px !important; height: 32px !important;
   color: $text-muted !important;
-  &:hover { background: #f1f5f9 !important; color: $text !important; }
+  &:hover { background: var(--hr-border-soft) !important; color: $text !important; }
 }
 
 ::ng-deep .ts-action-menu {
   min-width: 160px !important;
-  border-radius: 8px !important;
+  border-radius: var(--hr-radius) !important;
   padding: 4px !important;
   
   .mat-mdc-menu-item {
     min-height: 36px !important;
-    border-radius: 6px !important;
+    border-radius: var(--hr-radius) !important;
     font-size: 0.875rem !important;
     color: $text !important;
     mat-icon { margin-right: 8px !important; color: $text-secondary !important; }
     
-    &:hover { background: #f8fafc !important; }
+    &:hover { background: var(--hr-surface-2) !important; }
     &.ts-menu-danger {
-      color: #dc2626 !important;
-      mat-icon { color: #dc2626 !important; }
-      &:hover { background: #fef2f2 !important; }
+      color: var(--hr-danger) !important;
+      mat-icon { color: var(--hr-danger) !important; }
+      &:hover { background: var(--hr-danger-soft) !important; }
     }
   }
 }
@@ -308,7 +308,7 @@ $text-muted: #94a3b8;
 
   .ts-empty-icon {
     width: 64px; height: 64px; border-radius: 16px;
-    background: #f1f5f9; color: $text-muted;
+    background: var(--hr-border-soft); color: $text-muted;
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 16px;
     mat-icon { font-size: 32px; width: 32px; height: 32px; }
@@ -322,7 +322,7 @@ $text-muted: #94a3b8;
 // ── Paginator ─────────────────────────────────────────────────────────────────
 ::ng-deep .ts-paginator {
   background: transparent !important;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 var(--hr-radius-lg) var(--hr-radius-lg);
   .mat-mdc-paginator-container { min-height: 52px; padding: 0 16px; }
   .mat-mdc-paginator-range-label { font-size: 0.875rem; color: $text-secondary; }
   .mat-mdc-paginator-page-size-label { font-size: 0.875rem; color: $text-secondary; }

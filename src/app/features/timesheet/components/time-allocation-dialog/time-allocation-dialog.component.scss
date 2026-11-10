@@ -8,7 +8,7 @@
 
 .ts-day-card {
   border: 1px solid attendance-dialog.$ad-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   margin-bottom: 12px;
   overflow: hidden;
   background: attendance-dialog.$ad-input-bg;
@@ -19,7 +19,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  background: #f8fafc;
+  background: var(--hr-surface-2);
   border-bottom: 1px solid attendance-dialog.$ad-border;
 }
 
@@ -42,9 +42,9 @@
 .ts-day-allocated {
   font-weight: 600;
 
-  &.balanced { color: #16a34a; }
-  &.over { color: #dc2626; }
-  &.under { color: #d97706; }
+  &.balanced { color: var(--hr-success); }
+  &.over { color: var(--hr-danger); }
+  &.under { color: var(--hr-warning); }
   &.none { color: attendance-dialog.$ad-text-muted; }
 }
 
@@ -96,19 +96,19 @@
   cursor: pointer;
   font-size: 0.75rem;
   padding: 4px 6px;
-  border-radius: 4px;
+  border-radius: var(--hr-radius);
   color: attendance-dialog.$ad-text-muted;
 
-  &:hover { background: #f1f5f9; color: attendance-dialog.$ad-text-primary; }
+  &:hover { background: var(--hr-border-soft); color: attendance-dialog.$ad-text-primary; }
 }
 
-.ts-remove-btn:hover { background: #fef2f2 !important; color: #dc2626 !important; }
+.ts-remove-btn:hover { background: var(--hr-danger-soft) !important; color: var(--hr-danger) !important; }
 
 .ts-btn-add-row {
   background: none;
   border: 1px dashed attendance-dialog.$ad-border;
   padding: 6px 12px;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   cursor: pointer;
   font-size: 0.8125rem;
   color: attendance-dialog.$ad-text-secondary;
@@ -120,7 +120,7 @@
   &:hover {
     border-color: attendance-dialog.$ad-primary;
     color: attendance-dialog.$ad-primary;
-    background: #eff6ff;
+    background: var(--hr-navy-soft);
   }
 }
 
@@ -129,5 +129,5 @@
   height: 36px !important;
   background: attendance-dialog.$ad-input-bg !important;
   border: 1px solid attendance-dialog.$ad-border !important;
-  border-radius: 0.5rem !important;
+  border-radius: var(--hr-radius) !important;
 }

@@ -9,8 +9,8 @@
   padding: 80px 24px;
   gap: 16px;
 
-  p { margin: 0; font-size: 0.875rem; color: #94a3b8; }
-  ::ng-deep .mat-mdc-progress-spinner circle { stroke: #2563eb; }
+  p { margin: 0; font-size: 0.875rem; color: var(--hr-text-subtle); }
+  ::ng-deep .mat-mdc-progress-spinner circle { stroke: var(--hr-navy); }
 }
 
 // Settings card
@@ -26,7 +26,7 @@
   gap: 10px;
   padding: 16px 24px;
   background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--hr-border);
 
   .sg-section-icon {
     display: flex;
@@ -34,20 +34,20 @@
     justify-content: center;
     flex-shrink: 0;
 
-    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #94a3b8; }
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: var(--hr-text-subtle); }
   }
 
   .sg-section-title {
     margin: 0 0 2px;
     font-size: 1rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--hr-text);
   }
 
   .sg-section-subtitle {
     margin: 0;
     font-size: 0.8125rem;
-    color: #94a3b8;
+    color: var(--hr-text-subtle);
   }
 }
 
@@ -73,7 +73,7 @@
 .sg-label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--hr-text-2);
   display: block;
 }
 
@@ -84,22 +84,22 @@
   ::ng-deep {
     .mat-mdc-text-field-wrapper {
       background: #ffffff !important;
-      border-radius: 8px !important;
+      border-radius: var(--hr-radius) !important;
     }
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
-      border-color: #e2e8f0 !important;
+      border-color: var(--hr-border) !important;
     }
     .mat-mdc-form-field-infix { padding: 10px 0 !important; min-height: unset; }
-    input, .mat-mdc-select-value-text { font-size: 0.875rem; color: #0f172a; }
-    mat-icon[matPrefix] { color: #94a3b8; font-size: 18px; width: 18px; height: 18px; margin-right: 8px; }
-    .mat-mdc-form-field-hint { font-size: 0.75rem; color: #94a3b8; }
+    input, .mat-mdc-select-value-text { font-size: 0.875rem; color: var(--hr-text); }
+    mat-icon[matPrefix] { color: var(--hr-text-subtle); font-size: 18px; width: 18px; height: 18px; margin-right: 8px; }
+    .mat-mdc-form-field-hint { font-size: 0.75rem; color: var(--hr-text-subtle); }
 
     &.mat-focused {
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing { border-color: #2563eb !important; border-width: 1.5px !important; }
+      .mdc-notched-outline__trailing { border-color: var(--hr-navy) !important; border-width: 1.5px !important; }
     }
   }
 }
@@ -111,12 +111,12 @@
   gap: 10px;
 
   .sg-code-badge {
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--hr-navy-soft);
+    color: var(--hr-navy);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     padding: 3px 8px;
-    border-radius: 5px;
+    border-radius: var(--hr-radius);
   }
 }
 
@@ -128,11 +128,11 @@
   width: 100%;
 
   .sg-culture-main {
-    .sg-culture-code { font-weight: 700; color: #0f172a; font-size: 0.875rem; }
-    .sg-culture-name { color: #64748b; font-size: 0.8125rem; }
+    .sg-culture-code { font-weight: 700; color: var(--hr-text); font-size: 0.875rem; }
+    .sg-culture-name { color: var(--hr-text-muted); font-size: 0.8125rem; }
   }
 
-  .sg-culture-preview { font-size: 0.75rem; color: #94a3b8; }
+  .sg-culture-preview { font-size: 0.75rem; color: var(--hr-text-subtle); }
 }
 
 // Form actions — span full width in grid
@@ -143,7 +143,7 @@
   justify-content: flex-end;
   gap: 12px;
   padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--hr-border);
 
   @media (max-width: 768px) { flex-direction: column; }
 }

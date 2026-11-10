@@ -10,27 +10,27 @@
   letter-spacing: 0.3px;
   white-space: nowrap;
 
-  &.ts-draft        { background: #f1f5f9; color: var(--ts-status-draft); }
-  &.ts-inprogress   { background: #DBEAFE; color: var(--ts-status-inprogress); }
-  &.ts-submitted    { background: var(--ts-warning-bg); color: #b45309; }
-  &.ts-underreview  { background: #eff6ff; color: var(--ts-status-underreview); }
-  &.ts-approved     { background: var(--ts-success-bg); color: #15803d; }
-  &.ts-finalized    { background: var(--ts-success-bg); color: #15803d; }
-  &.ts-locked       { background: var(--ts-danger-bg); color: #b91c1c; }
-  &.ts-archived     { background: #f1f5f9; color: var(--ts-text-subtle); }
+  &.ts-draft        { background: var(--hr-border-soft); color: var(--ts-status-draft); }
+  &.ts-inprogress   { background: var(--hr-navy-soft); color: var(--ts-status-inprogress); }
+  &.ts-submitted    { background: var(--ts-warning-bg); color: var(--hr-warning-ink); }
+  &.ts-underreview  { background: var(--hr-navy-soft); color: var(--ts-status-underreview); }
+  &.ts-approved     { background: var(--ts-success-bg); color: var(--hr-success-ink); }
+  &.ts-finalized    { background: var(--ts-success-bg); color: var(--hr-success-ink); }
+  &.ts-locked       { background: var(--ts-danger-bg); color: var(--hr-danger-ink); }
+  &.ts-archived     { background: var(--hr-border-soft); color: var(--ts-text-subtle); }
 
   // Semantic aliases
-  &.ts-pending      { background: var(--ts-warning-bg); color: #92400E; }
-  &.ts-active       { background: var(--ts-success-bg); color: #15803d; }
-  &.ts-inactive     { background: #f1f5f9; color: var(--ts-text-subtle); }
-  &.ts-error        { background: var(--ts-danger-bg); color: #b91c1c; }
+  &.ts-pending      { background: var(--ts-warning-bg); color: var(--hr-warning-ink); }
+  &.ts-active       { background: var(--ts-success-bg); color: var(--hr-success-ink); }
+  &.ts-inactive     { background: var(--hr-border-soft); color: var(--ts-text-subtle); }
+  &.ts-error        { background: var(--ts-danger-bg); color: var(--hr-danger-ink); }
 
   // Day status pills for daily grid
-  &.ts-present      { background: var(--ts-success-bg); color: #16A34A; }
-  &.ts-late         { background: var(--ts-danger-bg); color: #b91c1c; }
-  &.ts-absent       { background: var(--ts-danger-bg); color: #b91c1c; }
-  &.ts-on-leave     { background: #DBEAFE; color: #2563EB; }
-  &.ts-half-day     { background: #eff6ff; color: #2563eb; }
+  &.ts-present      { background: var(--ts-success-bg); color: var(--hr-success); }
+  &.ts-late         { background: var(--ts-danger-bg); color: var(--hr-danger-ink); }
+  &.ts-absent       { background: var(--ts-danger-bg); color: var(--hr-danger-ink); }
+  &.ts-on-leave     { background: var(--hr-navy-soft); color: var(--hr-navy); }
+  &.ts-half-day     { background: var(--hr-navy-soft); color: var(--hr-navy); }
 }
 
 // PrimeNG p-tag overrides

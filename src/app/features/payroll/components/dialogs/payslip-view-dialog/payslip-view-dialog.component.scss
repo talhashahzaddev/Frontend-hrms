@@ -1,12 +1,12 @@
 .payslip-view-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 1rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
-  box-shadow: 0 24px 44px rgba(37, 99, 235, 0.14);
+  box-shadow: var(--hr-shadow-lg);
 }
 
 .payslip-view-dialog-panel .mdc-dialog__surface {
-  border-radius: 1rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
 }
 
@@ -15,7 +15,7 @@
   max-height: 92vh;
   overflow: auto;
   background: #ffffff;
-  color: #0f172a;
+  color: var(--hr-text);
   font-family: 'Inter', 'Public Sans', sans-serif;
 
   .modal-header {
@@ -29,7 +29,7 @@
       margin: 0;
       font-family: 'Manrope', 'Inter', sans-serif;
       font-size: 1.2rem;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.01em;
     }
 
@@ -42,15 +42,15 @@
     .ghost-btn {
       min-height: 2.25rem;
       border: 0;
-      border-radius: 0.55rem;
+      border-radius: var(--hr-radius);
       background: transparent;
-      color: #1d4ed8;
+      color: var(--hr-navy-hover);
       padding: 0 0.8rem;
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
 
       &:hover {
@@ -70,14 +70,14 @@
       border: 0;
       border-radius: 999px;
       background: transparent;
-      color: #475569;
+      color: var(--hr-text-2);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
 
       &:hover {
-        background: #f1f5f9;
+        background: var(--hr-border-soft);
       }
     }
   }
@@ -85,7 +85,7 @@
   .employee-strip {
     margin: 0 1.35rem 1rem;
     padding: 0.95rem;
-    border-radius: 0.75rem;
+    border-radius: var(--hr-radius-lg);
     background: #f3f6fa;
     border: 1px solid rgba(195, 198, 215, 0.24);
     display: flex;
@@ -107,24 +107,24 @@
         width: 2.9rem;
         height: 2.9rem;
         border-radius: 999px;
-        background: #1d4ed8;
+        background: var(--hr-navy-hover);
         color: #ffffff;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-weight: 800;
+        font-weight: 600;
         font-size: 1rem;
       }
 
       h2 {
         margin: 0;
         font-size: 1.06rem;
-        font-weight: 700;
+        font-weight: 600;
       }
 
       p {
         margin: 0.15rem 0 0;
-        color: #475569;
+        color: var(--hr-text-2);
         font-size: 0.74rem;
         font-weight: 600;
       }
@@ -132,7 +132,7 @@
       small {
         display: block;
         margin-top: 0.18rem;
-        color: #64748b;
+        color: var(--hr-text-muted);
         font-size: 0.69rem;
       }
     }
@@ -150,13 +150,13 @@
 
       strong {
         display: block;
-        color: #1d4ed8;
-        font-weight: 800;
+        color: var(--hr-navy-hover);
+        font-weight: 600;
         font-size: 0.9rem;
       }
 
       span {
-        color: #475569;
+        color: var(--hr-text-2);
         font-size: 0.74rem;
       }
     }
@@ -174,11 +174,11 @@
 
     h3 {
       margin: 0 0 0.65rem;
-      color: #64748b;
+      color: var(--hr-text-muted);
       font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      font-weight: 800;
+      font-weight: 600;
     }
 
     .section-offset {
@@ -198,11 +198,11 @@
       font-size: 0.85rem;
 
       span {
-        color: #334155;
+        color: var(--hr-text-2);
       }
 
       strong {
-        font-weight: 700;
+        font-weight: 600;
       }
 
       &.strong {
@@ -214,8 +214,8 @@
 
     .total-box {
       margin-top: 0.68rem;
-      border-radius: 0.58rem;
-      background: #e2e8f0;
+      border-radius: var(--hr-radius-lg);
+      background: var(--hr-border);
       padding: 0.7rem 0.75rem;
       display: flex;
       align-items: center;
@@ -224,13 +224,13 @@
 
       span {
         font-size: 0.86rem;
-        font-weight: 700;
+        font-weight: 600;
       }
 
       strong {
         font-family: 'Manrope', 'Inter', sans-serif;
         font-size: 1.08rem;
-        font-weight: 800;
+        font-weight: 600;
       }
 
       &.danger {
@@ -261,29 +261,29 @@
         }
 
         span {
-          color: #64748b;
+          color: var(--hr-text-muted);
         }
 
         strong {
-          color: #1e293b;
-          font-weight: 700;
+          color: var(--hr-text);
+          font-weight: 600;
         }
       }
     }
 
     .mini-card {
-      border-radius: 0.7rem;
+      border-radius: var(--hr-radius-lg);
       padding: 0.8rem;
       background: #f3f6fa;
       border: 1px solid rgba(195, 198, 215, 0.24);
 
       h4 {
         margin: 0 0 0.55rem;
-        color: #64748b;
+        color: var(--hr-text-muted);
         font-size: 0.63rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        font-weight: 800;
+        font-weight: 600;
       }
 
       &.ytd {
@@ -295,7 +295,7 @@
   .payable-bar {
     margin-top: auto;
     padding: 1rem 1.35rem;
-    background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
+    background: var(--hr-navy);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -310,8 +310,8 @@
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      color: #eef2ff;
-      font-weight: 700;
+      color: var(--hr-navy-soft);
+      font-weight: 600;
       font-size: 0.95rem;
 
       mat-icon {
@@ -340,24 +340,24 @@
       strong {
         font-family: 'Manrope', 'Inter', sans-serif;
         font-size: clamp(1.6rem, 3vw, 2rem);
-        font-weight: 800;
+        font-weight: 600;
       }
     }
   }
 }
 
 .tone-default {
-  color: #0f172a;
+  color: var(--hr-text);
 }
 
 .tone-primary {
-  color: #1d4ed8;
+  color: var(--hr-navy-hover);
 }
 
 .tone-danger {
-  color: #b91c1c;
+  color: var(--hr-danger-ink);
 }
 
 .tone-success {
-  color: #059669;
+  color: var(--hr-success);
 }

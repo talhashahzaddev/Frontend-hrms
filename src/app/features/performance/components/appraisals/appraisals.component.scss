@@ -18,11 +18,11 @@
   display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
-  background: #f1f5f9;
-  border-radius: 10px;
+  background: var(--hr-border-soft);
+  border-radius: var(--hr-radius-lg);
   margin-bottom: 1.25rem;
   width: fit-content;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--hr-border);
 }
 
 .perf-sub-tab {
@@ -30,10 +30,10 @@
   align-items: center;
   gap: 6px;
   padding: 0.375rem 0.875rem;
-  border-radius: 7px;
+  border-radius: var(--hr-radius);
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--hr-text-muted);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -47,18 +47,18 @@
   }
 
   &:hover {
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--hr-border);
+    color: var(--hr-text-2);
   }
 
   &.active {
     background: #ffffff;
-    color: #2563eb;
+    color: var(--hr-navy);
     font-weight: 600;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    box-shadow: var(--hr-shadow-sm);
 
     mat-icon {
-      color: #2563eb;
+      color: var(--hr-navy);
     }
   }
 }
@@ -73,51 +73,51 @@
     font-size: 1.125rem;
     width: 1.125rem;
     height: 1.125rem;
-    color: #e2e8f0;
+    color: var(--hr-border);
 
-    &.star-filled { color: #f59e0b; }
+    &.star-filled { color: var(--hr-warning); }
     &.star-half   { color: #fcd34d; }
-    &.star-empty  { color: #e2e8f0; }
+    &.star-empty  { color: var(--hr-border); }
   }
 }
 
 .numeric-rating {
   display: block;
   font-size: 0.6875rem;
-  font-weight: 700;
-  color: #64748b;
+  font-weight: 600;
+  color: var(--hr-text-muted);
   margin-top: 2px;
 }
 
 .no-rating {
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: var(--hr-text-subtle);
 }
 
 .name-sub {
   display: block;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--hr-text-subtle);
   margin-top: 1px;
 }
 
 .goal-cell {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
 }
 
 .empty-state-inline {
   padding: 2rem;
   text-align: center;
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--hr-text-subtle);
 }
 
 // Section sub-headers
 .appraisal-section-title {
   font-size: 0.9375rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 600;
+  color: var(--hr-text);
   margin: 0 0 1rem;
   display: flex;
   align-items: center;
@@ -126,7 +126,7 @@
 
 // Chip overrides for KRA/status (via ng-deep so they apply to mat-chip inside component)
 ::ng-deep .mat-mdc-chip {
-  border-radius: 6px !important;
+  border-radius: var(--hr-radius) !important;
   font-size: 0.6875rem !important;
   font-weight: 600 !important;
   height: 22px !important;
@@ -134,24 +134,24 @@
 
   .mdc-evolution-chip__text-label { font-size: 0.6875rem !important; }
 
-  &.chip-blue     { background: #eff6ff !important; color: #2563eb !important; }
-  &.chip-green    { background: #f0fdf4 !important; color: #16a34a !important; }
-  &.chip-yellow   { background: #fffbeb !important; color: #d97706 !important; }
-  &.chip-pending  { background: #fffbeb !important; color: #d97706 !important; }
-  &.chip-completed { background: #dcfce7 !important; color: #16a34a !important; }
-  &.chip-rejected  { background: #fee2e2 !important; color: #dc2626 !important; }
+  &.chip-blue     { background: var(--hr-navy-soft) !important; color: var(--hr-navy) !important; }
+  &.chip-green    { background: var(--hr-success-soft) !important; color: var(--hr-success) !important; }
+  &.chip-yellow   { background: var(--hr-warning-soft) !important; color: var(--hr-warning) !important; }
+  &.chip-pending  { background: var(--hr-warning-soft) !important; color: var(--hr-warning) !important; }
+  &.chip-completed { background: var(--hr-success-soft) !important; color: var(--hr-success) !important; }
+  &.chip-rejected  { background: var(--hr-danger-soft) !important; color: var(--hr-danger) !important; }
 }
 
 // Header action button
 .header-action-button {
-  background: #2563eb !important;
+  background: var(--hr-navy) !important;
   color: #ffffff !important;
-  border-radius: 8px !important;
+  border-radius: var(--hr-radius) !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px;
   height: 40px !important;
   font-size: 0.875rem !important;
   font-weight: 600 !important;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.3) !important;
+  box-shadow: var(--hr-shadow-sm) !important;
 }

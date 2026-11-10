@@ -7,12 +7,12 @@
 @include ad.ad-panel-shell;
 
 .daily-card.is-requested {
-  border: 1.5px dashed #2563eb;
-  box-shadow: 0 0 6px 0 rgba(37, 99, 235, 0.08);
+  border: 1.5px dashed var(--hr-navy);
+  box-shadow: var(--hr-shadow-md);
   position: relative;
 
   .requested-icon {
-    color: #2563eb;
+    color: var(--hr-navy);
     font-size: 14px;
     vertical-align: middle;
     margin-left: 4px;
@@ -22,11 +22,11 @@
     position: absolute;
     top: 8px;
     right: 10px;
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--hr-navy-soft);
+    color: var(--hr-navy);
     font-size: 11px;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: var(--hr-radius-lg);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -48,17 +48,17 @@
     gap: 8px;
     margin: 20px 24px 0;
     padding: 10px 14px;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
-    border: 1px solid #bbf7d0;
-    border-left: 4px solid #22c55e;
-    border-radius: 8px;
-    color: #15803d;
+    background: rgba(46, 125, 79, 0.08);
+    border: 1px solid var(--hr-success-soft);
+    border-left: 4px solid var(--hr-success);
+    border-radius: var(--hr-radius);
+    color: var(--hr-success-ink);
 
     mat-icon {
       font-size: 16px;
       width: 16px;
       height: 16px;
-      color: #22c55e;
+      color: var(--hr-success);
       flex-shrink: 0;
       margin-top: 1px;
     }
@@ -74,8 +74,8 @@
     margin: 20px 24px 0;
     background: ad.$ad-input-bg;
     border: 1px solid ad.$ad-border;
-    border-left: 4px solid #94a3b8;
-    border-radius: 8px;
+    border-left: 4px solid var(--hr-text-subtle);
+    border-radius: var(--hr-radius);
     padding: 14px 16px;
 
     .panel-label {
@@ -83,7 +83,7 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: ad.$ad-text-secondary;
@@ -93,7 +93,7 @@
         font-size: 15px;
         width: 15px;
         height: 15px;
-        color: #94a3b8;
+        color: var(--hr-text-subtle);
       }
     }
 
@@ -117,14 +117,14 @@
 
         .bi-value {
           font-size: 15px;
-          font-weight: 700;
+          font-weight: 600;
           color: ad.$ad-text-primary;
 
           &.status-chip {
             display: inline-block;
-            background: #e2e8f0;
+            background: var(--hr-border);
             padding: 1px 8px;
-            border-radius: 12px;
+            border-radius: var(--hr-radius-lg);
             font-size: 13px;
           }
         }
@@ -142,18 +142,18 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #fef2f2;
-      border: 1px solid #fca5a5;
-      border-radius: 6px;
+      background: var(--hr-danger-soft);
+      border: 1px solid var(--hr-danger-soft);
+      border-radius: var(--hr-radius);
       padding: 8px 12px;
       font-size: 13px;
-      color: #b91c1c;
+      color: var(--hr-danger-ink);
 
       mat-icon {
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: #ef4444;
+        color: var(--hr-danger);
       }
     }
 
@@ -162,7 +162,7 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: ad.$ad-primary;

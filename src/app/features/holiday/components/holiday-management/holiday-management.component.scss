@@ -13,14 +13,14 @@
 
     ::ng-deep {
       .mat-mdc-text-field-wrapper {
-        background: #f8fafc;
-        border-radius: 0.5rem !important;
+        background: var(--hr-surface-2);
+        border-radius: var(--hr-radius) !important;
       }
 
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: #e2e8f0 !important;
+        border-color: var(--hr-border) !important;
       }
     }
   }

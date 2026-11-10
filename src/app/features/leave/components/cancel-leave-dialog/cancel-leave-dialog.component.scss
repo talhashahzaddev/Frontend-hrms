@@ -11,19 +11,19 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
+  background: var(--hr-danger-soft);
+  border: 1px solid var(--hr-danger-soft);
+  border-radius: var(--hr-radius);
   margin-bottom: 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #b91c1c;
+  color: var(--hr-danger-ink);
 
   mat-icon {
     font-size: 1.25rem;
     width: 1.25rem;
     height: 1.25rem;
-    color: #dc2626;
+    color: var(--hr-danger);
     flex-shrink: 0;
   }
 }
@@ -31,7 +31,7 @@
 .request-summary-card {
   background: #ffffff;
   border: 1px solid ad.$ad-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1rem;
   margin-bottom: 1rem;
 
@@ -43,7 +43,7 @@
   .summary-icon-wrap {
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,7 +56,7 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.25rem 0.625rem;
-    border-radius: 0.375rem;
+    border-radius: var(--hr-radius);
     font-size: 0.8125rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
@@ -106,8 +106,8 @@
   align-items: flex-start;
   gap: 0.625rem;
   padding: 0.75rem 1rem;
-  background: #eff6ff;
-  border-radius: 0.5rem;
+  background: var(--hr-navy-soft);
+  border-radius: var(--hr-radius);
   border-left: 4px solid ad.$ad-primary;
   font-size: 0.8125rem;
   color: ad.$ad-text-label;
@@ -126,6 +126,6 @@
   background: ad.$ad-danger !important;
 
   &:hover:not([disabled]) {
-    background: #b91c1c !important;
+    background: var(--hr-danger-ink) !important;
   }
 }

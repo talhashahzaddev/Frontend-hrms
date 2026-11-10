@@ -1,19 +1,19 @@
 // ═══ Angular Material theme — HRMS brand ════════════════════════════════════
 // Replaces the stock indigo-pink prebuilt theme. Same M2 component styles,
 // density and type scale, so layouts do not shift; only the colors and the
-// font family change to the HRMS palette (royal blue / deep navy / red).
+// font family change to the HRMS enterprise palette (navy / neutral / muted red).
 @use '@angular/material' as mat;
 
 $_light: rgba(0, 0, 0, 0.87);
 $_dark: #ffffff;
 
-// Royal blue scale (500 = #2563EB)
+// Corporate blue scale (500 = #2552D0) — primary and accent
 $hr-blue: (
-  50: #eff6ff, 100: #dbeafe, 200: #bfdbfe, 300: #93c5fd, 400: #60a5fa,
-  500: #2563eb, 600: #1d4ed8, 700: #1e40af, 800: #1e3a8a, 900: #172554,
-  A100: #dbeafe, A200: #60a5fa, A400: #2563eb, A700: #1d4ed8,
+  50: #eef3fd, 100: #d6e1f9, 200: #b3c7f2, 300: #8fa8e3, 400: #5a7fdc,
+  500: #2552d0, 600: #2149bd, 700: #1e44ae, 800: #1a3a94, 900: #142d73,
+  A100: #d6e1f9, A200: #8fa8e3, A400: #2552d0, A700: #1e44ae,
   contrast: (
-    50: $_light, 100: $_light, 200: $_light, 300: $_light, 400: $_light,
+    50: $_light, 100: $_light, 200: $_light, 300: $_light, 400: $_dark,
     500: $_dark, 600: $_dark, 700: $_dark, 800: $_dark, 900: $_dark,
     A100: $_light, A200: $_light, A400: $_dark, A700: $_dark,
   )
@@ -31,13 +31,13 @@ $hr-navy: (
   )
 );
 
-// Red scale (500 = #DC2626)
+// Muted red scale (500 = #B42318) — errors and destructive actions only
 $hr-red: (
-  50: #fef2f2, 100: #fee2e2, 200: #fecaca, 300: #fca5a5, 400: #f87171,
-  500: #dc2626, 600: #b91c1c, 700: #991b1b, 800: #7f1d1d, 900: #450a0a,
-  A100: #fee2e2, A200: #f87171, A400: #dc2626, A700: #b91c1c,
+  50: #fbeae9, 100: #f5cdca, 200: #eba29c, 300: #de6f66, 400: #c9463b,
+  500: #b42318, 600: #a01f15, 700: #8a1c14, 800: #721710, 900: #5a120c,
+  A100: #f5cdca, A200: #de6f66, A400: #b42318, A700: #8a1c14,
   contrast: (
-    50: $_light, 100: $_light, 200: $_light, 300: $_light, 400: $_light,
+    50: $_light, 100: $_light, 200: $_light, 300: $_light, 400: $_dark,
     500: $_dark, 600: $_dark, 700: $_dark, 800: $_dark, 900: $_dark,
     A100: $_light, A200: $_light, A400: $_dark, A700: $_dark,
   )
@@ -50,7 +50,7 @@ $hr-theme: mat.m2-define-light-theme((
     warn: mat.m2-define-palette($hr-red, 500, 300, 700),
   ),
   typography: mat.m2-define-typography-config(
-    $font-family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    $font-family: "'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, Roboto, sans-serif"
   ),
   density: 0,
 ));

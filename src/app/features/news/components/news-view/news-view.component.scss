@@ -1,16 +1,16 @@
 // News View Styles — Slate/Blue Design System
 
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$primary-light: #eff6ff;
-$success: #16a34a;
-$success-light: #dcfce7;
-$danger: #dc2626;
-$border: #e2e8f0;
-$surface: #f8fafc;
-$text: #0f172a;
-$text-secondary: #64748b;
-$text-muted: #94a3b8;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$primary-light: #eef3fd;
+$success: #2e7d4f;
+$success-light: #eaf3ee;
+$danger: #b42318;
+$border: #dde1e6;
+$surface: #f7f8fa;
+$text: #1f2328;
+$text-secondary: #5f6670;
+$text-muted: #8b929b;
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 .ts-page-layout {
@@ -26,9 +26,9 @@ $text-muted: #94a3b8;
 // ── Card defaults ─────────────────────────────────────────────────────────────
 .ts-card {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid $border;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
@@ -38,11 +38,11 @@ $text-muted: #94a3b8;
   gap: 8px;
   height: 42px !important;
   padding: 0 20px !important;
-  border-radius: 8px !important;
+  border-radius: var(--hr-radius) !important;
   font-size: 0.9375rem !important;
   font-weight: 600 !important;
   background: #ffffff !important;
-  color: #475569 !important;
+  color: var(--hr-text-2) !important;
   border: 1px solid $border !important;
   &:hover:not(:disabled) { background: $surface !important; }
   &:disabled { opacity: 0.5; }
@@ -78,7 +78,7 @@ $text-muted: #94a3b8;
 .nv-title {
   margin: 0 0 24px;
   font-size: 2.25rem;
-  font-weight: 800;
+  font-weight: 600;
   color: $text;
   line-height: 1.25;
   letter-spacing: -0.02em;
@@ -118,7 +118,7 @@ $text-muted: #94a3b8;
 .nv-body {
   font-size: 1.0625rem;
   line-height: 1.7;
-  color: #334155;
+  color: var(--hr-text-2);
 
   ::ng-deep {
     p { margin-bottom: 1.5em; }
@@ -138,7 +138,7 @@ $text-muted: #94a3b8;
     img {
       max-width: 100%;
       height: auto;
-      border-radius: 8px;
+      border-radius: var(--hr-radius);
       margin: 1.5em 0;
     }
   }
@@ -150,7 +150,7 @@ $text-muted: #94a3b8;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: var(--hr-radius-xl);
   font-size: 0.8125rem;
   font-weight: 600;
   background: $surface;
@@ -167,15 +167,15 @@ $text-muted: #94a3b8;
     .ts-dot { background: $success; }
   }
   &.ts-chip-draft {
-    background: #f1f5f9;
+    background: var(--hr-border-soft);
   }
   &.ts-chip-announcement, &.ts-chip-company {
     background: $primary-light; border-color: transparent; color: $primary;
     .ts-dot { background: $primary; }
   }
   &.ts-chip-policy {
-    background: #fef3c7; border-color: transparent; color: #d97706;
-    .ts-dot { background: #d97706; }
+    background: var(--hr-warning-soft); border-color: transparent; color: var(--hr-warning);
+    .ts-dot { background: var(--hr-warning); }
   }
 }
 

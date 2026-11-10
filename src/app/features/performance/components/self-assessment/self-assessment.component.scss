@@ -5,10 +5,10 @@
 
 .assessment-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid var(--hr-border);
+  border-radius: var(--hr-radius-lg);
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--hr-shadow-sm);
   margin-bottom: 1.25rem;
 }
 
@@ -20,22 +20,22 @@
   padding: 4rem 1.5rem;
   text-align: center;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid var(--hr-border);
+  border-radius: var(--hr-radius-lg);
   margin-top: 1rem;
 
-  mat-icon { font-size: 3rem; color: #94a3b8; margin-bottom: 1rem; }
-  h2 { font-size: 1.125rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem; }
-  p { font-size: 0.875rem; color: #64748b; margin: 0; }
+  mat-icon { font-size: 3rem; color: var(--hr-text-subtle); margin-bottom: 1rem; }
+  h2 { font-size: 1.125rem; font-weight: 700; color: var(--hr-text); margin: 0 0 0.5rem; }
+  p { font-size: 0.875rem; color: var(--hr-text-muted); margin: 0; }
 }
 
 .submitted-info {
   margin-bottom: 1.25rem;
 
   mat-card {
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    border: 1px solid #dcfce7;
+    border-radius: var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-sm);
+    border: 1px solid var(--hr-success-soft);
 
     .submitted-content {
       display: flex;
@@ -44,9 +44,9 @@
       padding: 2rem;
       text-align: center;
 
-      mat-icon { font-size: 3rem; color: #16a34a; margin-bottom: 0.75rem; }
-      h2 { font-size: 1.125rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem; }
-      p { font-size: 0.875rem; color: #64748b; margin: 0; }
+      mat-icon { font-size: 3rem; color: var(--hr-success); margin-bottom: 0.75rem; }
+      h2 { font-size: 1.125rem; font-weight: 700; color: var(--hr-text); margin: 0 0 0.5rem; }
+      p { font-size: 0.875rem; color: var(--hr-text-muted); margin: 0; }
     }
   }
 }
@@ -55,8 +55,8 @@
 .step-content {
   padding: 1rem 0;
 
-  h3 { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0 0 0.25rem; }
-  .step-description { font-size: 0.875rem; color: #64748b; margin: 0 0 1rem; }
+  h3 { font-size: 1rem; font-weight: 700; color: var(--hr-text); margin: 0 0 0.25rem; }
+  .step-description { font-size: 0.875rem; color: var(--hr-text-muted); margin: 0 0 1rem; }
 }
 
 .assessment-panel { margin-bottom: 0.75rem; }
@@ -82,51 +82,51 @@
   align-items: center;
   gap: 8px;
   padding: 1rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
+  background: var(--hr-surface-2);
+  border-radius: var(--hr-radius);
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
 
-  mat-icon { color: #94a3b8; }
+  mat-icon { color: var(--hr-text-subtle); }
 }
 
 // Submitted assessments
 .submitted-assessments-card {
   margin-top: 1.25rem;
-  border-radius: 0.75rem !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  border-radius: var(--hr-radius-lg) !important;
+  box-shadow: var(--hr-shadow-sm) !important;
 
   .assessments-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
   .assessment-item {
     padding: 0.875rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.625rem;
+    background: var(--hr-surface-2);
+    border: 1px solid var(--hr-border);
+    border-radius: var(--hr-radius-lg);
 
     .assessment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-    .assessment-details { display: flex; gap: 1rem; font-size: 0.8125rem; color: #64748b; }
-    .rating { font-weight: 600; color: #0f172a; }
-    .date { color: #94a3b8; }
-    .comments { font-size: 0.8125rem; color: #64748b; margin: 0.5rem 0 0; font-style: italic; }
+    .assessment-details { display: flex; gap: 1rem; font-size: 0.8125rem; color: var(--hr-text-muted); }
+    .rating { font-weight: 600; color: var(--hr-text); }
+    .date { color: var(--hr-text-subtle); }
+    .comments { font-size: 0.8125rem; color: var(--hr-text-muted); margin: 0.5rem 0 0; font-style: italic; }
   }
 }
 
-.cycle-dates { font-size: 0.8125rem; color: #64748b; margin-left: 8px; }
+.cycle-dates { font-size: 0.8125rem; color: var(--hr-text-muted); margin-left: 8px; }
 
 .rating-field {
   .rating-value {
     font-size: 1rem;
-    font-weight: 700;
-    color: #2563eb;
+    font-weight: 600;
+    color: var(--hr-navy);
     margin-left: 8px;
   }
 }
 
 .review-summary {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  background: var(--hr-surface-2);
+  border: 1px solid var(--hr-border);
+  border-radius: var(--hr-radius);
   padding: 1rem;
   margin-bottom: 1rem;
   display: grid;
@@ -137,7 +137,7 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.875rem;
-    color: #64748b;
-    strong { color: #0f172a; }
+    color: var(--hr-text-muted);
+    strong { color: var(--hr-text); }
   }
 }

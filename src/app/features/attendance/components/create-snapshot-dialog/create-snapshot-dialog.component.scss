@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ef4444;
+  color: var(--hr-danger);
   font-size: 0.8125rem;
 
   mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
@@ -38,11 +38,11 @@
   align-items: center;
   gap: 8px;
   padding: 0.75rem 1rem;
-  background: #eff6ff;
-  border-radius: 0.5rem;
+  background: var(--hr-navy-soft);
+  border-radius: var(--hr-radius);
   border-left: 4px solid attendance-dialog.$ad-primary;
   font-size: 0.8125rem;
-  color: #1e40af;
+  color: var(--hr-navy-hover);
 
   mat-icon { color: attendance-dialog.$ad-primary; flex-shrink: 0; }
 }

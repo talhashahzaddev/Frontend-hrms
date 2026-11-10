@@ -1,19 +1,19 @@
 .reissue-payslip-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 0.9rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
-  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--hr-shadow-lg);
 }
 
 .reissue-payslip-dialog-panel .mdc-dialog__surface {
-  border-radius: 0.9rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
 }
 
 .reissue-dialog {
   width: min(520px, 96vw);
   background: #ffffff;
-  color: #0f172a;
+  color: var(--hr-text);
   font-family: 'Inter', 'Public Sans', sans-serif;
 
   header {
@@ -28,7 +28,7 @@
       margin: 0;
       font-family: 'Manrope', 'Inter', sans-serif;
       font-size: 1.15rem;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     button {
@@ -37,14 +37,14 @@
       border: 0;
       border-radius: 999px;
       background: transparent;
-      color: #475569;
+      color: var(--hr-text-2);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
 
       &:hover {
-        background: #f1f5f9;
+        background: var(--hr-border-soft);
       }
     }
   }
@@ -58,7 +58,7 @@
       display: flex;
       align-items: flex-start;
       gap: 0.6rem;
-      border-radius: 0.6rem;
+      border-radius: var(--hr-radius-lg);
       border-left: 3px solid #ba1a1a;
       background: rgba(255, 218, 214, 0.35);
       padding: 0.7rem;
@@ -82,16 +82,16 @@
     .history {
       h3 {
         margin: 0 0 0.5rem;
-        color: #475569;
+        color: var(--hr-text-2);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 600;
       }
 
       .history-table-wrap {
         border: 1px solid #e5e9f0;
-        border-radius: 0.6rem;
+        border-radius: var(--hr-radius-lg);
         overflow: hidden;
       }
 
@@ -100,15 +100,15 @@
         border-collapse: collapse;
 
         thead {
-          background: #f1f5f9;
+          background: var(--hr-border-soft);
 
           th {
             text-align: left;
             font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #64748b;
-            font-weight: 800;
+            color: var(--hr-text-muted);
+            font-weight: 600;
             padding: 0.55rem 0.7rem;
 
             &.text-right {
@@ -119,7 +119,7 @@
 
         tbody td {
           font-size: 0.84rem;
-          color: #1e293b;
+          color: var(--hr-text);
           padding: 0.62rem 0.7rem;
           border-top: 1px solid #eef2f7;
 
@@ -130,7 +130,7 @@
 
         .empty-row {
           text-align: center;
-          color: #64748b;
+          color: var(--hr-text-muted);
           font-style: italic;
         }
       }
@@ -141,7 +141,7 @@
       gap: 0.35rem;
 
       label {
-        color: #334155;
+        color: var(--hr-text-2);
         font-size: 0.84rem;
         font-weight: 600;
       }
@@ -151,16 +151,16 @@
         width: 100%;
         box-sizing: border-box;
         border: 1px solid #d9e0ea;
-        border-radius: 0.55rem;
+        border-radius: var(--hr-radius);
         background: #ffffff;
-        color: #0f172a;
+        color: var(--hr-text);
         font-size: 0.88rem;
         padding: 0.58rem 0.72rem;
         outline: none;
 
         &:focus {
-          border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.11);
+          border-color: var(--hr-navy);
+          box-shadow: none;
         }
       }
 
@@ -169,7 +169,7 @@
       }
 
       .field-error {
-        color: #b91c1c;
+        color: var(--hr-danger-ink);
         font-size: 0.73rem;
       }
     }
@@ -179,7 +179,7 @@
       align-items: center;
       gap: 0.5rem;
       font-size: 0.88rem;
-      color: #1e293b;
+      color: var(--hr-text);
 
       input {
         width: 1rem;
@@ -200,16 +200,16 @@
     button {
       min-height: 2.2rem;
       border: 0;
-      border-radius: 0.55rem;
+      border-radius: var(--hr-radius);
       font-size: 0.86rem;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       padding: 0 0.9rem;
     }
 
     .cancel-btn {
       background: transparent;
-      color: #1d4ed8;
+      color: var(--hr-navy-hover);
 
       &:hover {
         background: #e6efff;
@@ -217,9 +217,9 @@
     }
 
     .primary-btn {
-      background: linear-gradient(135deg, #2563eb 0%, #2563eb 100%);
+      background: var(--hr-navy);
       color: #ffffff;
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+      box-shadow: var(--hr-shadow-lg);
 
       &:hover {
         filter: brightness(1.02);
@@ -234,27 +234,27 @@
   border-radius: 999px;
   padding: 0.2rem 0.55rem;
   font-size: 0.67rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 
   &.status-draft {
-    background: #e2e8f0;
-    color: #475569;
+    background: var(--hr-border);
+    color: var(--hr-text-2);
   }
 
   &.status-generated {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--hr-success-soft);
+    color: var(--hr-success-ink);
   }
 
   &.status-sent {
-    background: #ccfbf1;
+    background: var(--hr-navy-soft);
     color: #0f766e;
   }
 
   &.status-viewed {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--hr-navy-soft);
+    color: var(--hr-navy-hover);
   }
 }

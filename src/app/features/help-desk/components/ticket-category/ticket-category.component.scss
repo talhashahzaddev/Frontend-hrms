@@ -3,25 +3,25 @@
 .action-menu-btn {
   width: 32px !important;
   height: 32px !important;
-  border-radius: 6px !important;
-  color: #64748b !important;
+  border-radius: var(--hr-radius) !important;
+  color: var(--hr-text-muted) !important;
   mat-icon { font-size: 20px; }
-  &:hover { background: #f1f5f9 !important; }
+  &:hover { background: var(--hr-border-soft) !important; }
 }
 
-.group-link-cell { font-weight: 600; color: #2563eb; }
+.group-link-cell { font-weight: 600; color: var(--hr-navy); }
 
-.td-empty { color: #94a3b8; font-style: italic; font-size: 0.8125rem; }
+.td-empty { color: var(--hr-text-subtle); font-style: italic; font-size: 0.8125rem; }
 
-.delete-action mat-icon { color: #dc2626 !important; }
+.delete-action mat-icon { color: var(--hr-danger) !important; }
 
 .hd-paginator {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--hr-border-soft);
 }
 
 ::ng-deep .mat-mdc-menu-panel {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  border-radius: var(--hr-radius-lg) !important;
+  box-shadow: var(--hr-shadow-lg) !important;
   border: 1px solid #f0f1f5 !important;
   min-width: 150px !important;
   .mat-mdc-menu-content { padding: 6px !important; }

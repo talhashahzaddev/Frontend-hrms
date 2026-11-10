@@ -1,19 +1,19 @@
 @use "sass:color";
 // ── Variables ────────────────────────────────────────────────
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$primary-light: #eff6ff;
-$primary-soft: rgba(37, 99, 235, 0.08);
-$secondary: #1d4ed8;
-$success: #16a34a;
-$danger: #dc2626;
-$warning: #f59e0b;
-$text-primary: #0f172a;
-$text-secondary: #64748b;
-$text-muted: #94a3b8;
-$border: #e2e8f0;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$primary-light: #eef3fd;
+$primary-soft: rgba(37, 82, 208, 0.08);
+$secondary: #1e44ae;
+$success: #2e7d4f;
+$danger: #b42318;
+$warning: #9a6700;
+$text-primary: #1f2328;
+$text-secondary: #5f6670;
+$text-muted: #8b929b;
+$border: #dde1e6;
 $surface: #ffffff;
-$bg: #f8fafc;
+$bg: #f7f8fa;
 
 ::ng-deep {
   .ob-mat-field {
@@ -74,7 +74,7 @@ $bg: #f8fafc;
 
   .step-eyebrow {
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 1.2px;
     text-transform: uppercase;
     color: $primary;
@@ -90,7 +90,7 @@ $bg: #f8fafc;
 
     .step-title {
       font-size: 28px;
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
       color: $text-primary;
       letter-spacing: -0.3px;
@@ -107,13 +107,13 @@ $bg: #f8fafc;
   .progress-track {
     height: 5px;
     background: $border;
-    border-radius: 3px;
+    border-radius: var(--hr-radius);
     overflow: hidden;
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, $primary, $secondary);
-      border-radius: 3px;
+      background: transparent;
+      border-radius: var(--hr-radius);
       transition: width 0.4s ease;
     }
   }
@@ -122,14 +122,14 @@ $bg: #f8fafc;
 // ── Card ─────────────────────────────────────────────────────
 .card {
   background: $surface;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-sm);
   padding: 32px;
   border: 1px solid $border;
 
   .card-title {
     font-size: 1.0625rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-primary;
     margin: 0 0 16px;
     padding-bottom: 12px;
@@ -172,7 +172,7 @@ $bg: #f8fafc;
 .ob-file-upload-zone {
   width: 100%;
   border: 2px dashed $border;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   background: $surface;
   padding: 32px 24px;
   display: flex;
@@ -254,7 +254,7 @@ $bg: #f8fafc;
   gap: 12px;
   background: $bg;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   border: 1px solid $border;
   width: 100%;
 
@@ -288,7 +288,7 @@ $bg: #f8fafc;
 ::ng-deep .ob-mat-field {
   .mat-mdc-text-field-wrapper {
     background: #ffffff !important;
-    border-radius: 8px !important;
+    border-radius: var(--hr-radius) !important;
     padding: 0 16px !important;
     border: 1px solid $border !important;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -309,7 +309,7 @@ $bg: #f8fafc;
   &:hover .mat-mdc-text-field-wrapper { border-color: $text-muted !important; }
   &.mat-focused .mat-mdc-text-field-wrapper {
     border-color: $primary !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: none;
   }
 }
 
@@ -317,7 +317,7 @@ $bg: #f8fafc;
 .entries-section {
   .entries-title {
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-primary;
     margin: 0 0 12px;
   }
@@ -326,7 +326,7 @@ $bg: #f8fafc;
 .entry-card {
   background: $surface;
   border: 1.5px solid $border;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   padding: 16px 18px;
   margin-bottom: 10px;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -349,9 +349,9 @@ $bg: #f8fafc;
     background: $primary-soft;
     color: $primary;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: var(--hr-radius);
     white-space: nowrap;
     text-transform: capitalize;
     flex-shrink: 0;
@@ -409,7 +409,7 @@ $bg: #f8fafc;
 .icon-btn {
   width: 32px;
   height: 32px;
-  border-radius: 7px;
+  border-radius: var(--hr-radius);
   border: 1px solid $border;
   background: none;
   cursor: pointer;
@@ -484,7 +484,7 @@ $bg: #f8fafc;
   align-items: center;
   gap: 6px;
   padding: 11px 26px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -495,13 +495,13 @@ $bg: #f8fafc;
 
 .btn-next {
   @extend %btn-base;
-  background: linear-gradient(135deg, $primary, $secondary);
+  background: transparent;
   color: $surface;
-  box-shadow: 0 4px 12px rgba($primary, 0.2);
+  box-shadow: var(--hr-shadow-md);
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba($primary, 0.3);
+    box-shadow: var(--hr-shadow-lg);
   }
 
   &:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -538,7 +538,7 @@ $bg: #f8fafc;
   background: none;
   border: 1px solid rgba($primary, 0.4);
   color: $primary;
-  border-radius: 6px;
+  border-radius: var(--hr-radius);
   padding: 5px 10px;
   font-size: 12px;
   cursor: pointer;
@@ -551,7 +551,7 @@ $bg: #f8fafc;
   background: none;
   border: 1px solid $border;
   color: $text-primary;
-  border-radius: 5px;
+  border-radius: var(--hr-radius);
   padding: 3px 8px;
   font-size: 11px;
   cursor: pointer;
@@ -576,10 +576,10 @@ $bg: #f8fafc;
 
 // ── Alert ─────────────────────────────────────────────────────
 .alert-error {
-  background: #fff1f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
-  border-radius: 8px;
+  background: var(--hr-danger-soft);
+  border: 1px solid var(--hr-danger-soft);
+  color: var(--hr-danger-ink);
+  border-radius: var(--hr-radius);
   padding: 10px 14px;
   font-size: 13px;
 }
@@ -615,7 +615,7 @@ $bg: #f8fafc;
 
   .bank-hero-title {
     font-size: 26px;
-    font-weight: 800;
+    font-weight: 600;
     color: $text-primary;
     margin: 0 0 10px;
     letter-spacing: -0.4px;
@@ -638,9 +638,9 @@ $bg: #f8fafc;
   gap: 16px;
   margin: 0 28px 20px;
   padding: 14px 18px;
-  background: #f8fafc;
+  background: var(--hr-surface-2);
   border: 1.5px solid $border;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   transition: border-color 0.2s, background 0.2s;
 
   &.active {
@@ -670,19 +670,19 @@ $bg: #f8fafc;
   gap: 12px;
   margin: 0 28px 24px;
   padding: 16px 18px;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 10px;
+  background: var(--hr-warning-soft);
+  border: 1px solid var(--hr-warning-soft);
+  border-radius: var(--hr-radius-lg);
 
   .notice-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
 
   p {
     font-size: 13px;
-    color: #92400e;
+    color: var(--hr-warning-ink);
     margin: 0;
     line-height: 1.6;
 
-    strong { color: #78350f; }
+    strong { color: var(--hr-warning-ink); }
   }
 }
 
@@ -694,7 +694,7 @@ $bg: #f8fafc;
   span {
     display: block;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: $text-secondary;
@@ -719,16 +719,16 @@ $bg: #f8fafc;
 
 .btn-bank-save {
   @extend %btn-base;
-  background: linear-gradient(135deg, $primary, $secondary);
+  background: transparent;
   color: $surface;
   padding: 13px 40px;
-  border-radius: 30px;
+  border-radius: var(--hr-radius-xl);
   font-size: 15px;
-  box-shadow: 0 4px 14px rgba($primary, 0.3);
+  box-shadow: var(--hr-shadow-md);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba($primary, 0.35);
+    box-shadow: var(--hr-shadow-lg);
   }
 
   &:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -740,7 +740,7 @@ $bg: #f8fafc;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
   border-top: 1px solid $border;
-  background: #f8fafc;
+  background: var(--hr-surface-2);
 
   @media (max-width: 640px) { grid-template-columns: 1fr; }
 }
@@ -763,7 +763,7 @@ $bg: #f8fafc;
   .trust-icon-wrap {
     width: 36px;
     height: 36px;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -777,7 +777,7 @@ $bg: #f8fafc;
 
   .trust-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-primary;
     margin: 0 0 3px;
   }
@@ -805,9 +805,9 @@ $bg: #f8fafc;
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #cbd5e1;
+  background-color: var(--hr-border-strong);
   transition: 0.25s ease;
-  border-radius: 26px;
+  border-radius: var(--hr-radius-xl);
 
   &::before {
     position: absolute;
@@ -819,7 +819,7 @@ $bg: #f8fafc;
     background-color: white;
     transition: 0.25s ease;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+    box-shadow: var(--hr-shadow-sm);
   }
 }
 
@@ -829,10 +829,10 @@ input:checked + .slider::before { transform: translateX(22px); }
 // Bank details summary in Verification Hub
 .no-bank-badge {
   font-size: 13px;
-  color: #b45309;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
+  color: var(--hr-warning-ink);
+  background: var(--hr-warning-soft);
+  border: 1px solid var(--hr-warning-soft);
+  border-radius: var(--hr-radius);
   padding: 10px 14px;
 }
 
@@ -864,18 +864,18 @@ input:checked + .slider::before { transform: translateX(22px); }
 
   .review-badge {
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     color: $primary;
     background: $primary-soft;
     padding: 5px 10px;
-    border-radius: 5px;
+    border-radius: var(--hr-radius);
     letter-spacing: 0.5px;
     white-space: nowrap;
   }
 
   h3 {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0;
     color: $text-primary;
     flex: 1;
@@ -891,7 +891,7 @@ input:checked + .slider::before { transform: translateX(22px); }
 
   h4 {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-primary;
     margin: 0 0 14px;
   }
@@ -917,7 +917,7 @@ input:checked + .slider::before { transform: translateX(22px); }
     label {
       display: block;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       color: $text-secondary;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -933,9 +933,9 @@ input:checked + .slider::before { transform: translateX(22px); }
 }
 
 .review-card {
-  background: #fafafa;
+  background: var(--hr-surface-2);
   border: 1px solid $border;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   padding: 14px 16px;
   margin-bottom: 10px;
   transition: border-color 0.15s;
@@ -959,8 +959,8 @@ input:checked + .slider::before { transform: translateX(22px); }
   align-items: center;
   gap: 14px;
   padding: 14px;
-  background: #fafafa;
-  border-radius: 10px;
+  background: var(--hr-surface-2);
+  border-radius: var(--hr-radius-lg);
   margin-bottom: 10px;
 
   .doc-icon {
@@ -971,7 +971,7 @@ input:checked + .slider::before { transform: translateX(22px); }
     align-items: center;
     justify-content: center;
     background: $primary-soft;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     flex-shrink: 0;
   }
 
@@ -983,13 +983,13 @@ input:checked + .slider::before { transform: translateX(22px); }
 
   .doc-status {
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     padding: 5px 10px;
-    border-radius: 6px;
+    border-radius: var(--hr-radius);
     white-space: nowrap;
 
-    &.verified { background: #ecfdf5; color: #065f46; }
-    &.pending  { background: #fff7ed; color: #92400e; }
+    &.verified { background: var(--hr-success-soft); color: var(--hr-success-ink); }
+    &.pending  { background: var(--hr-warning-soft); color: var(--hr-warning-ink); }
   }
 }
 
@@ -997,7 +997,7 @@ input:checked + .slider::before { transform: translateX(22px); }
   width: 100%;
   padding: 12px;
   border: 1.5px solid $border;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   font-size: 14px;
   font-family: inherit;
   color: $text-primary;
@@ -1026,12 +1026,12 @@ input:checked + .slider::before { transform: translateX(22px); }
 .sidebar-card {
   background: $surface;
   border: 1.5px solid $border;
-  border-radius: 14px;
+  border-radius: var(--hr-radius-lg);
   padding: 18px;
 
   h4 {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-secondary;
     text-transform: uppercase;
     letter-spacing: 0.6px;
@@ -1044,20 +1044,20 @@ input:checked + .slider::before { transform: translateX(22px); }
     width: 100%;
     height: 8px;
     background: $border;
-    border-radius: 4px;
+    border-radius: var(--hr-radius);
     overflow: hidden;
     margin-bottom: 10px;
 
     .sidebar-progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, $primary, $secondary);
+      background: transparent;
       transition: width 0.4s ease;
     }
   }
 
   .sidebar-percent {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     color: $primary;
     margin: 0;
     text-align: center;
@@ -1078,14 +1078,14 @@ input:checked + .slider::before { transform: translateX(22px); }
 
   .badge {
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: var(--hr-radius);
     letter-spacing: 0.3px;
 
-    &.ok   { background: #ecfdf5; color: #065f46; }
-    &.todo { background: #fff7ed; color: #92400e; }
+    &.ok   { background: var(--hr-success-soft); color: var(--hr-success-ink); }
+    &.todo { background: var(--hr-warning-soft); color: var(--hr-warning-ink); }
   }
 }
 
@@ -1094,7 +1094,7 @@ input:checked + .slider::before { transform: translateX(22px); }
   max-height: 420px;
   overflow-y: auto;
   border: 1px solid $border;
-  border-radius: 10px;
+  border-radius: var(--hr-radius-lg);
   padding: 16px;
   margin-bottom: 20px;
 
@@ -1125,7 +1125,7 @@ input:checked + .slider::before { transform: translateX(22px); }
     color: $primary;
     background: $primary-soft;
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: var(--hr-radius);
     margin-bottom: 10px;
   }
 
@@ -1143,8 +1143,8 @@ input:checked + .slider::before { transform: translateX(22px); }
 
 .policy-accept {
   padding: 16px 18px;
-  background: #f8fafc;
-  border-radius: 10px;
+  background: var(--hr-surface-2);
+  border-radius: var(--hr-radius-lg);
   border: 1px solid $border;
 }
 
@@ -1154,9 +1154,9 @@ input:checked + .slider::before { transform: translateX(22px); }
   gap: 10px;
   margin-top: 14px;
   padding: 10px 14px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 10px;
+  background: var(--hr-success-soft);
+  border: 1px solid var(--hr-success-soft);
+  border-radius: var(--hr-radius-lg);
 
   .policy-attachment-icon { font-size: 18px; flex-shrink: 0; line-height: 1; }
 
@@ -1164,7 +1164,7 @@ input:checked + .slider::before { transform: translateX(22px); }
     flex: 1;
     font-size: 13px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--hr-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1175,7 +1175,7 @@ input:checked + .slider::before { transform: translateX(22px); }
     height: 32px;
     padding: 0 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
     background: $primary;
     color: #fff;
     font-size: 12px;
@@ -1195,12 +1195,12 @@ input:checked + .slider::before { transform: translateX(22px); }
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $primary, $secondary);
+  background: transparent;
   color: $surface;
   border: none;
   font-size: 22px;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba($primary, 0.3);
+  box-shadow: var(--hr-shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;

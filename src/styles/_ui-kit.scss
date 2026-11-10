@@ -89,7 +89,7 @@
     color: var(--hr-text-2);
     border-color: var(--hr-border);
     box-shadow: var(--hr-shadow-xs);
-    &:hover:not(:disabled) { background: var(--hr-bg); border-color: #cbd5e1; }
+    &:hover:not(:disabled) { background: var(--hr-bg); border-color: var(--hr-border-strong); }
   }
 
   &--ghost {
@@ -101,7 +101,7 @@
   &--danger {
     background: var(--hr-danger);
     color: #fff;
-    &:hover:not(:disabled) { background: #b91c1c; }
+    &:hover:not(:disabled) { background: var(--hr-danger-ink); }
   }
 
   &--sm { min-height: 32px; padding: 0 12px; font-size: 13px; }
@@ -113,7 +113,7 @@
   width: 100%;
   min-height: var(--hr-control-h);
   padding: 8px 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--hr-border-strong);
   border-radius: var(--hr-radius);
   background: #fff;
   color: var(--hr-text);
@@ -122,7 +122,7 @@
   transition: border-color 0.15s var(--hr-ease), box-shadow 0.15s var(--hr-ease);
 
   &::placeholder { color: var(--hr-text-subtle); }
-  &:hover { border-color: #94a3b8; }
+  &:hover { border-color: var(--hr-text-subtle); }
   &:focus { outline: none; border-color: var(--hr-blue); box-shadow: var(--hr-focus); }
   &:disabled { background: var(--hr-bg); color: var(--hr-text-muted); cursor: not-allowed; }
   &.is-invalid { border-color: var(--hr-danger); }
@@ -232,7 +232,7 @@ textarea.hr-input { min-height: 96px; resize: vertical; line-height: 1.5; }
   display: block;
   min-height: 12px;
   border-radius: var(--hr-radius-sm);
-  background: linear-gradient(90deg, #eef2f7 0%, #f8fafc 50%, #eef2f7 100%);
+  background: linear-gradient(90deg, #eef2f7 0%, var(--hr-surface-2) 50%, #eef2f7 100%);
   background-size: 200% 100%;
   animation: hr-shimmer 1.4s ease-in-out infinite;
 

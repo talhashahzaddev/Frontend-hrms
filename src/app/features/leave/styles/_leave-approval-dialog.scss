@@ -9,8 +9,8 @@
 
 .dialog-header .header-icon {
   &.success {
-    background: #dcfce7;
-    mat-icon { color: #16a34a; }
+    background: var(--hr-success-soft);
+    mat-icon { color: var(--hr-success); }
   }
 }
 
@@ -23,7 +23,7 @@
 .leave-detail-card {
   background: ad.$ad-input-bg;
   border: 1px solid ad.$ad-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1rem 1.25rem;
 
   .card-title {
@@ -62,7 +62,7 @@
   margin-bottom: 0.375rem;
 
   .required {
-    color: #ef4444;
+    color: var(--hr-danger);
     margin-left: 2px;
   }
 }
@@ -82,7 +82,7 @@
   padding: 0 0.75rem;
   background: ad.$ad-surface;
   border: 1px solid ad.$ad-border;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   font-size: 0.875rem;
   color: ad.$ad-text-primary;
 
@@ -98,32 +98,32 @@
 .leave-type-badge {
   display: inline-flex;
   padding: 0.25rem 0.625rem;
-  border-radius: 0.375rem;
+  border-radius: var(--hr-radius);
   font-size: 0.8125rem;
   font-weight: 500;
-  background: #eff6ff;
+  background: var(--hr-navy-soft);
   color: ad.$ad-primary;
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(37, 82, 208, 0.2);
 }
 
 .days-badge {
   display: inline-flex;
   padding: 0.25rem 0.625rem;
-  border-radius: 0.375rem;
+  border-radius: var(--hr-radius);
   font-size: 0.8125rem;
   font-weight: 600;
 }
 
 .days-badge.approve {
-  background: #dcfce7;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: var(--hr-success-soft);
+  color: var(--hr-success);
+  border: 1px solid var(--hr-success-soft);
 }
 
 .days-badge.reject {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: var(--hr-danger-soft);
+  color: var(--hr-danger);
+  border: 1px solid var(--hr-danger-soft);
 }
 
 .info-box {
@@ -131,7 +131,7 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   border: 1px solid ad.$ad-border;
   background: ad.$ad-input-bg;
 
@@ -153,9 +153,9 @@
   strong { color: ad.$ad-text-primary; font-weight: 600; }
 
   &.success {
-    background: #f0fdf4;
-    border-color: #bbf7d0;
-    mat-icon { color: #16a34a; }
+    background: var(--hr-success-soft);
+    border-color: var(--hr-success-soft);
+    mat-icon { color: var(--hr-success); }
   }
 
   &.reason {
@@ -206,17 +206,17 @@
     &:hover {
       border-color: ad.$ad-primary;
       color: ad.$ad-primary;
-      background: #eff6ff;
+      background: var(--hr-navy-soft);
     }
   }
 }
 
 .dialog-footer .btn-save.success {
-  background: #16a34a !important;
+  background: var(--hr-success) !important;
 
   &:hover:not([disabled]) {
-    background: #15803d !important;
-    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2) !important;
+    background: var(--hr-success-ink) !important;
+    box-shadow: var(--hr-shadow-md) !important;
   }
 }
 

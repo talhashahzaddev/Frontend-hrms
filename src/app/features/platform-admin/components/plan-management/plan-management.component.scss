@@ -19,18 +19,18 @@
 .table-wrap { overflow: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 700px; }
 th, td { padding: 13px 15px; border-bottom: 1px solid #edf0f4; text-align: left; vertical-align: middle; }
-th { background: #f8fafc; color: #667085; font-size: 12px; text-transform: uppercase; }
+th { background: var(--hr-surface-2); color: #667085; font-size: 12px; text-transform: uppercase; }
 td strong, td small, td .code { display: block; }
 td small, .code { color: #667085; font-size: 12px; }
 .tag, .status { display: inline-flex; border-radius: 999px; padding: 3px 8px; margin: 5px 5px 0 0; background: #edf2ff; color: #344bc4; font-size: 11px; }
 .tag.recommended { background: #ecfdf3; color: #027a48; }
-.tag.custom { background: #fff7ed; color: #c2410c; }
+.tag.custom { background: var(--hr-warning-soft); color: var(--hr-warning-ink); }
 .tag.addon { background: #f4f3ff; color: #5925dc; }
 .status.archived { background: #f2f4f7; color: #667085; }
 .actions { white-space: nowrap; }
 .comparison { max-height: 75vh; }
 .comparison th:first-child, .comparison td:first-child { position: sticky; left: 0; background: #fff; }
-.comparison th:first-child { background: #f8fafc; }
+.comparison th:first-child { background: var(--hr-surface-2); }
 .comparison mat-icon { vertical-align: middle; }
 .included { color: #12a36a; }
 .comparison-note { color: #667085; margin: 0 0 12px; }

@@ -1,13 +1,13 @@
 // ═══ Top bar — breadcrumbs, search, zoom, notifications, profile ══════════════
-$text: #0f172a;
-$text-2: #334155;
-$muted: #64748b;
-$subtle: #94a3b8;
-$border: #e2e8f0;
-$soft: #f1f5f9;
-$bg: #f8fafc;
-$blue: #2563eb;
-$blue-hover: #1d4ed8;
+$text: #1f2328;
+$text-2: #3d434b;
+$muted: #5f6670;
+$subtle: #8b929b;
+$border: #dde1e6;
+$soft: #edeff2;
+$bg: #f7f8fa;
+$blue: #2552d0;
+$blue-hover: #1e44ae;
 $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 :host {
@@ -18,17 +18,16 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-toolbar {
-  height: 64px;
-  min-height: 64px;
+  height: var(--hr-header-h);
+  min-height: var(--hr-header-h);
   padding: 0 24px 0 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: saturate(180%) blur(10px);
+  background: #ffffff;
   border-bottom: 1px solid $border;
   color: $text;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--hr-font);
 
   @media (max-width: 768px) {
     padding: 0 12px 0 8px;
@@ -48,7 +47,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 .menu-button {
   flex: none;
   color: $muted;
-  border-radius: 10px;
+  border-radius: var(--hr-radius);
 
   &:hover { color: $text; background: $soft; }
 }
@@ -79,12 +78,12 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--hr-radius);
   color: $subtle;
   flex: none;
 
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
-  &:hover { color: $blue; background: #eff6ff; }
+  &:hover { color: $blue; background: var(--hr-navy-soft); }
 }
 
 .crumb-sep {
@@ -92,7 +91,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: #cbd5e1;
+  color: var(--hr-border-strong);
 }
 
 @media (max-width: 768px) {
@@ -124,7 +123,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 .action-button {
   color: $muted;
-  border-radius: 10px;
+  border-radius: var(--hr-radius);
 
   &:hover { color: $text; background: $soft; }
 
@@ -142,10 +141,10 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 8px;
   width: 260px;
-  height: 38px;
+  height: 34px;
   padding: 0 8px 0 12px;
   border: 1px solid $border;
-  border-radius: 10px;
+  border-radius: var(--hr-radius);
   background: $bg;
   color: $subtle;
   font: inherit;
@@ -156,8 +155,8 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   mat-icon { font-size: 18px; width: 18px; height: 18px; color: $subtle; }
   .search-pill-text { flex: 1; text-align: left; }
 
-  &:hover { border-color: #cbd5e1; background: #fff; }
-  &:focus-visible { outline: none; border-color: $blue; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
+  &:hover { border-color: var(--hr-border-strong); background: #fff; }
+  &:focus-visible { outline: none; border-color: $blue; box-shadow: var(--hr-focus); }
 
   @media (max-width: 1100px) { width: 200px; }
 
@@ -181,7 +180,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   padding: 2px 6px;
   border: 1px solid $border;
   border-bottom-width: 2px;
-  border-radius: 6px;
+  border-radius: var(--hr-radius);
   background: #fff;
 }
 
@@ -212,9 +211,9 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   height: 40px;
   padding: 0 4px 0 12px;
   border: 1px solid $blue;
-  border-radius: 10px;
+  border-radius: var(--hr-radius);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  box-shadow: none;
 }
 
 .search-icon {
@@ -258,9 +257,9 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   padding: 6px;
   border: 1px solid $border;
-  border-radius: 12px;
+  border-radius: var(--hr-radius);
   background: #fff;
-  box-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.25);
+  box-shadow: var(--hr-shadow-lg);
   z-index: 1000;
   animation: hdrSlideIn 0.15s $ease;
 }
@@ -270,12 +269,12 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 12px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   cursor: pointer;
   transition: background-color 0.12s $ease;
 
   &:hover {
-    background: #eff6ff;
+    background: var(--hr-navy-soft);
 
     .suggestion-icon-wrap { background: $blue; .suggestion-icon { color: #fff; } }
     .suggestion-go { opacity: 1; }
@@ -286,7 +285,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   flex: none;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--hr-radius);
   display: grid;
   place-items: center;
   background: $soft;
@@ -338,14 +337,14 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   color: $muted;
   text-align: center;
 
-  .no-results-icon { font-size: 28px; width: 28px; height: 28px; color: #cbd5e1; }
+  .no-results-icon { font-size: 28px; width: 28px; height: 28px; color: var(--hr-border-strong); }
 }
 
 // ── Zoom ──
 .zoom-trigger {
-  height: 38px !important;
+  height: 34px !important;
   padding: 0 8px 0 10px !important;
-  border-radius: 10px !important;
+  border-radius: var(--hr-radius) !important;
   color: $muted !important;
   min-width: 0 !important;
 
@@ -361,11 +360,11 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 .recommended-badge {
   margin-left: auto;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--hr-radius-sm);
   font-size: 11px;
   font-weight: 600;
   color: $blue-hover;
-  background: #eff6ff;
+  background: var(--hr-navy-soft);
   white-space: nowrap;
 }
 
@@ -409,8 +408,8 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid #fff;
     border-radius: 999px;
     font-size: 10px;
-    font-weight: 700;
-    background: #ef4444;
+    font-weight: 600;
+    background: var(--hr-danger);
     color: #fff;
     width: auto;
     top: -4px !important;
@@ -425,17 +424,17 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  height: 44px;
-  padding: 4px 8px 4px 4px;
+  height: 40px;
+  padding: 2px 8px 2px 2px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--hr-radius);
   background: transparent;
   cursor: pointer;
   font: inherit;
   transition: background-color 0.15s $ease, border-color 0.15s $ease;
 
   &:hover { background: $soft; }
-  &:focus-visible { outline: none; border-color: $blue; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
+  &:focus-visible { outline: none; border-color: $blue; box-shadow: var(--hr-focus); }
 
   @media (max-width: 768px) {
     padding: 2px;
@@ -453,9 +452,9 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     width: 36px !important;
     height: 36px !important;
     font-size: 13px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #fff !important;
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
+    background: var(--hr-navy) !important;
     overflow: hidden;
   }
 
@@ -474,7 +473,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #22c55e;
+  background: var(--hr-success);
   border: 2px solid #fff;
 }
 
@@ -522,11 +521,10 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
 
   .user-menu-header {
     position: relative;
-    padding: 20px;
+    padding: 16px;
     margin-bottom: 6px;
-    background:
-      radial-gradient(120% 120% at 100% 0%, rgba(96, 165, 250, 0.35) 0%, transparent 55%),
-      linear-gradient(135deg, #172554 0%, #1e3a8a 60%, #2563eb 100%);
+    background: var(--hr-surface-2);
+    border-bottom: 1px solid var(--hr-border);
   }
 
   .user-info {
@@ -539,13 +537,12 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     flex: none;
 
     .user-avatar-large-content {
-      width: 52px !important;
-      height: 52px !important;
-      font-size: 18px !important;
-      font-weight: 700 !important;
+      width: 44px !important;
+      height: 44px !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
       color: #fff !important;
-      background: rgba(255, 255, 255, 0.14) !important;
-      border: 2px solid rgba(255, 255, 255, 0.45);
+      background: var(--hr-navy) !important;
       border-radius: 50%;
       overflow: hidden;
     }
@@ -564,9 +561,9 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 0;
 
     .user-name {
-      font-size: 16px;
-      font-weight: 650;
-      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      color: $text;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -576,7 +573,7 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     .user-email {
       margin: 2px 0 10px;
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.75);
+      color: $muted;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -594,8 +591,8 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
       align-items: center;
       flex-wrap: wrap;
       gap: 4px 6px;
-      padding: 3px 9px;
-      border-radius: 999px;
+      padding: 2px 8px;
+      border-radius: var(--hr-radius-sm);
       font-size: 11px;
       font-weight: 600;
       line-height: 1.4;
@@ -604,21 +601,21 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .user-role {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: $text-2;
+      background: #fff;
+      border: 1px solid var(--hr-border);
     }
 
     .user-plan {
-      color: #fde68a;
-      background: rgba(251, 191, 36, 0.14);
-      border: 1px solid rgba(251, 191, 36, 0.32);
+      color: $text-2;
+      background: #fff;
+      border: 1px solid var(--hr-border);
       max-width: 200px;
 
       &.expired {
-        color: #fecaca;
-        background: rgba(248, 113, 113, 0.16);
-        border-color: rgba(248, 113, 113, 0.36);
+        color: var(--hr-danger-ink);
+        background: var(--hr-danger-soft);
+        border-color: transparent;
       }
 
       .plan-cycle { opacity: 0.85; text-transform: capitalize; }
@@ -629,19 +626,19 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0 6px;
     width: calc(100% - 12px);
     min-height: 42px;
-    border-radius: 8px;
+    border-radius: var(--hr-radius);
 
     .mat-icon { color: $muted; margin-right: 12px; }
 
     &:hover {
-      background: #eff6ff;
+      background: var(--hr-navy-soft);
       .mat-icon { color: $blue; }
     }
 
     &.logout-item:hover {
-      background: #fef2f2;
-      color: #b91c1c;
-      .mat-icon { color: #dc2626; }
+      background: var(--hr-danger-soft);
+      color: var(--hr-danger-ink);
+      .mat-icon { color: var(--hr-danger); }
     }
   }
 
@@ -650,6 +647,144 @@ $ease: cubic-bezier(0.4, 0, 0.2, 1);
     border-top-color: $soft;
   }
 }
+
+// ═══ Corporate light top bar (Phase 1 foundation) ═══════════════════════════
+// Outlined square icon buttons, bordered white search, "Parent / Page" crumbs.
+@mixin line-icon($size: 20px) {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-feature-settings: 'liga';
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  font-size: $size;
+  width: $size;
+  height: $size;
+  line-height: 1;
+}
+
+.header-toolbar {
+  padding: 0 24px;
+  gap: 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--hr-shell-line);
+}
+
+// Square outlined buttons (toggle, notifications, zoom)
+.menu-button,
+.action-button {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center;
+  border: 1px solid var(--hr-border) !important;
+  border-radius: 8px !important;
+  background: #fff;
+  color: var(--hr-text-2);
+
+  mat-icon { @include line-icon(20px); }
+
+  &:hover { background: var(--hr-shell-hover); color: var(--hr-text); border-color: var(--hr-border-strong) !important; }
+
+  // Material icon buttons draw a round state layer; keep the square look
+  ::ng-deep .mat-mdc-button-persistent-ripple,
+  ::ng-deep .mat-mdc-focus-indicator { border-radius: 8px; }
+}
+
+.menu-button { width: 36px !important; height: 36px !important; }
+
+.zoom-trigger {
+  height: 40px !important;
+  border: 1px solid var(--hr-border) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: var(--hr-text-2) !important;
+
+  .zoom-icon, .arrow-icon { @include line-icon(18px); }
+}
+
+// Breadcrumbs: "Overview / Dashboard"
+.breadcrumbs {
+  gap: 6px;
+  font-size: 15px;
+}
+
+.crumb {
+  color: var(--hr-text-muted);
+  font-weight: 400;
+
+  &.current { color: var(--hr-text); font-weight: 500; }
+}
+
+.crumb-home {
+  width: auto;
+  height: auto;
+  color: var(--hr-text-muted);
+  mat-icon { @include line-icon(18px); }
+  &:hover { background: transparent; color: var(--hr-primary); }
+}
+
+.crumb-sep {
+  width: auto;
+  height: auto;
+  font-size: 15px;
+  color: var(--hr-text-subtle);
+}
+
+// Search: bordered white field with a key hint
+.search-pill {
+  width: 340px;
+  height: 40px;
+  padding: 0 6px 0 12px;
+  border: 1px solid var(--hr-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--hr-text-muted);
+
+  mat-icon { @include line-icon(20px); color: var(--hr-text-muted); }
+
+  &:hover { border-color: var(--hr-border-strong); background: #fff; }
+
+  @media (max-width: 1100px) { width: 240px; }
+}
+
+.search-pill { align-items: center; }
+
+.search-kbd {
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 6px;
+  line-height: 1;
+  font-size: 11px;
+  border: 1px solid var(--hr-border) !important;
+  border-bottom-width: 1px !important;
+  border-radius: 4px !important;
+  background: var(--hr-surface-2) !important;
+  color: var(--hr-text-muted) !important;
+  box-shadow: none !important;
+}
+
+// Every top-bar control shares one height so the row reads as a single line
+.header-actions { gap: 8px; }
+.notification-button { width: 40px !important; height: 40px !important; }
+.user-menu-button-pic { padding: 2px 6px 2px 2px; gap: 8px; }
+
+.header-divider { display: none; }
+
+// Profile trigger: quiet, no pill
+.user-menu-button-pic {
+  height: 44px;
+  border-radius: 8px;
+
+  &:hover { background: var(--hr-shell-hover); }
+}
+
+.user-status-indicator { display: none; }
+
+.user-trigger-caret { @include line-icon(18px); }
 
 @media (prefers-reduced-motion: reduce) {
   .header-search, .search-suggestions { animation: none; }

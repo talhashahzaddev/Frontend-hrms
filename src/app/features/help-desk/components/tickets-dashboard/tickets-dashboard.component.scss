@@ -4,17 +4,17 @@
 .action-menu-btn {
   width: 32px !important;
   height: 32px !important;
-  border-radius: 6px !important;
-  color: #64748b !important;
+  border-radius: var(--hr-radius) !important;
+  color: var(--hr-text-muted) !important;
 
   mat-icon { font-size: 20px; }
-  &:hover { background: #f1f5f9 !important; }
+  &:hover { background: var(--hr-border-soft) !important; }
 }
 
 // Ticket type text
 .ticket-type-text {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--hr-text-muted);
 }
 
 // Pagination
@@ -25,7 +25,7 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 0.875rem 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--hr-border-soft);
 }
 
 .pagination-left {
@@ -35,7 +35,7 @@
 
   .pagination-label {
     font-size: 0.8125rem;
-    color: #64748b;
+    color: var(--hr-text-muted);
     white-space: nowrap;
   }
 }
@@ -53,28 +53,28 @@
   width: 30px;
   height: 30px;
   padding: 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border: 1px solid var(--hr-border);
+  border-radius: var(--hr-radius);
   background: #fff;
-  color: #475569;
+  color: var(--hr-text-2);
   cursor: pointer;
   transition: all 0.15s ease;
 
-  &:hover { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+  &:hover { background: var(--hr-border-soft); color: var(--hr-text); border-color: var(--hr-border-strong); }
   &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 // Mat menu overrides
 ::ng-deep .mat-mdc-menu-panel {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  border-radius: var(--hr-radius-lg) !important;
+  box-shadow: var(--hr-shadow-lg) !important;
   border: 1px solid #f0f1f5 !important;
   min-width: 150px !important;
 
   .mat-mdc-menu-content { padding: 6px !important; }
 
   .mat-mdc-menu-item {
-    border-radius: 6px !important;
+    border-radius: var(--hr-radius) !important;
     margin: 1px 0 !important;
     height: 38px !important;
     font-size: 0.875rem !important;

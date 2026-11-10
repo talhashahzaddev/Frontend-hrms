@@ -1,19 +1,19 @@
 /* Shared leave color CSS variables used across the app */
 :root {
-  --leave-red: #f44336;
+  --leave-red: var(--hr-danger);
   --leave-pink: #e91e63;
-  --leave-purple: #9c27b0;
-  --leave-deep-purple: #673ab7;
-  --leave-indigo: #2563eb;
-  --leave-blue: #2196f3;
+  --leave-purple: var(--hr-navy);
+  --leave-deep-purple: var(--hr-navy);
+  --leave-indigo: var(--hr-navy);
+  --leave-blue: var(--hr-navy);
   --leave-light-blue: #03a9f4;
-  --leave-cyan: #00bcd4;
-  --leave-teal: #009688;
-  --leave-green: #4caf50;
+  --leave-cyan: var(--hr-navy);
+  --leave-teal: var(--hr-navy);
+  --leave-green: var(--hr-success);
   --leave-light-green: #8bc34a;
   --leave-lime: #cddc39;
   --leave-yellow: #ffeb3b;
-  --leave-amber: #ffc107;
-  --leave-orange: #ff9800;
+  --leave-amber: var(--hr-warning);
+  --leave-orange: var(--hr-warning);
   --leave-deep-orange: #ff5722;
 }

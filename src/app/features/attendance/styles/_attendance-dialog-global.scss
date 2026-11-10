@@ -9,9 +9,9 @@
   .mat-mdc-dialog-container,
   .mdc-dialog__surface {
     padding: 0 !important;
-    border-radius: 0.75rem !important;
+    border-radius: var(--hr-radius-lg) !important;
     overflow: hidden !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
   }
 
   .mdc-dialog__surface {
@@ -22,20 +22,20 @@
 
   // Close (X) — muted slate, same as create-shift / attendance dialogs
   .close-button {
-    color: #94a3b8 !important;
-    --mdc-icon-button-icon-color: #94a3b8;
+    color: var(--hr-text-subtle) !important;
+    --mdc-icon-button-icon-color: var(--hr-text-subtle);
 
     mat-icon {
-      color: #94a3b8 !important;
+      color: var(--hr-text-subtle) !important;
     }
 
     &:hover {
-      color: #475569 !important;
-      background: #f8fafc !important;
-      --mdc-icon-button-icon-color: #475569;
+      color: var(--hr-text-2) !important;
+      background: var(--hr-surface-2) !important;
+      --mdc-icon-button-icon-color: var(--hr-text-2);
 
       mat-icon {
-        color: #475569 !important;
+        color: var(--hr-text-2) !important;
       }
     }
   }
@@ -81,11 +81,11 @@
     [mat-dialog-title] {
       margin: 0 !important;
       padding: 1.5rem !important;
-      border-bottom: 1px solid #e2e8f0 !important;
+      border-bottom: 1px solid var(--hr-border) !important;
       background: rgba(255, 255, 255, 0.8) !important;
       font-size: 1.125rem !important;
-      font-weight: 700 !important;
-      color: #0f172a !important;
+      font-weight: 600 !important;
+      color: var(--hr-text) !important;
     }
 
     .mat-mdc-dialog-content,
@@ -93,7 +93,7 @@
       padding: 1.5rem !important;
       margin: 0 !important;
       max-height: none !important;
-      background: #f8fafc !important;
+      background: var(--hr-surface-2) !important;
 
       .mat-mdc-text-field-wrapper {
         background: #ffffff !important;
@@ -102,14 +102,14 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: #e2e8f0 !important;
+        border-color: var(--hr-border) !important;
       }
 
       .mat-focused {
         .mdc-notched-outline__leading,
         .mdc-notched-outline__notch,
         .mdc-notched-outline__trailing {
-          border-color: #2563eb !important;
+          border-color: var(--hr-navy) !important;
         }
       }
     }
@@ -119,24 +119,24 @@
       padding: 1.25rem 1.5rem !important;
       margin: 0 !important;
       min-height: unset !important;
-      border-top: 1px solid #e2e8f0 !important;
-      background: #f8fafc !important;
+      border-top: 1px solid var(--hr-border) !important;
+      background: var(--hr-surface-2) !important;
       gap: 0.75rem !important;
 
       button {
         height: 2.5rem !important;
-        border-radius: 0.5rem !important;
+        border-radius: var(--hr-radius) !important;
         font-size: 0.875rem !important;
         font-weight: 600 !important;
       }
 
       button[mat-button]:not([color]) {
-        color: #475569 !important;
+        color: var(--hr-text-2) !important;
       }
 
       button[mat-raised-button],
       button[color='primary'] {
-        background: #2563eb !important;
+        background: var(--hr-navy) !important;
         color: #ffffff !important;
         box-shadow: none !important;
       }
@@ -152,19 +152,19 @@
     margin: 0;
     padding: 1.5rem 1.5rem 0;
     font-size: 1.125rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 600;
+    color: var(--hr-text);
   }
 
   .cdd-body {
     padding: 1rem 1.5rem !important;
-    background: #f8fafc !important;
+    background: var(--hr-surface-2) !important;
   }
 
   .cdd-message {
     margin: 0;
     font-size: 0.875rem;
-    color: #475569;
+    color: var(--hr-text-2);
     line-height: 1.6;
   }
 
@@ -173,8 +173,8 @@
     justify-content: flex-end;
     gap: 0.75rem;
     padding: 1.25rem 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border-top: 1px solid var(--hr-border);
+    background: var(--hr-surface-2);
     margin: 0;
   }
 }

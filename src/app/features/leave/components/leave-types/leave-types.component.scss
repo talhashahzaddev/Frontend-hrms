@@ -10,7 +10,7 @@
       right: 0;
 
       .menu-button {
-        color: #64748b;
+        color: var(--hr-text-muted);
         width: 2rem;
         height: 2rem;
       }
@@ -20,12 +20,12 @@
   .type-description-clean {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--hr-border);
 
     p {
       margin: 0;
       font-size: 0.8125rem;
-      color: #64748b;
+      color: var(--hr-text-muted);
       line-height: 1.5;
     }
   }
@@ -42,11 +42,11 @@
       gap: 0.25rem;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #475569;
+      color: var(--hr-text-2);
       padding: 0.25rem 0.5rem;
-      background: #f8fafc;
-      border-radius: 0.375rem;
-      border: 1px solid #e2e8f0;
+      background: var(--hr-surface-2);
+      border-radius: var(--hr-radius);
+      border: 1px solid var(--hr-border);
 
       mat-icon {
         font-size: 0.875rem;
@@ -55,8 +55,8 @@
       }
 
       &.inactive {
-        color: #94a3b8;
-        background: #f1f5f9;
+        color: var(--hr-text-subtle);
+        background: var(--hr-border-soft);
       }
     }
   }

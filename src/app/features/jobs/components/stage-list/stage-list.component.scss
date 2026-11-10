@@ -1,25 +1,25 @@
 @use "sass:color";
 /* Variables matching Tailwind */
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-300: #cbd5e1;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-700: #334155;
-$slate-800: #1e293b;
-$slate-900: #0f172a;
+$slate-50: #f7f8fa;
+$slate-100: #edeff2;
+$slate-200: #dde1e6;
+$slate-300: #c4c9d0;
+$slate-400: #8b929b;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-700: #3d434b;
+$slate-800: #1f2328;
+$slate-900: #1f2328;
 
-$primary: #2563EB;
+$primary: #2552d0;
 /* blue-600 */
-$primary-light: #EFF6FF;
+$primary-light: #eef3fd;
 /* blue-50 */
-$primary-100: #DBEAFE;
+$primary-100: #eef3fd;
 /* blue-100 */
 
 $white: #ffffff;
-$danger: #EF4444;
+$danger: #b42318;
 /* red-500 */
 
 .openings-container {
@@ -62,8 +62,8 @@ $danger: #EF4444;
         width: 3rem;
         height: 3rem;
         background-color: $white;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        border-radius: var(--hr-radius-lg);
+        box-shadow: var(--hr-shadow-sm);
         border: 1px solid $slate-100;
         display: flex;
         align-items: center;
@@ -80,7 +80,7 @@ $danger: #EF4444;
       .title-details {
         h1 {
           font-size: 1.75rem;
-          font-weight: 700;
+          font-weight: 600;
           color: $slate-900;
           margin: 0;
           line-height: 1.25;
@@ -103,11 +103,11 @@ $danger: #EF4444;
         color: $white;
         border: none;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-weight: 600;
         font-size: 0.875rem;
         cursor: pointer;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        box-shadow: var(--hr-shadow-sm);
         transition: all 0.2s;
 
         mat-icon {
@@ -125,8 +125,8 @@ $danger: #EF4444;
 
   .pipeline-card {
     background-color: $white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-radius: var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-sm);
     border: 1px solid $slate-200;
     padding: 2rem;
     margin-bottom: 1.5rem;
@@ -165,7 +165,7 @@ $danger: #EF4444;
         justify-content: center;
         margin-bottom: 0.5rem;
         font-size: 0.875rem;
-        font-weight: 700;
+        font-weight: 600;
 
         & {
           border: 2px solid $slate-200;
@@ -177,8 +177,8 @@ $danger: #EF4444;
           background-color: $primary;
           color: $white;
           border: none;
-          box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -4px rgba(37, 99, 235, 0.1);
-          box-shadow: 0 4px 14px 0 rgba($primary, 0.39);
+          box-shadow: var(--hr-shadow-md);
+          box-shadow: var(--hr-shadow-md);
           outline: 4px solid $primary-light;
         }
       }
@@ -197,7 +197,7 @@ $danger: #EF4444;
 
         &.is-interview {
           color: $primary;
-          font-weight: 700;
+          font-weight: 600;
         }
       }
     }
@@ -216,8 +216,8 @@ $danger: #EF4444;
 
   .search-card {
     background-color: $white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-radius: var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-sm);
     border: 1px solid $slate-200;
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -273,7 +273,7 @@ $danger: #EF4444;
         padding: 0.625rem 2.25rem 0.625rem 2.5rem;
         background-color: $slate-50;
         border: 1px solid $slate-200;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
         color: $slate-800;
         transition: all 0.2s;
@@ -294,8 +294,8 @@ $danger: #EF4444;
 
   .table-card {
     background-color: $white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-radius: var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-sm);
     border: 1px solid $slate-200;
     overflow: hidden;
 
@@ -306,7 +306,7 @@ $danger: #EF4444;
       h3 {
         margin: 0;
         font-size: 1rem;
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-800;
 
         .count {
@@ -333,7 +333,7 @@ $danger: #EF4444;
           th {
             padding: 1rem 1.5rem;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 600;
             color: $slate-400;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -404,7 +404,7 @@ $danger: #EF4444;
         padding: 0.25rem 0.625rem;
         border-radius: 9999px;
         font-size: 0.625rem;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         background-color: $slate-100;
@@ -501,7 +501,7 @@ $danger: #EF4444;
         color: $white;
         border: none;
         padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-weight: 600;
         font-size: 0.875rem;
         cursor: pointer;

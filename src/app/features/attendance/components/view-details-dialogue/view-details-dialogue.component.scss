@@ -228,8 +228,8 @@
       .header-avatar {
         width: 2.5rem;
         height: 2.5rem;
-        border-radius: 0.75rem;
-        background: #eff6ff;
+        border-radius: var(--hr-radius-lg);
+        background: var(--hr-navy-soft);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -247,7 +247,7 @@
       .header-name {
         margin: 0;
         font-size: 1.125rem;
-        font-weight: 700;
+        font-weight: 600;
         color: ad.$ad-text-primary;
       }
     }
@@ -266,18 +266,18 @@
   .attendance-details .detail-section { display:flex; flex-direction:column; gap:8px; }
   .attendance-details .detail-section.row { flex-direction:row; gap:12px; }
 
-  .attendance-details .detail-item { display:flex; flex-direction:column; gap:6px; padding-bottom:10px; border-bottom:1px solid #e2e8f0; }
+  .attendance-details .detail-item { display:flex; flex-direction:column; gap:6px; padding-bottom:10px; border-bottom:1px solid var(--hr-border); }
   .attendance-details .detail-item:last-child { border-bottom:none; padding-bottom:0; }
 
-  .attendance-details .detail-label { display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:#64748b; text-transform:uppercase; }
-  .attendance-details .detail-label mat-icon { color:#2563eb; font-size:16px; }
-  .attendance-details .detail-value { font-size:0.95rem; color:#1e293b; font-weight:500; line-height:1.3; }
+  .attendance-details .detail-label { display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:var(--hr-text-muted); text-transform:uppercase; }
+  .attendance-details .detail-label mat-icon { color:var(--hr-navy); font-size:16px; }
+  .attendance-details .detail-value { font-size:0.95rem; color:var(--hr-text); font-weight:500; line-height:1.3; }
 
-  .daily-update-card { background:white; border:1px solid #e2e8f0; border-radius:10px; padding:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.02); border-left:4px solid #2563eb; }
+  .daily-update-card { background:white; border:1px solid var(--hr-border); border-radius:10px; padding:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.02); border-left:4px solid var(--hr-navy); }
 
-  .sessions-list { background:#f8fafc; border-radius:12px; padding:16px; }
+  .sessions-list { background:var(--hr-surface-2); border-radius:12px; padding:16px; }
 
-  .session-item { display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid #e2e8f0; }
+  .session-item { display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--hr-border); }
   .session-item:last-child { border-bottom:none; }
 
   .dialog-footer {

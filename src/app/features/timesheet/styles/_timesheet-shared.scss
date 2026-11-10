@@ -1,12 +1,12 @@
 // Timesheet Module — aligned with Attendance design system (slate + blue #2563eb)
 
-$ts-primary: #2563eb;
-$ts-primary-hover: #1d4ed8;
-$ts-surface: #f8fafc;
-$ts-border: #e2e8f0;
-$ts-text: #0f172a;
-$ts-text-secondary: #64748b;
-$ts-text-muted: #94a3b8;
+$ts-primary: #2552d0;
+$ts-primary-hover: #1e44ae;
+$ts-surface: #f7f8fa;
+$ts-border: #dde1e6;
+$ts-text: #1f2328;
+$ts-text-secondary: #5f6670;
+$ts-text-muted: #8b929b;
 
 /* ═══ Page shell — full width like team-attendance / shift-dashboard ═══════════ */
 .ts-page-layout {
@@ -50,10 +50,10 @@ $ts-text-muted: #94a3b8;
 .filters-section {
   background: #ffffff;
   border: 1px solid $ts-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1rem 1.25rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
 
   .filters-row {
     display: flex;
@@ -79,9 +79,9 @@ $ts-text-muted: #94a3b8;
 .ts-table-card {
   background: #ffffff;
   border: 1px solid $ts-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 .ts-table-card { margin-bottom: 1.25rem; }
@@ -93,7 +93,7 @@ $ts-text-muted: #94a3b8;
   align-items: center;
   padding: 3rem;
   background: #ffffff;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   border: 1px solid $ts-border;
 }
 
@@ -105,14 +105,14 @@ $ts-text-muted: #94a3b8;
   justify-content: center;
   padding: 5rem 1.5rem;
   background: #ffffff;
-  border-radius: 1rem;
+  border-radius: var(--hr-radius-xl);
   border: 1px solid $ts-border;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--hr-shadow-md);
   text-align: center;
 
   .ts-empty-icon {
     font-size: 3rem;
-    color: #e2e8f0;
+    color: var(--hr-border);
     margin-bottom: 1rem;
 
     i { font-size: 3rem; }
@@ -120,7 +120,7 @@ $ts-text-muted: #94a3b8;
 
   .ts-empty-title {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $ts-text;
     margin-bottom: 0.5rem;
   }
@@ -140,7 +140,7 @@ $ts-text-muted: #94a3b8;
   padding: 0.75rem 1rem;
   background: $ts-surface;
   border: 1px solid $ts-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   margin-bottom: 1.25rem;
 }
 
@@ -162,9 +162,9 @@ $ts-text-muted: #94a3b8;
   font-weight: 600;
   color: $ts-text;
 
-  &.balanced { color: #16a34a; }
-  &.over { color: #dc2626; }
-  &.under { color: #d97706; }
+  &.balanced { color: var(--hr-success); }
+  &.over { color: var(--hr-danger); }
+  &.under { color: var(--hr-warning); }
 }
 
 /* ═══ Form layout helpers ═══════════════════════════════════════════════════ */
@@ -186,7 +186,7 @@ $ts-text-muted: #94a3b8;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--hr-border-soft);
 
   &:last-child { border-bottom: none; }
 }
@@ -223,16 +223,16 @@ $ts-text-muted: #94a3b8;
   padding: 0 2.5rem 0 2.5rem;
   background: #ffffff;
   border: 1px solid $ts-border;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   font-size: 0.875rem;
-  color: #334155;
+  color: var(--hr-text-2);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
 
   &:focus {
     border-color: $ts-primary;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: none;
   }
 
   &::placeholder { color: $ts-text-muted; }
@@ -254,7 +254,7 @@ $ts-text-muted: #94a3b8;
   align-items: center;
   justify-content: center;
 
-  &:hover { background: #f1f5f9; color: #475569; }
+  &:hover { background: var(--hr-border-soft); color: var(--hr-text-2); }
 }
 
 /* ═══ Animations ════════════════════════════════════════════════════════════ */
@@ -277,24 +277,24 @@ $ts-text-muted: #94a3b8;
 /* ═══ Tables inside timesheet pages (matches team-attendance table) ═══════════ */
 .ts-page-layout .p-datatable {
   .p-datatable-thead > tr > th {
-    background: #f8fafc !important;
-    color: #64748b !important;
+    background: var(--hr-surface-2) !important;
+    color: var(--hr-text-muted) !important;
     font-size: 0.75rem !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid var(--hr-border) !important;
     padding: 0.75rem 1rem !important;
   }
 
   .p-datatable-tbody > tr > td {
     padding: 0.75rem 1rem !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid var(--hr-border-soft) !important;
     font-size: 0.875rem !important;
-    color: #334155 !important;
+    color: var(--hr-text-2) !important;
   }
 
   .p-datatable-tbody > tr:hover > td {
-    background: #eff6ff !important;
+    background: var(--hr-navy-soft) !important;
   }
 }

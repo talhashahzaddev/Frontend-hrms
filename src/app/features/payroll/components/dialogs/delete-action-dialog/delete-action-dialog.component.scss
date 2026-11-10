@@ -1,18 +1,18 @@
 .delete-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 0.95rem;
+  border-radius: var(--hr-radius-xl);
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 20, 60, 0.14);
+  box-shadow: var(--hr-shadow-lg);
 }
 
 .delete-dialog-panel .mdc-dialog__surface {
-  border-radius: 0.95rem;
+  border-radius: var(--hr-radius-xl);
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
 }
 
 .delete-modal {
-  color: #0f172a;
+  color: var(--hr-text);
   font-family: 'Inter', 'Public Sans', sans-serif;
 
   .modal-header {
@@ -32,7 +32,7 @@
     .warn-icon {
       width: 1.75rem;
       height: 1.75rem;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -50,16 +50,16 @@
       margin: 0;
       font-family: 'Manrope', 'Inter', sans-serif;
       font-size: 1.35rem;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.01em;
     }
 
     button {
       border: 0;
       background: transparent;
-      color: #475569;
+      color: var(--hr-text-2);
       cursor: pointer;
-      border-radius: 0.4rem;
+      border-radius: var(--hr-radius);
       width: 2rem;
       height: 2rem;
 
@@ -74,7 +74,7 @@
 
     p {
       margin: 0;
-      color: #475569;
+      color: var(--hr-text-2);
       line-height: 1.5;
       font-size: 0.93rem;
     }
@@ -90,9 +90,9 @@
 
     button {
       height: 2.35rem;
-      border-radius: 0.55rem;
+      border-radius: var(--hr-radius);
       border: 0;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
       padding: 0 1.15rem;
@@ -101,17 +101,17 @@
 
     .btn-cancel {
       background: transparent;
-      color: #2563eb;
+      color: var(--hr-navy);
 
       &:hover {
-        background: rgba(37, 99, 235, 0.1);
+        background: rgba(37, 82, 208, 0.1);
       }
     }
 
     .btn-danger {
       color: #fff;
-      background: linear-gradient(135deg, #ba1a1a 0%, #dc2626 100%);
-      box-shadow: 0 6px 14px rgba(186, 26, 26, 0.25);
+      background: #ba1a1a;
+      box-shadow: var(--hr-shadow-md);
 
       &:hover {
         opacity: 0.95;
@@ -120,8 +120,8 @@
 
     .btn-success {
       color: #fff;
-      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-      box-shadow: 0 6px 14px rgba(5, 150, 105, 0.25);
+      background: var(--hr-success);
+      box-shadow: var(--hr-shadow-md);
 
       &:hover {
         opacity: 0.95;

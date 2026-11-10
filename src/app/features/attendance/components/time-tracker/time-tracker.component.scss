@@ -5,20 +5,20 @@
 // #22c55e accent-green, #f97316 accent-orange
 // ============================================================
 
-$primary:       #2563eb;
-$green:         #22c55e;
-$orange:        #f97316;
-$bg:            #f8fafc;
+$primary:       #2552d0;
+$green:         #2e7d4f;
+$orange:        #9a6700;
+$bg:            #f7f8fa;
 $white:         #ffffff;
-$slate-900:     #0f172a;
-$slate-700:     #334155;
-$slate-600:     #475569;
-$slate-500:     #64748b;
-$slate-400:     #94a3b8;
-$slate-300:     #cbd5e1;
-$slate-200:     #e2e8f0;
-$slate-100:     #f1f5f9;
-$slate-50:      #f8fafc;
+$slate-900:     #1f2328;
+$slate-700:     #3d434b;
+$slate-600:     #3d434b;
+$slate-500:     #5f6670;
+$slate-400:     #8b929b;
+$slate-300:     #c4c9d0;
+$slate-200:     #dde1e6;
+$slate-100:     #edeff2;
+$slate-50:      #f7f8fa;
 $border:        $slate-200;
 $radius-xl:     1rem;
 $radius-lg:     0.75rem;
@@ -104,7 +104,7 @@ $radius-md:     0.5rem;
       .brand-title {
         margin: 0;
         font-size: 18px;
-        font-weight: 800;
+        font-weight: 600;
         color: $slate-900;
         letter-spacing: -0.3px;
         line-height: 1.2;
@@ -142,7 +142,7 @@ $radius-md:     0.5rem;
 
       .working-label {
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: $green;
@@ -160,7 +160,7 @@ $radius-md:     0.5rem;
 
         .meta-label {
           font-size: 9px;
-          font-weight: 700;
+          font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           color: $slate-400;
@@ -170,7 +170,7 @@ $radius-md:     0.5rem;
 
         .meta-value {
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 600;
           color: $slate-700;
           line-height: 1;
         }
@@ -203,7 +203,7 @@ $radius-md:     0.5rem;
 
         .live-time {
           font-size: 20px;
-          font-weight: 800;
+          font-weight: 600;
           color: $primary;
           font-variant-numeric: tabular-nums;
           letter-spacing: -0.5px;
@@ -212,18 +212,18 @@ $radius-md:     0.5rem;
 
         .live-date {
           font-size: 10px;
-          font-weight: 700;
+          font-weight: 600;
           color: $slate-400;
           background: $slate-100;
           padding: 2px 6px;
-          border-radius: 4px;
+          border-radius: var(--hr-radius);
           line-height: 1.4;
         }
       }
 
       .elapsed-label {
         font-size: 9px;
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-400;
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -240,7 +240,7 @@ $radius-md:     0.5rem;
         padding: 0 16px;
         border-radius: $radius-md;
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 600;
         border: none;
         cursor: pointer;
         display: flex;
@@ -272,12 +272,12 @@ $radius-md:     0.5rem;
       .btn-clock-out {
         background: $orange;
         color: $white;
-        box-shadow: 0 4px 12px rgba($orange, 0.25);
+        box-shadow: var(--hr-shadow-md);
 
         &:not(:disabled):hover {
           background: color.adjust($orange, $lightness: -6%);
           transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba($orange, 0.3);
+          box-shadow: var(--hr-shadow-lg);
         }
       }
     }
@@ -295,14 +295,14 @@ $radius-md:     0.5rem;
     border: 1px solid $border;
     border-radius: $radius-xl;
     padding: 20px 20px 18px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    box-shadow: var(--hr-shadow-sm);
     display: flex;
     flex-direction: column;
     gap: 6px;
 
     .strip-label {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: $slate-400;
@@ -310,7 +310,7 @@ $radius-md:     0.5rem;
 
     .strip-value {
       font-size: 28px;
-      font-weight: 900;
+      font-weight: 600;
       color: $slate-900;
       letter-spacing: -0.5px;
       line-height: 1;
@@ -326,7 +326,7 @@ $radius-md:     0.5rem;
       padding: 4px 12px;
       border-radius: 999px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       width: fit-content;
@@ -350,7 +350,7 @@ $radius-md:     0.5rem;
     gap: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    box-shadow: var(--hr-shadow-sm);
 
     mat-icon {
       font-size: 26px;
@@ -364,7 +364,7 @@ $radius-md:     0.5rem;
       h3 {
         margin: 0 0 3px;
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-900;
       }
 
@@ -378,7 +378,7 @@ $radius-md:     0.5rem;
 
     &:hover {
       border-color: rgba($primary, 0.3);
-      box-shadow: 0 4px 16px rgba($primary, 0.1);
+      box-shadow: var(--hr-shadow-lg);
       transform: translateY(-2px);
     }
   }
@@ -401,7 +401,7 @@ $radius-md:     0.5rem;
   background: $white;
   border: 1px solid $border;
   border-radius: $radius-xl;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  box-shadow: var(--hr-shadow-sm);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -423,7 +423,7 @@ $radius-md:     0.5rem;
     .panel-title {
       margin: 0;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
       color: $slate-900;
     }
   }
@@ -486,7 +486,7 @@ $radius-md:     0.5rem;
 
     .filter-label {
       font-size: 10px;
-      font-weight: 800;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: $slate-400;
@@ -503,7 +503,7 @@ $radius-md:     0.5rem;
     border: none;
     border-radius: $radius-md;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 
@@ -607,7 +607,7 @@ $radius-md:     0.5rem;
 
     .mat-mdc-header-cell {
       font-size: 10px;
-      font-weight: 800;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: $slate-400;
@@ -623,7 +623,7 @@ $radius-md:     0.5rem;
       color: $slate-700;
 
       &:first-child {
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-900;
       }
     }
@@ -653,7 +653,7 @@ $radius-md:     0.5rem;
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -673,11 +673,11 @@ $radius-md:     0.5rem;
     }
     &::-webkit-scrollbar-track {
       background: $slate-100;
-      border-radius: 10px;
+      border-radius: var(--hr-radius-lg);
     }
     &::-webkit-scrollbar-thumb {
       background: $slate-300;
-      border-radius: 10px;
+      border-radius: var(--hr-radius-lg);
     }
   }
 }
@@ -721,14 +721,14 @@ $radius-md:     0.5rem;
 
       .day {
         font-size: 14px;
-        font-weight: 800;
+        font-weight: 600;
         color: $slate-700;
         line-height: 1;
       }
 
       .month {
         font-size: 8px;
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-500;
         text-transform: uppercase;
         letter-spacing: 0.04em;
@@ -750,7 +750,7 @@ $radius-md:     0.5rem;
       align-items: center;
       gap: 5px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       color: $green;
 
       mat-icon {
@@ -767,7 +767,7 @@ $radius-md:     0.5rem;
     border-radius: 999px;
     padding: 4px 12px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     color: $slate-500;
     white-space: nowrap;
     flex-shrink: 0;
@@ -781,8 +781,8 @@ $radius-md:     0.5rem;
 }
 
 .badge-absent {
-  background: rgba(#ef4444, 0.1);
-  color: #dc2626;
+  background: rgba(#b42318, 0.1);
+  color: var(--hr-danger);
 }
 
 .badge-late {
@@ -791,13 +791,13 @@ $radius-md:     0.5rem;
 }
 
 .badge-half_day {
-  background: rgba(#3b82f6, 0.1);
-  color: #2563eb;
+  background: rgba(#2552d0, 0.1);
+  color: var(--hr-navy);
 }
 
 .badge-on_leave {
-  background: rgba(#2563eb, 0.1);
-  color: #2563eb;
+  background: rgba(#2552d0, 0.1);
+  color: var(--hr-navy);
 }
 // ── Overlay backdrop 
 .geo-gate-overlay {
@@ -820,11 +820,11 @@ $radius-md:     0.5rem;
 // ── Card ─────────────────────────────────────────────────────────────────────
 .geo-gate-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--hr-radius-xl);
   padding: 28px 24px 24px;
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--hr-shadow-lg);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -842,7 +842,7 @@ $radius-md:     0.5rem;
     font-size: 32px;
     width: 32px;
     height: 32px;
-    color: #5c6bc0;
+    color: var(--hr-navy);
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -851,18 +851,18 @@ $radius-md:     0.5rem;
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    color: #1a237e;
+    color: var(--hr-navy-hover);
   }
 
   .geo-gate-sub {
     margin: 2px 0 0;
     font-size: 12px;
-    color: #64748b;
+    color: var(--hr-text-muted);
   }
 
   .geo-close-btn {
     margin-left: auto;
-    color: #9e9e9e;
+    color: var(--hr-text-subtle);
     flex-shrink: 0;
   }
 }
@@ -873,23 +873,23 @@ $radius-md:     0.5rem;
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 10px;
-  background: #f5f5f5;
-  border-left: 4px solid #e0e0e0;
+  border-radius: var(--hr-radius-lg);
+  background: var(--hr-border-soft);
+  border-left: 4px solid var(--hr-border);
   transition: border-color 0.3s, background 0.3s;
 
   &.step-loading {
-    border-left-color: #5c6bc0;
-    background: #ede7f6;
+    border-left-color: var(--hr-navy);
+    background: var(--hr-navy-soft);
   }
 
   &.step-success {
-    border-left-color: #4caf50;
+    border-left-color: var(--hr-success);
     background: #f1f8e9;
   }
 
   &.step-error {
-    border-left-color: #f44336;
+    border-left-color: var(--hr-danger);
     background: #fce4ec;
   }
 }
@@ -904,9 +904,9 @@ $radius-md:     0.5rem;
 
   mat-spinner { flex-shrink: 0; }
 
-  .step-icon-ok  { color: #4caf50; font-size: 24px; }
-  .step-icon-err { color: #f44336; font-size: 24px; }
-  .step-icon-idle { color: #9e9e9e; font-size: 24px; }
+  .step-icon-ok  { color: var(--hr-success); font-size: 24px; }
+  .step-icon-err { color: var(--hr-danger); font-size: 24px; }
+  .step-icon-idle { color: var(--hr-text-subtle); font-size: 24px; }
 }
 
 .step-body {
@@ -916,12 +916,12 @@ $radius-md:     0.5rem;
   .step-label {
     font-size: 13px;
     font-weight: 600;
-    color: #334155;
+    color: var(--hr-text-2);
   }
 
   .step-msg {
     font-size: 12px;
-    color: #64748b;
+    color: var(--hr-text-muted);
     margin-top: 2px;
     word-break: break-word;
   }
@@ -931,7 +931,7 @@ $radius-md:     0.5rem;
 .webcam-wrapper {
   position: relative;
   width: 100%;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   overflow: hidden;
   background: #000;
   aspect-ratio: 4 / 3;
@@ -948,7 +948,7 @@ $radius-md:     0.5rem;
     position: absolute;
     inset: 0;
     border: 3px solid rgba(92, 107, 192, 0.5);
-    border-radius: 12px;
+    border-radius: var(--hr-radius-lg);
     pointer-events: none;
     box-shadow: inset 0 0 30px rgba(92, 107, 192, 0.15);
   }
@@ -971,8 +971,8 @@ $radius-md:     0.5rem;
 
     .ring-text {
       font-size: 13px;
-      font-weight: 700;
-      fill: #334155;
+      font-weight: 600;
+      fill: var(--hr-text-2);
     }
   }
 
@@ -1020,8 +1020,8 @@ $radius-md:     0.5rem;
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  background: #e8eaf6;
-  border-radius: 20px;
+  background: var(--hr-navy-soft);
+  border-radius: var(--hr-radius-xl);
   color: #3949ab;
   font-size: 12px;
   font-weight: 600;

@@ -1,4 +1,4 @@
-// Layout shell: navy sidebar + light content canvas
+// Layout shell: graphite-navy sidebar + light grey content canvas
 .layout-container {
   height: 100vh;
   display: flex;
@@ -13,18 +13,18 @@
 
 // Sidebar Styles
 .sidenav {
-  width: var(--hr-sidebar-w, 272px);
-  background: #172554;
+  width: var(--hr-sidebar-w, 256px);
+  background: var(--hr-shell);
   border-right: 0;
   box-shadow: none;
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.is-collapsed {
-    width: var(--hr-sidebar-rail-w, 76px);
+    width: var(--hr-sidebar-rail-w, 64px);
   }
 
   @media (max-width: 959px) {
-    width: 280px !important;
+    width: 272px !important;
     max-width: 85vw !important; /* Ensure it leaves space on very small screens */
   }
 
@@ -71,12 +71,12 @@
 }
 
 .content-wrapper {
-  min-height: calc(100vh - 64px); // Subtract header height
+  min-height: calc(100vh - var(--hr-header-h)); // Subtract header height
   // padding: var(--spacing-xl);
 
   @media (max-width: 768px) {
     padding: var(--spacing-lg);
-    min-height: calc(100vh - 56px); // Mobile header height
+    min-height: calc(100vh - var(--hr-header-h)); // Mobile header height
   }
 }
 
@@ -104,8 +104,7 @@
   }
 
   ::ng-deep .mat-drawer-backdrop.mat-drawer-shown {
-    background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
+    background-color: rgba(0, 0, 0, 0.32);
   }
 }
 
@@ -166,7 +165,7 @@
   position: relative;
   transform-origin: top left;
   overflow: visible !important; // Critical: Allow content to expand when zoomed
-  min-height: calc(100vh - 64px); // Subtract header height
+  min-height: calc(100vh - var(--hr-header-h)); // Subtract header height
   
   // Smooth zoom transition
   transition: zoom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -200,11 +199,11 @@
   }
   
   &::-webkit-scrollbar-thumb {
-    background: var(--primary-300);
+    background: var(--hr-border-strong);
     border-radius: var(--radius-full);
     
     &:hover {
-      background: var(--primary-400);
+      background: var(--hr-text-subtle);
     }
   }
 }

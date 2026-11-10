@@ -13,9 +13,9 @@
 }
 
 .current-shift-banner {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 0.75rem;
+  background: var(--hr-navy-soft);
+  border: 1px solid var(--hr-navy-muted);
+  border-radius: var(--hr-radius-lg);
   padding: 10px 14px;
   display: flex;
   justify-content: space-between;
@@ -28,7 +28,7 @@
 
     .shift-label {
       font-size: 0.625rem;
-      font-weight: 700;
+      font-weight: 600;
       color: ad.$ad-primary;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -43,7 +43,7 @@
 
   .shift-info-right .shift-time {
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 600;
     color: ad.$ad-text-primary;
   }
 }
@@ -58,7 +58,7 @@
     font-weight: 600;
     color: ad.$ad-text-label;
 
-    .required { color: #ef4444; }
+    .required { color: var(--hr-danger); }
   }
 }
 

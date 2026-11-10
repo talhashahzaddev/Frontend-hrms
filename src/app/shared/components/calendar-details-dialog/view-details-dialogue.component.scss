@@ -1,32 +1,32 @@
 // ─── Design Tokens (mirrors attendance-dialog system) ─────────────────────────
-$ad-primary:        #2563eb;
-$ad-primary-light:  #eff6ff;
-$ad-primary-dark:   #1d4ed8;
-$ad-text-primary:   #0f172a;
-$ad-text-secondary: #64748b;
-$ad-text-label:     #475569;
-$ad-text-muted:     #94a3b8;
-$ad-border:         #e2e8f0;
-$ad-surface:        #f8fafc;
+$ad-primary:        #2552d0;
+$ad-primary-light:  #eef3fd;
+$ad-primary-dark:   #1e44ae;
+$ad-text-primary:   #1f2328;
+$ad-text-secondary: #5f6670;
+$ad-text-label:     #3d434b;
+$ad-text-muted:     #8b929b;
+$ad-border:         #dde1e6;
+$ad-surface:        #f7f8fa;
 $ad-white:          #ffffff;
-$ad-danger:         #dc2626;
-$ad-danger-bg:      #fef2f2;
-$ad-success:        #16a34a;
-$ad-success-bg:     #dcfce7;
-$ad-warning:        #d97706;
-$ad-warning-bg:     #fef3c7;
+$ad-danger:         #b42318;
+$ad-danger-bg:      #fbeae9;
+$ad-success:        #2e7d4f;
+$ad-success-bg:     #eaf3ee;
+$ad-warning:        #9a6700;
+$ad-warning-bg:     #fbf3e0;
 $ad-font:           'Inter', sans-serif;
 
 // ─── Dialog Container Shell ───────────────────────────────────────────────────
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 0.875rem !important;
+  border-radius: var(--hr-radius-lg) !important;
   padding: 0 !important;
   overflow: hidden !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: var(--hr-shadow-lg) !important;
 }
 
 ::ng-deep .mdc-dialog__surface {
-  border-radius: 0.875rem !important;
+  border-radius: var(--hr-radius-lg) !important;
   overflow: hidden !important;
 }
 
@@ -39,7 +39,7 @@ $ad-font:           'Inter', sans-serif;
   border-bottom: 1px solid $ad-border;
   flex-shrink: 0;
   background: $ad-white;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
   gap: 1rem;
   font-family: $ad-font;
 
@@ -54,7 +54,7 @@ $ad-font:           'Inter', sans-serif;
   .header-icon-wrap {
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 0.625rem;
+    border-radius: var(--hr-radius-lg);
     background: $ad-primary-light;
     display: flex;
     align-items: center;
@@ -79,7 +79,7 @@ $ad-font:           'Inter', sans-serif;
   h2 {
     margin: 0;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $ad-text-primary;
     line-height: 1.3;
     font-family: $ad-font;
@@ -95,7 +95,7 @@ $ad-font:           'Inter', sans-serif;
   .close-btn {
     width: 2rem;
     height: 2rem;
-    border-radius: 0.375rem;
+    border-radius: var(--hr-radius);
     flex-shrink: 0;
 
     mat-icon {
@@ -131,14 +131,14 @@ $ad-font:           'Inter', sans-serif;
   justify-content: center;
   align-items: center;
   z-index: 10;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
 }
 
 // ─── Section Container ────────────────────────────────────────────────────────
 .section-container {
   background: $ad-white;
   border: 1px solid $ad-border;
-  border-radius: 0.75rem;
+  border-radius: var(--hr-radius-lg);
   padding: 1.125rem 1.25rem;
   margin-bottom: 1rem;
 
@@ -161,7 +161,7 @@ $ad-font:           'Inter', sans-serif;
   h3 {
     margin: 0;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $ad-text-primary;
     flex: 1;
     text-transform: uppercase;
@@ -173,15 +173,15 @@ $ad-font:           'Inter', sans-serif;
 // ─── Status Badges ────────────────────────────────────────────────────────────
 .status-badge {
   padding: 0.2rem 0.625rem;
-  border-radius: 2rem;
+  border-radius: var(--hr-radius-xl);
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
   &.present  { background: $ad-success-bg; color: $ad-success; }
   &.absent   { background: $ad-danger-bg;  color: $ad-danger; }
-  &.half-day { background: #dbeafe;        color: #1d4ed8; }
+  &.half-day { background: var(--hr-navy-soft);        color: var(--hr-navy-hover); }
   &.late     { background: $ad-warning-bg; color: $ad-warning; }
 }
 
@@ -192,9 +192,9 @@ $ad-font:           'Inter', sans-serif;
     align-items: center;
     gap: 4px;
     padding: 0.2rem 0.625rem;
-    border-radius: 2rem;
+    border-radius: var(--hr-radius-xl);
     font-size: 0.6875rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
 
     &.status-present { background: $ad-success-bg; color: $ad-success; }
@@ -210,7 +210,7 @@ $ad-font:           'Inter', sans-serif;
     gap: 0.875rem;
     background: $ad-surface;
     padding: 0.875rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     border: 1px solid $ad-border;
     margin-bottom: 0.875rem;
   }
@@ -220,7 +220,7 @@ $ad-font:           'Inter', sans-serif;
 .shift-details {
   background: $ad-surface;
   padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -257,17 +257,17 @@ $ad-font:           'Inter', sans-serif;
   padding: 0.875rem;
   background: $ad-white;
   border: 1px solid $ad-border;
-  border-radius: 0.625rem;
+  border-radius: var(--hr-radius-lg);
   transition: border-color 0.2s, box-shadow 0.2s;
 
   &:hover {
     border-color: $ad-primary;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    box-shadow: var(--hr-shadow-md);
   }
 
   mat-icon {
     padding: 0.5rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     font-size: 1.125rem;
     width: 1.125rem;
     height: 1.125rem;
@@ -275,7 +275,7 @@ $ad-font:           'Inter', sans-serif;
 
     &.check-in  { background: $ad-success-bg; color: $ad-success; }
     &.check-out { background: $ad-danger-bg;  color: $ad-danger; }
-    &.hours     { background: #dbeafe;        color: #1d4ed8; }
+    &.hours     { background: var(--hr-navy-soft);        color: var(--hr-navy-hover); }
     &.overtime  { background: $ad-warning-bg; color: $ad-warning; }
   }
 
@@ -294,7 +294,7 @@ $ad-font:           'Inter', sans-serif;
 
     .value {
       font-size: 0.9375rem;
-      font-weight: 700;
+      font-weight: 600;
       color: $ad-text-primary;
     }
   }
@@ -305,7 +305,7 @@ $ad-font:           'Inter', sans-serif;
   background: $ad-white;
   border: 1px solid $ad-border;
   border-left: 3px solid $ad-primary;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   padding: 0.875rem 1rem;
   margin-bottom: 1rem;
 
@@ -319,7 +319,7 @@ $ad-font:           'Inter', sans-serif;
     mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
     span {
       font-size: 0.6875rem;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
@@ -338,7 +338,7 @@ $ad-font:           'Inter', sans-serif;
 .sessions-list {
   background: $ad-surface;
   border: 1px solid $ad-border;
-  border-radius: 0.5rem;
+  border-radius: var(--hr-radius);
   padding: 0.875rem 1rem;
 
   h4 {
@@ -347,7 +347,7 @@ $ad-font:           'Inter', sans-serif;
     color: $ad-text-muted;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .session-item {
@@ -445,7 +445,7 @@ $ad-font:           'Inter', sans-serif;
 
   button {
     height: 2.25rem;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     font-size: 0.875rem;
     font-weight: 600;
     font-family: $ad-font;

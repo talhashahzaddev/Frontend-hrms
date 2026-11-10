@@ -7,7 +7,7 @@
     border-radius: unset !important;
     height: 42px !important;
     padding: 0 1.25rem !important;
-    border-radius: 0.5rem !important;
+    border-radius: var(--hr-radius) !important;
     font-size: 0.875rem !important;
     font-weight: 600 !important;
     display: inline-flex !important;
@@ -37,14 +37,14 @@
 
   // Primary filled
   .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-danger):not(.p-button-success):not(.p-button-warning):not([styleClass*="danger"]):not([styleClass*="success"]):not([styleClass*="warning"]) {
-    background: #2563eb !important;
+    background: var(--hr-navy) !important;
     border: none !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+    box-shadow: none !important;
 
     &:hover:not(:disabled) {
-      background: #1d4ed8 !important;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+      background: var(--hr-navy-hover) !important;
+      box-shadow: none !important;
     }
 
     &:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -53,14 +53,14 @@
   // Outlined
   .p-button.p-button-outlined {
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #475569 !important;
+    border: 1px solid var(--hr-border) !important;
+    color: var(--hr-text-2) !important;
     box-shadow: none !important;
 
     &:hover:not(:disabled) {
-      background: #f8fafc !important;
-      border-color: #2563eb !important;
-      color: #2563eb !important;
+      background: var(--hr-surface-2) !important;
+      border-color: var(--hr-navy) !important;
+      color: var(--hr-navy) !important;
     }
   }
 
@@ -70,37 +70,37 @@
     padding: 0 0.75rem !important;
     background: transparent !important;
     border: none !important;
-    color: #64748b !important;
+    color: var(--hr-text-muted) !important;
     box-shadow: none !important;
 
     &:hover:not(:disabled) {
-      background: #f1f5f9 !important;
-      color: #0f172a !important;
+      background: var(--hr-border-soft) !important;
+      color: var(--hr-text) !important;
     }
   }
 
   .p-button.p-button-info.p-button-text {
-    color: #2563eb !important;
-    &:hover:not(:disabled) { background: #eff6ff !important; }
+    color: var(--hr-navy) !important;
+    &:hover:not(:disabled) { background: var(--hr-navy-soft) !important; }
   }
 
   // Danger
   .p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined) {
-    background: #dc2626 !important;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
-    &:hover:not(:disabled) { background: #b91c1c !important; }
+    background: var(--hr-danger) !important;
+    box-shadow: none !important;
+    &:hover:not(:disabled) { background: var(--hr-danger-ink) !important; }
   }
 
   .p-button.p-button-danger.p-button-text {
-    color: #dc2626 !important;
-    &:hover:not(:disabled) { background: #fef2f2 !important; }
+    color: var(--hr-danger) !important;
+    &:hover:not(:disabled) { background: var(--hr-danger-soft) !important; }
   }
 
   // Success
   .p-button.p-button-success:not(.p-button-text) {
-    background: #16a34a !important;
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
-    &:hover:not(:disabled) { background: #15803d !important; }
+    background: var(--hr-success) !important;
+    box-shadow: none !important;
+    &:hover:not(:disabled) { background: var(--hr-success-ink) !important; }
   }
 
   // Small
@@ -108,7 +108,7 @@
     height: 36px !important;
     padding: 0 1rem !important;
     font-size: 0.8125rem !important;
-    border-radius: 0.5rem !important;
+    border-radius: var(--hr-radius) !important;
 
     .p-button-icon,
     .p-button-label { font-size: 0.8125rem !important; }
@@ -121,19 +121,19 @@
     gap: 0.5rem;
     height: 42px;
     padding: 0 1.25rem;
-    background: #2563eb;
+    background: var(--hr-navy);
     color: #ffffff;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: var(--hr-radius);
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    box-shadow: none;
     transition: background 0.15s, box-shadow 0.15s;
 
     &:hover:not(:disabled) {
-      background: #1d4ed8;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      background: var(--hr-navy-hover);
+      box-shadow: none;
     }
 
     &:disabled { opacity: 0.5; cursor: not-allowed; }

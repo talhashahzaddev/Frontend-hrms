@@ -1,15 +1,15 @@
 // Employee List – Synced with Jobs/Expense Module Design System
 // Color palette: #f8fafc bg, #2563eb primary, #0f172a text
 
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$slate-50: #f8fafc;
-$slate-100: #f1f5f9;
-$slate-200: #e2e8f0;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-600: #475569;
-$slate-900: #0f172a;
+$primary: #2552d0;
+$primary-hover: #1e44ae;
+$slate-50: #f7f8fa;
+$slate-100: #edeff2;
+$slate-200: #dde1e6;
+$slate-400: #8b929b;
+$slate-500: #5f6670;
+$slate-600: #3d434b;
+$slate-900: #1f2328;
 
 .employee-list-container {
   padding: 2rem;
@@ -35,7 +35,7 @@ $slate-900: #0f172a;
       .icon-box {
         width: 3rem;
         height: 3rem;
-        border-radius: 0.75rem;
+        border-radius: var(--hr-radius-lg);
         background-color: rgba($primary, 0.1);
         color: $primary;
         display: flex;
@@ -51,7 +51,7 @@ $slate-900: #0f172a;
 
       .page-title {
         font-size: 1.75rem;
-        font-weight: 700;
+        font-weight: 600;
         margin: 0;
         line-height: 1.25;
         color: $slate-900;
@@ -69,18 +69,18 @@ $slate-900: #0f172a;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #2563eb;
+        background-color: var(--hr-navy);
         color: white;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
-        font-weight: 700;
+        font-weight: 600;
         border: none;
         cursor: pointer;
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+        box-shadow: var(--hr-shadow-md);
         transition: all 0.2s;
 
-        &:hover { background-color: rgba(37, 99, 235, 0.9); }
+        &:hover { background-color: rgba(37, 82, 208, 0.9); }
 
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
@@ -89,18 +89,18 @@ $slate-900: #0f172a;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #f59e0b;
+        background-color: var(--hr-warning);
         color: white;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
-        font-weight: 700;
+        font-weight: 600;
         border: none;
         cursor: pointer;
         transition: all 0.2s;
 
-        &:hover { background-color: #d97706; }
-        &.renew { background-color: #ef4444; &:hover { background-color: #dc2626; } }
+        &:hover { background-color: var(--hr-warning); }
+        &.renew { background-color: var(--hr-danger); &:hover { background-color: var(--hr-danger); } }
 
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
@@ -122,7 +122,7 @@ $slate-900: #0f172a;
     justify-content: space-between;
     align-items: center;
     background: white;
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-radius: var(--hr-radius-lg) var(--hr-radius-lg) 0 0;
     padding: 1rem 1.5rem;
     border-bottom: 1px solid $slate-200;
 
@@ -130,7 +130,7 @@ $slate-900: #0f172a;
       display: inline-flex;
       background: $slate-100;
       padding: 0.375rem;
-      border-radius: 0.875rem;
+      border-radius: var(--hr-radius-lg);
       border: 1px solid $slate-200;
 
       .tab-btn {
@@ -138,7 +138,7 @@ $slate-900: #0f172a;
         align-items: center;
         gap: 0.5rem;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.625rem;
+        border-radius: var(--hr-radius-lg);
         font-size: 0.875rem;
         font-weight: 600;
         color: $slate-500;
@@ -150,7 +150,7 @@ $slate-900: #0f172a;
         &.active {
           background: white;
           color: $primary;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--hr-shadow-md);
         }
 
         &:hover:not(.active) {
@@ -182,15 +182,15 @@ $slate-900: #0f172a;
           padding: 0.5rem 1rem 0.5rem 2.5rem;
           background-color: $slate-50;
           border: 1px solid $slate-200;
-          border-radius: 0.5rem;
+          border-radius: var(--hr-radius);
           font-size: 0.875rem;
-          color: #334155;
+          color: var(--hr-text-2);
           outline: none;
           box-sizing: border-box;
           transition: border-color 0.2s, box-shadow 0.2s;
 
           &::placeholder { color: $slate-400; }
-          &:focus { border-color: $primary; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+          &:focus { border-color: $primary; box-shadow: 0 0 0 2px rgba(37, 82, 208, 0.15); }
         }
       }
     }
@@ -210,9 +210,9 @@ $slate-900: #0f172a;
       padding: 0.5rem 1rem;
       background-color: $slate-50;
       border: 1px solid $slate-200;
-      border-radius: 0.5rem;
+      border-radius: var(--hr-radius);
       font-size: 0.875rem;
-      color: #334155;
+      color: var(--hr-text-2);
       outline: none;
       cursor: pointer;
       min-width: 150px;
@@ -227,7 +227,7 @@ $slate-900: #0f172a;
         align-items: center;
         gap: 0.35rem;
         padding: 0.5rem 0.875rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.8125rem;
         font-weight: 600;
         background-color: #fff;
@@ -240,8 +240,8 @@ $slate-900: #0f172a;
 
         &:not(:disabled):hover {
           background-color: $slate-50;
-          color: #ef4444;
-          border-color: #fca5a5;
+          color: var(--hr-danger);
+          border-color: var(--hr-danger-soft);
         }
       }
     }
@@ -252,9 +252,9 @@ $slate-900: #0f172a;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: #eff6ff;
+    background: var(--hr-navy-soft);
     padding: 0.625rem 1.5rem;
-    border-bottom: 1px solid #dbeafe;
+    border-bottom: 1px solid var(--hr-navy-soft);
 
     .selection-info {
       display: flex;
@@ -262,28 +262,28 @@ $slate-900: #0f172a;
       gap: 6px;
       font-size: 0.8125rem;
       font-weight: 600;
-      color: #2563eb;
+      color: var(--hr-navy);
 
       mat-icon { font-size: 18px; width: 18px; height: 18px; }
     }
 
-    .bulk-divider { width: 1px; height: 20px; background: #dbeafe; }
+    .bulk-divider { width: 1px; height: 20px; background: var(--hr-navy-soft); }
 
     .bulk-action-btn {
       height: 2.25rem !important;
       padding: 0 0.875rem !important;
-      border-radius: 0.5rem !important;
+      border-radius: var(--hr-radius) !important;
       font-size: 0.75rem !important;
-      font-weight: 700 !important;
-      color: #2563eb !important;
-      border-color: #dbeafe !important;
+      font-weight: 600 !important;
+      color: var(--hr-navy) !important;
+      border-color: var(--hr-navy-soft) !important;
       background: white !important;
 
       mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
 
       &:hover {
-        background: #f8fafc !important;
-        border-color: #bfdbfe !important;
+        background: var(--hr-surface-2) !important;
+        border-color: var(--hr-navy-muted) !important;
       }
     }
   }
@@ -292,8 +292,8 @@ $slate-900: #0f172a;
   .content-card {
     width: 100%;
     background-color: #ffffff;
-    border-radius: 0 0 0.75rem 0.75rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 var(--hr-radius-lg) var(--hr-radius-lg);
+    box-shadow: var(--hr-shadow-sm);
     border: 1px solid $slate-200;
     border-top: none;
     overflow: hidden;
@@ -316,7 +316,7 @@ $slate-900: #0f172a;
         align-items: center;
         gap: 0.35rem;
         padding: 0.5rem 0.875rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.8125rem;
         font-weight: 600;
         background-color: #fff;
@@ -355,7 +355,7 @@ $slate-900: #0f172a;
       th {
         padding: 1rem 1.5rem;
         font-size: 0.75rem;
-        font-weight: 700;
+        font-weight: 600;
         color: $slate-500;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -375,7 +375,7 @@ $slate-900: #0f172a;
           cursor: pointer;
 
           &:hover { background-color: $slate-50; }
-          &.selected-row { background-color: #eff6ff; }
+          &.selected-row { background-color: var(--hr-navy-soft); }
 
           td {
             padding: 1rem 1.5rem;
@@ -397,7 +397,7 @@ $slate-900: #0f172a;
       font-weight: 600;
       color: $slate-900;
       padding: 3px 7px;
-      border-radius: 4px;
+      border-radius: var(--hr-radius);
     }
 
     // Employee Info
@@ -409,8 +409,8 @@ $slate-900: #0f172a;
       .employee-avatar {
         width: 36px;
         height: 36px;
-        border-radius: 0.5rem;
-        background: #eff6ff;
+        border-radius: var(--hr-radius);
+        background: var(--hr-navy-soft);
         color: $primary;
         display: flex;
         align-items: center;
@@ -421,7 +421,7 @@ $slate-900: #0f172a;
         img {
           width: 100%;
           height: 100%;
-          border-radius: 0.5rem;
+          border-radius: var(--hr-radius);
           object-fit: contain;
           object-position: center;
         }
@@ -451,15 +451,15 @@ $slate-900: #0f172a;
       display: inline-flex;
       align-items: center;
       padding: 0.25rem 0.75rem;
-      border-radius: 2rem;
+      border-radius: var(--hr-radius-xl);
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 600;
 
-      &.badge-dept { background-color: #dcfce7; color: #166534; }
-      &.badge-pos { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-      &.status-active { background-color: #dcfce7; color: #166534; }
-      &.status-inactive { background-color: #f1f5f9; color: $slate-500; }
-      &.status-deleted { background-color: #fee2e2; color: #991b1b; }
+      &.badge-dept { background-color: var(--hr-success-soft); color: var(--hr-success-ink); }
+      &.badge-pos { background-color: var(--hr-warning-soft); color: var(--hr-warning-ink); border: 1px solid var(--hr-warning-soft); }
+      &.status-active { background-color: var(--hr-success-soft); color: var(--hr-success-ink); }
+      &.status-inactive { background-color: var(--hr-border-soft); color: $slate-500; }
+      &.status-deleted { background-color: var(--hr-danger-soft); color: var(--hr-danger-ink); }
     }
 
     // Action Cell
@@ -480,7 +480,7 @@ $slate-900: #0f172a;
       justify-content: center;
       border: none;
       background: transparent;
-      border-radius: 4px;
+      border-radius: var(--hr-radius);
       cursor: pointer;
       transition: all 0.2s;
 
@@ -524,17 +524,17 @@ $slate-900: #0f172a;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #2563eb;
+        background-color: var(--hr-navy);
         color: white;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
-        font-weight: 700;
+        font-weight: 600;
         border: none;
         cursor: pointer;
         transition: all 0.2s;
 
-        &:hover { background-color: rgba(37, 99, 235, 0.9); }
+        &:hover { background-color: rgba(37, 82, 208, 0.9); }
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
 
@@ -542,16 +542,16 @@ $slate-900: #0f172a;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #f59e0b;
+        background-color: var(--hr-warning);
         color: white;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--hr-radius);
         font-size: 0.875rem;
-        font-weight: 700;
+        font-weight: 600;
         border: none;
         cursor: pointer;
 
-        &.renew { background-color: #ef4444; }
+        &.renew { background-color: var(--hr-danger); }
         mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
       }
     }
@@ -565,8 +565,8 @@ $slate-900: #0f172a;
 
   // ─── Action Menu Panel ────────────────────────────────────────
   ::ng-deep .mat-mdc-menu-panel {
-    border-radius: 10px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    border-radius: var(--hr-radius-lg) !important;
+    box-shadow: var(--hr-shadow-lg) !important;
     border: 1px solid #f0f1f5 !important;
     min-width: 180px !important;
 
@@ -574,19 +574,19 @@ $slate-900: #0f172a;
       padding: 6px !important;
 
       .mat-mdc-menu-item {
-        border-radius: 6px !important;
+        border-radius: var(--hr-radius) !important;
         margin: 1px 0 !important;
         height: 38px !important;
         min-height: 38px !important;
         font-size: 13.5px !important;
-        color: #334155;
+        color: var(--hr-text-2);
 
         &:hover { background: #f5f6fa !important; }
 
-        mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #64748b; }
+        mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: var(--hr-text-muted); }
 
-        &.danger-action { color: #dc2626 !important; mat-icon { color: #dc2626 !important; } &:hover { background: #fff5f5 !important; } }
-        &.recover-action { color: #16a34a !important; mat-icon { color: #16a34a !important; } &:hover { background: #f0fdf4 !important; } }
+        &.danger-action { color: var(--hr-danger) !important; mat-icon { color: var(--hr-danger) !important; } &:hover { background: var(--hr-danger-soft) !important; } }
+        &.recover-action { color: var(--hr-success) !important; mat-icon { color: var(--hr-success) !important; } &:hover { background: var(--hr-success-soft) !important; } }
       }
 
       mat-divider { margin: 4px 0 !important; border-color: #f0f1f5 !important; }
