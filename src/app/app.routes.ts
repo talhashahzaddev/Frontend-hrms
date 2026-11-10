@@ -334,6 +334,12 @@ export const appRoutes: Routes = [
         title: 'Payment Management - Brisk People'
       },
       {
+        path: 'backups',
+        loadComponent: () =>
+          import('./features/platform-admin/components/database-backup/database-backup.component').then(m => m.DatabaseBackupComponent),
+        title: 'Database Backup - Brisk People'
+      },
+      {
         path: 'global-roles',
         children: [
           {

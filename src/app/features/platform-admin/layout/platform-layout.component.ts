@@ -55,7 +55,8 @@ export class PlatformLayoutComponent implements OnInit, OnDestroy {
     { label: 'User Invitations', icon: 'person_add', route: '/platform-admin/invitations' },
     { label: 'Roles Management', icon: 'admin_panel_settings', route: '/platform-admin/global-roles' },
     { label: 'Demo Inquiries', icon: 'contact_mail', route: '/platform-admin/inquiries' },
-    { label: 'Payments', icon: 'payments', route: '/platform-admin/payments' }
+    { label: 'Payments', icon: 'payments', route: '/platform-admin/payments' },
+    { label: 'Database Backup', icon: 'backup', route: '/platform-admin/backups' }
   ];
 
   private destroy$ = new Subject<void>();

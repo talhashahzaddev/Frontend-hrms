@@ -1,0 +1,254 @@
+<div class="backup-page">
+  <div class="page-header">
+    <div>
+      <h1>Database Backup</h1>
+      <p class="page-subtitle">Take a full backup of the database now, or schedule it to run automatically.</p>
+    </div>
+    <button mat-flat-button color="primary" class="backup-now-btn"
+            [disabled]="isStarting || hasRunning" (click)="backupNow()">
+      @if (isStarting || hasRunning) {
+        <mat-progress-spinner mode="indeterminate" diameter="18"></mat-progress-spinner>
+      } @else {
+        <mat-icon>backup</mat-icon>
+      }
+      <span>{{ hasRunning ? 'Backup running…' : isStarting ? 'Starting…' : 'Backup now' }}</span>
+    </button>
+  </div>
+
+  <div class="cards-grid">
+    <!-- Schedule -->
+    <mat-card class="panel-card">
+      <mat-card-content>
+        <div class="panel-title">
+          <mat-icon>schedule</mat-icon>
+          <h2>Automatic backups</h2>
+        </div>
+
+        <mat-slide-toggle [(ngModel)]="isEnabled" color="primary" class="enable-toggle">
+          {{ isEnabled ? 'On' : 'Off' }}
+        </mat-slide-toggle>
+
+        <div class="form-grid" [class.muted]="!isEnabled">
+          <mat-form-field appearance="outline">
+            <mat-label>How often</mat-label>
+            <mat-select [(ngModel)]="frequencyChoice" [disabled]="!isEnabled">
+              @for (opt of frequencyOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (frequencyChoice === 'custom') {
+            <mat-form-field appearance="outline">
+              <mat-label>Every how many days</mat-label>
+              <input matInput type="number" min="1" max="365" [(ngModel)]="customDays" [disabled]="!isEnabled">
+            </mat-form-field>
+          }
+
+          <mat-form-field appearance="outline">
+            <mat-label>At time</mat-label>
+            <input matInput type="time" [(ngModel)]="runAtTime" [disabled]="!isEnabled">
+            <mat-hint>{{ browserTimeZone }}</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Backups to keep on server</mat-label>
+            <input matInput type="number" min="1" max="100" [(ngModel)]="retentionCount">
+            <mat-hint>Older ones are deleted automatically</mat-hint>
+          </mat-form-field>
+        </div>
+
+        @if (settings?.isEnabled && settings?.nextRunAt) {
+          <p class="next-run">
+            <mat-icon>event</mat-icon>
+            Next backup: <strong>{{ settings!.nextRunAt | date:'medium' }}</strong>
+          </p>
+        }
+        @if (settings?.isEnabled && settings!.timeZone !== browserTimeZone) {
+          <p class="note warn">Schedule was saved in {{ settings!.timeZone }}. Saving here switches it to {{ browserTimeZone }}.</p>
+        }
+
+        <div class="panel-actions">
+          <button mat-stroked-button color="primary" [disabled]="isSavingSettings" (click)="saveSettings()">
+            <mat-icon>save</mat-icon> Save schedule
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Folder on this computer -->
+    <mat-card class="panel-card">
+      <mat-card-content>
+        <div class="panel-title">
+          <mat-icon>folder</mat-icon>
+          <h2>Save to my computer</h2>
+        </div>
+
+        @if (!folderSupported) {
+          <p class="note">
+            This browser can't save into a chosen folder. Backups will download to your normal Downloads folder.
+            Use Chrome or Edge to pick a folder.
+          </p>
+        } @else if (!folder) {
+          <p class="note">Choose a folder on this computer. New backups will be copied into it automatically.</p>
+          <button mat-stroked-button color="primary" (click)="chooseFolder()">
+            <mat-icon>create_new_folder</mat-icon> Choose folder
+          </button>
+        } @else {
+          <div class="folder-row">
+            <mat-icon class="folder-icon">folder_open</mat-icon>
+            <div class="folder-info">
+              <strong>{{ folder.name }}</strong>
+              <span class="folder-status" [class.ok]="folderPermission === 'granted'">
+                {{ folderPermission === 'granted' ? 'Ready — new backups are saved here' : 'Needs your permission' }}
+              </span>
+            </div>
+          </div>
+          <div class="panel-actions">
+            @if (folderPermission !== 'granted') {
+              <button mat-flat-button color="primary" (click)="allowFolderAccess()">
+                <mat-icon>lock_open</mat-icon> Allow access
+              </button>
+            }
+            <button mat-stroked-button (click)="chooseFolder()">Change folder</button>
+            <button mat-button color="warn" (click)="forgetFolder()">Remove</button>
+          </div>
+        }
+
+        <p class="note small">
+          Scheduled backups run on the server even when this computer is off. They are copied into your folder
+          the next time you open this page.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- History -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="panel-title table-title">
+        <mat-icon>history</mat-icon>
+        <h2>Backup history</h2>
+        <span class="spacer"></span>
+        <button mat-icon-button matTooltip="Refresh" (click)="loadBackups()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+      <div class="filter-row">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>From date</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filterFromDate" [max]="filterToDate" placeholder="Pick a date">
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>From time</mat-label>
+          <input matInput type="time" [(ngModel)]="filterFromTime" [disabled]="!filterFromDate">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>To date</mat-label>
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="filterToDate" [min]="filterFromDate" placeholder="Pick a date">
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>To time</mat-label>
+          <input matInput type="time" [(ngModel)]="filterToTime" [disabled]="!filterToDate">
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-flat-button color="primary" [disabled]="!filterFromDate && !filterToDate" (click)="applyFilter()">
+            <mat-icon>filter_alt</mat-icon> Apply
+          </button>
+          @if (isFiltered || filterFromDate || filterToDate) {
+            <button mat-button (click)="clearFilter()">
+              <mat-icon>filter_alt_off</mat-icon> Clear
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (isLoadingBackups) {
+        <div class="loading"><mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner></div>
+      } @else if (backups.length === 0) {
+        <div class="empty-state">
+          <mat-icon>cloud_off</mat-icon>
+          <p>{{ isFiltered ? 'No backups in the selected date range.' : 'No backups yet. Click "Backup now" to create the first one.' }}</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="backups">
+            <ng-container matColumnDef="startedAt">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let b">
+                <div class="date-cell">
+                  <span>{{ b.startedAt | date:'medium' }}</span>
+                  <small>{{ b.fileName }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="triggerType">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let b">{{ b.triggerType === 'scheduled' ? 'Scheduled' : 'Manual' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="size">
+              <th mat-header-cell *matHeaderCellDef>Size</th>
+              <td mat-cell *matCellDef="let b">{{ formatSize(b.sizeBytes) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let b">
+                <span class="status-chip" [ngClass]="b.status"
+                      [matTooltip]="b.status === 'failed' ? (b.errorMessage || '') : ''">
+                  {{ b.status === 'running' ? 'Running…' : b.status === 'completed' ? 'Completed' : 'Failed' }}
+                </span>
+                @if (b.status === 'completed' && !b.fileAvailable) {
+                  <span class="status-chip missing" matTooltip="The server no longer has this file">File missing</span>
+                }
+                @if (isSaved(b)) {
+                  <mat-icon class="saved-icon" matTooltip="Saved to your folder">download_done</mat-icon>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let b" class="actions-cell">
+                @if (busyIds.has(b.backupId)) {
+                  <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+                } @else if (b.status === 'completed' && b.fileAvailable) {
+                  @if (folder) {
+                    <button mat-icon-button matTooltip="Save to {{ folder.name }}" (click)="saveToFolder(b)">
+                      <mat-icon>drive_folder_upload</mat-icon>
+                    </button>
+                  }
+                  <button mat-icon-button matTooltip="Download" (click)="download(b)">
+                    <mat-icon>download</mat-icon>
+                  </button>
+                }
+                @if (b.status !== 'running') {
+                  <button mat-icon-button matTooltip="Delete" (click)="confirmDelete(b)">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <p class="note small restore-hint">
+    Backups are PostgreSQL custom-format files (.dump). Restore with
+    <code>pg_restore --clean --no-owner -d &lt;database&gt; file.dump</code>.
+  </p>
+</div>
