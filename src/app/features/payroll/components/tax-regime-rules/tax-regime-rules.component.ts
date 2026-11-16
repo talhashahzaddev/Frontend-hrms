@@ -173,7 +173,7 @@ export class TaxRegimeRulesComponent implements OnInit {
           },
           error: (err) => {
             console.error(err);
-            this.notification.showError('Failed to delete tax regime');
+            this.notification.showError(err?.error?.message || ('Failed to delete tax regime'));
           }
         });
       }

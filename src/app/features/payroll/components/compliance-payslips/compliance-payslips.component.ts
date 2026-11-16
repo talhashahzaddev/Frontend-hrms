@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription, take } from 'rxjs';
+import { Observable, Subscription, map, of, take } from 'rxjs';
 
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
@@ -381,29 +381,23 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Only a delivered (uploaded, absolute https) copy is opened directly. The local /payslips/... file is
+    // deleted after a successful send, so for everything else use the authenticated PDF endpoint.
+    // Previously both were opened, giving two tabs (one often a 404).
     const directUrl = this.resolvePayslipOpenUrl(row.payslipUrl);
-    if (directUrl) {
-      const opened = window.open(directUrl, '_blank', 'noopener,noreferrer');
-    //   if (!opened) {
-    //     window.alert('Pop-up blocked. Please allow pop-ups to view the payslip PDF.');
-    //   }
-    //   return;
+    if (directUrl && /^https:\/\//i.test(directUrl)) {
+      window.open(directUrl, '_blank', 'noopener,noreferrer');
+      return;
     }
 
     this.payrollService.getCompliancePayslipPdfBlob(row.id).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
-        const opened = window.open(url, '_blank');
-        // if (!opened) {
-        //   URL.revokeObjectURL(url);
-        //   window.alert('Pop-up blocked. Please allow pop-ups to view the payslip PDF.');
-        //   return;
-        // }
-
+        window.open(url, '_blank');
         setTimeout(() => URL.revokeObjectURL(url), 120_000);
       },
       error: () => {
-        window.alert('Unable to open payslip PDF. Ensure payroll data exists for this employee and period.');
+        this.toastr.error('Unable to open payslip PDF. Ensure payroll data exists for this employee and period.');
       }
     });
   }
@@ -471,6 +465,16 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
       return;
     }
     const defaultPeriodId = this.appliedPeriodId || this.periods[0]?.id || '';
+
+    // The table only holds the current page; the dialog needs every employee of the period,
+    // otherwise "All generated" silently emails just the visible page.
+    this.loadPeriodRecipients(defaultPeriodId).subscribe({
+      next: (recipients) => this.openBulkEmailDialogWith(defaultPeriodId, recipients),
+      error: () => this.toastr.error('Could not load payslip recipients. Please try again.')
+    });
+  }
+
+  private openBulkEmailDialogWith(defaultPeriodId: string, recipients: BulkEmailRecipientOption[]): void {
     const periodLabel = this.getPeriodLabelById(defaultPeriodId);
 
     const dialogRef = this.dialog.open(BulkEmailPayslipsDialogComponent, {
@@ -481,7 +485,8 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
       restoreFocus: false,
       data: {
         periods: this.periods.map((period) => ({ id: period.id, label: period.label })),
-        recipients: this.buildBulkEmailRecipients(),
+        recipients,
+        loadRecipients: (periodId: string) => this.loadPeriodRecipients(periodId),
         defaultPeriodId,
         defaultSubject: `Payslip for ${periodLabel} - Enterprise HR`,
         defaultMessage: 'Hello,\n\nYour payslip for the selected period is now available. Please find the attached document for your records.\n\nBest regards,\nPayroll Team'
@@ -523,7 +528,9 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
           this.applyLocalSingleGenerate(row);
+          return;
         }
+        this.toastr.error(this.getApiErrorMessage(error, 'Failed to generate payslip.'));
       }
     });
   }
@@ -742,23 +749,31 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.payrollService.reissuePayslip(row.id, {
-      reason: payload.reason,
-      notes: payload.notes,
-      sendEmail: payload.sendEmail,
-      nextVersionNo: payload.nextVersionNo
+    // There is no dedicated reissue endpoint on the API (the old call always 404'd and the page silently
+    // switched to fake local data). Reissue = regenerate the PDF (overwrite, which puts it back to "pending")
+    // and optionally email it again.
+    this.payrollService.bulkGenerateCompliancePayslipPdfs({
+      payrollPeriodId: row.periodId,
+      employeeIds: [row.employeeId],
+      overwriteExisting: true
     }).subscribe({
       next: () => {
+        this.toastr.success('Payslip regenerated.');
         this.loadPayslips();
         this.loadStats();
+
+        if (payload.sendEmail) {
+          this.sendSinglePayslip({ ...row, status: 'generated' });
+        }
       },
       error: (error: any) => {
-        if (this.isUnsupportedEndpointError(error)) {
-          this.activateLocalPayslipFallback();
-          this.applyLocalReissue(row, payload);
-        }
+        this.toastr.error(this.getApiErrorMessage(error, 'Failed to reissue payslip.'));
       }
     });
+  }
+
+  private getApiErrorMessage(error: any, fallback: string): string {
+    return error?.error?.message ?? error?.message ?? fallback;
   }
 
   private bulkGeneratePayslips(payload: BulkGeneratePayslipsDialogPayload): void {
@@ -780,7 +795,9 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
           this.applyLocalBulkGenerate(payload);
+          return;
         }
+        this.toastr.error(this.getApiErrorMessage(error, 'Failed to generate payslips.'));
       }
     });
   }
@@ -1147,11 +1164,29 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
     };
   }
 
-  private buildBulkEmailRecipients(): BulkEmailRecipientOption[] {
-    const recipients = this.payslips.map((row) => ({
+  /** Loads every payslip row of a period (not just the table page) for the bulk email recipient list. */
+  private loadPeriodRecipients(periodId: string): Observable<BulkEmailRecipientOption[]> {
+    if (!periodId || this.usingLocalPayslipData) {
+      return of(this.buildBulkEmailRecipients(this.payslips.filter((row) => !periodId || row.periodId === periodId)));
+    }
+
+    return this.payrollService.getCompliancePayslips({
+      page: 1,
+      pageSize: 5000,
+      payrollPeriodId: periodId
+    }).pipe(
+      map((page: any) => {
+        const items = Array.isArray(page?.data) ? page.data : [];
+        return this.buildBulkEmailRecipients(items.map((item: any, index: number) => this.mapPayslipRow(item, index)));
+      })
+    );
+  }
+
+  private buildBulkEmailRecipients(rows: PayslipRow[] = this.payslips): BulkEmailRecipientOption[] {
+    const recipients = rows.map((row) => ({
       id: row.employeeId,
       employeeName: row.employeeName,
-      employeeEmail: this.findEmployee(row.employeeId)?.email ?? `${row.employeeCode.toLowerCase()}@example.com`,
+      employeeEmail: this.findEmployee(row.employeeId)?.email ?? '',
       payrollPeriodId: row.periodId,
       hasGeneratedPayslip: row.status !== 'draft',
       alreadySent: row.status === 'sent' || row.status === 'viewed',
@@ -1394,8 +1429,10 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   }
 
   private isUnsupportedEndpointError(error: any): boolean {
-    const status = Number(error?.status ?? 0);
-    return status === 0 || status === 404 || status === 405 || status === 501;
+    // Network errors (status 0) must not switch the page to generated demo data: admins would see fake
+    // salaries and "sent" statuses. Only a genuinely missing endpoint triggers the local fallback.
+    const status = Number(error?.status ?? -1);
+    return status === 405 || status === 501;
   }
 
   private estimateSalary(seed: string): { gross: number; deductions: number; net: number } {

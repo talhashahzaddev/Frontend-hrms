@@ -105,11 +105,20 @@ export class SocialSecurityAdminActionDialogComponent {
       this.form.get('rejectionReason')?.updateValueAndValidity();
     }
     if (this.mode === 'approve-claim') {
-      this.form.get('approvedAmount')?.setValidators([Validators.required, Validators.min(0)]);
+      // Same rules as the API: more than zero and not above the claimed amount.
+      const approvedValidators = [Validators.required, Validators.min(0.01)];
+      if (Number(data?.claimedAmount ?? 0) > 0) {
+        approvedValidators.push(Validators.max(Number(data?.claimedAmount)));
+      }
+      this.form.get('approvedAmount')?.setValidators(approvedValidators);
       this.form.get('approvedAmount')?.updateValueAndValidity();
     }
     if (this.mode === 'mark-claim-paid') {
-      this.form.get('paidAmount')?.setValidators([Validators.required, Validators.min(0)]);
+      const paidValidators = [Validators.required, Validators.min(0.01)];
+      if (Number(data?.approvedAmount ?? 0) > 0) {
+        paidValidators.push(Validators.max(Number(data?.approvedAmount)));
+      }
+      this.form.get('paidAmount')?.setValidators(paidValidators);
       this.form.get('paymentDate')?.setValidators([Validators.required]);
       this.form.get('paidAmount')?.updateValueAndValidity();
       this.form.get('paymentDate')?.updateValueAndValidity();

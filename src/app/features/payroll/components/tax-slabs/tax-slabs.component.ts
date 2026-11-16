@@ -79,7 +79,7 @@ export class TaxSlabsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to create tax slab');
+          this.notification.showError(err?.error?.message || ('Failed to create tax slab'));
         }
       });
     });
@@ -115,7 +115,7 @@ export class TaxSlabsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to update tax slab');
+          this.notification.showError(err?.error?.message || ('Failed to update tax slab'));
         }
       });
     });
@@ -145,7 +145,7 @@ export class TaxSlabsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete tax slab');
+          this.notification.showError(err?.error?.message || ('Failed to delete tax slab'));
         }
       });
     });

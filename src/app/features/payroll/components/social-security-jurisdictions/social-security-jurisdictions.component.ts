@@ -80,7 +80,7 @@ export class SocialSecurityJurisdictionsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to create jurisdiction');
+          this.notification.showError(err?.error?.message || ('Failed to create jurisdiction'));
         }
       });
     });
@@ -111,7 +111,7 @@ export class SocialSecurityJurisdictionsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to update jurisdiction');
+          this.notification.showError(err?.error?.message || ('Failed to update jurisdiction'));
         }
       });
     });
@@ -141,7 +141,7 @@ export class SocialSecurityJurisdictionsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete jurisdiction');
+          this.notification.showError(err?.error?.message || ('Failed to delete jurisdiction'));
         }
       });
     });

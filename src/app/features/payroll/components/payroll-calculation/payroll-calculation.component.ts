@@ -269,6 +269,13 @@ export class PayrollCalculationComponent implements OnInit {
         const processed = result?.employeesConsidered || 0;
         const deducts = (result?.totalDeductions || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         this.notificationService.success(`Payroll calculated successfully. Processed ${processed} employees with total deductions of ${deducts}.`);
+        const warnings: string[] = Array.isArray(result?.warnings) ? result.warnings : [];
+        if (warnings.length > 0) {
+          console.warn('Payroll calculation warnings:', warnings);
+          this.notificationService.warning(
+            `${warnings.length} warning(s): ${warnings.slice(0, 3).join(' | ')}${warnings.length > 3 ? ' …' : ''}`
+          );
+        }
         this.isCalculating = false;
       },
       error: (err) => {

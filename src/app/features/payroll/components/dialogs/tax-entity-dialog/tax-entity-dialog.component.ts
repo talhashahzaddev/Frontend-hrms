@@ -71,7 +71,7 @@ export class TaxEntityDialogComponent {
     limitAmount: [0 as number | null],
     limitPercentage: [0 as number | null],
     limitType: ['fixed' as SlabAmountType],
-    applyStage: ['BeforeTax']
+    applyStage: ['ProvidentFunds']
   });
 
   constructor(@Inject(MAT_DIALOG_DATA) incomingData: TaxEntityDialogData) {
@@ -127,13 +127,9 @@ export class TaxEntityDialogComponent {
     }
 
     if (this.isSlab) {
-      const amountType = (raw.amountType ?? 'fixed') as SlabAmountType;
-      const fixedAmount = amountType === 'fixed'
-        ? Number(raw.fixedAmount ?? 0)
-        : null;
-      const percentage = amountType === 'percentage'
-        ? Number(raw.percentage ?? 0)
-        : null;
+      // Slab tax = fixed + percentage x (income - min); both parts are sent.
+      const fixedAmount = Number(raw.fixedAmount ?? 0);
+      const percentage = Number(raw.percentage ?? 0);
 
       this.dialogRef.close({
         categoryId: String(raw.categoryId || ''),
@@ -157,7 +153,7 @@ export class TaxEntityDialogComponent {
       taxability: String(raw.taxability || 'FullyTaxable').trim(),
       limitAmount,
       limitPercentage,
-      applyStage: String(raw.applyStage || 'BeforeTax').trim()
+      applyStage: String(raw.applyStage || 'ProvidentFunds').trim()
     });
   }
 
@@ -174,7 +170,16 @@ export class TaxEntityDialogComponent {
       this.form.get('slabOrder')?.setValidators([Validators.required, Validators.min(1)]);
       this.form.get('minIncome')?.setValidators([Validators.required, Validators.min(0)]);
       this.form.get('maxIncome')?.setValidators([Validators.min(0)]);
-      this.updateSlabAmountValidators((this.form.get('amountType')?.value ?? 'fixed') as SlabAmountType);
+      this.form.get('fixedAmount')?.setValidators([Validators.required, Validators.min(0)]);
+      this.form.get('percentage')?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+      this.form.setValidators(() => {
+        if (!this.isSlab) return null;
+        const min = Number(this.form.get('minIncome')?.value ?? 0);
+        const max = this.form.get('maxIncome')?.value;
+        return max !== null && max !== undefined && String(max) !== '' && Number(max) <= min
+          ? { maxIncomeNotGreater: true }
+          : null;
+      });
       return;
     }
 
@@ -191,19 +196,11 @@ export class TaxEntityDialogComponent {
   private patchInitialValue(): void {
     if (!this.data.initialValue) return;
     if (this.isSlab) {
-      const fixedAmount = this.data.initialValue.fixedAmount;
-      const percentage = this.data.initialValue.percentage;
-      const amountType: SlabAmountType =
-        fixedAmount !== null && fixedAmount !== undefined && Number(fixedAmount) > 0
-          ? 'fixed'
-          : 'percentage';
       this.form.patchValue({
         ...this.data.initialValue,
-        amountType,
-        fixedAmount: amountType === 'fixed' ? fixedAmount ?? 0 : null,
-        percentage: amountType === 'percentage' ? percentage ?? 0 : null
+        fixedAmount: this.data.initialValue.fixedAmount ?? 0,
+        percentage: this.data.initialValue.percentage ?? 0
       });
-      this.updateSlabAmountValidators(amountType);
       return;
     }
     if (this.isRule) {

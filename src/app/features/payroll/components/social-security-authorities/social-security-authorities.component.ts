@@ -85,7 +85,7 @@ export class SocialSecurityAuthoritiesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to create authority');
+          this.notification.showError(err?.error?.message || ('Failed to create authority'));
         }
       });
     });
@@ -117,7 +117,7 @@ export class SocialSecurityAuthoritiesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to update authority');
+          this.notification.showError(err?.error?.message || ('Failed to update authority'));
         }
       });
     });
@@ -147,7 +147,7 @@ export class SocialSecurityAuthoritiesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete authority');
+          this.notification.showError(err?.error?.message || ('Failed to delete authority'));
         }
       });
     });

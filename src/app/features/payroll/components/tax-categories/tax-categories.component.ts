@@ -79,7 +79,7 @@ export class TaxCategoriesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to create tax category');
+          this.notification.showError(err?.error?.message || ('Failed to create tax category'));
         }
       });
     });
@@ -112,7 +112,7 @@ export class TaxCategoriesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to update tax category');
+          this.notification.showError(err?.error?.message || ('Failed to update tax category'));
         }
       });
     });
@@ -131,7 +131,7 @@ export class TaxCategoriesComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.notification.showError('Failed to update status');
+        this.notification.showError(err?.error?.message || ('Failed to update status'));
       }
     });
   }
@@ -160,7 +160,7 @@ export class TaxCategoriesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete tax category');
+          this.notification.showError(err?.error?.message || ('Failed to delete tax category'));
         }
       });
     });

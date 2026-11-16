@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { TimesheetPayrollSummaryDto, TimesheetPeriodLinkDto } from '../../../core/models/attendance.models';
 
@@ -3126,7 +3126,9 @@ export class PayrollService {
         map((response: any) => {
           if (!response.success && response.message) throw new Error(response.message);
           return response.data;
-        })
+        }),
+        // Surface the API's message (e.g. "Payroll period is Locked…") instead of the raw HTTP error text.
+        catchError((err: any) => throwError(() => new Error(err?.error?.message || err?.message || 'Payroll calculation failed.')))
       );
     }
 
