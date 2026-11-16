@@ -65,38 +65,27 @@
           </div>
 
           <div class="rd-field">
-            <label>Value Type *</label>
-            <mat-form-field appearance="outline" class="rd-mat-field">
-              <mat-select formControlName="amountType">
-                <mat-option value="fixed">Fixed Amount</mat-option>
-                <mat-option value="percentage">Percentage</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="rd-grid-2">
-          <div class="rd-field">
             <label>Slab Order *</label>
             <mat-form-field appearance="outline" class="rd-mat-field">
               <input matInput type="number" formControlName="slabOrder" />
             </mat-form-field>
           </div>
-          @if (form.get('amountType')?.value === 'percentage') {
-          <div class="rd-field">
-            <label>Percentage *</label>
-            <mat-form-field appearance="outline" class="rd-mat-field">
-              <input matInput type="number" formControlName="percentage" />
-            </mat-form-field>
-          </div>
-          } @else {
+        </div>
+
+        <!-- Annual tax for this slab = Fixed Amount + Percentage x (income - Min Income). Both can be set. -->
+        <div class="rd-grid-2">
           <div class="rd-field">
             <label>Fixed Amount *</label>
             <mat-form-field appearance="outline" class="rd-mat-field">
-              <input matInput type="number" formControlName="fixedAmount" />
+              <input matInput type="number" min="0" formControlName="fixedAmount" />
             </mat-form-field>
           </div>
-          }
+          <div class="rd-field">
+            <label>Percentage (on income above Min) *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" min="0" max="100" formControlName="percentage" />
+            </mat-form-field>
+          </div>
         </div>
 
         <div class="rd-grid-2">
@@ -111,6 +100,9 @@
             <mat-form-field appearance="outline" class="rd-mat-field">
               <input matInput type="number" formControlName="maxIncome" />
             </mat-form-field>
+            @if (form.hasError('maxIncomeNotGreater')) {
+            <small class="rd-error">Max income must be greater than min income (leave empty for no upper limit).</small>
+            }
           </div>
         </div>
       </section>

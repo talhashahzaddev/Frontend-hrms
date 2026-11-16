@@ -3,6 +3,7 @@ import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { Observable } from 'rxjs';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export type BulkEmailRecipientStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
@@ -26,6 +27,8 @@ export interface BulkEmailRecipientOption {
 export interface BulkEmailPayslipsDialogData {
   periods: BulkEmailPeriodOption[];
   recipients: BulkEmailRecipientOption[];
+  /** Loads all recipients of a period that is not in `recipients` yet (the list is per period, not per table page). */
+  loadRecipients?: (periodId: string) => Observable<BulkEmailRecipientOption[]>;
   defaultPeriodId?: string;
   defaultSubject?: string;
   defaultMessage?: string;
@@ -58,6 +61,8 @@ export class BulkEmailPayslipsDialogComponent {
 
   readonly selectedRecipientIds = new Set<string>();
   selectionError = false;
+  loadingRecipients = false;
+  private readonly loadedPeriodIds = new Set<string>();
 
   readonly form = this.fb.group({
     payrollPeriodId: [this.data.defaultPeriodId ?? this.data.periods[0]?.id ?? '', Validators.required],
@@ -74,9 +79,13 @@ export class BulkEmailPayslipsDialogComponent {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: BulkEmailPayslipsDialogData) {
     this.generatedPeriodRecipients.forEach((recipient) => this.selectedRecipientIds.add(recipient.id));
+    if (this.data.defaultPeriodId) {
+      this.loadedPeriodIds.add(this.data.defaultPeriodId);
+    }
 
     this.form.get('payrollPeriodId')?.valueChanges.subscribe(() => {
       this.selectionError = false;
+      this.ensurePeriodRecipientsLoaded();
       this.reconcileSelection();
     });
 
@@ -177,6 +186,10 @@ export class BulkEmailPayslipsDialogComponent {
   }
 
   process(): void {
+    if (this.loadingRecipients) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       if (!this.emailExpanded) {
@@ -201,6 +214,31 @@ export class BulkEmailPayslipsDialogComponent {
       subject: String(raw.subject ?? '').trim(),
       message: String(raw.message ?? '').trim(),
       employeeIds: this.sendableRecipients.map((recipient) => recipient.id)
+    });
+  }
+
+  private ensurePeriodRecipientsLoaded(): void {
+    const periodId = this.selectedPeriodId;
+    if (!periodId || !this.data.loadRecipients || this.loadedPeriodIds.has(periodId)) {
+      return;
+    }
+
+    this.loadedPeriodIds.add(periodId);
+    this.loadingRecipients = true;
+    this.data.loadRecipients(periodId).subscribe({
+      next: (recipients) => {
+        this.data.recipients = [
+          ...this.data.recipients.filter((recipient) => recipient.payrollPeriodId !== periodId),
+          ...recipients
+        ];
+        this.loadingRecipients = false;
+        this.selectedRecipientIds.clear();
+        this.reconcileSelection();
+      },
+      error: () => {
+        this.loadedPeriodIds.delete(periodId);
+        this.loadingRecipients = false;
+      }
     });
   }
 

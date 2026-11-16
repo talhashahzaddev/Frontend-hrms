@@ -79,7 +79,7 @@ export class TaxRulesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to create tax rule');
+          this.notification.showError(err?.error?.message || ('Failed to create tax rule'));
         }
       });
     });
@@ -98,10 +98,10 @@ export class TaxRulesComponent implements OnInit {
         initialValue: {
           regimeId: rule.regimeId,
           componentName: rule.componentName ?? '',
-          taxability: rule.taxability ?? 'taxable',
+          taxability: rule.taxability ?? 'FullyTaxable',
           limitAmount: rule.limitAmount,
           limitPercentage: rule.limitPercentage,
-          applyStage: rule.applyStage ?? 'monthly'
+          applyStage: rule.applyStage ?? 'ProvidentFunds'
         }
       }
     });
@@ -115,7 +115,7 @@ export class TaxRulesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to update tax rule');
+          this.notification.showError(err?.error?.message || ('Failed to update tax rule'));
         }
       });
     });
@@ -145,7 +145,7 @@ export class TaxRulesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete tax rule');
+          this.notification.showError(err?.error?.message || ('Failed to delete tax rule'));
         }
       });
     });

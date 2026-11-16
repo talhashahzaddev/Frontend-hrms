@@ -88,7 +88,7 @@ export class SocialSecuritySchemesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to create scheme');
+          this.notification.showError(err?.error?.message || ('Failed to create scheme'));
         }
       });
     });
@@ -122,7 +122,7 @@ export class SocialSecuritySchemesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to update scheme');
+          this.notification.showError(err?.error?.message || ('Failed to update scheme'));
         }
       });
     });
@@ -152,7 +152,7 @@ export class SocialSecuritySchemesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete scheme');
+          this.notification.showError(err?.error?.message || ('Failed to delete scheme'));
         }
       });
     });

@@ -207,7 +207,7 @@ export class SocialSecurityRulesComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.notification.showError('Failed to delete rule');
+          this.notification.showError(err?.error?.message || ('Failed to delete rule'));
         }
       });
     });
